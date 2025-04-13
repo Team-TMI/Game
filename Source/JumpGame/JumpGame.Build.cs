@@ -8,7 +8,12 @@ public class JumpGame : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
+			"UMG", "OnlineSubsystem" , "OnlineSubsystemSteam", "SlateCore",
+			"Json", "JsonUtilities", "HTTP", "WebSockets"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
