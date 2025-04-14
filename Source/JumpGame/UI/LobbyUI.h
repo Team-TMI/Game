@@ -6,8 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "LobbyUI.generated.h"
 
-/**
- * 
+/*
+여기는 대기방 (진짜 로비)
  */
 UCLASS()
 class JUMPGAME_API ULobbyUI : public UUserWidget
