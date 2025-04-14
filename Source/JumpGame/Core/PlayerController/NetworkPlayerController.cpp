@@ -2,3 +2,33 @@
 
 
 #include "NetworkPlayerController.h"
+
+#include "NetworkClockComponent.h"
+
+ANetworkPlayerController::ANetworkPlayerController()
+{
+	NetworkClockComponent = CreateDefaultSubobject<UNetworkClockComponent>("Network Clock Component");
+	NetworkClockComponent->SetNetAddressable();
+	NetworkClockComponent->SetIsReplicated(true);
+}
+
+float ANetworkPlayerController::GetServerTime() const
+{
+	if (NetworkClockComponent)
+	{
+		return NetworkClockComponent->GetServerTime();
+	}
+	return GetWorld()->GetTimeSeconds();
+}
+
+// PlayerController가 서버로부터 생성되었을 때 호출되는 함수
+// 해당 함수에서 서버 시간을 요청한다.
+void ANetworkPlayerController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+
+	if (NetworkClockComponent)
+	{
+		NetworkClockComponent->RequestServerTime(this);
+	}
+}
