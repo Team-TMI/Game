@@ -26,7 +26,7 @@ AFrog::AFrog()
 	bUseControllerRotationRoll = false;
 
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	
+
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->MaxAcceleration = 800.0f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
@@ -34,13 +34,13 @@ AFrog::AFrog()
 	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 150.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 750.0f;
-	//GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 	GetCharacterMovement()->PerchRadiusThreshold = 20.0f;
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 	GetCharacterMovement()->JumpZVelocity = 500.0f;
 	GetCharacterMovement()->AirControl = 0.25f;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, -1.0f, 0.0f);
-	//GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
