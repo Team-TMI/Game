@@ -30,5 +30,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsCrouching;
-	
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float Pitch;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float Yaw;
 };

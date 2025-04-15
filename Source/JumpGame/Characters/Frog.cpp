@@ -210,24 +210,24 @@ void AFrog::StopJump()
 
 void AFrog::StartSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 800.f;
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 }
 
 void AFrog::StopSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 400.f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
 
 void AFrog::StartCrouch()
 {
 	bIsCrouching = true;
-	GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	GetCharacterMovement()->MaxWalkSpeed = 150.f;
 	Crouch();
 }
 
 void AFrog::StopCrouch()
 {
 	bIsCrouching = false;
-	GetCharacterMovement()->MaxWalkSpeed = 400.f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	UnCrouch();
 }
