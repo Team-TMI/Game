@@ -13,4 +13,22 @@ UCLASS()
 class JUMPGAME_API UFrogAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+
+public:
+	virtual void NativeInitializeAnimation() override;
+
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	class AFrog* Frog;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float Speed;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bIsFalling;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bIsCrouching;
+	
 };

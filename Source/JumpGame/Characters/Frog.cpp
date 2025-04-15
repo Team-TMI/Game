@@ -17,7 +17,35 @@ AFrog::AFrog()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 86.0f);
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> FrogMesh
+	(TEXT("/Game/Characters/Fat_Frog/SM_Frog17.SM_Frog17"));
+	if (FrogMesh.Succeeded())
+	{
+		GetMesh()->SetSkeletalMesh(FrogMesh.Object);
+		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -75), FRotator(0, -90, 0));
+	}
+
+	ConstructorHelpers::FClassFinder<UAnimInstance> FrogABP
+	(TEXT("/Game/Characters/ABP_Frog.ABP_Frog_C"));
+	if (FrogABP.Succeeded()) {
+		GetMesh()->SetAnimInstanceClass(FrogABP.Class);
+	}
+	
+	ConstructorHelpers::FObjectFinder<UInputMappingContext> FrogIMC
+	(TEXT("/Game/Characters/Input/IMC_Frog.IMC_Frog"));
+	if (FrogIMC.Succeeded()) {
+		DefaultMappingContext = FrogIMC.Object;
+	}
+	
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Move
+	(TEXT("/Game/Characters/Input/IA_FrogMove.IA_FrogMove"));
+	if (Frog_Move.Succeeded()) {
+		MoveAction = Frog_Move.Object;
+	}
+
+	
+	
+	GetCapsuleComponent()->InitCapsuleSize(43.f, 70.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	
@@ -30,16 +58,18 @@ AFrog::AFrog()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->MaxAcceleration = 800.0f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
+	GetCharacterMovement()->CrouchedHalfHeight = 60.f;
+	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
 	GetCharacterMovement()->GroundFriction = 5.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 150.0f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 750.0f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 1500.0f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
-	GetCharacterMovement()->PerchRadiusThreshold = 20.0f;
-	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 	GetCharacterMovement()->JumpZVelocity = 500.0f;
 	GetCharacterMovement()->AirControl = 0.25f;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, -1.0f, 0.0f);
+	GetCharacterMovement()->PerchRadiusThreshold = 20.0f;
+	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -47,9 +77,7 @@ AFrog::AFrog()
 	CameraBoom->TargetArmLength = 400.0f;
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->bEnableCameraLag = true;
-	CameraBoom->CameraLagMaxDistance = 200.0f;
-	CameraBoom->ProbeSize = 0.0f;
-	
+
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
@@ -80,6 +108,15 @@ void AFrog::BeginPlay()
 void AFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (GetCharacterMovement()->IsFalling())
+	{
+		GetCharacterMovement()->RotationRate = FRotator(0.0f, 200.0f, 0.0f);
+	}
+	else
+	{
+		GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
+	}
 }
 
 // Called to bind functionality to input

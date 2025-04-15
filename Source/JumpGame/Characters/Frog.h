@@ -29,6 +29,10 @@ public:
 	virtual void NotifyControllerChanged() override;
 	
 public:
+	void Move(const struct FInputActionValue& Value);
+	void Look(const struct FInputActionValue& Value);
+	
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
 	
@@ -47,7 +51,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* CrouchAction;
+
 public:
-	void Move(const struct FInputActionValue& Value);
-	void Look(const struct FInputActionValue& Value);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsCrouching;
 };
