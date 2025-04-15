@@ -31,6 +31,12 @@ public:
 public:
 	void Move(const struct FInputActionValue& Value);
 	void Look(const struct FInputActionValue& Value);
+	void StartJump();
+	void StopJump();
+	void StartSprint();
+	void StopSprint();
+	void StartCrouch();
+	void StopCrouch();
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -53,6 +59,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* CrouchAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* SprintAction;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

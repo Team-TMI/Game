@@ -2,7 +2,7 @@
 
 
 #include "Frog.h"
-
+#include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
@@ -18,7 +18,7 @@ AFrog::AFrog()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> FrogMesh
-	(TEXT("/Game/Characters/Fat_Frog/SM_Frog17.SM_Frog17"));
+		(TEXT("/Game/Characters/Fat_Frog/SM_Frog17.SM_Frog17"));
 	if (FrogMesh.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(FrogMesh.Object);
@@ -26,29 +26,58 @@ AFrog::AFrog()
 	}
 
 	ConstructorHelpers::FClassFinder<UAnimInstance> FrogABP
-	(TEXT("/Game/Characters/ABP_Frog.ABP_Frog_C"));
-	if (FrogABP.Succeeded()) {
+		(TEXT("/Game/Characters/ABP_Frog.ABP_Frog_C"));
+	if (FrogABP.Succeeded())
+	{
 		GetMesh()->SetAnimInstanceClass(FrogABP.Class);
 	}
-	
+
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> FrogIMC
-	(TEXT("/Game/Characters/Input/IMC_Frog.IMC_Frog"));
-	if (FrogIMC.Succeeded()) {
+		(TEXT("/Game/Characters/Input/IMC_Frog.IMC_Frog"));
+	if (FrogIMC.Succeeded())
+	{
 		DefaultMappingContext = FrogIMC.Object;
 	}
-	
+
 	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Move
-	(TEXT("/Game/Characters/Input/IA_FrogMove.IA_FrogMove"));
-	if (Frog_Move.Succeeded()) {
+		(TEXT("/Game/Characters/Input/IA_FrogMove.IA_FrogMove"));
+	if (Frog_Move.Succeeded())
+	{
 		MoveAction = Frog_Move.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Jump
+		(TEXT("/Game/Characters/Input/IA_FrogJump.IA_FrogJump"));
+	if (Frog_Jump.Succeeded())
+	{
+		JumpAction = Frog_Jump.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Look
+		(TEXT("/Game/Characters/Input/IA_FrogLook.IA_FrogLook"));
+	if (Frog_Look.Succeeded())
+	{
+		LookAction = Frog_Look.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Crouch
+		(TEXT("/Game/Characters/Input/IA_FrogCrouch.IA_FrogCrouch"));
+	if (Frog_Crouch.Succeeded())
+	{
+		CrouchAction = Frog_Crouch.Object;
+	}
 	
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Sprint
+		(TEXT("/Game/Characters/Input/IA_FrogSprint.IA_FrogSprint"));
+	if (Frog_Sprint.Succeeded())
+	{
+		SprintAction = Frog_Sprint.Object;
+	}
 	
 	GetCapsuleComponent()->InitCapsuleSize(43.f, 70.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	
+
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
@@ -58,7 +87,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->MaxAcceleration = 800.0f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
-	GetCharacterMovement()->CrouchedHalfHeight = 60.f;
+	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
 	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
 	GetCharacterMovement()->GroundFriction = 5.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
@@ -126,9 +155,15 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AFrog::StartJump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AFrog::StopJumping);
+		
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AFrog::StartCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AFrog::StopCrouch);
+		
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AFrog::StartSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFrog::StopSprint);
+		
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFrog::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrog::Look);
 	}
@@ -161,4 +196,38 @@ void AFrog::Look(const struct FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AFrog::StartJump()
+{
+	Jump();
+}
+
+void AFrog::StopJump()
+{
+	StopJumping();
+}
+
+void AFrog::StartSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 800.f;
+}
+
+void AFrog::StopSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 400.f;
+}
+
+void AFrog::StartCrouch()
+{
+	bIsCrouching = true;
+	GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	Crouch();
+}
+
+void AFrog::StopCrouch()
+{
+	bIsCrouching = false;
+	GetCharacterMovement()->MaxWalkSpeed = 400.f;
+	UnCrouch();
 }
