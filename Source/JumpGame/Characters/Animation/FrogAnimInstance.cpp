@@ -23,19 +23,28 @@ void UFrogAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		Speed = UKismetMathLibrary::VSize(Frog->GetCharacterMovement()->Velocity);
 		bIsFalling = Frog->GetCharacterMovement()->IsFalling();
 		bIsCrouching = Frog->bIsCrouching;
-
+		
 		Pitch = Frog->GetBaseAimRotation().Pitch;
-		if (Frog->GetBaseAimRotation().Yaw >= 90.f)
+
+		// 상대 Yaw
+		float CharacterYaw = Frog->GetActorRotation().Yaw;
+		// 절대 Yaw
+		float AimYaw = Frog->GetBaseAimRotation().Yaw;
+		// AimYaw - CharacterYaw
+		float RelativeYaw = FMath::FindDeltaAngleDegrees(CharacterYaw, AimYaw);
+
+		// 카메라로 캐릭터 정면 볼 때 고려
+		if (RelativeYaw >= 90.f)
 		{
-			Yaw = 90.f - (Frog->GetBaseAimRotation().Yaw - 90.f);
+			Yaw = 90.f - (RelativeYaw - 90.f);
 		}
-		else if (Frog->GetBaseAimRotation().Yaw <= -90.f)
+		else if (RelativeYaw <= -90.f)
 		{
-			Yaw = -90 - (Frog->GetBaseAimRotation().Yaw + 90.f);
+			Yaw = -90 - (RelativeYaw+ 90.f);
 		}
 		else
 		{
-			Yaw = Frog->GetBaseAimRotation().Yaw;
+			Yaw = RelativeYaw;
 		}
 	}
 }
