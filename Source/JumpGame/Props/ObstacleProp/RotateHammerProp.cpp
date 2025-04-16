@@ -24,9 +24,3 @@ void ARotateHammerProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-
-void ARotateHammerProp::LaunchCharacter(ACharacter* Character)
-{
-	Super::LaunchCharacter(Character);
-}
-

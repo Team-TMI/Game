@@ -23,5 +23,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void LaunchCharacter(ACharacter* Character) override;
+	// virtual void LaunchCharacter(AFrog* Character) override;
 };
