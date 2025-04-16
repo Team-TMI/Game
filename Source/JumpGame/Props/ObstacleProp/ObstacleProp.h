@@ -6,6 +6,8 @@
 #include "JumpGame/Props/BaseProp.h"
 #include "ObstacleProp.generated.h"
 
+class AFrog;
+
 UCLASS()
 class JUMPGAME_API AObstacleProp : public ABaseProp
 {
@@ -35,9 +37,11 @@ public:
 	// 밑의 두개 값이 true면 LaunchVelocity값으로 재정의
 	// 즉, false면 캐릭터의 속도와 방향을 반영해 그 값에 더한다
 	UPROPERTY(EditAnywhere, Category = "Launch")
-	bool bXYOverrid = false;
+	bool bXYOverride = false;
 	UPROPERTY(EditAnywhere, Category = "Launch")
 	bool bZOverride = false;
+	UPROPERTY(EditAnywhere)
+	bool bDebug = false;
 	
 	// Rotate (자체 회전)관련
 	// 장애물: 회전망치, 뿔망치, 굴러오는 공
@@ -46,8 +50,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	float RotYaw = 0;
 	
-	
-	// TODO: 캐릭터 클래스 바꾸기?
-	virtual void LaunchCharacter(ACharacter* Character);
+	virtual void LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool XYOverride = false, bool ZOverride = false);
+	virtual void CalculateForce(AFrog* Character);
 	virtual void ObstacleRoatate();
 };

@@ -7,6 +7,8 @@
 
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
+#include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 
 // Sets default values
@@ -32,12 +34,17 @@ void ATrampolineProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ATrampolineProp::LaunchCharacter(ACharacter* Character)
+void ATrampolineProp::CalculateForce(AFrog* Character)
 {
-	// 위로 띄우기 테스트
-	// TODO: 변수 빼기
-	FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
-	LaunchVelocity = CharacterDir*300 + FVector(0, 0, 500);
-	Super::LaunchCharacter(Character);
-}
 
+	FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
+	FVector Direction = CharacterDir + FVector::UpVector;
+	float Force = 500;
+
+	if (bDebug)
+	{
+		FLog::Log("ATrampolineProp::CalculateForce");
+	}
+	
+	Super::LaunchCharacter(Character, Direction, Force);
+}
