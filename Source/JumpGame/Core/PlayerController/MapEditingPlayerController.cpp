@@ -3,6 +3,8 @@
 
 #include "MapEditingPlayerController.h"
 
+#include "Kismet/GameplayStatics.h"
+
 AMapEditingPlayerController::AMapEditingPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -22,18 +24,23 @@ FVector AMapEditingPlayerController::GetMouseWorldPosition() const
 	// 마우스가 화면 밖에 있으면 무시
 	if (!bIsValid) return FVector::ZeroVector;
 
+	// GetPawn()
+	
 	FHitResult HitResult;
 	GetHitResultAtScreenPosition(MouseScreenPosition, ECC_Visibility, true, HitResult);
 	if (HitResult.IsValidBlockingHit())
 	{
 		MouseWorldPosition = HitResult.Location;
-		DrawDebugSphere(GetWorld(), MouseWorldPosition, 10.f, 12, FColor::Red, false, 5.f);
 	}
 	else
 	{
-		// 마우스가 화면 밖에 있으면 무시
-		return FVector::ZeroVector;
+		FVector MouseLocation;
+		FVector MouseDirection;
+		UGameplayStatics::DeprojectScreenToWorld(this, MouseScreenPosition, MouseLocation, MouseDirection);
+		MouseWorldPosition = MouseLocation + (MouseDirection * 1000.f);
 	}
+	// 자기 자신 중심으로
+	DrawDebugSphere(GetWorld(), MouseWorldPosition, 10.f, 12, FColor::Red, false, 5.f);
 
 	return MouseWorldPosition;
 }

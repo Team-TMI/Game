@@ -53,7 +53,8 @@ AMapEditingPawn::AMapEditingPawn()
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponentMapEditing"));
 	CollisionComponent->InitSphereRadius(35.0f);
-	CollisionComponent->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+	CollisionComponent->SetCollisionProfileName(TEXT("EditorPawn"));
+	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 	CollisionComponent->CanCharacterStepUpOn = ECB_No;
 	CollisionComponent->SetShouldUpdatePhysicsVolume(true);
@@ -117,6 +118,20 @@ void AMapEditingPawn::OnMoveable(const FInputActionValue& InputActionValue)
 {
 	// 마우스 오른쪽 클릭을 했을 때만 움직일 수 있음
 	bCanMove = !bCanMove;
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC) return;
+	
+	if (bCanMove)
+	{
+		PC->SetShowMouseCursor(false);
+		PC->SetInputMode(FInputModeGameOnly());
+	}
+	else
+	{
+		PC->SetShowMouseCursor(true);
+		PC->SetInputMode(FInputModeGameAndUI());
+	}
 }
 
 void AMapEditingPawn::OnMove(const FInputActionValue& InputActionValue)
