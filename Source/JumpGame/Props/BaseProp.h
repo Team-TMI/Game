@@ -1,0 +1,42 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "BaseProp.generated.h"
+
+class UBoxComponent;
+
+UCLASS()
+class JUMPGAME_API ABaseProp : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	// Sets default values for this actor's properties
+	ABaseProp();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+protected:
+	// 물체의 외관 설정
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* MeshComp;
+	
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* CollisionComp;
+
+	// 태그
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName TagName = "";
+
+	// 콜리전 박스 크기 설정 (50이면 100큐브 딱맞음)
+	float BoxExtent = 50.0f;
+};
