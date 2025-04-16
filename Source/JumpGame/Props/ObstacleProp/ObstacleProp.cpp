@@ -39,6 +39,8 @@ void AObstacleProp::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CollisionComp->SetBoxExtent(FVector(49,49,0));
+	CollisionComp->SetRelativeLocation(FVector(0,0,50));
 	CollisionComp->OnComponentHit.AddDynamic(this, &AObstacleProp::OnMyHit);
 }
 
@@ -46,11 +48,20 @@ void AObstacleProp::BeginPlay()
 void AObstacleProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	ObstacleRoatate();
 }
 
 void AObstacleProp::LaunchCharacter(ACharacter* Character)
 {
 	// 가상 함수: 기본 로직
 	Character->LaunchCharacter(LaunchVelocity,bXYOverrid,bZOverride);
+}
+
+void AObstacleProp::ObstacleRoatate()
+{
+	// Yaw 축으로 회전시
+	AddActorLocalRotation(FRotator(0,RotateSpeed*GetWorld()->DeltaTimeSeconds,0));
+	RotYaw = GetActorRotation().Yaw;
 }
 
