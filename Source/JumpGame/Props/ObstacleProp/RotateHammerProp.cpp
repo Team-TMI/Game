@@ -15,7 +15,8 @@ ARotateHammerProp::ARotateHammerProp()
 void ARotateHammerProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	RotateSpeed = 50.f;
 }
 
 // Called every frame

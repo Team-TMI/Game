@@ -41,10 +41,13 @@ public:
 	
 	// Rotate (자체 회전)관련
 	// 장애물: 회전망치, 뿔망치, 굴러오는 공
-	// UPROPERTY(EditAnywhere, Category = "Rotate")
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float RotateSpeed = 0;
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float RotYaw = 0;
 	
 	
 	// TODO: 캐릭터 클래스 바꾸기?
 	virtual void LaunchCharacter(ACharacter* Character);
-	// virtual void ObstacleRoatate();
+	virtual void ObstacleRoatate();
 };
