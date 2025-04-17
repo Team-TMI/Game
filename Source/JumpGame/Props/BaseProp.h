@@ -27,15 +27,14 @@ public:
 
 protected:
 	// 물체의 외관 설정
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* MeshComp;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UBoxComponent* CollisionComp;
 
-	// 태그
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TagName = "";
+	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
+	USceneComponent* PivotScene;
 
 	// 콜리전 박스 크기 설정 (50이면 100큐브 딱맞음)
 	float BoxExtent = 50.0f;

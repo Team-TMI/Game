@@ -18,6 +18,7 @@ AObstacleProp::AObstacleProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
 		TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
@@ -25,6 +26,10 @@ AObstacleProp::AObstacleProp()
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
+	CollisionComp->SetBoxExtent(FVector(49, 49, 0));
+	CollisionComp->SetRelativeLocation(FVector(0, 0, 100));
+	MeshComp->SetRelativeLocation(FVector(0, 0, -50));
+	Tags.Add("Obstacle");
 }
 
 void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -47,9 +52,8 @@ void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 void AObstacleProp::BeginPlay()
 {
 	Super::BeginPlay();
-
-	CollisionComp->SetBoxExtent(FVector(49, 49, 0));
-	CollisionComp->SetRelativeLocation(FVector(0, 0, 50));
+	
+	SetReplicateMovement(true);
 	CollisionComp->OnComponentHit.AddDynamic(this, &AObstacleProp::OnMyHit);
 }
 
@@ -58,7 +62,7 @@ void AObstacleProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ObstacleRoatate();
+	ObstacleRotate();
 }
 
 void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float Force,
@@ -81,9 +85,10 @@ void AObstacleProp::CalculateForce(AFrog* Character)
 	}
 }
 
-void AObstacleProp::ObstacleRoatate()
+void AObstacleProp::ObstacleRotate()
 {
-	// Yaw 축으로 회전시 테스트
-	AddActorLocalRotation(FRotator(0, RotateSpeed * GetWorld()->DeltaTimeSeconds, 0));
-	RotYaw = GetActorRotation().Yaw;
+	float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
+	FRotator DeltaRot = RotAxis * RotSpeed;
+	// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
+	PivotScene->AddLocalRotation(DeltaRot);
 }
