@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PrimitiveProp/PrimitiveProp.h"
 #include "BaseProp.generated.h"
 
 class UBoxComponent;
 
 UCLASS()
-class JUMPGAME_API ABaseProp : public AActor
+class JUMPGAME_API ABaseProp : public APrimitiveProp
 {
 	GENERATED_BODY()
 

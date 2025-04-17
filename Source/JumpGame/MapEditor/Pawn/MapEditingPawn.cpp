@@ -13,7 +13,9 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
+#include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
+#include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 // Sets default values
@@ -90,18 +92,19 @@ void AMapEditingPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (ControlledActor)
-	{
-		FHitResult HitResult;
-		FVector MouseWorldPosition = Cast<AMapEditingPlayerController>(GetController())->GetMouseWorldPosition(HitResult);
-		if (MouseWorldPosition.IsZero()) return;
-
-		ATestActor* TestActor = Cast<ATestActor>(ControlledActor);
-		if (TestActor)
-		{
-			TestActor->GridComponent->MoveActorInGrid(MouseWorldPosition, HitResult);
-		}
-	}
+	// 테스트 코드
+	// if (ControlledActor)
+	// {
+	// 	FHitResult HitResult;
+	// 	FVector MouseWorldPosition = Cast<AMapEditingPlayerController>(GetController())->GetMouseWorldPosition(HitResult);
+	// 	if (MouseWorldPosition.IsZero()) return;
+	//
+	// 	ATestActor* TestActor = Cast<ATestActor>(ControlledActor);
+	// 	if (TestActor)
+	// 	{
+	// 		TestActor->GridComponent->MoveActorInGrid(MouseWorldPosition, HitResult);
+	// 	}
+	// }
 }
 
 // Called to bind functionality to input
@@ -125,9 +128,52 @@ void AMapEditingPawn::OnClick(const FInputActionValue& InputActionValue)
 	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
 	if (!PC) return ;
 
+	// UI 위에 Hovering 중인지에 따라 로직 변화
+	
 	FHitResult HitResult;
 	FVector WorldPosition = PC->GetMouseWorldPosition(HitResult);
+	
 	if (WorldPosition.IsZero()) return;
+
+	APrimitiveProp* HitActor = Cast<APrimitiveProp>(HitResult.GetActor());
+	if (!HitActor)
+	{
+		if (ControlledActor)
+		{
+			ControlledActor->SetUnSelected();
+		}
+		ControlledActor = nullptr;
+		CachedGizmo = nullptr;
+		return;
+	}
+
+	// TODO : Controlled Actor에다가 두기!
+	if (ControlledActor != HitActor)
+	{
+		if (ControlledActor)
+		{
+			ControlledActor->SetUnSelected();
+			CachedGizmo = nullptr;
+		}
+		ControlledActor = HitActor;
+		ControlledActor->SetSelected();
+	}
+	else
+	{
+		UGizmoComponent* Gizmo = Cast<UGizmoComponent>(HitResult.GetComponent());
+		if (Gizmo == nullptr)
+		{
+			if (CachedGizmo) CachedGizmo->SetUnSelected();
+			CachedGizmo = nullptr;
+		}
+		
+		if (CachedGizmo != Gizmo)
+		{
+			if (CachedGizmo) CachedGizmo->SetUnSelected();
+			CachedGizmo = Gizmo;
+			CachedGizmo->SetSelected();
+		}
+	}
 }
 
 void AMapEditingPawn::OnMoveable(const FInputActionValue& InputActionValue)

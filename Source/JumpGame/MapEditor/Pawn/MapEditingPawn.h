@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "GameFramework/Pawn.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "MapEditingPawn.generated.h"
 
 UCLASS()
@@ -26,6 +27,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	GETTER(class APrimitiveProp*, ControlledActor);
 
 private:
 	UFUNCTION()
@@ -68,5 +71,7 @@ private:
 	class USphereComponent* CollisionComponent;
 
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class AActor* ControlledActor = nullptr;
+	class APrimitiveProp* ControlledActor = nullptr;
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UGizmoComponent* CachedGizmo = nullptr;
 };

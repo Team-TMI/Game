@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "GridComponent.generated.h"
 
 
@@ -15,6 +16,8 @@ class JUMPGAME_API UGridComponent : public USceneComponent
 public:
 	// Sets default values for this component's properties
 	UGridComponent();
+
+	GETTER(float, SnapSize);
 
 protected:
 	// Called when the game starts
