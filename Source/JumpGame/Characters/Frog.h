@@ -6,6 +6,15 @@
 #include "GameFramework/Character.h"
 #include "Frog.generated.h"
 
+UENUM()
+enum class ECharacterStateEnum : uint8
+{
+	None,
+	Deep,
+	Shallow,
+	Surface
+};
+
 UCLASS()
 class JUMPGAME_API AFrog : public ACharacter
 {
@@ -29,6 +38,7 @@ public:
 	virtual void NotifyControllerChanged() override;
 	
 public:
+	// Input
 	void Move(const struct FInputActionValue& Value);
 	void Look(const struct FInputActionValue& Value);
 	void StartJump();
@@ -37,33 +47,46 @@ public:
 	void StopSprint();
 	void StartCrouch();
 	void StopCrouch();
-	
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void StartSwim();
+	UFUNCTION(BlueprintCallable)
+	void StopSwim();
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class UCameraComponent* FollowCamera;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputMappingContext* DefaultMappingContext;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* JumpAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* MoveAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* LookAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* CrouchAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* SprintAction;
-
+	
+	// 일반 변수
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsCrouching;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsSwimming;
+
+	// 컴포넌트 
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UCharacterTrajectoryComponent* TrajectoryComponent;
+
+	// Enum
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ECharacterStateEnum CharacterState;
+
 };
