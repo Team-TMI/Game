@@ -40,12 +40,6 @@ void ARisingWaterProp::BeginPlay()
 	DeepCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginDeepOverlap);
 	DeepCollision->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndDeepOverlap);
 
-	ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
-	ShallowCollision->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndShallowOverlap);
-
-	SurfaceCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
-	SurfaceCollision->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndSurfaceOverlap);
-
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 
@@ -53,7 +47,7 @@ void ARisingWaterProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FLog::Log("Character State", static_cast<float>(Frog->CharacterState));
+	//FLog::Log("Character State", static_cast<float>(Frog->CharacterState));
 
 	switch (WaterState)
 	{
@@ -63,7 +57,7 @@ void ARisingWaterProp::Tick(float DeltaTime)
 		RiseWater(DeltaTime);
 		break;
 	}
-	
+
 	UCharacterMovementComponent* MovementComponent{Frog->GetCharacterMovement()};
 	if (MovementComponent)
 	{
@@ -76,19 +70,19 @@ void ARisingWaterProp::Tick(float DeltaTime)
 		case ECharacterStateEnum::Deep:
 			// 물 속 중력 0
 			MovementComponent->GravityScale = 0.f;
-			// 위쪽으로 강한 힘
+		// 위쪽으로 강한 힘
 			Frog->AddMovementInput(FVector::UpVector, 1000.0f * DeltaTime);
 			break;
 		case ECharacterStateEnum::Shallow:
 			// 물 속 중력 0
 			MovementComponent->GravityScale = 0.f;
-			// 위쪽으로 약한 힘
+		// 위쪽으로 약한 힘
 			Frog->AddMovementInput(FVector::UpVector, 300.0f * DeltaTime);
 			break;
 		case ECharacterStateEnum::Surface:
 			// 약한 중력 ( 둥둥 떠다니는 느낌 )
 			MovementComponent->GravityScale = 0.1f;
-			// Z축 속도를 천천히 줄여서 위아래 움직임 댐핑
+		// Z축 속도를 천천히 줄여서 위아래 움직임 댐핑
 			MovementComponent->Velocity.Z *= 0.9f;
 			break;
 		}
@@ -103,6 +97,19 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	{
 		Frog->bIsSwimming = true;
 		Frog->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+
+		// 잠시 가라앉고 올라오게
+		FTimerHandle TimerHandle;
+		FTimerDelegate MovementModeDelegate{
+			FTimerDelegate::CreateLambda([this]() {
+				ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
+				ShallowCollision->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndShallowOverlap);
+
+				SurfaceCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
+				SurfaceCollision->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndSurfaceOverlap);
+			})
+		};
+		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
 	}
 }
 
@@ -114,6 +121,12 @@ void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		Frog->bIsSwimming = false;
 		Frog->CharacterState = ECharacterStateEnum::None;
 		Frog->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+		ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
+		ShallowCollision->OnComponentEndOverlap.RemoveDynamic(this, &ARisingWaterProp::OnEndShallowOverlap);
+
+		SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
+		SurfaceCollision->OnComponentEndOverlap.RemoveDynamic(this, &ARisingWaterProp::OnEndSurfaceOverlap);
 	}
 }
 

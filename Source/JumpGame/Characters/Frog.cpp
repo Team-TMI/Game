@@ -218,10 +218,20 @@ void AFrog::StartJump()
 	// 수면 점프
 	if (CharacterState == ECharacterStateEnum::Surface)
 	{
-		ACharacter::LaunchCharacter(FVector(0, 0, 500.0f), true, true);
+		SetActorEnableCollision(false);
+		FVector LaunchVelocity = GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f;
+		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+		
+		FTimerHandle TimerHandle;
+		FTimerDelegate MovementModeDelegate{FTimerDelegate::CreateLambda([this]()
+		{
+			SetActorEnableCollision(true);
+		})};
+		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
+
 		return;
 	}
-	
+
 	Jump();
 }
 
