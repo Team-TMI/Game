@@ -1,0 +1,99 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "GridComponent.h"
+
+#include "Evaluation/IMovieSceneEvaluationHook.h"
+#include "JumpGame/Utils/FastLogger.h"
+
+// Sets default values for this component's properties
+UGridComponent::UGridComponent()
+{
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = true;
+	bWantsInitializeComponent = true;
+	// ...
+}
+
+// Called when the game starts
+void UGridComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// ...
+	
+}
+
+void UGridComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
+	UpdatedActor = GetOwner();
+}
+
+// Called every frame
+void UGridComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
+}
+
+void UGridComponent::SetSize(FVector NewSize)
+{
+	Size.X = FMath::RoundToInt(NewSize.X);
+	Size.Y = FMath::RoundToInt(NewSize.Y);
+	Size.Z = FMath::RoundToInt(NewSize.Z);
+	
+	// Offset = Size * SnapSize * 0.5f;
+}
+
+bool UGridComponent::MoveActorInGrid(FVector MouseLocation, const FHitResult& HitResult)
+{
+	bool flag = true;
+
+	FVector Sign = FVector(1.f, 1.f, 1.f);
+
+	Sign.X = ((int32)MouseLocation.X == 0 || (MouseLocation.X >= 0.f)) ? 1.f : -1.f;
+	Sign.Y = ((int32)MouseLocation.Y == 0 || (MouseLocation.Y >= 0.f)) ? 1.f : -1.f;
+	Sign.Z = ((int32)MouseLocation.Z == 0 || (MouseLocation.Z >= 0.f)) ? 1.f : -1.f;
+
+	// GridComponent의 위치 계산
+	// 그리드의 스냅 단위는 100으로 유지
+	int32 X = (int32)FMath::RoundToInt(MouseLocation.X) / ((int32)SnapSize);
+	int32 Y = (int32)FMath::RoundToInt(MouseLocation.Y) / ((int32)SnapSize);
+	int32 Z = (int32)FMath::RoundToInt(MouseLocation.Z) / ((int32)SnapSize);
+
+	// 음수일 경우 -1을 더해줌 :
+	// 이유 : 음수일 경우 -53도 100으로 나누면 0이 나오기 때문이다. 이때 부터의 기준점은 -100에 Snap이 되어야 한다.
+	X = Sign.X < 0.f ? X - 1 : X;
+	Y = Sign.Y < 0.f ? Y - 1 : Y;
+	Z = Sign.Z < 0.f ? Z - 1 : Z;
+
+	// 충돌이 발생했을 때 접촉 면의 Normal을 받아와서 만약 해당 Normal이 -1이면 해당 방향으로 1칸 이동
+	if (HitResult.IsValidBlockingHit())
+	{
+		FVector ImpactNormal = HitResult.ImpactNormal;
+		ImpactNormal.Normalize();
+		X = (int32)ImpactNormal.X < 0.f ? X - Size.X : X;
+		Y = (int32)ImpactNormal.Y < 0.f ? Y - Size.Y : Y;
+		Z = (int32)ImpactNormal.Z < 0.f ? Z - Size.Z : Z;
+	}
+
+	// 100 단위 그리드 기준이지만, 블록의 중심을 고려하여 보정
+	FVector GridOrigin = FVector(X, Y, Z) * SnapSize;
+	FVector CenterOffset = FVector(Size) * SnapSize * 0.5f;
+	FVector GridLocation = GridOrigin + CenterOffset;
+	
+	UpdatedActor->SetActorLocation(GridLocation);
+
+	// 만약 충돌하는 곳이 있다면 해당 장소는 못 간다는 것을 알려줌
+	return flag;
+}
+
+void UGridComponent::RotateActorInGrid(FVector Direction)
+{
+	// Direction을 기준으로 회전
+	
+}

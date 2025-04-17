@@ -66,4 +66,7 @@ private:
 	class UPawnMovementComponent* MovementComponent;
 	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* CollisionComponent;
+
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class AActor* ControlledActor = nullptr;
 };

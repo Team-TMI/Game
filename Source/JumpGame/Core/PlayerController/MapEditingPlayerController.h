@@ -18,5 +18,5 @@ public:
 	AMapEditingPlayerController();
 
 	UFUNCTION()
-	FVector GetMouseWorldPosition() const;
+	FVector GetMouseWorldPosition(FHitResult& HitResult) const;
 };

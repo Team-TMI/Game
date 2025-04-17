@@ -9,9 +9,11 @@
 #include "InputActionValue.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "TestActor.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
+#include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 // Sets default values
@@ -87,6 +89,19 @@ void AMapEditingPawn::BeginPlay()
 void AMapEditingPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (ControlledActor)
+	{
+		FHitResult HitResult;
+		FVector MouseWorldPosition = Cast<AMapEditingPlayerController>(GetController())->GetMouseWorldPosition(HitResult);
+		if (MouseWorldPosition.IsZero()) return;
+
+		ATestActor* TestActor = Cast<ATestActor>(ControlledActor);
+		if (TestActor)
+		{
+			TestActor->GridComponent->MoveActorInGrid(MouseWorldPosition, HitResult);
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -110,7 +125,8 @@ void AMapEditingPawn::OnClick(const FInputActionValue& InputActionValue)
 	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
 	if (!PC) return ;
 
-	FVector WorldPosition = PC->GetMouseWorldPosition();
+	FHitResult HitResult;
+	FVector WorldPosition = PC->GetMouseWorldPosition(HitResult);
 	if (WorldPosition.IsZero()) return;
 }
 

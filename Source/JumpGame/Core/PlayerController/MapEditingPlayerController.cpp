@@ -10,10 +10,9 @@ AMapEditingPlayerController::AMapEditingPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	bShowMouseCursor = true;
-	// Super::SetInputMode(FInputModeGameAndUI());
 }
 
-FVector AMapEditingPlayerController::GetMouseWorldPosition() const
+FVector AMapEditingPlayerController::GetMouseWorldPosition(FHitResult& HitResult) const
 {
 	FVector MouseWorldPosition = FVector::ZeroVector;
 
@@ -24,9 +23,6 @@ FVector AMapEditingPlayerController::GetMouseWorldPosition() const
 	// 마우스가 화면 밖에 있으면 무시
 	if (!bIsValid) return FVector::ZeroVector;
 
-	// GetPawn()
-	
-	FHitResult HitResult;
 	GetHitResultAtScreenPosition(MouseScreenPosition, ECC_Visibility, true, HitResult);
 	if (HitResult.IsValidBlockingHit())
 	{
