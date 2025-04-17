@@ -13,4 +13,12 @@ UCLASS()
 class JUMPGAME_API AMapEditorState : public ANetworkGameState
 {
 	GENERATED_BODY()
+
+public:
+	AMapEditorState();
+
+	virtual void BeginPlay() override;
+
+	UPROPERTY()
+	class UWebSocketManageComponent* WebSocketManageComponent = nullptr;
 };

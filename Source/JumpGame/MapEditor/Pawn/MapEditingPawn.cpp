@@ -147,7 +147,6 @@ void AMapEditingPawn::OnClick(const FInputActionValue& InputActionValue)
 		return;
 	}
 
-	// TODO : Controlled Actor에다가 두기!
 	if (ControlledActor != HitActor)
 	{
 		if (ControlledActor)
