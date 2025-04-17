@@ -31,44 +31,27 @@ public:
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	                    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 	UFUNCTION()
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	                  int32 OtherBodyIndex);
-
 	UFUNCTION()
 	void OnBeginDeepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                        UPrimitiveComponent* OtherComp,
 	                        int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
-	void OnEndDeepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	                      int32 OtherBodyIndex);
-	UFUNCTION()
 	void OnBeginShallowOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                           UPrimitiveComponent* OtherComp,
 	                           int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
-	void OnEndShallowOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	                         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-
-	UFUNCTION()
 	void OnBeginSurfaceOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                           UPrimitiveComponent* OtherComp,
 	                           int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 	UFUNCTION()
-	void OnEndSurfaceOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	                         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void OnBeginDeadZoneOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+							   UPrimitiveComponent* OtherComp,
+							   int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:
-	UFUNCTION()
-	void InDeepWater(float DeltaTime);
-	UFUNCTION()
-	void InShallowWater(float DeltaTime);
-	UFUNCTION()
-	void InSurfaceWater(float DeltaTime);
-
 	UFUNCTION()
 	void RiseWater(float DeltaTime);
 
@@ -79,6 +62,10 @@ public:
 	class UBoxComponent* ShallowCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBoxComponent* SurfaceCollision;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UBoxComponent* DeadZoneCollision;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USceneComponent* RespawnPoint;
 
 public:
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
