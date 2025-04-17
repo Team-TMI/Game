@@ -11,7 +11,7 @@ ADefeatPlatform::ADefeatPlatform()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
-			TEXT("/Script/Engine.StaticMesh'/Game/Props/ObstacleBaseCube.ObstacleBaseCube'"));
+			TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
 	if (TempMesh.Succeeded())
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);

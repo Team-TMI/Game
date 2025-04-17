@@ -24,5 +24,19 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	// 골인지점에서 구현
+	// void SpawnVictoryPlatform();
 
+	// 카메라 액터
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCameraComponent* VictoryCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* VictoryPlane;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* VictoryCube;
+	
+	// 1등 유저를 소환할 위치값을 반환하는 함수
+	FVector SpawnVictoryCharacter();
 };

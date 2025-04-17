@@ -16,7 +16,7 @@ ABounceBollard::ABounceBollard()
 	CollisionComp->SetRelativeScale3D(FVector(0,0,0));
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
-		TEXT("/Script/Engine.StaticMesh'/Game/Props/ObstacleCylinder.ObstacleCylinder'"));
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleCylinder.SM_ObstacleCylinder'"));
 	if (TempMesh.Succeeded())
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);

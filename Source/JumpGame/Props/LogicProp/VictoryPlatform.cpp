@@ -3,6 +3,9 @@
 
 #include "VictoryPlatform.h"
 
+#include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
+
 
 // Sets default values
 AVictoryPlatform::AVictoryPlatform()
@@ -11,13 +14,45 @@ AVictoryPlatform::AVictoryPlatform()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
-		TEXT("/Script/Engine.StaticMesh'/Game/Props/ObstacleBaseCube.ObstacleBaseCube'"));
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
 	if (TempMesh.Succeeded())
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempPlane(
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstaclePlane.SM_ObstaclePlane'"));
+	if (TempPlane.Succeeded())
+	{
+		VictoryPlane->SetStaticMesh(TempPlane.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempCube(
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
+	if (TempPlane.Succeeded())
+	{
+		VictoryCube->SetStaticMesh(TempPlane.Object);
+	}
 
-	MeshComp->SetRelativeScale3D(FVector(3,3,1));
+	// 밑바닥
+	MeshComp->SetRelativeLocation(FVector(0, 0, -80));
+	MeshComp->SetRelativeScale3D(FVector(5,5,0.5));
+
+	// 1등 발판
+	VictoryCube = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryCube"));
+	VictoryCube->SetRelativeScale3D(FVector(1.5,1.1,1.1));
+
+	// 카메라
+	VictoryCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("VictoryCamera"));
+	VictoryCamera->SetupAttachment(CollisionComp);
+	VictoryCamera->FieldOfView = 50.0f;
+	VictoryCamera->SetRelativeLocation(FVector(0, 500, 140));
+	VictoryCamera->SetRelativeRotation(FRotator(0, -90, 0));
+
+	// 배경
+	VictoryPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryPlane"));
+	VictoryPlane->SetupAttachment(MeshComp);
+	VictoryPlane->SetRelativeLocation(FVector(0, -50, 500));
+	VictoryPlane->SetRelativeRotation(FRotator(90, 0, 0));
+	VictoryPlane->SetRelativeScale3D(FVector(3, 1.5, 1));
 	
 	Tags.Add("VictoryPlatform");
 }
@@ -33,5 +68,11 @@ void AVictoryPlatform::BeginPlay()
 void AVictoryPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+FVector AVictoryPlatform::SpawnVictoryCharacter()
+{
+	FVector SpawnLocation = VictoryCube->GetComponentLocation() + FVector(0.f, 0.f, 10.f);
+	return SpawnLocation;
 }
 
