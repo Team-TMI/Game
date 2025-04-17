@@ -54,6 +54,12 @@ public:
 public:
 	UFUNCTION()
 	void RiseWater(float DeltaTime);
+	UFUNCTION()
+	void StopRising(float Time = -1.f);
+	UFUNCTION()
+	void StartRising();
+	UFUNCTION()
+	void SetRisingSpeed(float Speed);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -77,7 +83,9 @@ public:
 
 public:
 	FTimerHandle TimerHandle;
+	FTimerHandle StopTimerHandle;
 	float FlowTime{};
 	float JumpTime{2.f};
 	bool bIsChanged{false};
+	float RisingSpeed{50.f};
 };

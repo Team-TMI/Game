@@ -59,6 +59,8 @@ void ARisingWaterProp::BeginPlay()
 
 	WaterState = EWaterStateEnum::Rise;
 
+	SetRisingSpeed(50.f);
+
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginOverlap);
 	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndOverlap);
 
@@ -211,10 +213,35 @@ void ARisingWaterProp::OnBeginDeadZoneOverlap(UPrimitiveComponent* OverlappedCom
 
 void ARisingWaterProp::RiseWater(float DeltaTime)
 {
-	float DeltaZ{DeltaTime * 50.f};
+	float DeltaZ{DeltaTime * RisingSpeed};
 
 	Frog->SetActorLocation(FVector(Frog->GetActorLocation().X, Frog->GetActorLocation().Y,
 	                               Frog->GetActorLocation().Z + DeltaZ));
 	SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y,
 	                         GetActorLocation().Z + DeltaZ));
+}
+
+void ARisingWaterProp::StopRising(float Time)
+{
+	WaterState = EWaterStateEnum::None;
+
+	if (Time > 0.f)
+	{
+		FTimerDelegate StopWaterDelegate{
+			FTimerDelegate::CreateLambda([this]() {
+				WaterState = EWaterStateEnum::Rise;
+			})
+		};
+		GetWorldTimerManager().SetTimer(StopTimerHandle, StopWaterDelegate, Time, false);
+	}
+}
+
+void ARisingWaterProp::StartRising()
+{
+	WaterState = EWaterStateEnum::Rise;
+}
+
+void ARisingWaterProp::SetRisingSpeed(float Speed)
+{
+	RisingSpeed = Speed;
 }
