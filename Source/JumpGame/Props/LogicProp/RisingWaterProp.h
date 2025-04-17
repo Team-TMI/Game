@@ -68,12 +68,16 @@ public:
 	class USceneComponent* RespawnPoint;
 
 public:
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	// ECharacterStateEnum CharacterState;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EWaterStateEnum WaterState;
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AFrog* Frog;
+
+public:
+	FTimerHandle TimerHandle;
+	float FlowTime{};
+	float JumpTime{2.f};
+	bool bIsChanged{false};
 };

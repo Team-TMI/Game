@@ -10,38 +10,47 @@
 
 ARisingWaterProp::ARisingWaterProp()
 {
-	CollisionComp->SetBoxExtent(FVector(600.f, 600.f, 1300.f));
-	CollisionComp->SetCollisionProfileName(TEXT("Water"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> WaterMesh(
+		TEXT("/Game/Props/Logic/SM_Water.SM_Water"));
+	if (WaterMesh.Succeeded())
+	{
+		MeshComp->SetStaticMesh(WaterMesh.Object);
+		MeshComp->SetRelativeScale3D(FVector(12.f, 12.f, 27.f));
+	}
 
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	CollisionComp->SetBoxExtent(FVector(600.f, 600.f, 1300.f));
+	CollisionComp->SetCollisionProfileName(TEXT("Water"));
+
+
 	DeepCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("DeepCollision"));
 	DeepCollision->SetupAttachment(RootComponent);
-	DeepCollision->SetBoxExtent(FVector(500.f, 500.f, 500.f));
-	DeepCollision->SetRelativeLocation(FVector(0, 0, 170.f));
+	DeepCollision->SetBoxExtent(FVector(500.f, 500.f, 700.f));
+	DeepCollision->SetRelativeLocation(FVector(0, 0, -20.f));
 	DeepCollision->SetCollisionProfileName(TEXT("Water"));
 
 	ShallowCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("ShallowCollision"));
 	ShallowCollision->SetupAttachment(RootComponent);
 	ShallowCollision->SetBoxExtent(FVector(500.f, 500.f, 300.f));
-	ShallowCollision->SetRelativeLocation(FVector(0, 0, 970.f));
+	ShallowCollision->SetRelativeLocation(FVector(0, 0, 980.f));
 	ShallowCollision->SetCollisionProfileName(TEXT("Water"));
 
 	SurfaceCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("SurfaceCollision"));
 	SurfaceCollision->SetupAttachment(RootComponent);
 	SurfaceCollision->SetBoxExtent(FVector(500.f, 500.f, 10.f));
-	SurfaceCollision->SetRelativeLocation(FVector(0, 0, 1280.f));
+	SurfaceCollision->SetRelativeLocation(FVector(0, 0, 1290.f));
 	SurfaceCollision->SetCollisionProfileName(TEXT("Water"));
 
 	DeadZoneCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("DeadZoneCollision"));
 	DeadZoneCollision->SetupAttachment(RootComponent);
 	DeadZoneCollision->SetBoxExtent(FVector(500.f, 500.f, 100.f));
-	DeadZoneCollision->SetRelativeLocation(FVector(0, 0, -430.f));
+	DeadZoneCollision->SetRelativeLocation(FVector(0, 0, -820.f));
 	DeadZoneCollision->SetCollisionProfileName(TEXT("Water"));
 
 	RespawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("RespawnPoint"));
 	RespawnPoint->SetupAttachment(RootComponent);
-	RespawnPoint->SetRelativeLocation(FVector(0, 0, 970.f));
+	RespawnPoint->SetRelativeLocation(FVector(0, 0, 480.f));
 }
 
 void ARisingWaterProp::BeginPlay()
@@ -49,7 +58,7 @@ void ARisingWaterProp::BeginPlay()
 	Super::BeginPlay();
 
 	WaterState = EWaterStateEnum::Rise;
-	
+
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginOverlap);
 	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndOverlap);
 
@@ -64,7 +73,17 @@ void ARisingWaterProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//FLog::Log("Character State", static_cast<float>(Frog->CharacterState));
+	// 일정 시간이 흘렀는데 상태가 "None"인 경우, 강제로 "Surface"로 수정
+	if (!bIsChanged && Frog->bIsSwimming)
+	{
+		FlowTime += DeltaTime;
+		if (FlowTime > JumpTime && Frog->CharacterState == ECharacterStateEnum::None)
+		{
+			FlowTime = 0.f;
+			Frog->CharacterState = ECharacterStateEnum::Surface;
+			bIsChanged = true;
+		}
+	}
 
 	switch (WaterState)
 	{
@@ -114,9 +133,15 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	{
 		Frog->bIsSwimming = true;
 		Frog->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		//FLog::Log("Speed", Frog->GetCharacterMovement()->Velocity.Length());
+
+		// 안빠르면 가라앉지 않게
+		if (Frog->GetCharacterMovement()->Velocity.Length() < 1'000.f)
+		{
+			Frog->CharacterState = ECharacterStateEnum::Surface;
+		}
 
 		// 잠시 가라앉고 올라오게
-		FTimerHandle TimerHandle;
 		FTimerDelegate MovementModeDelegate{
 			FTimerDelegate::CreateLambda([this]() {
 				ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
@@ -132,12 +157,13 @@ void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 {
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
 		Frog->bIsSwimming = false;
 		Frog->CharacterState = ECharacterStateEnum::None;
 		Frog->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		bIsChanged = false;
 
 		ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
-
 		SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
 	}
 }
@@ -178,7 +204,7 @@ void ARisingWaterProp::OnBeginDeadZoneOverlap(UPrimitiveComponent* OverlappedCom
 {
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
-		Frog->CharacterState = ECharacterStateEnum::Shallow;
+		Frog->CharacterState = ECharacterStateEnum::Deep;
 		Frog->SetActorLocation(RespawnPoint->GetComponentLocation());
 	}
 }
@@ -190,5 +216,5 @@ void ARisingWaterProp::RiseWater(float DeltaTime)
 	Frog->SetActorLocation(FVector(Frog->GetActorLocation().X, Frog->GetActorLocation().Y,
 	                               Frog->GetActorLocation().Z + DeltaZ));
 	SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y,
-							   GetActorLocation().Z + DeltaZ));
+	                         GetActorLocation().Z + DeltaZ));
 }
