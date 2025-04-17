@@ -1,0 +1,40 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "ObstacleProp.h"
+#include "ConveyorBelt.generated.h"
+
+UCLASS()
+class JUMPGAME_API AConveyorBelt : public AObstacleProp
+{
+	GENERATED_BODY()
+
+public:
+	// Sets default values for this actor's properties
+	AConveyorBelt();
+
+protected:
+	UFUNCTION()
+	void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	                      const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+public:
+	UPROPERTY(EditAnywhere)
+	class UArrowComponent* Arrow;
+
+	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
+	float BeltSpeed = 350.f;
+
+	// 플레이어 캐스팅
+	class AFrog* Character;
+};
