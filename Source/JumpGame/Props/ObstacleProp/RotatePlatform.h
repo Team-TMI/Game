@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "ObstacleProp.h"
-#include "RotateHammerProp.generated.h"
+#include "RotatePlatform.generated.h"
 
 UCLASS()
-class JUMPGAME_API ARotateHammerProp : public AObstacleProp
+class JUMPGAME_API ARotatePlatform : public AObstacleProp
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ARotateHammerProp();
+	ARotatePlatform();
 
 protected:
 	// Called when the game starts or when spawned
@@ -22,7 +22,4 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-public:
-	virtual void CalculateForce(AFrog* Character) override;
 };
