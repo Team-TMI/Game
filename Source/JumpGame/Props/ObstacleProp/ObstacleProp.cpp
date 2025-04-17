@@ -21,7 +21,7 @@ AObstacleProp::AObstacleProp()
 	bReplicates = true;
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
-		TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/ObstacleBaseCube.ObstacleBaseCube'"));
 	if (TempMesh.Succeeded())
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
@@ -66,7 +66,7 @@ void AObstacleProp::Tick(float DeltaTime)
 }
 
 void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float Force,
-                                    bool XYOverride, bool ZOverride)
+                                    bool bXYOverride, bool bZOverride)
 {
 	if (bDebug)
 	{

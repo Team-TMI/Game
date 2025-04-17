@@ -3,21 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ObstacleProp.h"
-#include "BounceBollard.generated.h"
+#include "LogicProp.h"
+#include "VictoryPlatform.generated.h"
 
 UCLASS()
-class JUMPGAME_API ABounceBollard : public AObstacleProp
+class JUMPGAME_API AVictoryPlatform : public ALogicProp
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ABounceBollard();
+	AVictoryPlatform();
 
 protected:
-	UFUNCTION()
-	void OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -26,5 +24,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	virtual void CalculateForce(AFrog* Character) override;
+
 };

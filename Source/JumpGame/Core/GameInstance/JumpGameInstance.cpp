@@ -4,6 +4,7 @@
 #include "JumpGameInstance.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
+#include "JumpGame/Utils/FastLogger.h"
 #include "Online/OnlineSessionNames.h"
 
 void UJumpGameInstance::Init()
@@ -45,8 +46,12 @@ void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount)
 	// 커스텀 정보 (세션이름)
 	// base64로 인코딩
 	DisplayName = StringBase64Encode(DisplayName);
+	FName EncodedName = FName(DisplayName);
 	SessionSettings.Set(FName(TEXT("DP_NAME")), DisplayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
+	// 세션 이름 저장
+	CurrentSessionName = EncodedName;
+	
 	// 세션 생성
 	SessionInterface->CreateSession(0,FName(DisplayName),SessionSettings);
 }
@@ -59,7 +64,7 @@ void UJumpGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucc
 
 		// 서버가 멀티플레이 하는 맵으로 이동
 		// TODO: 이동할 맵 경로 설정하기
-		GetWorld()->ServerTravel(TEXT("/Game/Maps/InGameLevel?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/WaitRoomLevel?listen"));
 	}
 	else
 	{
@@ -146,6 +151,35 @@ void UJumpGameInstance::OnJoinSessionComplete(FName SessionName,
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
 		pc->ClientTravel(url, TRAVEL_Absolute);
 	}
+}
+
+void UJumpGameInstance::LeaveSession(bool bDestroySession)
+{
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	IOnlineSubsystem* Subsys = IOnlineSubsystem::Get();
+	if (Subsys)
+	{
+		SessionInterface = Subsys->GetSessionInterface();
+		if (SessionInterface.IsValid() && bDestroySession)
+		{
+			// 생성된 세션의 이름을 가져오자
+			FName SessionName = CurrentSessionName;
+			// 서버가 방을 떠나면, 세션을 삭제하자
+			if (PC->HasAuthority())
+			{
+				// 먼저 세션을 끝내고
+				SessionInterface->EndSession(SessionName);
+				// 그 다음 파괴
+				SessionInterface->DestroySession(SessionName); 
+			}
+			else
+			{
+				// 클라이언트가 방을 떠나면, 그 클라이언트만 세션에서 나오자
+				SessionInterface->EndSession(SessionName);
+			}
+		}
+	}
+	FLog::Log("UJumpGameInstance::LeaveSession, Server Leaving Session");
 }
 
 FString UJumpGameInstance::StringBase64Encode(FString Str)

@@ -21,7 +21,10 @@ class JUMPGAME_API UJumpGameInstance : public UGameInstance
 	
 public:
 	virtual void Init() override;
-
+	// 세션 이름
+	UPROPERTY()
+	FName CurrentSessionName;
+	
 	// 세션 생성 관련
 	UFUNCTION(BlueprintCallable)
 	void CreateMySession(FString DisplayName, int32 PlayerCount);
@@ -37,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void JoinOtherSession(int32 SessionIdx);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	// 세션 파괴 관련
+	void LeaveSession(bool bDestroySession);
 
 	// 스팀 세션 제목을 한글로 했을 때 깨짐 현상
 	FString StringBase64Encode(FString Str);

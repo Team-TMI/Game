@@ -20,6 +20,7 @@ public:
 protected:
 	UFUNCTION()
 	void OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -34,12 +35,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Launch")
 	FVector LaunchVelocity	= FVector(0, 0, 0);
 	
-	// 밑의 두개 값이 true면 LaunchVelocity값으로 재정의
-	// 즉, false면 캐릭터의 속도와 방향을 반영해 그 값에 더한다
-	UPROPERTY(EditAnywhere, Category = "Launch")
-	bool bXYOverride = false;
-	UPROPERTY(EditAnywhere, Category = "Launch")
-	bool bZOverride = false;
+	// 디버깅
 	UPROPERTY(EditAnywhere)
 	bool bDebug = false;
 	

@@ -12,9 +12,23 @@ ABounceBollard::ABounceBollard()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	CollisionComp->SetRelativeScale3D(FVector(0,0,0));
 	
-	CollisionComp->SetBoxExtent(FVector(50));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/ObstacleCylinder.ObstacleCylinder'"));
+	if (TempMesh.Succeeded())
+	{
+		MeshComp->SetStaticMesh(TempMesh.Object);
+	}
 	MeshComp->SetRelativeLocation(FVector(0, 0, 0));
+}
+
+void ABounceBollard::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	AFrog* Frog = Cast<AFrog>(OtherActor);
+	CalculateForce(Frog);
 }
 
 // Called when the game starts or when spawned
@@ -22,8 +36,10 @@ void ABounceBollard::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	// 콜리전 설정 (Block)
-	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	MeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	MeshComp->OnComponentHit.AddDynamic(this, &ABounceBollard::OnBollardHit);
 }
 
 // Called every frame
