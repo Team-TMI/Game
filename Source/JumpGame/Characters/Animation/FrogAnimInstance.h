@@ -19,20 +19,21 @@ public:
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	class AFrog* Frog;
-	
+
+public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float Speed;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsFalling;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsCrouching;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float Pitch;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float Yaw;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bIsSwimming;
 };
