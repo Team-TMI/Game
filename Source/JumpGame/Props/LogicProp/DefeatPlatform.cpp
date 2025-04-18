@@ -34,3 +34,10 @@ void ADefeatPlatform::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+FVector ADefeatPlatform::SpawnDefeatCharacter()
+{
+	// 모두 같은 곳에 스폰되어도 어차피 안보임
+	FVector SpawnLocation = MeshComp->GetComponentLocation() + FVector(0.f, 0.f, 200.f);
+	return SpawnLocation;
+}
+

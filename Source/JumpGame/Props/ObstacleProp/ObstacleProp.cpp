@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -57,6 +58,14 @@ void AObstacleProp::BeginPlay()
 	CollisionComp->OnComponentHit.AddDynamic(this, &AObstacleProp::OnMyHit);
 }
 
+void AObstacleProp::GetLifetimeReplicatedProps(
+	TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AObstacleProp, DeltaRot);
+}
+
 // Called every frame
 void AObstacleProp::Tick(float DeltaTime)
 {
@@ -88,8 +97,18 @@ void AObstacleProp::CalculateForce(AFrog* Character)
 
 void AObstacleProp::ObstacleRotate()
 {
-	float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
-	FRotator DeltaRot = RotAxis * RotSpeed;
-	// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
+	//서버라면
+	if (HasAuthority())
+	{
+		float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
+		DeltaRot = RotAxis * RotSpeed;
+		// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
+		PivotScene->AddLocalRotation(DeltaRot);
+	}
+}
+
+void AObstacleProp::OnRep_ObstacleRotate()
+{
+	// 클라이언트라면 이 함수가 실행
 	PivotScene->AddLocalRotation(DeltaRot);
 }

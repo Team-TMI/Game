@@ -5,9 +5,13 @@
 
 #include <filesystem>
 
+#include "DefeatPlatform.h"
+#include "RisingWaterProp.h"
 #include "VictoryPlatform.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
+#include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -62,21 +66,35 @@ void AGameFinishProp::Tick(float DeltaTime)
 
 void AGameFinishProp::GameEnd()
 {
-	// 물 멈추자
-	
+	/*// 물 멈추자
+	ARisingWaterProp* RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
+	if (RisingWaterProp)
+	{
+		RisingWaterProp->StopRising();
+	}*/
 	
 	// 시상대 스폰 (박스 위치부터 위로)
 	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,10000);
+	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
+	
 	AVictoryPlatform* VictoryP = GetWorld()->SpawnActor<AVictoryPlatform>(VictoryPos, FRotator::ZeroRotator);
-
+	ADefeatPlatform* DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
+	
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
+	// state에서 bIsWin이 false라면, Defeat으로 이동하자
+	/*
+	 if(~~)
+	 {
+		SetActorLocation(DefeatP->SpawnDefeatCharacter());
+	 }
+	 */
 
 	// 카메라 전환
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (PC)
 	{
-		PC->SetViewTargetWithBlend(VictoryP, 1.5f);
+		PC->SetViewTargetWithBlend(VictoryP, 1.0f);
 	}
 
 	// 게임 종료 처리 (게임모드?)

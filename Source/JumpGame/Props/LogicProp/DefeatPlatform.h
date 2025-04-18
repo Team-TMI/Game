@@ -22,4 +22,8 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+public:
+	// 1등 아닌 유저들 소환할 위치들 반환
+	FVector SpawnDefeatCharacter();
 };

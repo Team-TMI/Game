@@ -8,7 +8,7 @@
 
 /*
  세션 생성 시 보여지는 제목 리스트
- TODO: 현재 인원 수, 게임 진행중 여부?, 비밀방인지 아닌지
+ 현재 인원 수, 게임 진행중 여부?, 비밀방인지 아닌지
  */
 UCLASS()
 class JUMPGAME_API USessionListItemWidget : public UUserWidget

@@ -62,8 +62,7 @@ void UJumpGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucc
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[%s] 세션 생성 성공"), *SessionName.ToString());
 
-		// 서버가 멀티플레이 하는 맵으로 이동
-		// TODO: 이동할 맵 경로 설정하기
+		// 대기방으로 이동
 		GetWorld()->ServerTravel(TEXT("/Game/Maps/WaitRoomLevel?listen"));
 	}
 	else

@@ -23,6 +23,7 @@ protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	// Called every frame
@@ -41,6 +42,8 @@ public:
 	
 	// Rotate (자체 회전)관련
 	// 장애물: 회전망치, 뿔망치, 굴러오는 공
+	UPROPERTY(ReplicatedUsing=OnRep_ObstacleRotate)
+	FRotator DeltaRot;
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	float RotAngle = 0;
 	UPROPERTY (EditAnywhere, Category = "Rotate")
@@ -48,5 +51,10 @@ public:
 	
 	virtual void LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool XYOverride = false, bool ZOverride = false);
 	virtual void CalculateForce(AFrog* Character);
+
+	// 서버에서
 	virtual void ObstacleRotate();
+	// 클라이언트에서
+	UFUNCTION()
+	void OnRep_ObstacleRotate();
 };
