@@ -31,9 +31,9 @@ public:
 	virtual void SendPongMessage();
 	virtual void SendPingMessage();
 
-	// UPROPERTY()
-	const FString ServerURL = TEXT("ws://172.29.252.83:3000/");
-	// UPROPERTY()
+	// @ Trouble
+	// WebSocket은 서버가 /ws를 지정한 경우 뒤에 /ws를 붙여야 함
+	const FString ServerURL = TEXT("ws://192.168.20.68:8029/ws");
 	const FString ServerProtocol = TEXT("ws");
 
 	// UPROPERTY()

@@ -91,20 +91,6 @@ void AMapEditingPawn::BeginPlay()
 void AMapEditingPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// 테스트 코드
-	// if (ControlledActor)
-	// {
-	// 	FHitResult HitResult;
-	// 	FVector MouseWorldPosition = Cast<AMapEditingPlayerController>(GetController())->GetMouseWorldPosition(HitResult);
-	// 	if (MouseWorldPosition.IsZero()) return;
-	//
-	// 	ATestActor* TestActor = Cast<ATestActor>(ControlledActor);
-	// 	if (TestActor)
-	// 	{
-	// 		TestActor->GridComponent->MoveActorInGrid(MouseWorldPosition, HitResult);
-	// 	}
-	// }
 }
 
 // Called to bind functionality to input
@@ -136,43 +122,25 @@ void AMapEditingPawn::OnClick(const FInputActionValue& InputActionValue)
 	if (WorldPosition.IsZero()) return;
 
 	APrimitiveProp* HitActor = Cast<APrimitiveProp>(HitResult.GetActor());
+	UGizmoComponent* Gizmo = Cast<UGizmoComponent>(HitResult.GetComponent());
+
+	// Actor가 맞지 않으면 선택 해제
 	if (!HitActor)
 	{
-		if (ControlledActor)
-		{
-			ControlledActor->SetUnSelected();
-		}
-		ControlledActor = nullptr;
-		CachedGizmo = nullptr;
+		ClearSelection();
 		return;
 	}
 
+	// 새로운 Actor 선택
 	if (ControlledActor != HitActor)
 	{
-		if (ControlledActor)
-		{
-			ControlledActor->SetUnSelected();
-			CachedGizmo = nullptr;
-		}
-		ControlledActor = HitActor;
-		ControlledActor->SetSelected();
+		SetControlledActor(HitActor);
+		ClearGizmo();
+		return;
 	}
-	else
-	{
-		UGizmoComponent* Gizmo = Cast<UGizmoComponent>(HitResult.GetComponent());
-		if (Gizmo == nullptr)
-		{
-			if (CachedGizmo) CachedGizmo->SetUnSelected();
-			CachedGizmo = nullptr;
-		}
-		
-		if (CachedGizmo != Gizmo)
-		{
-			if (CachedGizmo) CachedGizmo->SetUnSelected();
-			CachedGizmo = Gizmo;
-			CachedGizmo->SetSelected();
-		}
-	}
+
+	// 이미 같은 Actor 선택 중인 경우 Gizmo 처리
+	UpdateGizmo(Gizmo);
 }
 
 void AMapEditingPawn::OnMoveable(const FInputActionValue& InputActionValue)
@@ -243,4 +211,55 @@ void AMapEditingPawn::MoveUp(float Val)
 {
 	if (FMath::IsNearlyZero(Val)) return;
 	AddMovementInput(FVector::UpVector, Val);
+}
+
+void AMapEditingPawn::ClearSelection()
+{
+	if (ControlledActor)
+	{
+		ControlledActor->SetUnSelected();
+		ControlledActor = nullptr;
+	}
+	ClearGizmo();
+}
+
+void AMapEditingPawn::ClearGizmo()
+{
+	if (CachedGizmo)
+	{
+		CachedGizmo->SetUnSelected();
+		CachedGizmo = nullptr;
+	}
+}
+
+void AMapEditingPawn::SetControlledActor(APrimitiveProp* NewActor)
+{
+	if (ControlledActor)
+	{
+		ControlledActor->SetUnSelected();
+	}
+	
+	ControlledActor = NewActor;
+	
+	if (ControlledActor)
+	{
+		ControlledActor->SetSelected();
+	}
+}
+
+void AMapEditingPawn::UpdateGizmo(UGizmoComponent* NewGizmo)
+{
+	if (CachedGizmo == NewGizmo) return;
+
+	if (CachedGizmo)
+	{
+		CachedGizmo->SetUnSelected();
+	}
+
+	CachedGizmo = NewGizmo;
+	
+	if (CachedGizmo)
+	{
+		CachedGizmo->SetSelected();
+	}
 }

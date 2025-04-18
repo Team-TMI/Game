@@ -46,7 +46,17 @@ private:
 	void MoveRight(float Val);
 	UFUNCTION()
 	void MoveUp(float Val);
-	
+
+	UFUNCTION()
+	void ClearSelection();
+	UFUNCTION()
+	void ClearGizmo();
+	UFUNCTION()
+	void SetControlledActor(class APrimitiveProp* NewActor);
+	UFUNCTION()
+	void UpdateGizmo(class UGizmoComponent* NewGizmo);
+
+	// IMC_MAPEDITING
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputMappingContext* IMC_MapEditing = nullptr;
 
@@ -66,9 +76,9 @@ private:
 	bool bCanMove = false;
 
 	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UPawnMovementComponent* MovementComponent;
+	class UPawnMovementComponent* MovementComponent = nullptr;
 	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class USphereComponent* CollisionComponent;
+	class USphereComponent* CollisionComponent = nullptr;
 
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class APrimitiveProp* ControlledActor = nullptr;

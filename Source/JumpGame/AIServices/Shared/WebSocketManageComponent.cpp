@@ -89,6 +89,8 @@ void UWebSocketManageComponent::SendPongMessage()
 	FMessageUnion PongMessage;
 	PongMessage.PongMessage.Header.Type = EMessageType::Pong;
 	PongMessage.PongMessage.Header.PayloadSize = sizeof(FPongMessage);
+	PongMessage.PongMessage.Header.PlayerID = 1;
+	PongMessage.PongMessage.Header.SessionID[0] = 1;
 	PongMessage.PongMessage.TimeStamp = TimeStamp;
 
 	Socket->Send(PongMessage.RawData, PongMessage.PongMessage.Header.PayloadSize, true);
@@ -101,6 +103,8 @@ void UWebSocketManageComponent::SendPingMessage()
 	FMessageUnion PingMessage;
 	PingMessage.PingMessage.Header.Type = EMessageType::Ping;
 	PingMessage.PingMessage.Header.PayloadSize = sizeof(FPingMessage);
+	PingMessage.PingMessage.Header.PlayerID = 1;
+	PingMessage.PingMessage.Header.SessionID[0] = 1;
 	PingMessage.PingMessage.TimeStamp = TimeStamp;
 
 	Socket->Send(PingMessage.RawData, PingMessage.PingMessage.Header.PayloadSize, true);
