@@ -19,6 +19,7 @@ AObstacleProp::AObstacleProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	Tags.Add("Obstacle");
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
 		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
@@ -29,7 +30,6 @@ AObstacleProp::AObstacleProp()
 	CollisionComp->SetBoxExtent(FVector(49, 49, 0));
 	CollisionComp->SetRelativeLocation(FVector(0, 0, 100));
 	MeshComp->SetRelativeLocation(FVector(0, 0, -50));
-	Tags.Add("Obstacle");
 }
 
 void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

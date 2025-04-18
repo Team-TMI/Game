@@ -1,18 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BounceBollard.h"
+#include "BounceBollardProp.h"
 
 #include "Components/BoxComponent.h"
 #include "JumpGame/Characters/Frog.h"
 
 
 // Sets default values
-ABounceBollard::ABounceBollard()
+ABounceBollardProp::ABounceBollardProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	Tags.Add("BounceBollard");
+	
 	CollisionComp->SetRelativeScale3D(FVector(0,0,0));
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
@@ -24,7 +25,7 @@ ABounceBollard::ABounceBollard()
 	MeshComp->SetRelativeLocation(FVector(0, 0, 0));
 }
 
-void ABounceBollard::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+void ABounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	AFrog* Frog = Cast<AFrog>(OtherActor);
@@ -32,23 +33,23 @@ void ABounceBollard::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* Oth
 }
 
 // Called when the game starts or when spawned
-void ABounceBollard::BeginPlay()
+void ABounceBollardProp::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	// 콜리전 설정 (Block)
 	MeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	MeshComp->OnComponentHit.AddDynamic(this, &ABounceBollard::OnBollardHit);
+	MeshComp->OnComponentHit.AddDynamic(this, &ABounceBollardProp::OnBollardHit);
 }
 
 // Called every frame
-void ABounceBollard::Tick(float DeltaTime)
+void ABounceBollardProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-void ABounceBollard::CalculateForce(AFrog* Character)
+void ABounceBollardProp::CalculateForce(AFrog* Character)
 {
 	FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
 	FVector Direction = CharacterDir*(-1);

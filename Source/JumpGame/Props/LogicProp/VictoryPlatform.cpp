@@ -13,6 +13,29 @@ AVictoryPlatform::AVictoryPlatform()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
+	// 밑바닥
+	MeshComp->SetRelativeLocation(FVector(0, 0, -80));
+	MeshComp->SetRelativeScale3D(FVector(10,5,0.5));
+
+	// 1등 발판
+	VictoryCube = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryCube"));
+	VictoryCube->SetRelativeScale3D(FVector(1.5,1.1,1.1));
+	VictoryCube->SetupAttachment(CollisionComp);
+
+	// 카메라
+	VictoryCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("VictoryCamera"));
+	VictoryCamera->SetupAttachment(CollisionComp);
+	VictoryCamera->FieldOfView = 50.0f;
+	VictoryCamera->SetRelativeLocation(FVector(0, 580, 110));
+	VictoryCamera->SetRelativeRotation(FRotator(0, -90, 0));
+
+	// 배경
+	VictoryPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryPlane"));
+	VictoryPlane->SetupAttachment(MeshComp);
+	VictoryPlane->SetRelativeLocation(FVector(0, -50, 500));
+	VictoryPlane->SetRelativeRotation(FRotator(0, 0, 90));
+	VictoryPlane->SetRelativeScale3D(FVector(3, 1.5, 1));
+
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
 		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
 	if (TempMesh.Succeeded())
@@ -29,30 +52,8 @@ AVictoryPlatform::AVictoryPlatform()
 		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
 	if (TempPlane.Succeeded())
 	{
-		VictoryCube->SetStaticMesh(TempPlane.Object);
+		VictoryCube->SetStaticMesh(TempMesh.Object);
 	}
-
-	// 밑바닥
-	MeshComp->SetRelativeLocation(FVector(0, 0, -80));
-	MeshComp->SetRelativeScale3D(FVector(5,5,0.5));
-
-	// 1등 발판
-	VictoryCube = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryCube"));
-	VictoryCube->SetRelativeScale3D(FVector(1.5,1.1,1.1));
-
-	// 카메라
-	VictoryCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("VictoryCamera"));
-	VictoryCamera->SetupAttachment(CollisionComp);
-	VictoryCamera->FieldOfView = 50.0f;
-	VictoryCamera->SetRelativeLocation(FVector(0, 500, 140));
-	VictoryCamera->SetRelativeRotation(FRotator(0, -90, 0));
-
-	// 배경
-	VictoryPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryPlane"));
-	VictoryPlane->SetupAttachment(MeshComp);
-	VictoryPlane->SetRelativeLocation(FVector(0, -50, 500));
-	VictoryPlane->SetRelativeRotation(FRotator(90, 0, 0));
-	VictoryPlane->SetRelativeScale3D(FVector(3, 1.5, 1));
 	
 	Tags.Add("VictoryPlatform");
 }
@@ -72,7 +73,7 @@ void AVictoryPlatform::Tick(float DeltaTime)
 
 FVector AVictoryPlatform::SpawnVictoryCharacter()
 {
-	FVector SpawnLocation = VictoryCube->GetComponentLocation() + FVector(0.f, 0.f, 10.f);
+	FVector SpawnLocation = VictoryCube->GetComponentLocation() + FVector(0.f, 0.f, 100.f);
 	return SpawnLocation;
 }
 

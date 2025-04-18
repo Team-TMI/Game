@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "ObstacleProp.h"
-#include "BounceBollard.generated.h"
+#include "BounceBollardProp.generated.h"
 
 UCLASS()
-class JUMPGAME_API ABounceBollard : public AObstacleProp
+class JUMPGAME_API ABounceBollardProp : public AObstacleProp
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ABounceBollard();
+	ABounceBollardProp();
 
 protected:
 	UFUNCTION()
