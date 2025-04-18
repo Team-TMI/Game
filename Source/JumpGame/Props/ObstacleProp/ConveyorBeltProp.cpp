@@ -16,7 +16,7 @@ AConveyorBeltProp::AConveyorBeltProp()
 	Tags.Add("ConveyorBelt");
 	
 	// TODO: 컨베이어 벨트 크기 설정
-	CollisionComp->SetBoxExtent(FVector(102, 51, 60));
+	CollisionComp->SetBoxExtent(FVector(102.f, 51.f, 60.f));
 	CollisionComp->SetRelativeLocation(FVector(0, 0, 0));
 	MeshComp->SetRelativeLocation(FVector(0, 0, -10));
 	MeshComp->SetRelativeScale3D(FVector(2, 1, 1));

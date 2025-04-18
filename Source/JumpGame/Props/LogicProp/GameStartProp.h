@@ -22,4 +22,19 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	// 플레이어 인덱스에 해당하는 시작 위치 반환
+	// FTransform PlayerStartTransform(int32 PlayerIdx) const;
+
+	// 테스트용: 혼자일때 되나 테스트
+	FTransform SinglePlayerStart();
+	
+	UPROPERTY(VisibleAnywhere)
+	TArray<USceneComponent*> StartPoints;
+
+	// 얼마나 떨어뜨릴건지
+	UPROPERTY(EditAnywhere,	BlueprintReadWrite)
+	float Gap = 30.f;
 };
+
+
