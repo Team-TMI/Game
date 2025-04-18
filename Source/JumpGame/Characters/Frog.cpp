@@ -70,7 +70,7 @@ AFrog::AFrog()
 	{
 		CrouchAction = Frog_Crouch.Object;
 	}
-	
+
 	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Sprint
 		(TEXT("/Game/Characters/Input/IA_FrogSprint.IA_FrogSprint"));
 	if (Frog_Sprint.Succeeded())
@@ -96,17 +96,17 @@ AFrog::AFrog()
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
 	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
 	GetCharacterMovement()->GroundFriction = 5.0f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 150.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 1500.0f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
-	GetCharacterMovement()->JumpZVelocity = 500.0f;
 	GetCharacterMovement()->AirControl = 0.25f;
 	GetCharacterMovement()->PerchRadiusThreshold = 20.0f;
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
-
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
+	
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f;
@@ -139,20 +139,21 @@ void AFrog::NotifyControllerChanged()
 	}
 }
 
-
 // Called when the game starts or when spawned
 void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
 	Tags.Add(TEXT("Frog"));
+
+	InitFrogState();
 }
 
 // Called every frame
 void AFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
 	if (GetCharacterMovement()->IsFalling())
 	{
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 200.0f, 0.0f);
@@ -172,13 +173,13 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AFrog::StartJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AFrog::StopJumping);
-		
+
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AFrog::StartCrouch);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AFrog::StopCrouch);
-		
+
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AFrog::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFrog::StopSprint);
-		
+
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFrog::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrog::Look);
 	}
@@ -187,7 +188,7 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AFrog::Move(const struct FInputActionValue& Value)
 {
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	FVector2D MovementVector{Value.Get<FVector2D>()};
 
 	if (Controller)
 	{
@@ -213,22 +214,61 @@ void AFrog::Look(const struct FInputActionValue& Value)
 	}
 }
 
+bool AFrog::CanJumpInternal_Implementation() const
+{
+	// 원래 점프 로직
+	bool bCanJump{Super::CanJumpInternal_Implementation()};
+
+	// 앉은 상태라면 ?
+	if (!bCanJump && bIsCrouched)
+	{
+		// 현재 지면에 서 있는지
+		// 더 점프할 수 있는지
+		// 공중이 아닌지
+		bCanJump = GetCharacterMovement()->IsMovingOnGround()
+			&& JumpCurrentCount < JumpMaxCount
+			&& !GetCharacterMovement()->IsFalling();
+	}
+
+	return bCanJump;
+}
+
 void AFrog::StartJump()
 {
 	// 수면 점프
 	if (CharacterState == ECharacterStateEnum::Surface)
 	{
 		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Jumping"));
-		FVector LaunchVelocity = GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f;
+		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
 		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
-		
+
 		FTimerHandle TimerHandle;
-		FTimerDelegate MovementModeDelegate{FTimerDelegate::CreateLambda([this]()
-		{
-			GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
-		})};
+		FTimerDelegate MovementModeDelegate{
+			FTimerDelegate::CreateLambda([this]() {
+				GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
+			})
+		};
 		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
 
+		return;
+	}
+	
+	// 슈퍼 점프
+	if (GetCharacterMovement()->IsCrouching())
+	{
+		//FLog::Log("Time", CrouchTime);
+		if (CrouchTime > 4.f)
+		{
+			SetJumpAvailableBlock(3);
+		}
+		else if (CrouchTime > 2.f)
+		{
+			SetJumpAvailableBlock(2);
+		}
+		
+		StopCrouch();
+		Jump();
+		
 		return;
 	}
 
@@ -252,16 +292,39 @@ void AFrog::StopSprint()
 
 void AFrog::StartCrouch()
 {
+	if (GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
+
 	bIsCrouching = true;
-	GetCharacterMovement()->MaxWalkSpeed = 150.f;
 	Crouch();
+	
+	FTimerDelegate CrouchDelegate{
+		FTimerDelegate::CreateLambda([this]() {
+			CrouchTime += GetWorld()->GetDeltaSeconds();
+		})
+	};
+	GetWorldTimerManager().SetTimer(CrouchTimer, CrouchDelegate, GetWorld()->GetDeltaSeconds(), true);
 }
 
 void AFrog::StopCrouch()
 {
+	if (GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
+
 	bIsCrouching = false;
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	UnCrouch();
+
+	GetWorldTimerManager().ClearTimer(CrouchTimer);
+	CrouchTime = 0.f;
+}
+
+void AFrog::InitFrogState()
+{
+	SetJumpAvailableBlock(1);
 }
 
 void AFrog::StartSwim()
@@ -274,4 +337,23 @@ void AFrog::StopSwim()
 {
 	FLog::Log("StopSwim");
 	bIsSwimming = false;
+}
+
+void AFrog::SetJumpAvailableBlock(int32 Block)
+{
+	float Height{Block * 100.f + 10.f};
+	float Value{FMath::Sqrt(Height * FMath::Abs(GetCharacterMovement()->GetGravityZ()) * 2)};
+	GetCharacterMovement()->JumpZVelocity = Value;
+
+	// 점프력 높게 설정하면 다시 원래대로 점프력 돌아오게
+	if (Block != 1)
+	{
+		FTimerHandle TimerHandle;
+		FTimerDelegate JumpDelegate{
+			FTimerDelegate::CreateLambda([this]() {
+				SetJumpAvailableBlock(1);
+			})
+		};
+		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
+	}
 }
