@@ -153,7 +153,7 @@ void AFrog::BeginPlay()
 void AFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
+	//FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
 	if (GetCharacterMovement()->IsFalling())
 	{
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 200.0f, 0.0f);
