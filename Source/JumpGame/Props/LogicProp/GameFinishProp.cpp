@@ -79,6 +79,11 @@ void AGameFinishProp::GameEnd()
 	
 	AVictoryPlatform* VictoryP = GetWorld()->SpawnActor<AVictoryPlatform>(VictoryPos, FRotator::ZeroRotator);
 	ADefeatPlatform* DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
+
+	// 플레이어들 조작막기
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	DisableInput(PC);
+	// 우승자 앞에 보게 정렬하기
 	
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
@@ -91,7 +96,6 @@ void AGameFinishProp::GameEnd()
 	 */
 
 	// 카메라 전환
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (PC)
 	{
 		PC->SetViewTargetWithBlend(VictoryP, 1.0f);
