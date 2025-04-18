@@ -8,7 +8,7 @@
 
 AMapEditorState::AMapEditorState()
 {
-	WebSocketManageComponent = CreateDefaultSubobject<UWebSocketManageComponent>(TEXT("WebSocketManageComponent"));
+	// WebSocketManageComponent = CreateDefaultSubobject<UWebSocketManageComponent>(TEXT("WebSocketManageComponent"));
 }
 
 void AMapEditorState::BeginPlay()

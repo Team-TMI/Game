@@ -13,4 +13,9 @@ UCLASS()
 class JUMPGAME_API ANetworkGameMode : public AGameMode
 {
 	GENERATED_BODY()
+
+public:
+	ANetworkGameMode();
+
+	virtual void BeginPlay() override;
 };
