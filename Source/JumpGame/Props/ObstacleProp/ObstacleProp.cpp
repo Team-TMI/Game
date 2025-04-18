@@ -72,6 +72,7 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 	{
 		FLog::Log("AObstacleProp::LaunchCharacter", Direction.Z, Force);
 	}
+
 	// 가상 함수: 기본 로직
 	LaunchVelocity = Direction.GetSafeNormal() * Force;
 	Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);

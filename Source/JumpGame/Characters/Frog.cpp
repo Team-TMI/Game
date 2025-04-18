@@ -2,6 +2,8 @@
 
 
 #include "Frog.h"
+
+#include "CharacterTrajectoryComponent.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -9,6 +11,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -73,7 +77,8 @@ AFrog::AFrog()
 	{
 		SprintAction = Frog_Sprint.Object;
 	}
-	
+
+	// CapsuleComponent Settings
 	GetCapsuleComponent()->InitCapsuleSize(43.f, 70.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
@@ -84,6 +89,7 @@ AFrog::AFrog()
 
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
+	// CharacterMovement Settings
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->MaxAcceleration = 800.0f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
@@ -110,6 +116,13 @@ AFrog::AFrog()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	// MotionMatching
+	TrajectoryComponent = CreateDefaultSubobject<UCharacterTrajectoryComponent>(TEXT("TrajectoryComponent"));
+
+	// 초기값 설정
+	bIsSwimming = false;
+	CharacterState = ECharacterStateEnum::None;
 }
 
 void AFrog::NotifyControllerChanged()
@@ -131,6 +144,8 @@ void AFrog::NotifyControllerChanged()
 void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Tags.Add(TEXT("Frog"));
 }
 
 // Called every frame
@@ -200,6 +215,23 @@ void AFrog::Look(const struct FInputActionValue& Value)
 
 void AFrog::StartJump()
 {
+	// 수면 점프
+	if (CharacterState == ECharacterStateEnum::Surface)
+	{
+		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Jumping"));
+		FVector LaunchVelocity = GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f;
+		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+		
+		FTimerHandle TimerHandle;
+		FTimerDelegate MovementModeDelegate{FTimerDelegate::CreateLambda([this]()
+		{
+			GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
+		})};
+		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
+
+		return;
+	}
+
 	Jump();
 }
 
@@ -230,4 +262,16 @@ void AFrog::StopCrouch()
 	bIsCrouching = false;
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	UnCrouch();
+}
+
+void AFrog::StartSwim()
+{
+	FLog::Log("StartSwim");
+	bIsSwimming = true;
+}
+
+void AFrog::StopSwim()
+{
+	FLog::Log("StopSwim");
+	bIsSwimming = false;
 }
