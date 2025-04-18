@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ConveyorBelt.h"
+#include "ConveyorBeltProp.h"
 
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
@@ -9,7 +9,7 @@
 
 
 // Sets default values
-AConveyorBelt::AConveyorBelt()
+AConveyorBeltProp::AConveyorBeltProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -26,30 +26,30 @@ AConveyorBelt::AConveyorBelt()
 	Arrow->SetRelativeLocation(FVector(110, 0, 0));
 }
 
-void AConveyorBelt::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
 	Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 }
 
-void AConveyorBelt::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	Character = nullptr;
 }
 
 // Called when the game starts or when spawned
-void AConveyorBelt::BeginPlay()
+void AConveyorBeltProp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AConveyorBelt::OnMyBeginOverlap);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AConveyorBelt::OnMyEndOverlap);
+	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AConveyorBeltProp::OnMyBeginOverlap);
+	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AConveyorBeltProp::OnMyEndOverlap);
 }
 
 // Called every frame
-void AConveyorBelt::Tick(float DeltaTime)
+void AConveyorBeltProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 

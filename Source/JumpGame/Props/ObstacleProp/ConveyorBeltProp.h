@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "ObstacleProp.h"
-#include "ConveyorBelt.generated.h"
+#include "ConveyorBeltProp.generated.h"
 
 UCLASS()
-class JUMPGAME_API AConveyorBelt : public AObstacleProp
+class JUMPGAME_API AConveyorBeltProp : public AObstacleProp
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	AConveyorBelt();
+	AConveyorBeltProp();
 
 protected:
 	UFUNCTION()
