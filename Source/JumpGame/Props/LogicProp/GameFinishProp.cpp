@@ -82,7 +82,8 @@ void AGameFinishProp::GameEnd()
 
 	// 플레이어들 조작막기
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	DisableInput(PC);
+	PC->SetInputMode(FInputModeUIOnly());
+	PC->bShowMouseCursor = true;
 	// 우승자 앞에 보게 정렬하기
 	
 	// 플레이어 텔레포트
@@ -94,7 +95,7 @@ void AGameFinishProp::GameEnd()
 		SetActorLocation(DefeatP->SpawnDefeatCharacter());
 	 }
 	 */
-
+	
 	// 카메라 전환
 	if (PC)
 	{
