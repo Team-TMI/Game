@@ -28,6 +28,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	UPROPERTY()
+	class UJumpGameInstance* GI;
+	
 	// 첫번째 플레이어가 들어오면 10초후 게임 끝내자
 	void GameEnd();
 

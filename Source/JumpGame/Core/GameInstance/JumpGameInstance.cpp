@@ -199,3 +199,13 @@ FString UJumpGameInstance::StringBase64Decode(FString Str)
 	
 	return UTF8_TO_TCHAR(utf8String.c_str());
 }
+
+void UJumpGameInstance::SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin)
+{
+	if (PlayerMap.Contains(PlayerNetID))
+	{
+		// 승리 상태 업데이트
+		FPlayerInfo& PlayerInfo = PlayerMap[PlayerNetID];
+		PlayerInfo.bIsWin = bIsWin;
+	}
+}

@@ -44,6 +44,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int32 MapID;
 
+	// 맵 썸네일?!
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UTexture2D* Thumbnail;
+
 	// 맵마다 맵을 설명하는 UI를 띄우자
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UUserWidget* LoadingWidget;
@@ -51,6 +55,7 @@ public:
 	// 기본 생성자
 	FMapInfo()
 		: MapID(-1)
+		, Thumbnail(nullptr)
 		, LoadingWidget(nullptr)
 	{}
 };

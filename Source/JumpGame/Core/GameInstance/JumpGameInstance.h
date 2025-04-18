@@ -6,6 +6,7 @@
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Engine/GameInstance.h"
+#include "JumpGame/Core/GameState/TypeInfo/GameInfo.h"
 #include "JumpGameInstance.generated.h"
 
 // 세션 검색 완료시 호출되는 함수를 등록하는 델리게이트
@@ -57,4 +58,15 @@ public:
 
 	// 세션 검색완료시 호출되는 델리게이트
 	FFindComplete OnFindComplete;
+
+private:
+	FString NetID;
+	TMap<FString, FPlayerInfo> PlayerMap;
+
+public:
+	void SetPlayerInfo(const TMap<FString, FPlayerInfo> info) { PlayerMap = info; }
+	void AddPlayerInfo(const FString& PlayerKey, const FPlayerInfo& PlayerInfo) { PlayerMap.Add(PlayerKey, PlayerInfo); }
+	TMap<FString, FPlayerInfo>& GetPlayerInfo() { return PlayerMap; }
+	// 승리 판별 (bIsWin값 변경)
+	void SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin);
 };

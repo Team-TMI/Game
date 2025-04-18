@@ -10,6 +10,8 @@
 #include "VictoryPlatform.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/PlayerState.h"
+#include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -40,7 +42,7 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (!bWinnerFound)
 	{
 		bWinnerFound = true;
-		// TODO: 캐릭터의 상태 bIsWin을 만들어서 그 캐릭터만 true로 바꾸기
+		
 		// 1등 캐릭터 저장
 		WinnerCharacter = Character;
 
@@ -54,6 +56,8 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 void AGameFinishProp::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGameFinishProp::OnMyBeginOverlap);
 }
@@ -76,7 +80,6 @@ void AGameFinishProp::GameEnd()
 	// 시상대 스폰 (박스 위치부터 위로)
 	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,10000);
 	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
-	
 	AVictoryPlatform* VictoryP = GetWorld()->SpawnActor<AVictoryPlatform>(VictoryPos, FRotator::ZeroRotator);
 	ADefeatPlatform* DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
 
@@ -84,24 +87,24 @@ void AGameFinishProp::GameEnd()
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	PC->SetInputMode(FInputModeUIOnly());
 	PC->bShowMouseCursor = true;
-	// 우승자 앞에 보게 정렬하기
 	
+	// 우승자 앞에 보게 정렬하기
+	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
+
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
-	// state에서 bIsWin이 false라면, Defeat으로 이동하자
-	/*
-	 if(~~)
-	 {
+	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController());
+	if (Character != WinnerCharacter)
+	{
 		SetActorLocation(DefeatP->SpawnDefeatCharacter());
-	 }
-	 */
+	}
 	
 	// 카메라 전환
 	if (PC)
 	{
-		PC->SetViewTargetWithBlend(VictoryP, 1.0f);
+		PC->SetViewTargetWithBlend(VictoryP, 0.2f);
 	}
 
-	// 게임 종료 처리 (게임모드?)
+	// TODO: 게임 종료 처리 (게임모드?)
 }
 

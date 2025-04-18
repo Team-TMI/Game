@@ -73,7 +73,7 @@ void AVictoryPlatform::Tick(float DeltaTime)
 
 FVector AVictoryPlatform::SpawnVictoryCharacter()
 {
-	FVector SpawnLocation = VictoryCube->GetComponentLocation() + FVector(0.f, 0.f, 200.f);
+	FVector SpawnLocation = VictoryCube->GetComponentLocation() + FVector(0.f, 0.f, 100.f);
 	return SpawnLocation;
 }
 
