@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "NetworkPlayerController.h"
+#include "JumpGame/MapEditor/ClickHandlers/ClickResponse.h"
+#include "JumpGame/MapEditor/ClickHandlers/EClickHandlingResult.h"
 #include "MapEditingPlayerController.generated.h"
 
 /**
@@ -17,6 +19,27 @@ class JUMPGAME_API AMapEditingPlayerController : public ANetworkPlayerController
 public:
 	AMapEditingPlayerController();
 
+#pragma region CLICK_OPERATION
+	// Click Operation
+public:
 	UFUNCTION()
-	FVector GetMouseWorldPosition(FHitResult& HitResult) const;
+	bool OnClickOperation(class APrimitiveProp* InControlledProp, FClickResponse& ClickResponse);
+
+	UFUNCTION()
+	bool OnGizmoClickOperation(class APrimitiveProp* InControlledProp, FClickResponse& ClickResponse);
+	UFUNCTION()
+	bool OnActorClickOperation(class APrimitiveProp* InControlledProp, FClickResponse& ClickResponse);
+	UFUNCTION()
+	bool OnBackgroundClickOperation(class APrimitiveProp* InControlledProp, FClickResponse& ClickResponse);
+private:
+	using FClickOpFunc = bool (AMapEditingPlayerController::*)(class APrimitiveProp*, FClickResponse&);
+	// Click Operation
+	TMap<EClickHandlingResult, FClickOpFunc> ClickOperations = {
+		{ EClickHandlingResult::GizmoEditing, &AMapEditingPlayerController::OnGizmoClickOperation },
+		{ EClickHandlingResult::ActorEditing, &AMapEditingPlayerController::OnActorClickOperation },
+		{ EClickHandlingResult::BackgroundEditing, &AMapEditingPlayerController::OnBackgroundClickOperation }
+	};
+	
+#pragma endregion
+	
 };

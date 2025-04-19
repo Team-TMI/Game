@@ -32,13 +32,13 @@ public:
 
 private:
 	UFUNCTION()
-	void OnClick(const FInputActionValue& InputActionValue);
+	void HandleLeftClick(const FInputActionValue& InputActionValue);
 	UFUNCTION()
-	void OnMoveable(const FInputActionValue& InputActionValue);
+	void HandleRightClickStarted(const FInputActionValue& InputActionValue);
 	UFUNCTION()
-	void OnMove(const FInputActionValue& InputActionValue);
+	void HandleMove(const FInputActionValue& InputActionValue);
 	UFUNCTION()
-	void OnTurn(const FInputActionValue& InputActionValue);
+	void HandleMouseMove(const FInputActionValue& InputActionValue);
 
 	UFUNCTION()
 	void MoveForward(float Val);
@@ -46,15 +46,6 @@ private:
 	void MoveRight(float Val);
 	UFUNCTION()
 	void MoveUp(float Val);
-
-	UFUNCTION()
-	void ClearSelection();
-	UFUNCTION()
-	void ClearGizmo();
-	UFUNCTION()
-	void SetControlledActor(class APrimitiveProp* NewActor);
-	UFUNCTION()
-	void UpdateGizmo(class UGizmoComponent* NewGizmo);
 
 	// IMC_MAPEDITING
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -84,4 +75,7 @@ private:
 	class APrimitiveProp* ControlledActor = nullptr;
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UGizmoComponent* CachedGizmo = nullptr;
+
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UClickHandlerManager* ClickHandlerManager = nullptr;
 };

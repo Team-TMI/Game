@@ -13,6 +13,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
+#include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
@@ -69,6 +70,8 @@ AMapEditingPawn::AMapEditingPawn()
 	
 	MovementComponent = CreateDefaultSubobject<UPawnMovementComponent, UFloatingPawnMovement>(TEXT("MovementComponentMapEditing"));
 	MovementComponent->UpdatedComponent = RootComponent;
+
+	ClickHandlerManager = CreateDefaultSubobject<UClickHandlerManager>(TEXT("ClickHandlerManager"));
 }
 
 // Called when the game starts or when spawned
@@ -101,49 +104,25 @@ void AMapEditingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	UEnhancedInputComponent* PlayerInput = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	if (PlayerInput)
 	{
-		PlayerInput->BindAction(IA_Click, ETriggerEvent::Started, this, &AMapEditingPawn::OnClick);
-		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Started, this, &AMapEditingPawn::OnMoveable);
-		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Completed, this, &AMapEditingPawn::OnMoveable);
-		PlayerInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AMapEditingPawn::OnMove);
-		PlayerInput->BindAction(IA_Turn, ETriggerEvent::Triggered, this, &AMapEditingPawn::OnTurn);
+		// TODO : ClickHeldHandler 체인 구조 만들기
+		PlayerInput->BindAction(IA_Click, ETriggerEvent::Started, this, &AMapEditingPawn::HandleLeftClick);
+		// PlayerInput->BindAction(IA_Click, ETriggerEvent::Triggered, this, &AMapEditingPawn::OnClick);
+		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Started, this, &AMapEditingPawn::HandleRightClickStarted);
+		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Completed, this, &AMapEditingPawn::HandleRightClickStarted);
+		PlayerInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleMove);
+		PlayerInput->BindAction(IA_Turn, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleMouseMove);
 	}
 }
 
-void AMapEditingPawn::OnClick(const FInputActionValue& InputActionValue)
+void AMapEditingPawn::HandleLeftClick(const FInputActionValue& InputActionValue)
 {
 	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
 	if (!PC) return ;
-
-	// UI 위에 Hovering 중인지에 따라 로직 변화
 	
-	FHitResult HitResult;
-	FVector WorldPosition = PC->GetMouseWorldPosition(HitResult);
-	
-	if (WorldPosition.IsZero()) return;
-
-	APrimitiveProp* HitActor = Cast<APrimitiveProp>(HitResult.GetActor());
-	UGizmoComponent* Gizmo = Cast<UGizmoComponent>(HitResult.GetComponent());
-
-	// Actor가 맞지 않으면 선택 해제
-	if (!HitActor)
-	{
-		ClearSelection();
-		return;
-	}
-
-	// 새로운 Actor 선택
-	if (ControlledActor != HitActor)
-	{
-		SetControlledActor(HitActor);
-		ClearGizmo();
-		return;
-	}
-
-	// 이미 같은 Actor 선택 중인 경우 Gizmo 처리
-	UpdateGizmo(Gizmo);
+	ClickHandlerManager->HandleClick(PC);
 }
 
-void AMapEditingPawn::OnMoveable(const FInputActionValue& InputActionValue)
+void AMapEditingPawn::HandleRightClickStarted(const FInputActionValue& InputActionValue)
 {
 	// 마우스 오른쪽 클릭을 했을 때만 움직일 수 있음
 	bCanMove = !bCanMove;
@@ -163,7 +142,7 @@ void AMapEditingPawn::OnMoveable(const FInputActionValue& InputActionValue)
 	}
 }
 
-void AMapEditingPawn::OnMove(const FInputActionValue& InputActionValue)
+void AMapEditingPawn::HandleMove(const FInputActionValue& InputActionValue)
 {
 	if (!bCanMove) return;
 
@@ -174,7 +153,7 @@ void AMapEditingPawn::OnMove(const FInputActionValue& InputActionValue)
 	MoveUp(MoveInput.Z);
 }
 
-void AMapEditingPawn::OnTurn(const FInputActionValue& InputActionValue)
+void AMapEditingPawn::HandleMouseMove(const FInputActionValue& InputActionValue)
 {
 	if (!bCanMove) return;
 
@@ -211,55 +190,4 @@ void AMapEditingPawn::MoveUp(float Val)
 {
 	if (FMath::IsNearlyZero(Val)) return;
 	AddMovementInput(FVector::UpVector, Val);
-}
-
-void AMapEditingPawn::ClearSelection()
-{
-	if (ControlledActor)
-	{
-		ControlledActor->SetUnSelected();
-		ControlledActor = nullptr;
-	}
-	ClearGizmo();
-}
-
-void AMapEditingPawn::ClearGizmo()
-{
-	if (CachedGizmo)
-	{
-		CachedGizmo->SetUnSelected();
-		CachedGizmo = nullptr;
-	}
-}
-
-void AMapEditingPawn::SetControlledActor(APrimitiveProp* NewActor)
-{
-	if (ControlledActor)
-	{
-		ControlledActor->SetUnSelected();
-	}
-	
-	ControlledActor = NewActor;
-	
-	if (ControlledActor)
-	{
-		ControlledActor->SetSelected();
-	}
-}
-
-void AMapEditingPawn::UpdateGizmo(UGizmoComponent* NewGizmo)
-{
-	if (CachedGizmo == NewGizmo) return;
-
-	if (CachedGizmo)
-	{
-		CachedGizmo->SetUnSelected();
-	}
-
-	CachedGizmo = NewGizmo;
-	
-	if (CachedGizmo)
-	{
-		CachedGizmo->SetSelected();
-	}
 }

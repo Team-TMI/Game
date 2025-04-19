@@ -14,54 +14,125 @@ AMapEditingPlayerController::AMapEditingPlayerController()
 	bShowMouseCursor = true;
 }
 
-FVector AMapEditingPlayerController::GetMouseWorldPosition(FHitResult& HitResult) const
+bool AMapEditingPlayerController::OnClickOperation(APrimitiveProp* InControlledProp, FClickResponse& ClickResponse)
 {
-	FVector MouseWorldPosition = FVector::ZeroVector;
-
-	// FVector Start = GetPosition
-	FVector2D MouseScreenPosition;
-	bool bIsValid = GetMousePosition(MouseScreenPosition.X, MouseScreenPosition.Y);
-
-	// 마우스가 화면 밖에 있으면 무시
-	if (!bIsValid) return FVector::ZeroVector;
-
-	AMapEditingPawn* MapEditingPawn = Cast<AMapEditingPawn>(GetPawn());
-	APrimitiveProp* ControlledActor = MapEditingPawn->GetControlledActor();
-	
-	GetHitResultAtScreenPosition(MouseScreenPosition, ECC_Visibility, true, HitResult);
-	if (HitResult.IsValidBlockingHit())
+	if (ClickOperations.Contains(ClickResponse.Result))
 	{
-		MouseWorldPosition = HitResult.Location;
-		// HitResult가 Gizmo에 걸린 경우 그대로 반환
-		if (HitResult.GetActor() == ControlledActor)
+		bool bResult = (this->*ClickOperations[ClickResponse.Result])(InControlledProp, ClickResponse);
+		DrawDebugSphere(GetWorld(), ClickResponse.MouseWorldPosition, 10.f, 12, FColor::Red, false, 5.f);
+		return bResult;
+	}
+	return false;
+}
+
+// Click Operation : Gizmo
+bool AMapEditingPlayerController::OnGizmoClickOperation(APrimitiveProp* InControlledProp, FClickResponse& ClickResponse)
+{
+	FVector2D MouseScreenPosition;
+	if (!GetMousePosition(MouseScreenPosition.X, MouseScreenPosition.Y)) return false;
+
+	// 선택되어 있는 액터가 없다면 false를 반환
+	if (!InControlledProp) return false;
+	
+	// 선택되어 있는 액터가 있다면 그 의외의 액터들의 Collision을 모두 꺼준다.
+	TArray<AActor*> AllActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APrimitiveProp::StaticClass(), AllActors);
+	for (AActor* Actor : AllActors)
+	{
+		APrimitiveProp* PrimitiveProp = Cast<APrimitiveProp>(Actor);
+		if (PrimitiveProp && PrimitiveProp != InControlledProp)
 		{
-			DrawDebugSphere(GetWorld(), MouseWorldPosition, 10.f, 12, FColor::Red, false, 5.f);
-			return MouseWorldPosition;
+			PrimitiveProp->SetCollision(false);
 		}
 	}
 
-	// 이미 조작하고 있는 오브젝트가 있다면 해당 오브젝트의 Collision을 다시 켜줌
-	// 그리고 다시 체크
-	if (ControlledActor) ControlledActor->SetCollision(true);
+	// 충돌 체크를 진행한다.
+	bool bResult = true;
+	FHitResult HitResult;
+	GetHitResultAtScreenPosition(MouseScreenPosition, ECC_Visibility, true, HitResult);
+	if (HitResult.IsValidBlockingHit() && HitResult.GetActor() == InControlledProp)
+	{
+		bResult = true;
+		ClickResponse.Result = EClickHandlingResult::GizmoEditing;
+		ClickResponse.HitResult = HitResult;
+		ClickResponse.MouseWorldPosition = HitResult.Location;
+	}
+	else
+	{
+		bResult = false;
+		ClickResponse.Result = EClickHandlingResult::None;
+		ClickResponse.HitResult = FHitResult();
+		ClickResponse.MouseWorldPosition = FVector::ZeroVector;
+	}
+
+	// 선택되어 있는 액터가 있다면 그 의외의 액터들의 Collision을 다시 켜준다.
+	for (AActor* Actor : AllActors)
+	{
+		APrimitiveProp* PrimitiveProp = Cast<APrimitiveProp>(Actor);
+		if (PrimitiveProp && PrimitiveProp != InControlledProp)
+		{
+			PrimitiveProp->SetCollision(true);
+		}
+	}
 	
+	return bResult;
+}
+
+// Click Operation : Actor // Gizmo가 실패하고 나서 다시 시도
+bool AMapEditingPlayerController::OnActorClickOperation(APrimitiveProp* InControlledProp, FClickResponse& ClickResponse)
+{
+	FVector2D MouseScreenPosition;
+	if (!GetMousePosition(MouseScreenPosition.X, MouseScreenPosition.Y)) return false;
+
+	// 현재의 InControlledProp가 nullptr이 아니라면 해당 액터의 Collision을 켜준다.
+	if (InControlledProp) 
+	{
+		InControlledProp->SetCollision(true);
+	}
+
+	// 마우스 위치에 있는 액터를 HitResult로 가져온다.
+	FHitResult HitResult;
 	GetHitResultAtScreenPosition(MouseScreenPosition, ECC_Visibility, true, HitResult);
 	
-	if (ControlledActor) ControlledActor->SetCollision(false);
-	
+	if (InControlledProp)
+	{
+		InControlledProp->SetCollision(false);
+	}
+
+	bool bResult = true;
 	if (HitResult.IsValidBlockingHit())
 	{
-		MouseWorldPosition = HitResult.Location;
-		DrawDebugSphere(GetWorld(), MouseWorldPosition, 10.f, 12, FColor::Red, false, 5.f);
-		return MouseWorldPosition;
+		bResult = true;
+		ClickResponse.Result = EClickHandlingResult::ActorEditing;
+		ClickResponse.HitResult = HitResult;
+		ClickResponse.MouseWorldPosition = HitResult.Location;
 	}
+	else
+	{
+		bResult = false;
+		ClickResponse.Result = EClickHandlingResult::None;
+		ClickResponse.HitResult = FHitResult();
+		ClickResponse.MouseWorldPosition = FVector::ZeroVector;
+	}
+	
+	return bResult;
+}
+
+// Click Operation : Background
+// 이전의 동작이 전부 실패했을 경우
+bool AMapEditingPlayerController::OnBackgroundClickOperation(APrimitiveProp* InControlledProp, FClickResponse& ClickResponse)
+{
+	FVector2D MouseScreenPosition;
+	if (!GetMousePosition(MouseScreenPosition.X, MouseScreenPosition.Y)) return false;
 
 	// 그 외에 공중에 마우스가 있는 경우
 	FVector MouseLocation;
 	FVector MouseDirection;
 	UGameplayStatics::DeprojectScreenToWorld(this, MouseScreenPosition, MouseLocation, MouseDirection);
-	MouseWorldPosition = MouseLocation + (MouseDirection * 1000.f);
 
-	DrawDebugSphere(GetWorld(), MouseWorldPosition, 10.f, 12, FColor::Red, false, 5.f);
+	ClickResponse.Result = EClickHandlingResult::BackgroundEditing;
+	ClickResponse.HitResult = FHitResult();
+	ClickResponse.MouseWorldPosition = MouseLocation + (MouseDirection * 1000.f);
 	
-	return MouseWorldPosition;
+	return true;
 }
