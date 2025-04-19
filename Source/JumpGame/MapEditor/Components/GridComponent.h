@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,23 +12,17 @@ class JUMPGAME_API UGridComponent : public USceneComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UGridComponent();
 
 	GETTER(float, SnapSize);
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 	virtual void InitializeComponent() override;
 
 public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
-
 	void SetSize(FVector NewSize);
-	bool MoveActorInGrid(FVector MouseLocation, const FHitResult& HitResult);
+	bool MoveByGizmoPrimary(FVector MouseLocation, const FHitResult& HitResult);
 	void RotateActorInGrid(FVector Direction);
 
 private:
@@ -44,6 +36,13 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Grid", meta=(AllowPrivateAccess="true"))
 	FVector Size = FVector(1.f, 1.f, 1.f);
+
+	UPROPERTY()
+	int32 X = 0;
+	UPROPERTY()
+	int32 Y = 0;
+	UPROPERTY()
+	int32 Z = 0;
 
 	// 사용하지 않는 변수 : 일단 냅둠
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Grid", meta=(AllowPrivateAccess="true"))

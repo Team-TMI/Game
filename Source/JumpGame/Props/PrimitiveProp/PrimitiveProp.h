@@ -32,9 +32,12 @@ public:
 	void SetUnSelected();
 	UFUNCTION(BlueprintCallable)
 	void SetCollision(bool bCond);
+	UFUNCTION(BlueprintCallable)
+	void SetGizmosCollision(bool bCond);
 
 	GETTER(class UBoxComponent*, GridOuterCollision)
 	GETTER(class UBoxComponent*, GridInnerCollision);
+	GETTER(class UGridComponent*, GridComp);
 
 protected:
 	UFUNCTION()
@@ -45,6 +48,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")
 	class UGridComponent* GridComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")
+	class UGizmoComponent* GizmoPrimary;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")
 	class UGizmoComponent* GizmoOne;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")

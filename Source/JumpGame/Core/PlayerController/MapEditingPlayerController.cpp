@@ -136,3 +136,43 @@ bool AMapEditingPlayerController::OnBackgroundClickOperation(APrimitiveProp* InC
 	
 	return true;
 }
+
+bool AMapEditingPlayerController::OnPressedOperation(const EPressedHandlingResult EPressedOperation, FHitResult& InHitResult)
+{
+	if (PressedOperations.Contains(EPressedOperation))
+	{
+		bool bResult = (this->*PressedOperations[EPressedOperation])(InHitResult);
+		return bResult;
+	}
+	return false;
+}
+
+bool AMapEditingPlayerController::OnGizmoPrimaryPressedOperation(FHitResult& InHitResult)
+{
+	FVector2D MouseScreenPosition;
+	if (!GetMousePosition(MouseScreenPosition.X, MouseScreenPosition.Y)) return false;
+
+	FHitResult HitResult;
+	GetHitResultAtScreenPosition(MouseScreenPosition, ECC_Visibility, true, HitResult);
+
+	if (HitResult.IsValidBlockingHit())
+	{
+		InHitResult = HitResult;
+		return true;
+	}
+
+	// 그 외에 공중에 마우스가 있는 경우
+	FVector MouseLocation;
+	FVector MouseDirection;
+	UGameplayStatics::DeprojectScreenToWorld(this, MouseScreenPosition, MouseLocation, MouseDirection);
+
+	HitResult.Location = MouseLocation + (MouseDirection * 1000.f);
+	InHitResult = HitResult;
+	
+	return true;
+}
+
+bool AMapEditingPlayerController::OnGizmoPressedOperation(FHitResult& InHitResult)
+{
+	return false;
+}

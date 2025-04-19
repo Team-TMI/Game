@@ -6,6 +6,7 @@
 #include "NetworkPlayerController.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickResponse.h"
 #include "JumpGame/MapEditor/ClickHandlers/EClickHandlingResult.h"
+#include "JumpGame/MapEditor/PressedHandlers/EPressedHandlingResult.h"
 #include "MapEditingPlayerController.generated.h"
 
 /**
@@ -31,6 +32,7 @@ public:
 	bool OnActorClickOperation(class APrimitiveProp* InControlledProp, FClickResponse& ClickResponse);
 	UFUNCTION()
 	bool OnBackgroundClickOperation(class APrimitiveProp* InControlledProp, FClickResponse& ClickResponse);
+
 private:
 	using FClickOpFunc = bool (AMapEditingPlayerController::*)(class APrimitiveProp*, FClickResponse&);
 	// Click Operation
@@ -39,7 +41,26 @@ private:
 		{ EClickHandlingResult::ActorEditing, &AMapEditingPlayerController::OnActorClickOperation },
 		{ EClickHandlingResult::BackgroundEditing, &AMapEditingPlayerController::OnBackgroundClickOperation }
 	};
+public:
+#pragma endregion
+
+#pragma region PRESSED_OPERATION
+public:
+	UFUNCTION()
+	bool OnPressedOperation(const EPressedHandlingResult EPressedOperation, FHitResult& InHitResult);
+
+	UFUNCTION()
+	bool OnGizmoPrimaryPressedOperation(FHitResult& InHitResult);
+	UFUNCTION()
+	bool OnGizmoPressedOperation(FHitResult& InHitResult);
 	
+private:
+	using FPressedOpFunc = bool (AMapEditingPlayerController::*)(FHitResult&);
+
+	TMap<EPressedHandlingResult, FPressedOpFunc> PressedOperations = {
+		{ EPressedHandlingResult::GizmoPrimaryPressed, &AMapEditingPlayerController::OnGizmoPrimaryPressedOperation },
+		{ EPressedHandlingResult::GizmoPressed, &AMapEditingPlayerController::OnGizmoPressedOperation },
+	};
 #pragma endregion
 	
 };

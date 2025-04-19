@@ -18,11 +18,13 @@ public:
 	UGizmoComponent();
 
 	UFUNCTION()
-	FVector GetDirection() const;
+	virtual FVector GetDirection() const;
 	UFUNCTION()
-	void SetSelected();
+	virtual void SetSelected();
 	UFUNCTION()
-	void SetUnSelected();
+	virtual void SetUnSelected();
+
+	virtual ~UGizmoComponent() override {}
 	
 protected:
 	UPROPERTY()
@@ -33,7 +35,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	class UMaterialInstance* GizmoSelectedMaterial;
 
-private:
 	UPROPERTY()
 	bool bSelected = false;
 };

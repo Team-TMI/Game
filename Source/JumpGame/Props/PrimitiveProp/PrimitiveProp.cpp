@@ -5,6 +5,7 @@
 
 #include "Components/BoxComponent.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
+#include "JumpGame/MapEditor/Components/GizmoPrimaryComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -28,7 +29,11 @@ APrimitiveProp::APrimitiveProp()
 	GridInnerCollision->SetCollisionProfileName(TEXT("GridInnerPrefet"));
 	GridInnerCollision->SetupAttachment(GridComp);
 
-
+	GizmoPrimary = CreateDefaultSubobject<UGizmoPrimaryComponent>(TEXT("GizmoPrimary"));
+	GizmoPrimary->SetupAttachment(GridComp);
+	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	GizmoPrimary->SetVisibility(false);
+	
 	// Gizmo들고 옴
 	GizmoOne = CreateDefaultSubobject<UGizmoComponent>(TEXT("GizmoOne"));
 	GizmoArray.Add(GizmoOne);
@@ -110,7 +115,9 @@ void APrimitiveProp::SetSelected()
 
 	// Outer Collision을 꺼줌
 	GridOuterCollision->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	
+
+	GizmoPrimary->SetVisibility(true);
+	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	for (auto& Gizmo : GizmoArray)
 	{
 		Gizmo->SetVisibility(true);
@@ -124,7 +131,10 @@ void APrimitiveProp::SetUnSelected()
 
 	// Outer Collision을 켜줌
 	GridOuterCollision->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	
+
+	GizmoPrimary->SetVisibility(false);
+	GizmoPrimary->SetUnSelected();
+	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	for (auto& Gizmo : GizmoArray)
 	{
 		Gizmo->SetVisibility(false);
@@ -142,5 +152,26 @@ void APrimitiveProp::SetCollision(bool bCond)
 	else
 	{
 		GridOuterCollision->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	}
+}
+
+
+void APrimitiveProp::SetGizmosCollision(bool bCond)
+{
+	if (bCond)
+	{
+		GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+		for (auto& Gizmo : GizmoArray)
+		{
+			Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+		}
+	}
+	else
+	{
+		GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+		for (auto& Gizmo : GizmoArray)
+		{
+			Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+		}
 	}
 }

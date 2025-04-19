@@ -1,10 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "ClickHandlerInterface.h"
 #include "Components/ActorComponent.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "ClickHandlerManager.generated.h"
 
 
@@ -18,6 +17,8 @@ public:
 
 	void RegisterHandler(TSharedPtr<IClickHandler> Handler);
 	bool HandleClick(class AMapEditingPlayerController* PlayerController);
+
+	GETTER(FClickResponse, ControlledClickResponse);
 
 protected:
 	virtual void BeginPlay() override;

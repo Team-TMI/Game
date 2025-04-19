@@ -11,7 +11,7 @@ UGridComponent::UGridComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
 	// ...
 }
@@ -32,14 +32,6 @@ void UGridComponent::InitializeComponent()
 	UpdatedActor = GetOwner();
 }
 
-// Called every frame
-void UGridComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-
 void UGridComponent::SetSize(FVector NewSize)
 {
 	Size.X = FMath::RoundToInt(NewSize.X);
@@ -49,7 +41,7 @@ void UGridComponent::SetSize(FVector NewSize)
 	// Offset = Size * SnapSize * 0.5f;
 }
 
-bool UGridComponent::MoveActorInGrid(FVector MouseLocation, const FHitResult& HitResult)
+bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult& HitResult)
 {
 	bool flag = true;
 
@@ -61,9 +53,9 @@ bool UGridComponent::MoveActorInGrid(FVector MouseLocation, const FHitResult& Hi
 
 	// GridComponent의 위치 계산
 	// 그리드의 스냅 단위는 100으로 유지
-	int32 X = (int32)FMath::RoundToInt(MouseLocation.X) / ((int32)SnapSize);
-	int32 Y = (int32)FMath::RoundToInt(MouseLocation.Y) / ((int32)SnapSize);
-	int32 Z = (int32)FMath::RoundToInt(MouseLocation.Z) / ((int32)SnapSize);
+	X = (int32)FMath::RoundToInt(MouseLocation.X) / ((int32)SnapSize);
+	Y = (int32)FMath::RoundToInt(MouseLocation.Y) / ((int32)SnapSize);
+	Z = (int32)FMath::RoundToInt(MouseLocation.Z) / ((int32)SnapSize);
 
 	// 음수일 경우 -1을 더해줌 :
 	// 이유 : 음수일 경우 -53도 100으로 나누면 0이 나오기 때문이다. 이때 부터의 기준점은 -100에 Snap이 되어야 한다.

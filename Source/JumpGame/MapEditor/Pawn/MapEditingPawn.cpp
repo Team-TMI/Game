@@ -16,6 +16,7 @@
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
+#include "JumpGame/MapEditor/PressedHandlers/PressedHandlerManager.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/Utils/FastLogger.h"
 
@@ -55,6 +56,13 @@ AMapEditingPawn::AMapEditingPawn()
 	{
 		IA_Turn = IA_TURN.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_PRESSED
+	(TEXT("/Game/MapEditor/Input/Actions/IA_Pressed.IA_Pressed"));
+	if (IA_PRESSED.Succeeded())
+	{
+		IA_Pressed = IA_PRESSED.Object;
+	}
+	
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponentMapEditing"));
 	CollisionComponent->InitSphereRadius(35.0f);
@@ -72,6 +80,7 @@ AMapEditingPawn::AMapEditingPawn()
 	MovementComponent->UpdatedComponent = RootComponent;
 
 	ClickHandlerManager = CreateDefaultSubobject<UClickHandlerManager>(TEXT("ClickHandlerManager"));
+	PressedHandlerManager = CreateDefaultSubobject<UPressedHandlerManager>(TEXT("PressedHandlerManager"));
 }
 
 // Called when the game starts or when spawned
@@ -104,9 +113,8 @@ void AMapEditingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	UEnhancedInputComponent* PlayerInput = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	if (PlayerInput)
 	{
-		// TODO : ClickHeldHandler 체인 구조 만들기
 		PlayerInput->BindAction(IA_Click, ETriggerEvent::Started, this, &AMapEditingPawn::HandleLeftClick);
-		// PlayerInput->BindAction(IA_Click, ETriggerEvent::Triggered, this, &AMapEditingPawn::OnClick);
+		PlayerInput->BindAction(IA_Pressed, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleLeftPressed);
 		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Started, this, &AMapEditingPawn::HandleRightClickStarted);
 		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Completed, this, &AMapEditingPawn::HandleRightClickStarted);
 		PlayerInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleMove);
@@ -118,8 +126,23 @@ void AMapEditingPawn::HandleLeftClick(const FInputActionValue& InputActionValue)
 {
 	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
 	if (!PC) return ;
+
+	PC->SetShowMouseCursor(true);
+	PC->SetInputMode(FInputModeGameAndUI());
 	
 	ClickHandlerManager->HandleClick(PC);
+}
+
+void AMapEditingPawn::HandleLeftPressed(const FInputActionValue& InputActionValue)
+{
+	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
+	if (!PC) return ;
+
+	PC->SetShowMouseCursor(true);
+	PC->SetInputMode(FInputModeGameAndUI());
+	
+	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
+	PressedHandlerManager->HandlePressed(ControlledInfo, PC);
 }
 
 void AMapEditingPawn::HandleRightClickStarted(const FInputActionValue& InputActionValue)
@@ -155,9 +178,9 @@ void AMapEditingPawn::HandleMove(const FInputActionValue& InputActionValue)
 
 void AMapEditingPawn::HandleMouseMove(const FInputActionValue& InputActionValue)
 {
-	if (!bCanMove) return;
+	TurnInput = InputActionValue.Get<FVector2d>();
 
-	FVector2d TurnInput = InputActionValue.Get<FVector2d>();
+	if (!bCanMove) return;
 	AddControllerYawInput(-TurnInput.X);
 	AddControllerPitchInput(TurnInput.Y);
 }

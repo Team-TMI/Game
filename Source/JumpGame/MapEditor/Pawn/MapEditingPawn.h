@@ -34,11 +34,16 @@ private:
 	UFUNCTION()
 	void HandleLeftClick(const FInputActionValue& InputActionValue);
 	UFUNCTION()
+	void HandleLeftPressed(const FInputActionValue& InputActionValue);
+	UFUNCTION()
 	void HandleRightClickStarted(const FInputActionValue& InputActionValue);
 	UFUNCTION()
 	void HandleMove(const FInputActionValue& InputActionValue);
 	UFUNCTION()
 	void HandleMouseMove(const FInputActionValue& InputActionValue);
+
+	// UPROPERTY()가 안됨
+	FVector2d TurnInput;
 
 	UFUNCTION()
 	void MoveForward(float Val);
@@ -53,6 +58,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Click = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_Pressed = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Move = nullptr;
@@ -78,4 +86,6 @@ private:
 
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UClickHandlerManager* ClickHandlerManager = nullptr;
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UPressedHandlerManager* PressedHandlerManager = nullptr;
 };
