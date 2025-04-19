@@ -34,7 +34,7 @@ public:
 
 	// 얼마나 떨어뜨릴건지
 	UPROPERTY(EditAnywhere,	BlueprintReadWrite)
-	float Gap = 30.f;
+	float Gap = 300.f;
 };
 
 

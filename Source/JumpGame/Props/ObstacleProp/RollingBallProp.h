@@ -1,0 +1,57 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "ObstacleProp.h"
+#include "Engine/NetworkObjectList.h"
+#include "RollingBallProp.generated.h"
+
+UCLASS()
+class JUMPGAME_API ARollingBallProp : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	// Sets default values for this actor's properties
+	ARollingBallProp();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+public:
+	// 오브젝트 풀링으로 관리될 오브젝트
+	// 오브젝트 풀의 레퍼런스 초기화를 위한 함수 (어디소속)
+	FORCEINLINE void SetObjectPool(class UObjectPoolComponent* InObjectPool) { ObjectPool = InObjectPool; }
+	void RetrunSelf();
+	void SetActive(bool bIsActive);
+	FORCEINLINE bool IsActive() { return bActive; }
+	
+private:
+	// 현재 사용중인가요?
+	bool bActive;
+	// 소속 풀
+	class UObjectPoolComponent* ObjectPool;
+
+public:
+	// 외관
+	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
+	USceneComponent* PivotScene;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* MeshComp;
+	
+	// 프로젝타일로 날아가자
+	UPROPERTY(visibleAnywhere,BlueprintReadWrite)
+	class UProjectileMovementComponent* ProjectileComp;
+
+	// 구르자
+	UPROPERTY(visibleAnywhere,BlueprintReadWrite)
+	class UArrowComponent* Arrow;
+};
+
