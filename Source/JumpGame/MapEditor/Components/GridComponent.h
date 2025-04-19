@@ -14,7 +14,7 @@ class JUMPGAME_API UGridComponent : public USceneComponent
 public:
 	UGridComponent();
 
-	GETTER(float, SnapSize);
+	GETTER(float, SnapSize)
 
 protected:
 	virtual void BeginPlay() override;
@@ -23,6 +23,7 @@ protected:
 public:
 	void SetSize(FVector NewSize);
 	bool MoveByGizmoPrimary(FVector MouseLocation, const FHitResult& HitResult);
+	void MoveByGizmo(const FVector& NewLocation);;
 	void RotateActorInGrid(FVector Direction);
 
 private:

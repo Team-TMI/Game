@@ -19,7 +19,7 @@ FGizmoPrimaryPressedHandler::~FGizmoPrimaryPressedHandler()
 }
 
 bool FGizmoPrimaryPressedHandler::HandlePressed(FClickResponse& PressedResponse,
-	class AMapEditingPlayerController* PlayerController)
+	class AMapEditingPlayerController* PlayerController, const FVector& MouseStartPosition, const FVector& InitializedActorPosition)
 {
 	if (PressedResponse.Result != EClickHandlingResult::GizmoEditing)
 	{
@@ -33,7 +33,11 @@ bool FGizmoPrimaryPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 	PressedResponse.TargetProp->SetGizmosCollision(false);
 
 	FHitResult HitResult;
-	if (!PlayerController->OnPressedOperation(PressedType, HitResult))
+	bool bResult = PlayerController->OnPressedOperation(PressedType, HitResult);
+	
+	PressedResponse.TargetProp->SetGizmosCollision(true);
+	
+	if (!bResult)
 	{
 		return false;
 	}
@@ -47,6 +51,5 @@ bool FGizmoPrimaryPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 
 	Grid->MoveByGizmoPrimary(HitResult.Location, HitResult);
 
-	PressedResponse.TargetProp->SetGizmosCollision(true);
 	return true;
 }

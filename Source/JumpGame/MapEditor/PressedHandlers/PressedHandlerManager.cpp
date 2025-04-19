@@ -1,6 +1,9 @@
 ﻿#include "PressedHandlerManager.h"
 
+#include "GizmoPressedHandler.h"
 #include "GizmoPrimaryPressedHandler.h"
+#include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
+#include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 
 
 UPressedHandlerManager::UPressedHandlerManager()
@@ -14,6 +17,7 @@ void UPressedHandlerManager::BeginPlay()
 	Super::BeginPlay();
 
 	RegisterHandler(MakeShared<FGizmoPrimaryPressedHandler>());
+	RegisterHandler(MakeShared<FGizmoPressedHandler>());
 }
 
 void UPressedHandlerManager::RegisterHandler(TSharedPtr<IPressedHandler> Handler)
@@ -30,10 +34,26 @@ bool UPressedHandlerManager::HandlePressed(FClickResponse& ControlledInfo,
 {
 	for (const auto& Handler : Handlers)
 	{
-		if (Handler->HandlePressed(ControlledInfo, PlayerController))
+		if (Handler->HandlePressed(ControlledInfo, PlayerController, MouseStartPosition, InitializeActorPosition))
 		{
 			return true;
 		}
 	}
 	return false;
+}
+
+void UPressedHandlerManager::InitializePositions(FClickResponse& ControlledInfo, AMapEditingPlayerController* PlayerController)
+{
+	PlayerController->GetWorldMousePosition(MouseStartPosition);
+
+	if (ControlledInfo.TargetProp)
+	{
+		InitializeActorPosition = ControlledInfo.TargetProp->GetActorLocation();
+	}
+}
+
+void UPressedHandlerManager::ResetPositions()
+{
+	MouseStartPosition = FVector::ZeroVector;
+	InitializeActorPosition = FVector::ZeroVector;
 }

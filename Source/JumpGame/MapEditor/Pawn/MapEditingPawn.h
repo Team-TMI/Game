@@ -34,7 +34,11 @@ private:
 	UFUNCTION()
 	void HandleLeftClick(const FInputActionValue& InputActionValue);
 	UFUNCTION()
+	void HandleLeftPressedStarted(const FInputActionValue& InputActionValue);
+	UFUNCTION()
 	void HandleLeftPressed(const FInputActionValue& InputActionValue);
+	UFUNCTION()
+	void HandleLeftPressedCompleted(const FInputActionValue& InputActionValue);
 	UFUNCTION()
 	void HandleRightClickStarted(const FInputActionValue& InputActionValue);
 	UFUNCTION()

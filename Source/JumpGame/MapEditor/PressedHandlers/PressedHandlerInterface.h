@@ -8,6 +8,6 @@ class JUMPGAME_API IPressedHandler
 public:
 	IPressedHandler() {};
 	virtual int32 GetPriority() const = 0;
-	virtual bool HandlePressed(FClickResponse& PressedResponse, class AMapEditingPlayerController* PlayerController) = 0;
+	virtual bool HandlePressed(FClickResponse& PressedResponse, class AMapEditingPlayerController* PlayerController, const FVector& MouseStartPosition, const FVector& InitializedActorPosition) = 0;
 	virtual ~IPressedHandler() {};
 };

@@ -84,6 +84,20 @@ bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult&
 	return flag;
 }
 
+void UGridComponent::MoveByGizmo(const FVector& NewLocation)
+{
+	X += NewLocation.X;
+	Y += NewLocation.Y;
+	Z += NewLocation.Z;
+
+	// 100 단위 그리드 기준이지만, 블록의 중심을 고려하여 보정
+	FVector GridOrigin = FVector(X, Y, Z) * SnapSize;
+	FVector CenterOffset = FVector(Size) * SnapSize * 0.5f;
+	FVector GridLocation = GridOrigin + CenterOffset;
+	
+	UpdatedActor->SetActorLocation(GridLocation);
+}
+
 void UGridComponent::RotateActorInGrid(FVector Direction)
 {
 	// Direction을 기준으로 회전

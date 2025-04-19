@@ -114,7 +114,10 @@ void AMapEditingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	if (PlayerInput)
 	{
 		PlayerInput->BindAction(IA_Click, ETriggerEvent::Started, this, &AMapEditingPawn::HandleLeftClick);
+		PlayerInput->BindAction(IA_Pressed, ETriggerEvent::Started, this, &AMapEditingPawn::HandleLeftPressedStarted);
 		PlayerInput->BindAction(IA_Pressed, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleLeftPressed);
+		PlayerInput->BindAction(IA_Pressed, ETriggerEvent::Completed, this, &AMapEditingPawn::HandleLeftPressedCompleted);
+		
 		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Started, this, &AMapEditingPawn::HandleRightClickStarted);
 		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Completed, this, &AMapEditingPawn::HandleRightClickStarted);
 		PlayerInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleMove);
@@ -133,6 +136,15 @@ void AMapEditingPawn::HandleLeftClick(const FInputActionValue& InputActionValue)
 	ClickHandlerManager->HandleClick(PC);
 }
 
+void AMapEditingPawn::HandleLeftPressedStarted(const FInputActionValue& InputActionValue)
+{
+	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
+	if (!PC) return ;
+	
+	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
+	PressedHandlerManager->InitializePositions(ControlledInfo, PC);
+}
+
 void AMapEditingPawn::HandleLeftPressed(const FInputActionValue& InputActionValue)
 {
 	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
@@ -143,6 +155,11 @@ void AMapEditingPawn::HandleLeftPressed(const FInputActionValue& InputActionValu
 	
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
 	PressedHandlerManager->HandlePressed(ControlledInfo, PC);
+}
+
+void AMapEditingPawn::HandleLeftPressedCompleted(const FInputActionValue& InputActionValue)
+{
+	PressedHandlerManager->ResetPositions();
 }
 
 void AMapEditingPawn::HandleRightClickStarted(const FInputActionValue& InputActionValue)

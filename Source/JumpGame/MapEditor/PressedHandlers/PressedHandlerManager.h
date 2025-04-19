@@ -17,6 +17,8 @@ public:
 
 	void RegisterHandler(TSharedPtr<IPressedHandler> Handler);
 	bool HandlePressed(FClickResponse& ControlledInfo, class AMapEditingPlayerController* PlayerController);
+	void InitializePositions(FClickResponse& ControlledInfo, AMapEditingPlayerController* PlayerController);
+	void ResetPositions();
 
 protected:
 	virtual void BeginPlay() override;
@@ -25,4 +27,8 @@ private:
 	// GC의 관리 대상이 아님
 	// 주의 : 내부적으로 UObject를 캐싱하지 않기 : 즉 일회성으로만 사용
 	TArray<TSharedPtr<IPressedHandler>> Handlers;
+	UPROPERTY()
+	FVector MouseStartPosition = FVector::ZeroVector;
+	UPROPERTY()
+	FVector InitializeActorPosition = FVector::ZeroVector;
 };

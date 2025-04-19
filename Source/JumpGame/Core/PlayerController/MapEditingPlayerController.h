@@ -20,6 +20,9 @@ class JUMPGAME_API AMapEditingPlayerController : public ANetworkPlayerController
 public:
 	AMapEditingPlayerController();
 
+	UFUNCTION()
+	bool GetWorldMousePosition(FVector& OutMouseWorldPosition);
+
 #pragma region CLICK_OPERATION
 	// Click Operation
 public:
@@ -53,7 +56,7 @@ public:
 	bool OnGizmoPrimaryPressedOperation(FHitResult& InHitResult);
 	UFUNCTION()
 	bool OnGizmoPressedOperation(FHitResult& InHitResult);
-	
+
 private:
 	using FPressedOpFunc = bool (AMapEditingPlayerController::*)(FHitResult&);
 
