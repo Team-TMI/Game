@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "ObjectPoolComponent.generated.h"
 
+// 풀로 오브젝트가 돌아오면 호출될 델리게이트
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnObjectRetrurn);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class JUMPGAME_API UObjectPoolComponent : public UActorComponent
@@ -31,6 +33,10 @@ public:
 	void ReturnObject(class ARollingBallProp* ReturnObject);
 	void Initialize();
 
+	// 델리게이트 함수
+	UPROPERTY(BlueprintAssignable)
+	FOnObjectRetrurn OnObjectRetrurn;
+
 public:
 	// 생성할 액터 타입 설정
 	UPROPERTY(EditAnywhere)
@@ -42,5 +48,6 @@ public:
 
 private:
 	// 오브젝트 들어있는 배열
+	UPROPERTY()
 	TArray<class ARollingBallProp*> Pool;
 };

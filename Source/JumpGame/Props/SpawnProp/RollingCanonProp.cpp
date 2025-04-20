@@ -4,6 +4,7 @@
 #include "RollingCanonProp.h"
 
 #include "RollingBallProp.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 
 // Sets default values
@@ -12,15 +13,30 @@ ARollingCanonProp::ARollingCanonProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+	SetRootComponent(MeshComp);
 	ObjectPool = CreateDefaultSubobject<UObjectPoolComponent>(TEXT("ObjectPool"));
+}
+
+void ARollingCanonProp::OnProjectileReturn()
+{
+	// 알림 받으면 다시 발사!
+	FFastLogger::LogConsole(TEXT("알림받았다!! 다시 발사"));
+	FireRollingBall();
 }
 
 // Called when the game starts or when spawned
 void ARollingCanonProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	MeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	FireRollingBall();
+
+	if (ObjectPool)
+	{
+		ObjectPool->OnObjectRetrurn.AddDynamic(this, &ARollingCanonProp::OnProjectileReturn);
+	}
 }
 
 // Called every frame
@@ -36,12 +52,12 @@ void ARollingCanonProp::FireRollingBall()
 	ARollingBallProp* Projectile = ObjectPool->GetRollingBallProp();
 	if (Projectile)
 	{
-		Projectile->SetActive(true);
+		FFastLogger::LogConsole(TEXT("Projectile!!!!!!"));
 		Projectile->SetActorLocation(GetActorLocation());
 		Projectile->SetActorRotation(GetActorRotation());
+		Projectile->SetActive(true);
+		Projectile->LaunchProjectile();
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("ARollingCanonProp::FireRollingBall"));
 }
 
 

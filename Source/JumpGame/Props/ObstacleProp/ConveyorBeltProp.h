@@ -36,5 +36,6 @@ public:
 	float BeltSpeed = 350.f;
 
 	// 플레이어 캐스팅
+	UPROPERTY()
 	class AFrog* Character;
 };

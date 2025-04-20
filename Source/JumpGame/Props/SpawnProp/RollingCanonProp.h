@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "ObjectPoolComponent.h"
-#include "ObstacleProp.h"
 #include "RollingCanonProp.generated.h"
 
 UCLASS()
-class JUMPGAME_API ARollingCanonProp : public AObstacleProp
+class JUMPGAME_API ARollingCanonProp : public AActor
 {
 	GENERATED_BODY()
 
@@ -17,6 +16,8 @@ public:
 	ARollingCanonProp();
 
 protected:
+	UFUNCTION()
+	void OnProjectileReturn();
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -24,6 +25,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// 외관 설정
+	UPROPERTY(editAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* MeshComp;
+	
 	UPROPERTY(visibleAnywhere, BlueprintReadOnly)
 	class UObjectPoolComponent* ObjectPool;
 

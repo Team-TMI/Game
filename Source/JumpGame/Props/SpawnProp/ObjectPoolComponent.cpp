@@ -4,6 +4,10 @@
 #include "ObjectPoolComponent.h"
 
 #include "RollingBallProp.h"
+#include "RollingCanonProp.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values for this component's properties
@@ -41,7 +45,7 @@ class ARollingBallProp* UObjectPoolComponent::GetRollingBallProp()
 	// 0개면 추가하자
 	if (Pool.Num() == 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("풀 비었음, 추가 생성 없음"));
+		FFastLogger::LogConsole(TEXT("풀 비었음"));
 		// 생성하지 말자
 		return nullptr;
 	}
@@ -54,19 +58,26 @@ void UObjectPoolComponent::Expand()
 	// 풀에 오브젝트 부족하면 추가생성
 	for (int32 i = 0; i < ExpandSize; i++)
 	{
-		ARollingBallProp* BallProp = GetWorld()->SpawnActor<ARollingBallProp>(PooledObjectClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		ARollingBallProp* BallProp = GetWorld()->SpawnActor<ARollingBallProp>(PooledObjectClass,
+			FVector::ZeroVector, FRotator::ZeroRotator);
+
+		ARollingCanonProp* canon = Cast<ARollingCanonProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollingCanonProp::StaticClass()));
+
+		// 소속풀 지정
+		BallProp->SetObjectPool(this);
 		BallProp->SetActive(false);
 		Pool.Push(BallProp);
 	}
 	PoolSize += ExpandSize;
-
-	UE_LOG(LogTemp, Warning, TEXT("UObjectPoolComponent::Expand"));
 }
 
 void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject)
 {
+	FFastLogger::LogConsole(TEXT("알림을 보낸다: 다시 왔음!!"));
 	// 사용하고 나서 다시 풀에 넣자 
 	Pool.Push(ReturnObject);
+	// 알림을 보낸다: 다시 왔음!!
+	OnObjectRetrurn.Broadcast();
 }
 
 void UObjectPoolComponent::Initialize()
