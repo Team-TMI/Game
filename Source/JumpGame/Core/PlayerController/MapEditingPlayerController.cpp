@@ -19,7 +19,10 @@ bool AMapEditingPlayerController::OnClickOperation(APrimitiveProp* InControlledP
 	if (ClickOperations.Contains(ClickResponse.Result))
 	{
 		bool bResult = (this->*ClickOperations[ClickResponse.Result])(InControlledProp, ClickResponse);
-		DrawDebugSphere(GetWorld(), ClickResponse.MouseWorldPosition, 10.f, 12, FColor::Red, false, 5.f);
+		if (bResult)
+		{
+			DrawDebugSphere(GetWorld(), ClickResponse.MouseWorldPosition, 10.f, 12, FColor::Red, false, 5.f);
+		}
 		return bResult;
 	}
 	return false;

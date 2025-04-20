@@ -35,6 +35,9 @@ bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult&
 {
 	bool flag = true;
 
+	// TODO: 트러블 슈팅 작성하기 (왜 음수가 필요 없어졌는가)
+	// 이유 : 이전에는 Offset을 더하는 형식이라 중심 좌표를 옮겼지만 지금은 그리드의 교차점이 중점이라 Offset이 필요 없어짐
+	// 그에 따라서 추가적인 음수와 관련된 연산이 필요 없어짐
 	FVector Sign = FVector(1.f, 1.f, 1.f);
 
 	Sign.X = ((int32)MouseLocation.X == 0 || (MouseLocation.X >= 0.f)) ? 1.f : -1.f;
@@ -49,18 +52,23 @@ bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult&
 
 	// 음수일 경우 -1을 더해줌 :
 	// 이유 : 음수일 경우 -53도 100으로 나누면 0이 나오기 때문이다. 이때 부터의 기준점은 -100에 Snap이 되어야 한다.
-	X = Sign.X < 0.f ? X - 1 : X;
-	Y = Sign.Y < 0.f ? Y - 1 : Y;
-	Z = Sign.Z < 0.f ? Z - 1 : Z;
+	// X = Sign.X < 0.f ? X - 1 : X;
+	// Y = Sign.Y < 0.f ? Y - 1 : Y;
+	// Z = Sign.Z < 0.f ? Z - 1 : Z;
 
 	// 충돌이 발생했을 때 접촉 면의 Normal을 받아와서 만약 해당 Normal이 -1이면 해당 방향으로 1칸 이동
 	if (HitResult.IsValidBlockingHit())
 	{
 		FVector ImpactNormal = HitResult.ImpactNormal;
 		ImpactNormal.Normalize();
-		X = (int32)ImpactNormal.X < 0.f ? X - Size.X : X;
-		Y = (int32)ImpactNormal.Y < 0.f ? Y - Size.Y : Y;
-		Z = (int32)ImpactNormal.Z < 0.f ? Z - Size.Z : Z;
+		// 충돌이 발생한 Normal을 기준으로 이동
+		FVector Offset = ImpactNormal * Size;
+		// X = (int32)ImpactNormal.X < 0.f ? X - Size.X : X + Size.X;
+		// Y = (int32)ImpactNormal.Y < 0.f ? Y - Size.Y : Y + Size.Y;
+		// Z = (int32)ImpactNormal.Z < 0.f ? Z - Size.Z : Z + Size.Z;
+		X += Offset.X;
+		Y += Offset.Y;
+		Z += Offset.Z;
 	}
 
 	// 100 단위 그리드 기준이지만, 블록의 중심을 고려하여 보정
