@@ -121,6 +121,11 @@ void UGridComponent::Rotate(const FVector& Direction)
 	// 이유 : 회전 축을 설정할 때는 월드 좌표계 기준으로 회전해야 한다.
 
 	// 이전 문제
+	// FRotator DeltaRotation;
+	// DeltaRotation.Roll = Direction.X * RotateAngle;
+	// DeltaRotation.Pitch = Direction.Y * RotateAngle;
+	// DeltaRotation.Yaw = Direction.Z * RotateAngle;
+	//
 	// FRotator NewRotation = (CurrentRotation.Quaternion() * DeltaRotation.Quaternion()).Rotator();
 	// 이건 로컬 기준 회전 즉, 이전 회전을 기준으로 덧붙이는 거라서,
 	// 회전할수록 축이 기울어져서 **의도한 방향(Yaw → 위에서 회전)**이 망가짐.
