@@ -59,6 +59,7 @@ void ARollingCannonProp::FireRollingBall()
 		Projectile->SetActorRotation(GetActorRotation());
 		Projectile->SetActive(true);
 		Projectile->LaunchProjectile();
+		Projectile->bIsHitGround = false;
 	}
 }
 

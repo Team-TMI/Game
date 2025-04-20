@@ -44,7 +44,6 @@ public:
 	// 외관
 	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
 	USceneComponent* PivotScene;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* MeshComp;
 	
@@ -58,6 +57,19 @@ public:
 	// 구르자
 	UPROPERTY(visibleAnywhere,BlueprintReadWrite)
 	class UArrowComponent* Arrow;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	bool bIsHitGround = false;
+	UPROPERTY()
+	FVector GravityDir = FVector(0.0f, 0.0f, -1.0f);
+	UPROPERTY()
+	FVector GroundDir = FVector::ZeroVector;
+	UPROPERTY()
+	FVector HitNormal = FVector::ZeroVector;
+	// 구르는 속도
+	UPROPERTY()
+	float RollingSpeed = 1500.f;
+	
+	void RollingBall();
 };
 
 

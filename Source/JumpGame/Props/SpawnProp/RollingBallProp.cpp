@@ -4,6 +4,7 @@
 #include "RollingBallProp.h"
 
 #include "ObjectPoolComponent.h"
+#include "Chaos/Utilities.h"
 #include "Components/ArrowComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
@@ -27,8 +28,9 @@ ARollingBallProp::ARollingBallProp()
 	ProjectileComp->SetUpdatedComponent(RootComponent);
 	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Dir"));
 	Arrow->SetupAttachment(RootComponent);
-	
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSphere(TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleSphere.SM_ObstacleSphere'"));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSphere(
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleSphere.SM_ObstacleSphere'"));
 	if (TempSphere.Succeeded())
 	{
 		MeshComp->SetStaticMesh(TempSphere.Object);
@@ -43,10 +45,20 @@ ARollingBallProp::ARollingBallProp()
 }
 
 void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+                                          UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+                                          const FHitResult& Hit)
 {
 	FFastLogger::LogConsole(TEXT("Hit!!!: %s"), *OtherActor->GetName());
-	
+	HitNormal = Hit.Normal;
+
+	// TODO: 어떤 물체랑 부딪혔는지 분기처리 (장애물이면 bounce, 땅이면 구르기 등)
+	if (OtherActor->ActorHasTag("Ground"))
+	{
+		bIsHitGround = true;
+		ProjectileComp->StopMovementImmediately();
+		ProjectileComp->Deactivate();
+	}
+
 	ARisingWaterProp* water = Cast<ARisingWaterProp>(OtherActor);
 	if (water)
 	{
@@ -61,7 +73,7 @@ void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AAc
 void ARollingBallProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	MeshComp->OnComponentHit.AddDynamic(this, &ARollingBallProp::OnMyRollingBallHit);
 }
 
@@ -69,6 +81,8 @@ void ARollingBallProp::BeginPlay()
 void ARollingBallProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	RollingBall();
 }
 
 void ARollingBallProp::ReturnSelf()
@@ -108,9 +122,9 @@ void ARollingBallProp::SetActive(bool bIsActive)
 		// NOTE: SetUpdatedComponent를 하지 않으면 재소환 이후 projectile movement가 실행되지않음
 		ProjectileComp->SetUpdatedComponent(RootComponent);
 		ProjectileComp->Activate(true);
-		MeshComp->IgnoreActorWhenMoving(this,true);
+		MeshComp->IgnoreActorWhenMoving(this, true);
 	}
-	
+
 	FFastLogger::LogConsole(TEXT("SetActive: %d"), bIsActive);
 }
 
@@ -121,5 +135,17 @@ void ARollingBallProp::LaunchProjectile()
 
 	// 발사 후 다시 복귀하는 타이밍
 	// 바닥에 닿지않으면, 6초후에 복귀하자
-	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, this, &ARollingBallProp::ReturnSelf, 6.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, this, &ARollingBallProp::ReturnSelf,
+	                                       6.0f, false);
+}
+
+void ARollingBallProp::RollingBall()
+{
+	if (bIsHitGround)
+	{
+		GroundDir = FVector::CrossProduct(HitNormal, FVector::CrossProduct(GravityDir, HitNormal));
+		FVector MeshPos = MeshComp->GetRelativeLocation();
+		FVector NewPos = MeshPos + GroundDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
+		MeshComp->SetRelativeLocation(NewPos);
+	}
 }
