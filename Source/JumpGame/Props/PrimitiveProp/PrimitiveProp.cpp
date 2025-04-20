@@ -85,6 +85,18 @@ void APrimitiveProp::SetSize(const FVector& InSize)
 	}
 }
 
+void APrimitiveProp::SetNewSizeByRotation(const FVector& InSize)
+{
+	float SnapSize = GridComp->GetSnapSize();
+	
+	const FVector BoxExtent = InSize * SnapSize;
+
+	GridOuterCollision->SetBoxExtent(BoxExtent);
+	GridInnerCollision->SetBoxExtent(BoxExtent - DefaultCollisionExtentOffset);
+
+	RotateAllGizmos();
+}
+
 // Called when the game starts or when spawned
 void APrimitiveProp::BeginPlay()
 {
@@ -97,19 +109,19 @@ void APrimitiveProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void APrimitiveProp::SetGizmoLocation(class UGizmoComponent* Grid, const FVector& Direction,
+void APrimitiveProp::SetGizmoLocation(class UGizmoComponent* Gizmo, const FVector& Direction,
 	const FVector& InBoxSize)
 {
 	const float Offset = 10.f;
 
 	const FVector Location = Direction * (InBoxSize + FVector(Offset));
-	Grid->SetRelativeLocation(Location);
+	Gizmo->SetRelativeLocation(Location);
 }
 
-void APrimitiveProp::SetGizmoRotation(class UGizmoComponent* Grid, const FVector& Direction)
+void APrimitiveProp::SetGizmoRotation(class UGizmoComponent* Gizmo, const FVector& Direction)
 {
 	const FRotator Rotation = UKismetMathLibrary::MakeRotFromZ(Direction);
-	Grid->SetRelativeRotation(Rotation);
+	Gizmo->SetWorldRotation(Rotation);
 }
 
 void APrimitiveProp::SetSelected()
@@ -176,5 +188,14 @@ void APrimitiveProp::SetGizmosCollision(bool bCond)
 		{
 			Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 		}
+	}
+}
+
+void APrimitiveProp::RotateAllGizmos()
+{
+	for (auto& Gizmo : GizmoArray)
+	{
+		FVector Direction = Gizmo->GetDirection();
+		SetGizmoRotation(Gizmo, Direction);
 	}
 }

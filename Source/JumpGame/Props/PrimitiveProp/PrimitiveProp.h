@@ -34,6 +34,10 @@ public:
 	void SetCollision(bool bCond);
 	UFUNCTION(BlueprintCallable)
 	void SetGizmosCollision(bool bCond);
+	UFUNCTION(BlueprintCallable)
+	void RotateAllGizmos();
+	UFUNCTION(BlueprintCallable)
+	void SetNewSizeByRotation(const FVector& InSize);
 
 	GETTER(class UBoxComponent*, GridOuterCollision)
 	GETTER(class UBoxComponent*, GridInnerCollision);
@@ -41,9 +45,9 @@ public:
 
 protected:
 	UFUNCTION()
-	void SetGizmoLocation(class UGizmoComponent* Grid, const FVector& Direction, const FVector& InBoxSize);
+	void SetGizmoLocation(class UGizmoComponent* Gizmo, const FVector& Direction, const FVector& InBoxSize);
 	UFUNCTION()
-	void SetGizmoRotation(class UGizmoComponent* Grid, const FVector& Direction);
+	void SetGizmoRotation(class UGizmoComponent* Gizmo, const FVector& Direction);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")
 	class UGridComponent* GridComp;

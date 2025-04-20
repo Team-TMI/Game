@@ -23,19 +23,30 @@ void UClickHandlerManager::RegisterHandler(TSharedPtr<IClickHandler> Handler)
 
 bool UClickHandlerManager::HandleClick(class AMapEditingPlayerController* PlayerController)
 {
+	AActor* TempActor = ControlledClickResponse.TargetProp;
+	
+	bool bHandled = false;
 	for (const auto& Handler : Handlers)
 	{
 		if (Handler->HandleClick(ControlledClickResponse, PlayerController))
 		{
-			return true;
+			bHandled = true;
+			break ;
 		}
 	}
-	return false;
+	
+	if (TempActor != ControlledClickResponse.TargetProp)
+	{
+		OnControlledPropChanged.Broadcast();
+	}
+	
+	return bHandled;
 }
 
 void UClickHandlerManager::ResetControl()
 {
 	ControlledClickResponse = FClickResponse();
+	OnControlledPropChanged.Broadcast();
 }
 
 void UClickHandlerManager::BeginPlay()

@@ -25,9 +25,11 @@ public:
 	void SetSize(FVector NewSize);
 	bool MoveByGizmoPrimary(FVector MouseLocation, const FHitResult& HitResult);
 	void MoveByGizmo(const FVector& NewLocation);;
-	void RotateActorInGrid(FVector Direction);
+	void Rotate(const FVector& Direction);
 
 private:
+	void SwapSize(const FVector& Direction);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Grid", meta=(AllowPrivateAccess="true"))
 	class AActor* UpdatedActor = nullptr;
 

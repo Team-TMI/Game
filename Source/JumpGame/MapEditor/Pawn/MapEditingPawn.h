@@ -28,7 +28,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	GETTER(class APrimitiveProp*, ControlledActor);
+	GETTER(class UClickHandlerManager*, ClickHandlerManager);
 
 private:
 	UFUNCTION()
@@ -47,6 +47,10 @@ private:
 	void HandleMouseMove(const FInputActionValue& InputActionValue);
 	UFUNCTION()
 	void HandleDelete(const FInputActionValue& InputActionValue);
+	UFUNCTION()
+	void HandleRotate(const FInputActionValue& InputActionValue);
+	UFUNCTION()
+	void HandleAxis(const FInputActionValue& InputActionValue);
 
 	UFUNCTION()
 	void MoveForward(float Val);
@@ -77,6 +81,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Delete = nullptr;
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_Rotate = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_Axis = nullptr;
 
 	UPROPERTY()
 	bool bCanMove = false;
@@ -97,5 +106,6 @@ private:
 	class UPressedHandlerManager* PressedHandlerManager = nullptr;
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UDeleteHandlerManager* DeleteHandlerManager = nullptr;
-	
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class URotateHandlerManager* RotateHandlerManager = nullptr;
 };

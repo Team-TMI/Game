@@ -18,6 +18,7 @@
 #include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/MapEditor/DeleteHandlers/DeleteHandlerManager.h"
 #include "JumpGame/MapEditor/PressedHandlers/PressedHandlerManager.h"
+#include "JumpGame/MapEditor/RotateHandlers/RotateHandlerManager.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/Utils/FastLogger.h"
 
@@ -69,6 +70,18 @@ AMapEditingPawn::AMapEditingPawn()
 	{
 		IA_Delete = IA_DELETE.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_ROTATE
+	(TEXT("/Game/MapEditor/Input/Actions/IA_Rotate.IA_Rotate"));
+	if (IA_ROTATE.Succeeded())
+	{
+		IA_Rotate= IA_ROTATE.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_AXIS
+	(TEXT("/Game/MapEditor/Input/Actions/IA_Axis.IA_Axis"));
+	if (IA_AXIS.Succeeded())
+	{
+		IA_Axis= IA_AXIS.Object;
+	}
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponentMapEditing"));
 	CollisionComponent->InitSphereRadius(35.0f);
@@ -88,6 +101,7 @@ AMapEditingPawn::AMapEditingPawn()
 	ClickHandlerManager = CreateDefaultSubobject<UClickHandlerManager>(TEXT("ClickHandlerManager"));
 	PressedHandlerManager = CreateDefaultSubobject<UPressedHandlerManager>(TEXT("PressedHandlerManager"));
 	DeleteHandlerManager = CreateDefaultSubobject<UDeleteHandlerManager>(TEXT("DeleteHandlerManager"));
+	RotateHandlerManager = CreateDefaultSubobject<URotateHandlerManager>(TEXT("RotateHandlerManager"));
 }
 
 // Called when the game starts or when spawned
@@ -133,6 +147,9 @@ void AMapEditingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		PlayerInput->BindAction(IA_Turn, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleMouseMove);
 
 		PlayerInput->BindAction(IA_Delete, ETriggerEvent::Started, this, &AMapEditingPawn::HandleDelete);
+
+		PlayerInput->BindAction(IA_Rotate, ETriggerEvent::Started, this, &AMapEditingPawn::HandleRotate);
+		PlayerInput->BindAction(IA_Axis, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleAxis);
 	}
 }
 
@@ -219,6 +236,21 @@ void AMapEditingPawn::HandleDelete(const FInputActionValue& InputActionValue)
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
 	DeleteHandlerManager->HandleDelete(ControlledInfo);
 	ClickHandlerManager->ResetControl();
+}
+
+void AMapEditingPawn::HandleRotate(const FInputActionValue& InputActionValue)
+{
+	// 정해져 있는 회전값으로 회전
+	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
+	RotateHandlerManager->HandleRotate(ControlledInfo);
+}
+
+void AMapEditingPawn::HandleAxis(const FInputActionValue& InputActionValue)
+{
+	// 회전 축 설정
+	FVector Axis = InputActionValue.Get<FVector>();
+	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
+	RotateHandlerManager->HandleAxis(Axis, ControlledInfo);
 }
 
 void AMapEditingPawn::MoveForward(float Val)

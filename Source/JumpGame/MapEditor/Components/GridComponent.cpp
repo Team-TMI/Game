@@ -115,8 +115,67 @@ void UGridComponent::MoveByGizmo(const FVector& NewLocation)
 	UpdatedActor->SetActorLocation(GridLocation);
 }
 
-void UGridComponent::RotateActorInGrid(FVector Direction)
+void UGridComponent::Rotate(const FVector& Direction)
 {
-	// Direction을 기준으로 회전
+	// TODO: 트러블 슈팅 작성하기
+	// 이유 : 회전 축을 설정할 때는 월드 좌표계 기준으로 회전해야 한다.
+
+	// 이전 문제
+	// FRotator NewRotation = (CurrentRotation.Quaternion() * DeltaRotation.Quaternion()).Rotator();
+	// 이건 로컬 기준 회전 즉, 이전 회전을 기준으로 덧붙이는 거라서,
+	// 회전할수록 축이 기울어져서 **의도한 방향(Yaw → 위에서 회전)**이 망가짐.
 	
+	// 기존 회전
+	FQuat CurrentQuat = GetComponentQuat();
+
+	// 회전 축 정의 (월드 기준)
+	const FVector WorldRight = FVector::RightVector;     // Pitch
+	const FVector WorldUp    = FVector::UpVector;        // Yaw
+	const FVector WorldForward = FVector::ForwardVector; // Roll
+
+	// 각 축 기준으로 회전 쿼터니언 생성 (회전량 * 회전축)
+	FQuat YawQuat   = FQuat(WorldUp,    FMath::DegreesToRadians(Direction.Z * RotateAngle));
+	FQuat PitchQuat = FQuat(WorldRight, FMath::DegreesToRadians(Direction.Y * RotateAngle));
+	FQuat RollQuat  = FQuat(WorldForward, FMath::DegreesToRadians(Direction.X * RotateAngle));
+
+	// 순서대로 회전 적용 (예: Roll → Pitch → Yaw)
+	FQuat CombinedQuat = YawQuat * PitchQuat * RollQuat;
+
+	// 월드 축 기준으로 누적 회전 적용
+	FQuat NewQuat = CombinedQuat * CurrentQuat;
+
+	// Size 스왑은 여전히 필요
+	SwapSize(Direction);
+
+	// 결과 적용
+	UpdatedActor->SetActorRotation(NewQuat);
+
+	FFastLogger::LogScreen(FColor::Red, TEXT("After Rotate : %s"), *Size.ToString());
 }
+
+void UGridComponent::SwapSize(const FVector& Direction)
+{
+	// Roll 회전
+	if (Direction == FVector(1, 0, 0))
+	{
+		int32 Temp = Size.Y;
+		Size.Y = Size.Z;
+		Size.Z = Temp;
+	}
+	// Pitch 회전
+	else if (Direction == FVector(0, 1, 0))
+	{
+		int32 Temp = Size.X;
+		Size.X = Size.Z;
+		Size.Z = Temp;
+	}
+	// Yaw 회전
+	else if (Direction == FVector(0, 0, 1))
+	{
+		int32 Temp = Size.X;
+		Size.X = Size.Y;
+		Size.Y = Temp;
+	}
+}
+
+

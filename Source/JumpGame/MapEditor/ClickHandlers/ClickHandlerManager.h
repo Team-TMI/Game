@@ -6,6 +6,7 @@
 #include "JumpGame/Utils/CommonUtils.h"
 #include "ClickHandlerManager.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnControlledPropChanged);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class JUMPGAME_API UClickHandlerManager : public UActorComponent
@@ -20,6 +21,9 @@ public:
 	void ResetControl();;
 
 	GETTER(FClickResponse, ControlledClickResponse)
+
+	UPROPERTY()
+	FOnControlledPropChanged OnControlledPropChanged;
 
 protected:
 	virtual void BeginPlay() override;
