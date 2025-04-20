@@ -3,6 +3,7 @@
 
 #include "GizmoPressedHandler.h"
 
+#include "BaseGizmos/GizmoMath.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
 #include "JumpGame/MapEditor/ClickHandlers/GizmoClickHandler.h"
 #include "JumpGame/MapEditor/Components/GizmoPrimaryComponent.h"
@@ -19,13 +20,14 @@ FGizmoPressedHandler::~FGizmoPressedHandler()
 }
 
 bool FGizmoPressedHandler::HandlePressed(FClickResponse& PressedResponse,
-	class AMapEditingPlayerController* PlayerController, const FVector& MouseStartPosition, const FVector& InitializedActorPosition)
+	class AMapEditingPlayerController* PlayerController, const FGizmoPressedInfo& GizmoPressedInfo)
 {
 	if (PressedResponse.Result != EClickHandlingResult::GizmoEditing)
 	{
 		return false;
 	}
-	// 그럴 일은 없지만 애초에 이게 들어오면 전체 로직이 잘못된거임!
+
+	// 예외 처리: 잘못된 Gizmo 타입
 	if (PressedResponse.TargetGizmo->IsA(UGizmoPrimaryComponent::StaticClass()))
 	{
 		return false;
@@ -37,35 +39,6 @@ bool FGizmoPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 		return false;
 	}
 
-	// PressedResponse.TargetProp->SetGizmosCollision(false);
-	// PressedResponse.TargetProp->SetGizmosCollision(true);
-
-	FVector Direction = Gizmo->GetDirection().GetAbs();
-
-	FHitResult HitResult;
-	if (!PlayerController->OnPressedOperation(PressedType, HitResult))
-	{
-		return false;
-	}
-
-	FVector CurrentMouseLocation = HitResult.Location;
-	FVector MouseDelta = CurrentMouseLocation - MouseStartPosition;
-
-	// 마우스가 방향으로 얼마나 이동했는지 거리 측정
-	float Distance = FVector::DotProduct(MouseDelta, Direction.GetSafeNormal());
-
-	// 100 이상 움직였을 때만 1단위 스냅
-	int32 Snap = FMath::RoundToInt(Distance / 100.0f); // 또는 Trunc/Sign, 상황에 맞게
-
-	// 최종 이동 좌표 (X, Y, Z 중 하나만 ±1, 나머지는 0)
-	FVector StepVector = Direction.GetSafeNormal() * (float)Snap;
-
-	// 정수로 바꿔서 이동 처리 (각 축 중 하나만 의미 있음)
-	FVector StepVectorInt = FVector(
-		FMath::RoundToInt(StepVector.X),
-		FMath::RoundToInt(StepVector.Y),
-		FMath::RoundToInt(StepVector.Z));
-
 	TWeakObjectPtr<UGridComponent> GridComponent = PressedResponse.TargetProp->GetGridComp();
 	UGridComponent* Grid = GridComponent.Get();
 	if (!Grid)
@@ -73,7 +46,49 @@ bool FGizmoPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 		return false;
 	}
 
-	Grid->MoveByGizmo(StepVectorInt);
+	FHitResult HitResult;
+	if (!PlayerController->OnPressedOperation(PressedType, HitResult))
+	{
+		return false;
+	}
+
+	FVector InitialRayOrigin = GizmoPressedInfo.InitialMouseRayOrigin;
+	FVector InitialRayDirection = GizmoPressedInfo.InitialMouseRayDirection;
 	
+	FVector RayOrigin = HitResult.Location;
+	FVector RayDirection = HitResult.Normal;
+
+	FVector GizmoOrigin = PressedResponse.TargetProp->GetActorLocation() - (Grid->GetSize() * Grid->GetSnapSize() * 0.5f);
+	FVector GizmoDirection = Gizmo->GetDirection();
+	
+	// 1. 최초 클릭 시점의 레이와 기즈모 선분 사이 최근접점
+	FVector InitialNearestOnLine, InitialNearestOnRay;
+	float InitialLineT, InitialRayT;
+	GizmoMath::NearestPointOnLineToRay(
+		GizmoOrigin, GizmoDirection,
+		InitialRayOrigin, InitialRayDirection,
+		InitialNearestOnLine, InitialLineT,
+		InitialNearestOnRay, InitialRayT
+	);
+
+	// 2. 현재 드래그 위치에서의 최근접점
+	FVector CurrentNearestOnLine, CurrentNearestOnRay;
+	float CurrentLineT, CurrentRayT;
+	GizmoMath::NearestPointOnLineToRay(
+		GizmoOrigin, GizmoDirection,
+		RayOrigin, RayDirection,
+		CurrentNearestOnLine, CurrentLineT,
+		CurrentNearestOnRay, CurrentRayT
+	);
+
+	// 3. 이동 거리 = 선 위에서의 파라미터 차이만큼 이동
+	float DeltaT = CurrentLineT - InitialLineT;
+	FVector DeltaMove = GizmoDirection * DeltaT;
+	
+	// 4. Actor 이동
+	FVector NewLocation = GizmoPressedInfo.OriginalActorLocation + DeltaMove;
+
+	// GridComponent 이동 수행
+	Grid->MoveByGizmo(NewLocation);
 	return true;
 }

@@ -142,7 +142,7 @@ void AMapEditingPawn::HandleLeftPressedStarted(const FInputActionValue& InputAct
 	if (!PC) return ;
 	
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
-	PressedHandlerManager->InitializePositions(ControlledInfo, PC);
+	PressedHandlerManager->InitializeSettings(ControlledInfo, PC);
 }
 
 void AMapEditingPawn::HandleLeftPressed(const FInputActionValue& InputActionValue)

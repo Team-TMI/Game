@@ -20,9 +20,6 @@ class JUMPGAME_API AMapEditingPlayerController : public ANetworkPlayerController
 public:
 	AMapEditingPlayerController();
 
-	UFUNCTION()
-	bool GetWorldMousePosition(FVector& OutMouseWorldPosition);
-
 #pragma region CLICK_OPERATION
 	// Click Operation
 public:

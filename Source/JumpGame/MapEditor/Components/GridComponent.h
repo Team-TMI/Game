@@ -15,6 +15,7 @@ public:
 	UGridComponent();
 
 	GETTER(float, SnapSize)
+	GETTER(FVector, Size)
 
 protected:
 	virtual void BeginPlay() override;

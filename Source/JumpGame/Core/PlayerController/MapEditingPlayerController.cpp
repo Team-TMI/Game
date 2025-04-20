@@ -174,28 +174,13 @@ bool AMapEditingPlayerController::OnGizmoPrimaryPressedOperation(FHitResult& InH
 
 bool AMapEditingPlayerController::OnGizmoPressedOperation(FHitResult& InHitResult)
 {
-	FVector2D MouseScreenPosition;
-	if (!GetMousePosition(MouseScreenPosition.X, MouseScreenPosition.Y)) return false;
-
-	// 그 외에 공중에 마우스가 있는 경우
 	FVector MouseLocation;
 	FVector MouseDirection;
-	UGameplayStatics::DeprojectScreenToWorld(this, MouseScreenPosition, MouseLocation, MouseDirection);
 
-	InHitResult.Location = MouseLocation + (MouseDirection * 1000.f);
+	DeprojectMousePositionToWorld(MouseLocation, MouseDirection);
 
-	return true;
-}
+	InHitResult.Location = MouseLocation;
+	InHitResult.Normal = MouseDirection;
 
-bool AMapEditingPlayerController::GetWorldMousePosition(FVector& OutMouseWorldPosition)
-{
-	FVector2D MouseScreenPosition;
-	if (!GetMousePosition(MouseScreenPosition.X, MouseScreenPosition.Y)) return false;
-
-	FVector MouseLocation;
-	FVector MouseDirection;
-	UGameplayStatics::DeprojectScreenToWorld(this, MouseScreenPosition, MouseLocation, MouseDirection);
-
-	OutMouseWorldPosition = MouseLocation + (MouseDirection * 1000.f);
 	return true;
 }

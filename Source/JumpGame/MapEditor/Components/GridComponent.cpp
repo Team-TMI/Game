@@ -86,9 +86,22 @@ bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult&
 
 void UGridComponent::MoveByGizmo(const FVector& NewLocation)
 {
-	X += NewLocation.X;
-	Y += NewLocation.Y;
-	Z += NewLocation.Z;
+	FVector Sign = FVector(1.f, 1.f, 1.f);
+
+	Sign.X = ((int32)NewLocation.X == 0 || (NewLocation.X >= 0.f)) ? 1.f : -1.f;
+	Sign.Y = ((int32)NewLocation.Y == 0 || (NewLocation.Y >= 0.f)) ? 1.f : -1.f;
+	Sign.Z = ((int32)NewLocation.Z == 0 || (NewLocation.Z >= 0.f)) ? 1.f : -1.f;
+
+	// GridComponent의 위치 계산
+	// 그리드의 스냅 단위는 100으로 유지
+	X = (int32)FMath::RoundToInt(NewLocation.X) / ((int32)SnapSize);
+	Y = (int32)FMath::RoundToInt(NewLocation.Y) / ((int32)SnapSize);
+	Z = (int32)FMath::RoundToInt(NewLocation.Z) / ((int32)SnapSize);
+
+	// NOTE: Gizmo로 이동할 때는 -1을 더해주지 않음, 왜냐하면 딱 거기 있어야 하는데 이것 때문에 한번 더 연산이 들어가기 때문이다.
+	// X = Sign.X < 0.f ? X - 1 : X;
+	// Y = Sign.Y < 0.f ? Y - 1 : Y;
+	// Z = Sign.Z < 0.f ? Z - 1 : Z;
 
 	// 100 단위 그리드 기준이지만, 블록의 중심을 고려하여 보정
 	FVector GridOrigin = FVector(X, Y, Z) * SnapSize;

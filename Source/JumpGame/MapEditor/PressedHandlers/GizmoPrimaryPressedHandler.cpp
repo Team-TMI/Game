@@ -19,7 +19,7 @@ FGizmoPrimaryPressedHandler::~FGizmoPrimaryPressedHandler()
 }
 
 bool FGizmoPrimaryPressedHandler::HandlePressed(FClickResponse& PressedResponse,
-	class AMapEditingPlayerController* PlayerController, const FVector& MouseStartPosition, const FVector& InitializedActorPosition)
+	class AMapEditingPlayerController* PlayerController, const FGizmoPressedInfo& /*GizmoPressedInfo*/)
 {
 	if (PressedResponse.Result != EClickHandlingResult::GizmoEditing)
 	{

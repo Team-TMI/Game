@@ -3,6 +3,7 @@
 #include "GizmoPressedHandler.h"
 #include "GizmoPrimaryPressedHandler.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
+#include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 
 
@@ -34,7 +35,7 @@ bool UPressedHandlerManager::HandlePressed(FClickResponse& ControlledInfo,
 {
 	for (const auto& Handler : Handlers)
 	{
-		if (Handler->HandlePressed(ControlledInfo, PlayerController, MouseStartPosition, InitializeActorPosition))
+		if (Handler->HandlePressed(ControlledInfo, PlayerController, GizmoPressedInfo))
 		{
 			return true;
 		}
@@ -42,18 +43,24 @@ bool UPressedHandlerManager::HandlePressed(FClickResponse& ControlledInfo,
 	return false;
 }
 
-void UPressedHandlerManager::InitializePositions(FClickResponse& ControlledInfo, AMapEditingPlayerController* PlayerController)
+void UPressedHandlerManager::InitializeSettings(FClickResponse& ControlledInfo,
+	AMapEditingPlayerController* PlayerController)
 {
-	PlayerController->GetWorldMousePosition(MouseStartPosition);
+	FVector MouseWorldPosition;
+	FVector MouseDirection;
+	PlayerController->DeprojectMousePositionToWorld(MouseWorldPosition, MouseDirection);
 
-	if (ControlledInfo.TargetProp)
+	GizmoPressedInfo.InitialMouseRayOrigin = MouseWorldPosition;
+	GizmoPressedInfo.InitialMouseRayDirection = MouseDirection;
+	if (!ControlledInfo.TargetProp)
 	{
-		InitializeActorPosition = ControlledInfo.TargetProp->GetActorLocation();
+		return;
 	}
+	UGridComponent* Grid = ControlledInfo.TargetProp->GetGridComp();
+	GizmoPressedInfo.OriginalActorLocation = ControlledInfo.TargetProp->GetActorLocation() - (Grid->GetSize() * Grid->GetSnapSize() * 0.5f);
 }
 
 void UPressedHandlerManager::ResetPositions()
 {
-	MouseStartPosition = FVector::ZeroVector;
-	InitializeActorPosition = FVector::ZeroVector;
+	GizmoPressedInfo = FGizmoPressedInfo();
 }
