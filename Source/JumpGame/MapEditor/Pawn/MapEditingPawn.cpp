@@ -16,6 +16,7 @@
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
+#include "JumpGame/MapEditor/DeleteHandlers/DeleteHandlerManager.h"
 #include "JumpGame/MapEditor/PressedHandlers/PressedHandlerManager.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -62,7 +63,12 @@ AMapEditingPawn::AMapEditingPawn()
 	{
 		IA_Pressed = IA_PRESSED.Object;
 	}
-	
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_DELETE
+	(TEXT("/Game/MapEditor/Input/Actions/IA_Delete.IA_Delete"));
+	if (IA_DELETE.Succeeded())
+	{
+		IA_Delete = IA_DELETE.Object;
+	}
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponentMapEditing"));
 	CollisionComponent->InitSphereRadius(35.0f);
@@ -81,6 +87,7 @@ AMapEditingPawn::AMapEditingPawn()
 
 	ClickHandlerManager = CreateDefaultSubobject<UClickHandlerManager>(TEXT("ClickHandlerManager"));
 	PressedHandlerManager = CreateDefaultSubobject<UPressedHandlerManager>(TEXT("PressedHandlerManager"));
+	DeleteHandlerManager = CreateDefaultSubobject<UDeleteHandlerManager>(TEXT("DeleteHandlerManager"));
 }
 
 // Called when the game starts or when spawned
@@ -114,14 +121,18 @@ void AMapEditingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	if (PlayerInput)
 	{
 		PlayerInput->BindAction(IA_Click, ETriggerEvent::Started, this, &AMapEditingPawn::HandleLeftClick);
+		
 		PlayerInput->BindAction(IA_Pressed, ETriggerEvent::Started, this, &AMapEditingPawn::HandleLeftPressedStarted);
 		PlayerInput->BindAction(IA_Pressed, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleLeftPressed);
 		PlayerInput->BindAction(IA_Pressed, ETriggerEvent::Completed, this, &AMapEditingPawn::HandleLeftPressedCompleted);
 		
 		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Started, this, &AMapEditingPawn::HandleRightClickStarted);
 		PlayerInput->BindAction(IA_Moveable, ETriggerEvent::Completed, this, &AMapEditingPawn::HandleRightClickStarted);
+		
 		PlayerInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleMove);
 		PlayerInput->BindAction(IA_Turn, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleMouseMove);
+
+		PlayerInput->BindAction(IA_Delete, ETriggerEvent::Started, this, &AMapEditingPawn::HandleDelete);
 	}
 }
 
@@ -195,11 +206,19 @@ void AMapEditingPawn::HandleMove(const FInputActionValue& InputActionValue)
 
 void AMapEditingPawn::HandleMouseMove(const FInputActionValue& InputActionValue)
 {
-	TurnInput = InputActionValue.Get<FVector2d>();
-
 	if (!bCanMove) return;
+
+	FVector2d TurnInput = InputActionValue.Get<FVector2d>();
+	
 	AddControllerYawInput(-TurnInput.X);
 	AddControllerPitchInput(TurnInput.Y);
+}
+
+void AMapEditingPawn::HandleDelete(const FInputActionValue& InputActionValue)
+{
+	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
+	DeleteHandlerManager->HandleDelete(ControlledInfo);
+	ClickHandlerManager->ResetControl();
 }
 
 void AMapEditingPawn::MoveForward(float Val)

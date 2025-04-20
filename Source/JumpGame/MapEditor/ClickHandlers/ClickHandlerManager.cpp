@@ -3,6 +3,7 @@
 #include "ActorClickHandler.h"
 #include "BackgroundClickHandler.h"
 #include "GizmoClickHandler.h"
+#include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 UClickHandlerManager::UClickHandlerManager()
@@ -30,6 +31,11 @@ bool UClickHandlerManager::HandleClick(class AMapEditingPlayerController* Player
 		}
 	}
 	return false;
+}
+
+void UClickHandlerManager::ResetControl()
+{
+	ControlledClickResponse = FClickResponse();
 }
 
 void UClickHandlerManager::BeginPlay()

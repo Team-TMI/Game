@@ -17,8 +17,9 @@ public:
 
 	void RegisterHandler(TSharedPtr<IClickHandler> Handler);
 	bool HandleClick(class AMapEditingPlayerController* PlayerController);
+	void ResetControl();;
 
-	GETTER(FClickResponse, ControlledClickResponse);
+	GETTER(FClickResponse, ControlledClickResponse)
 
 protected:
 	virtual void BeginPlay() override;

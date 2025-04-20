@@ -32,9 +32,7 @@ struct FClickResponse
 	UPROPERTY(BlueprintReadOnly)
 	FString DebugMessage = TEXT("");
 
-	FClickResponse() = default;
-
-	FClickResponse(EClickHandlingResult InResult, class APrimitiveProp* InTargetProp = nullptr,
+	FClickResponse(const EClickHandlingResult InResult = EClickHandlingResult::None, class APrimitiveProp* InTargetProp = nullptr,
 		class UGizmoComponent* InTargetGizmo = nullptr, const FHitResult& InHitResult = FHitResult(),
 		const FVector& InMouseWorldPosition = FVector::ZeroVector, const FString& InDebug = TEXT(""))
 			: Result(InResult), TargetProp(InTargetProp), TargetGizmo(InTargetGizmo),
