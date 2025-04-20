@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "ObjectPoolComponent.h"
-#include "RollingCanonProp.generated.h"
+#include "RollingCannonProp.generated.h"
 
 UCLASS()
-class JUMPGAME_API ARollingCanonProp : public AActor
+class JUMPGAME_API ARollingCannonProp : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ARollingCanonProp();
+	ARollingCannonProp();
 
 protected:
 	UFUNCTION()

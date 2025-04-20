@@ -4,7 +4,7 @@
 #include "ObjectPoolComponent.h"
 
 #include "RollingBallProp.h"
-#include "RollingCanonProp.h"
+#include "RollingCannonProp.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
@@ -61,7 +61,7 @@ void UObjectPoolComponent::Expand()
 		ARollingBallProp* BallProp = GetWorld()->SpawnActor<ARollingBallProp>(PooledObjectClass,
 			FVector::ZeroVector, FRotator::ZeroRotator);
 
-		ARollingCanonProp* canon = Cast<ARollingCanonProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollingCanonProp::StaticClass()));
+		// ARollingCannonProp* cannon = Cast<ARollingCannonProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollingCannonProp::StaticClass()));
 
 		// 소속풀 지정
 		BallProp->SetObjectPool(this);

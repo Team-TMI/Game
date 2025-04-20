@@ -1,24 +1,26 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "RollingCanonProp.h"
+#include "RollingCannonProp.h"
 
 #include "RollingBallProp.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 
 // Sets default values
-ARollingCanonProp::ARollingCanonProp()
+ARollingCannonProp::ARollingCannonProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	Tags.Add("Cannon");
+	bReplicates = true;
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	SetRootComponent(MeshComp);
 	ObjectPool = CreateDefaultSubobject<UObjectPoolComponent>(TEXT("ObjectPool"));
 }
 
-void ARollingCanonProp::OnProjectileReturn()
+void ARollingCannonProp::OnProjectileReturn()
 {
 	// 알림 받으면 다시 발사!
 	FFastLogger::LogConsole(TEXT("알림받았다!! 다시 발사"));
@@ -26,7 +28,7 @@ void ARollingCanonProp::OnProjectileReturn()
 }
 
 // Called when the game starts or when spawned
-void ARollingCanonProp::BeginPlay()
+void ARollingCannonProp::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -35,17 +37,17 @@ void ARollingCanonProp::BeginPlay()
 
 	if (ObjectPool)
 	{
-		ObjectPool->OnObjectRetrurn.AddDynamic(this, &ARollingCanonProp::OnProjectileReturn);
+		ObjectPool->OnObjectRetrurn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
 	}
 }
 
 // Called every frame
-void ARollingCanonProp::Tick(float DeltaTime)
+void ARollingCannonProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-void ARollingCanonProp::FireRollingBall()
+void ARollingCannonProp::FireRollingBall()
 {
 	if (!ObjectPool) return;
 
