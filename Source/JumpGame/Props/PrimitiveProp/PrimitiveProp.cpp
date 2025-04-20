@@ -68,7 +68,10 @@ void APrimitiveProp::SetSize(const FVector& InSize)
 	GridComp->SetSize(InSize);
 	float SnapSize = GridComp->GetSnapSize();
 
-	const FVector BoxExtent = InSize * SnapSize * 0.5f;
+	// const FVector BoxExtent = InSize * SnapSize * 0.5f;
+	
+	// 박스의 크기는 SnapSize의 2의 배수이다.
+	const FVector BoxExtent = InSize * SnapSize;
 
 	GridOuterCollision->SetBoxExtent(BoxExtent);
 	GridInnerCollision->SetBoxExtent(BoxExtent - DefaultCollisionExtentOffset);

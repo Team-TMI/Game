@@ -58,7 +58,9 @@ bool FGizmoPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 	FVector RayOrigin = HitResult.Location;
 	FVector RayDirection = HitResult.Normal;
 
-	FVector GizmoOrigin = PressedResponse.TargetProp->GetActorLocation() - (Grid->GetSize() * Grid->GetSnapSize() * 0.5f);
+	// FVector GizmoOrigin = PressedResponse.TargetProp->GetActorLocation() - (Grid->GetSize() * Grid->GetSnapSize() * 0.5f);
+	// 교차점으로 중심을 옮김
+	FVector GizmoOrigin = PressedResponse.TargetProp->GetActorLocation();
 	FVector GizmoDirection = Gizmo->GetDirection();
 	
 	// 1. 최초 클릭 시점의 레이와 기즈모 선분 사이 최근접점

@@ -1,28 +1,18 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GridComponent.h"
 
 #include "Evaluation/IMovieSceneEvaluationHook.h"
 #include "JumpGame/Utils/FastLogger.h"
 
-// Sets default values for this component's properties
 UGridComponent::UGridComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
-	// ...
 }
 
-// Called when the game starts
 void UGridComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
 }
 
 void UGridComponent::InitializeComponent()
@@ -75,7 +65,10 @@ bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult&
 
 	// 100 단위 그리드 기준이지만, 블록의 중심을 고려하여 보정
 	FVector GridOrigin = FVector(X, Y, Z) * SnapSize;
-	FVector CenterOffset = FVector(Size) * SnapSize * 0.5f;
+	// FVector CenterOffset = FVector(Size) * SnapSize * 0.5f;
+	
+	// 물체의 중점을 그리드의 교차점으로 옮김
+	FVector CenterOffset = FVector::ZeroVector;
 	FVector GridLocation = GridOrigin + CenterOffset;
 	
 	UpdatedActor->SetActorLocation(GridLocation);
@@ -105,7 +98,10 @@ void UGridComponent::MoveByGizmo(const FVector& NewLocation)
 
 	// 100 단위 그리드 기준이지만, 블록의 중심을 고려하여 보정
 	FVector GridOrigin = FVector(X, Y, Z) * SnapSize;
-	FVector CenterOffset = FVector(Size) * SnapSize * 0.5f;
+	// FVector CenterOffset = FVector(Size) * SnapSize * 0.5f;
+	
+	// 물체의 중점을 그리드의 교차점으로 옮김
+	FVector CenterOffset = FVector::ZeroVector;
 	FVector GridLocation = GridOrigin + CenterOffset;
 	
 	UpdatedActor->SetActorLocation(GridLocation);

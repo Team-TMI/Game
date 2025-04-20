@@ -57,7 +57,9 @@ void UPressedHandlerManager::InitializeSettings(FClickResponse& ControlledInfo,
 		return;
 	}
 	UGridComponent* Grid = ControlledInfo.TargetProp->GetGridComp();
-	GizmoPressedInfo.OriginalActorLocation = ControlledInfo.TargetProp->GetActorLocation() - (Grid->GetSize() * Grid->GetSnapSize() * 0.5f);
+	// GizmoPressedInfo.OriginalActorLocation = ControlledInfo.TargetProp->GetActorLocation() - (Grid->GetSize() * Grid->GetSnapSize() * 0.5f);
+	// 교차점으로 중심을 옮김
+	GizmoPressedInfo.OriginalActorLocation = ControlledInfo.TargetProp->GetActorLocation();
 }
 
 void UPressedHandlerManager::ResetPositions()

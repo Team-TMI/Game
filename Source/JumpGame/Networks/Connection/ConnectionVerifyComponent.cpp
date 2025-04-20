@@ -55,10 +55,7 @@ void UConnectionVerifyComponent::RecursiveCheckClientVerified()
 void UConnectionVerifyComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	// 타이머를 종료한다.
-	if (EndPlayReason == EEndPlayReason::Type::Destroyed)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(ConnectionTimer);
-	}
+	GetWorld()->GetTimerManager().ClearTimer(ConnectionTimer);
 	
 	Super::EndPlay(EndPlayReason);
 }

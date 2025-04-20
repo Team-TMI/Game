@@ -34,8 +34,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Grid", meta=(AllowPrivateAccess="true"))
 	float RotateAngle = 90.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Grid", meta=(AllowPrivateAccess="true"))
-	float SnapSize = 100.f;
+	float SnapSize = 50.f;
 
+	// 박스의 사이즈 : 항상 100의 배수
+	// 예시 : 1x1x1 => 100x100x100
+	// 예시 : Size * SnapSize * 2.0f => 1*1*1 * 50 * 2.0f = 100x100x100
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Grid", meta=(AllowPrivateAccess="true"))
 	FVector Size = FVector(1.f, 1.f, 1.f);
 
