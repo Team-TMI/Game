@@ -55,14 +55,7 @@ double ANetworkGameState::GetServerWorldTimeSeconds() const
 void ANetworkGameState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (HasAuthority())
-	{
-
-	}
-	else
-	{
-			}
+	
 }
 
 void ANetworkGameState::VerifyConnection(const FString& NetID)
@@ -79,7 +72,17 @@ void ANetworkGameState::HandleConnection(const FString& NetID)
 void ANetworkGameState::MulticastRPC_ConnectionSucceeded_Implementation(const FString& NetID)
 {
 	ANetworkPlayerController* PlayerController = Cast<ANetworkPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (PlayerController == nullptr)
+	{
+		FFastLogger::LogConsole(TEXT("PlayerController is null"));
+		return;
+	}
 	ANetworkPlayerState* PlayerState = Cast<ANetworkPlayerState>(PlayerController->PlayerState);
+	if (PlayerState == nullptr)
+	{
+		FFastLogger::LogConsole(TEXT("PlayerState is null"));
+		return;
+	}
 	
 	// 서버에 연결되었을 때 서버에 자신의 NetID를 전송한다.
 	const FUniqueNetIdRepl& PlayerNetID = PlayerState->GetUniqueId();
