@@ -39,7 +39,8 @@ void URotateHandlerManager::HandleRotate(FClickResponse& ClickResponse)
 
 	GridComponent->Rotate(Axis);
 
-	PrimitiveProp->SetNewSizeByRotation(GridComponent->GetSize());
+	// PrimitiveProp->SetNewSizeByRotation(GridComponent->GetSize());
+	PrimitiveProp->RotateAllGizmos();
 	
 	FFastLogger::LogScreen(FColor::Red, TEXT("Rotate : %s"), *Axis.ToString());
 }
