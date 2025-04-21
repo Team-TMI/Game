@@ -100,7 +100,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 150.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 1500.0f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
-	GetCharacterMovement()->AirControl = 0.25f;
+	GetCharacterMovement()->AirControl = 1.f;
 	GetCharacterMovement()->PerchRadiusThreshold = 20.0f;
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
@@ -154,6 +154,8 @@ void AFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
+
+	// 공중에 있을 때는 회전 잘 안되게
 	if (GetCharacterMovement()->IsFalling())
 	{
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 200.0f, 0.0f);
@@ -238,6 +240,7 @@ void AFrog::StartJump()
 	// 수면 점프
 	if (CharacterState == ECharacterStateEnum::Surface)
 	{
+		// 1초 동안 물에 충돌 없앰
 		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Jumping"));
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
 		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
@@ -257,12 +260,14 @@ void AFrog::StartJump()
 	if (GetCharacterMovement()->IsCrouching())
 	{
 		//FLog::Log("Time", CrouchTime);
-		if (CrouchTime > 4.f)
+		if (bIsSuperJump)
 		{
+			//FLog::Log("SuperJump");
 			SetJumpAvailableBlock(3);
 		}
-		else if (CrouchTime > 2.f)
+		else if (SuperJumpRatio >= 0.5f)
 		{
+			//FLog::Log("LittleJump");
 			SetJumpAvailableBlock(2);
 		}
 		
@@ -292,17 +297,27 @@ void AFrog::StopSprint()
 
 void AFrog::StartCrouch()
 {
-	if (GetCharacterMovement()->IsFalling())
+	if (GetCharacterMovement()->IsFalling() || bIsSwimming)
 	{
 		return;
 	}
 
 	bIsCrouching = true;
 	Crouch();
-	
+
+	// 슈퍼 점프 게이지 충전
 	FTimerDelegate CrouchDelegate{
 		FTimerDelegate::CreateLambda([this]() {
 			CrouchTime += GetWorld()->GetDeltaSeconds();
+			
+			if (CrouchTime >= SuperJumpValue)
+			{
+				bIsSuperJump = true;
+			}
+			
+			SuperJumpRatio = FMath::Clamp(CrouchTime / SuperJumpValue, 0.f, 1.f);
+
+			//FLog::Log("Ratio", SuperJumpRatio);
 		})
 	};
 	GetWorldTimerManager().SetTimer(CrouchTimer, CrouchDelegate, GetWorld()->GetDeltaSeconds(), true);
@@ -320,23 +335,13 @@ void AFrog::StopCrouch()
 
 	GetWorldTimerManager().ClearTimer(CrouchTimer);
 	CrouchTime = 0.f;
+
+	ResetSuperJumpRatio();
 }
 
 void AFrog::InitFrogState()
 {
 	SetJumpAvailableBlock(1);
-}
-
-void AFrog::StartSwim()
-{
-	FLog::Log("StartSwim");
-	bIsSwimming = true;
-}
-
-void AFrog::StopSwim()
-{
-	FLog::Log("StopSwim");
-	bIsSwimming = false;
 }
 
 void AFrog::SetJumpAvailableBlock(int32 Block)
@@ -356,4 +361,10 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 		};
 		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
 	}
+}
+
+void AFrog::ResetSuperJumpRatio()
+{
+	SuperJumpRatio = 0.f;
+	bIsSuperJump = false;
 }

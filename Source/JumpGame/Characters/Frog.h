@@ -54,12 +54,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitFrogState();
 	UFUNCTION(BlueprintCallable)
-	void StartSwim();
-	UFUNCTION(BlueprintCallable)
-	void StopSwim();
-	UFUNCTION(BlueprintCallable)
 	void SetJumpAvailableBlock(int32 Block);
-	
+	void ResetSuperJumpRatio();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -88,7 +84,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float CrouchTime{};
 	FTimerHandle CrouchTimer;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float SuperJumpRatio;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float SuperJumpValue{3.f};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsSuperJump{false};
+	
 	// 컴포넌트 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
