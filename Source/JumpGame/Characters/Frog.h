@@ -36,6 +36,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void NotifyControllerChanged() override;
+
+	virtual bool CanJumpInternal_Implementation() const override;
 	
 public:
 	// Input
@@ -50,9 +52,10 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void StartSwim();
+	void InitFrogState();
 	UFUNCTION(BlueprintCallable)
-	void StopSwim();
+	void SetJumpAvailableBlock(int32 Block);
+	void ResetSuperJumpRatio();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -78,7 +81,16 @@ public:
 	bool bIsCrouching;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsSwimming;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float CrouchTime{};
+	FTimerHandle CrouchTimer;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float SuperJumpRatio;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float SuperJumpValue{3.f};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsSuperJump{false};
+	
 	// 컴포넌트 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

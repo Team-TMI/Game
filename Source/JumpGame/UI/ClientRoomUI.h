@@ -4,13 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "LobbyUI.generated.h"
+#include "ClientRoomUI.generated.h"
 
 /*
-여기는 대기방 (진짜 로비)
+여기서는 로비를 생성하고 찾는다
+ -> 즉, 게임 시작시 메인화면
+
+WidgetSwitcher 구조
+0) 메인화면: 게임 시작시 보이는 화면
+1) FindRoom: 메인화면에서 방 목록보기를 누르면 이동하는 화면
+-> FindRoom에서 팝업으로 방을 생성한다
  */
 UCLASS()
-class JUMPGAME_API ULobbyUI : public UUserWidget
+class JUMPGAME_API UClientRoomUI : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -24,19 +30,22 @@ public:
 	// 위젯 스위처
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* WidgetSwitcher;
-	
-	// 세션 메인 관련
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_GoCreate;
+
+	// WidgetSwitcher (0)
+	// 메인 관련
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoFind;
+	
 	// 눌렀을때 호출되는 함수
 	UFUNCTION()
-	void OnClickGoCreateRoom();
-	UFUNCTION()
 	void OnClickGoFindRoom();
-	
-	// 세션 생성 관련
+
+	// WidgetSwitcher (1)
+	// 방 만들기 관련
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* CanvasCreateRoom;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_GoCreate;
 	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* Edit_RoomName;
 	UPROPERTY(meta = (BindWidget))
@@ -47,10 +56,21 @@ public:
 	class UButton* Btn_Create;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_BackFromCreate;
+
+	// 비밀방 설정하기
+	UPROPERTY(meta = (BindWidget))
+	class UCheckBox* CheckBox_Lock;
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* Edit_Password;
 	
 	// 버튼 눌렀을 때 호출될 함수
 	UFUNCTION()
+	void OnClickGoCreateRoom();
+	UFUNCTION()
 	void CreateSession();
+	// 비밀번호 설정 함수
+	UFUNCTION()
+	void OnClickCheckBox(bool bIsChecked);
 	
 	// 슬라이더
 	UFUNCTION()
@@ -65,8 +85,14 @@ public:
 	class UScrollBox* Scroll_RoomList;
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_BtnFind;
+
+	// 눌렀을 때 호출되는 함수
+	UFUNCTION()
+	void OnClickBackFromFind();
+	
+	// 세션 목록
 	UPROPERTY(editanywhere)
-	TSubclassOf<class USessionItemWidget> sessionItemFactory;
+	TSubclassOf<class USessionListItemWidget> SessionItemFactory;
 	
 	// 함수
 	UFUNCTION()
