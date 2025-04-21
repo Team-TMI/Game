@@ -37,7 +37,7 @@ void ARollingCannonProp::BeginPlay()
 
 	if (ObjectPool)
 	{
-		ObjectPool->OnObjectRetrurn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
+		ObjectPool->OnObjectReturn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
 	}
 }
 

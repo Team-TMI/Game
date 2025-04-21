@@ -64,6 +64,7 @@ void UObjectPoolComponent::Expand()
 		// ARollingCannonProp* cannon = Cast<ARollingCannonProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollingCannonProp::StaticClass()));
 
 		// 소속풀 지정
+		// Queue 로 연습하기
 		BallProp->SetObjectPool(this);
 		BallProp->SetActive(false);
 		Pool.Push(BallProp);
@@ -77,7 +78,7 @@ void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject)
 	// 사용하고 나서 다시 풀에 넣자 
 	Pool.Push(ReturnObject);
 	// 알림을 보낸다: 다시 왔음!!
-	OnObjectRetrurn.Broadcast();
+	OnObjectReturn.Broadcast();
 }
 
 void UObjectPoolComponent::Initialize()

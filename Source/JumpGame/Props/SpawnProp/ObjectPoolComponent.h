@@ -35,7 +35,7 @@ public:
 
 	// 델리게이트 함수
 	UPROPERTY(BlueprintAssignable)
-	FOnObjectRetrurn OnObjectRetrurn;
+	FOnObjectRetrurn OnObjectReturn;
 
 public:
 	// 생성할 액터 타입 설정
