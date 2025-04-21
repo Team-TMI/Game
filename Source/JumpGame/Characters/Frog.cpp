@@ -297,7 +297,7 @@ void AFrog::StopSprint()
 
 void AFrog::StartCrouch()
 {
-	if (GetCharacterMovement()->IsFalling())
+	if (GetCharacterMovement()->IsFalling() || bIsSwimming)
 	{
 		return;
 	}
@@ -336,8 +336,7 @@ void AFrog::StopCrouch()
 	GetWorldTimerManager().ClearTimer(CrouchTimer);
 	CrouchTime = 0.f;
 
-	SuperJumpRatio = 0.f;
-	bIsSuperJump = false;
+	ResetSuperJumpRatio();
 }
 
 void AFrog::InitFrogState()
@@ -362,4 +361,10 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 		};
 		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
 	}
+}
+
+void AFrog::ResetSuperJumpRatio()
+{
+	SuperJumpRatio = 0.f;
+	bIsSuperJump = false;
 }

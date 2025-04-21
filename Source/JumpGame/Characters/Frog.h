@@ -55,6 +55,7 @@ public:
 	void InitFrogState();
 	UFUNCTION(BlueprintCallable)
 	void SetJumpAvailableBlock(int32 Block);
+	void ResetSuperJumpRatio();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
