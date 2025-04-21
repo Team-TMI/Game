@@ -49,6 +49,25 @@ void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 	}
 }
 
+void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	if (bDebug)
+	{
+		FLog::Log("AObstacleProp::OnMyBeginOverlap");
+	}
+}
+
+void AObstacleProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (bDebug)
+	{
+		FLog::Log("AObstacleProp::OnMyEndOverlap");
+	}
+}
+
 // Called when the game starts or when spawned
 void AObstacleProp::BeginPlay()
 {
@@ -56,6 +75,8 @@ void AObstacleProp::BeginPlay()
 	
 	SetReplicateMovement(true);
 	CollisionComp->OnComponentHit.AddDynamic(this, &AObstacleProp::OnMyHit);
+	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AObstacleProp::OnMyBeginOverlap);
+	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AObstacleProp::OnMyEndOverlap);
 }
 
 void AObstacleProp::GetLifetimeReplicatedProps(

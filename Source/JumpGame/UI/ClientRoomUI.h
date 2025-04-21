@@ -35,6 +35,8 @@ public:
 	// 메인 관련
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoFind;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_GoCreateMap;
 	
 	// 눌렀을때 호출되는 함수
 	UFUNCTION()

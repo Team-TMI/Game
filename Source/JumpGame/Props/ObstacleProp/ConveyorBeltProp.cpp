@@ -30,22 +30,22 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	Character = Cast<AFrog>(OtherActor);
+	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
 
 void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	Character = nullptr;
+	Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
 // Called when the game starts or when spawned
 void AConveyorBeltProp::BeginPlay()
 {
 	Super::BeginPlay();
-
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AConveyorBeltProp::OnMyBeginOverlap);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AConveyorBeltProp::OnMyEndOverlap);
+	
 }
 
 // Called every frame
