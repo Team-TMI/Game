@@ -29,6 +29,7 @@ void ABounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, AActor*
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	AFrog* Frog = Cast<AFrog>(OtherActor);
+	
 	CalculateForce(Frog);
 }
 
