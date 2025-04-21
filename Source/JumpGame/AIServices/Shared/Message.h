@@ -4,6 +4,7 @@
 
 enum class EMessageType : uint8
 {
+	None = 0,
 	Ping = 1,
 	Pong = 2,
 	QuizNotify = 3,
@@ -115,5 +116,5 @@ union FMessageUnion
 	FEyeTrackingNotifyMessage EyeTrackingNotifyMessage;
 	FEyeTrackingRequest EyeTrackingRequestMessage;
 	FEyeTrackingResponse EyeTrackingResponseMessage;
-	uint8 RawData[128];
+	uint8 RawData[1460];
 };
