@@ -5,25 +5,26 @@
 #include "CoreMinimal.h"
 #include "IOHandlerInterface.h"
 #include "IWebSocket.h"
-#include "JumpGame/AIServices/Shared/Message.h"
 
 /**
  * 
  */
-class JUMPGAME_API FSocketHandler : public IIOHandlerInterface
+class JUMPGAME_API FSocketHandler : public IIOHandlerInterface, public TSharedFromThis<FSocketHandler>
 {
 public:
 	FSocketHandler();
 
-	virtual void Init() override;
-	virtual void SendMessage(const FMessageUnion& Message) override;
-	virtual void ReceiveMessage() override;
+	virtual void Init(const FIOHandlerInitInfo& InitInfo) override;
+	virtual bool SendGameMessage(const FMessageUnion& Message) override;
+	virtual bool ReceiveMessage() override { return true; };
 	
-	virtual ~FSocketHandler();
-
-	const FString ServerURL = TEXT("ws://192.168.20.68:8029/ws");
-	const FString ServerProtocol = TEXT("ws");
+	virtual ~FSocketHandler() override;
 	
 private:
+	void ReceiveSocketMessage(const void* Data, SIZE_T Size, SIZE_T BytesRemaining);
+	
 	TSharedPtr<IWebSocket> Socket = nullptr;
+
+	FString ServerURL;
+	FString ServerProtocol;
 };

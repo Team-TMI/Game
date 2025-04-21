@@ -4,6 +4,7 @@
 #include "NetworkGameState.h"
 
 #include "GameFramework/PlayerState.h"
+#include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/Core/PlayerController/NetworkPlayerController.h"
 #include "JumpGame/Core/PlayerState/NetworkPlayerState.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
@@ -26,6 +27,8 @@ ANetworkGameState::ANetworkGameState()
 	ConnectionVerifyComponent->OnConnectionSucceeded.AddDynamic(this, &ANetworkGameState::OnConnectionSucceeded);
 	ConnectionVerifyComponent->OnConnectionBlocked.AddDynamic(this, &ANetworkGameState::OnConnectionBlocked);
 	ConnectionVerifyComponent->InitMaxPlayerCount(2);
+
+	IOManagerComponent = CreateDefaultSubobject<UIOManagerComponent>(TEXT("IOManagerComponent"));
 }
 
 

@@ -37,6 +37,9 @@ public:
 	void MulticastRPC_ConnectionSucceeded(const FString& NetID);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_RetryConnections(const TArray<FString>& NetIDs);
+
+	UPROPERTY()
+	class UIOManagerComponent* IOManagerComponent = nullptr;
 private:
 	UPROPERTY()
 	class UConnectionVerifyComponent* ConnectionVerifyComponent = nullptr;

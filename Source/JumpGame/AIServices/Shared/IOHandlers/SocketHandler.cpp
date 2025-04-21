@@ -9,49 +9,63 @@ FSocketHandler::FSocketHandler()
 {
 }
 
-void FSocketHandler::Init()
+void FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo)
 {
-	IIOHandlerInterface::Init();
-
+	ServerURL = InitInfo.ServerUrl;
+	ServerProtocol = InitInfo.ServerProtocol;
+	MessageQueue = InitInfo.MessageQueue;
 	// ...
 	Socket = FWebSocketsModule::Get().CreateWebSocket(ServerURL, ServerProtocol);
 
-	TWeakObjectPtr<FSocketHandler> WeakThis = this;
+	TWeakPtr<FSocketHandler> WeakSharedThis = AsShared();
 	
-	Socket->OnConnected().AddLambda([WeakThis]() {
-		if (!WeakThis.IsValid()) return;
+	Socket->OnConnected().AddLambda([WeakSharedThis]() {
+		if (!WeakSharedThis.IsValid()) return;
 
-		FSocketHandler* StrongThis = WeakThis.Get();
+		TSharedPtr<FSocketHandler> StrongThis = WeakSharedThis.Pin();
 		
 		UE_LOG(LogTemp, Warning, TEXT("Connected to WebSocket server."));
 	});
 
-	Socket->OnConnectionError().AddLambda([WeakThis](const FString& Error) {
-		if (!WeakThis.IsValid()) return;
+	Socket->OnConnectionError().AddLambda([WeakSharedThis](const FString& Error) {
+		if (!WeakSharedThis.IsValid()) return;
 
-		FSocketHandler* StrongThis = WeakThis.Get();
+		TSharedPtr<FSocketHandler> StrongThis = WeakSharedThis.Pin();
 		
 		UE_LOG(LogTemp, Error, TEXT("Connection error: %s"), *Error);
 	});
+	
+	Socket->OnRawMessage().AddLambda([WeakSharedThis](const void* Data, SIZE_T Size, SIZE_T BytesRemaining) {
+		if (!WeakSharedThis.IsValid()) return;
 
-	Socket->OnRawMessage().AddLambda([WeakThis](const void* Data, SIZE_T Size, SIZE_T BytesRemaining) {
-		if (!WeakThis.IsValid()) return;
+		TSharedPtr<FSocketHandler> StrongThis = WeakSharedThis.Pin();
 
-		FSocketHandler* StrongThis = WeakThis.Get();
+		StrongThis->ReceiveSocketMessage(Data, Size, BytesRemaining);
 	});
 
 	Socket->Connect();
 }
 
-void FSocketHandler::SendMessage(const FMessageUnion& Message)
+bool FSocketHandler::SendGameMessage(const FMessageUnion& Message)
 {
 	Socket->Send(Message.RawData, Message.Header.PayloadSize, true);
+	return true;
 }
 
-void FSocketHandler::ReceiveMessage()
+void FSocketHandler::ReceiveSocketMessage(const void* Data, SIZE_T Size, SIZE_T BytesRemaining)
 {
+	const uint8* RawData = (const uint8*)Data;
+
+	FMessageUnion Message;
+	// memory copy
+	FMemory::Memcpy(&Message, RawData, Size);
+	if (MessageQueue && MessageQueue->find(Message.Header.Type) != MessageQueue->end())
+	{
+		MessageQueue->at(Message.Header.Type).push(Message);
+	}
 }
 
 FSocketHandler::~FSocketHandler()
 {
+	
 }
