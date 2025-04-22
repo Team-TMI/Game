@@ -12,7 +12,8 @@ public class JumpGame : ModuleRules
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
 			"UMG", "OnlineSubsystem" , "OnlineSubsystemSteam", "SlateCore",
-			"Json", "JsonUtilities", "HTTP", "WebSockets", "InteractiveToolsFramework"
+			"Json", "JsonUtilities", "HTTP", "WebSockets", "InteractiveToolsFramework",
+			"MotionTrajectory", "AdvancedWidgets"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

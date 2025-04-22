@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -19,9 +20,10 @@ AObstacleProp::AObstacleProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	Tags.Add("Obstacle");
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
-		TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
 	if (TempMesh.Succeeded())
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
@@ -29,7 +31,6 @@ AObstacleProp::AObstacleProp()
 	CollisionComp->SetBoxExtent(FVector(49, 49, 0));
 	CollisionComp->SetRelativeLocation(FVector(0, 0, 100));
 	MeshComp->SetRelativeLocation(FVector(0, 0, -50));
-	Tags.Add("Obstacle");
 }
 
 void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -57,6 +58,14 @@ void AObstacleProp::BeginPlay()
 	CollisionComp->OnComponentHit.AddDynamic(this, &AObstacleProp::OnMyHit);
 }
 
+void AObstacleProp::GetLifetimeReplicatedProps(
+	TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AObstacleProp, DeltaRot);
+}
+
 // Called every frame
 void AObstacleProp::Tick(float DeltaTime)
 {
@@ -66,15 +75,20 @@ void AObstacleProp::Tick(float DeltaTime)
 }
 
 void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float Force,
-                                    bool XYOverride, bool ZOverride)
+                                    bool bXYOverride, bool bZOverride)
 {
 	if (bDebug)
 	{
 		FLog::Log("AObstacleProp::LaunchCharacter", Direction.Z, Force);
 	}
-	// 가상 함수: 기본 로직
-	LaunchVelocity = Direction.GetSafeNormal() * Force;
-	Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+
+	// 물어보기
+	if (Character->IsLocallyControlled())
+	{
+		// 가상 함수: 기본 로직
+		LaunchVelocity = Direction.GetSafeNormal() * Force;
+		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+	}
 }
 
 void AObstacleProp::CalculateForce(AFrog* Character)
@@ -87,8 +101,18 @@ void AObstacleProp::CalculateForce(AFrog* Character)
 
 void AObstacleProp::ObstacleRotate()
 {
-	float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
-	FRotator DeltaRot = RotAxis * RotSpeed;
-	// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
+	//서버라면
+	if (HasAuthority())
+	{
+		float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
+		DeltaRot = RotAxis * RotSpeed;
+		// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
+		PivotScene->AddLocalRotation(DeltaRot);
+	}
+}
+
+void AObstacleProp::OnRep_ObstacleRotate()
+{
+	// 클라이언트라면 이 함수가 실행
 	PivotScene->AddLocalRotation(DeltaRot);
 }
