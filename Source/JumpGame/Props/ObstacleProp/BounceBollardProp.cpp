@@ -13,8 +13,9 @@ ABounceBollardProp::ABounceBollardProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("BounceBollard");
-	
-	CollisionComp->SetRelativeScale3D(FVector(0,0,0));
+
+	// NOTE: scale로 0해버리면 밑의 자식들 안보임 Extent로 하자
+	CollisionComp->SetBoxExtent(FVector(FVector::ZeroVector));
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
 		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleCylinder.SM_ObstacleCylinder'"));
@@ -23,6 +24,10 @@ ABounceBollardProp::ABounceBollardProp()
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
 	MeshComp->SetRelativeLocation(FVector(0, 0, 0));
+
+	// 메쉬랑 부딪힘 (CollisionComp랑은 충돌하지 않는다)
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	MeshComp->SetCollisionProfileName(TEXT("Prop"));
 }
 
 void ABounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

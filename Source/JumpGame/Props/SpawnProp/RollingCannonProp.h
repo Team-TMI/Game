@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "ObjectPoolComponent.h"
+#include "JumpGame/Props/ObstacleProp/ObstacleProp.h"
 #include "RollingCannonProp.generated.h"
 
 UCLASS()
-class JUMPGAME_API ARollingCannonProp : public AActor
+class JUMPGAME_API ARollingCannonProp : public AObstacleProp
 {
 	GENERATED_BODY()
 
@@ -26,9 +27,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// 외관 설정
-	UPROPERTY(editAnywhere, BlueprintReadWrite)
-	class UStaticMeshComponent* MeshComp;
-	
 	UPROPERTY(visibleAnywhere, BlueprintReadOnly)
 	class UObjectPoolComponent* ObjectPool;
 

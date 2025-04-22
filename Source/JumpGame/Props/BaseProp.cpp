@@ -11,11 +11,12 @@ ABaseProp::ABaseProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
+	
 	Tags.Add("Prop");
 
 	PivotScene = CreateDefaultSubobject<USceneComponent>(TEXT("PivotScene"));
 	PivotScene->SetupAttachment(RootComponent);
-	
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionComp"));
 	CollisionComp->SetBoxExtent(FVector(50.f));
 	CollisionComp->SetupAttachment(PivotScene);
@@ -31,19 +32,25 @@ void ABaseProp::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// 동작 동기화
+	SetReplicateMovement(true);
 }
 
 void ABaseProp::SetCollision(bool bEnable)
 {
+	// 장애물에 추가 메쉬가 있는 경우에 override
 	if (bEnable)
 	{
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		// 추가 메쉬 설정
 	}
 	else
 	{
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		// 추가 메쉬 설정
+		// TODO: Material 불투명하게 바꿔주기
 	}
 }
 

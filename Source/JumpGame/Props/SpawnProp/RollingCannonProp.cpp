@@ -4,6 +4,7 @@
 #include "RollingCannonProp.h"
 
 #include "RollingBallProp.h"
+#include "Components/BoxComponent.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 
@@ -13,11 +14,12 @@ ARollingCannonProp::ARollingCannonProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("Cannon");
-	bReplicates = true;
-
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-	SetRootComponent(MeshComp);
+	
 	ObjectPool = CreateDefaultSubobject<UObjectPoolComponent>(TEXT("ObjectPool"));
+
+	// 콜리전 없음
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 }
 
 void ARollingCannonProp::OnProjectileReturn()

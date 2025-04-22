@@ -13,15 +13,16 @@ ARotateHammerProp::ARotateHammerProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("RotateHammer");
+
+	// CollisionComp랑 충돌
+	CollisionComp->SetCollisionProfileName(TEXT("Prop"));
 }
 
 // Called when the game starts or when spawned
 void ARotateHammerProp::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 콜리전 설정 (Block)
-	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	
 	RotAxis = FRotator(0,0,1);
 	RotAngle = 50.f;
 }
@@ -34,9 +35,8 @@ void ARotateHammerProp::Tick(float DeltaTime)
 
 void ARotateHammerProp::CalculateForce(AFrog* Character)
 {
-	FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
-	FVector Direction = CharacterDir*(-1) + FVector::UpVector;
+	FVector Direction = CollisionComp->GetUpVector();
 	float Force = 500;
 	
-	Super::LaunchCharacter(Character, Direction, Force);
+	Super::LaunchCharacter(Character, Direction, Force, true, true);
 }

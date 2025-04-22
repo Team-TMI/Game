@@ -26,4 +26,3 @@ void ARotatePlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-
