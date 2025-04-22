@@ -106,7 +106,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
-	
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f;
@@ -123,6 +123,9 @@ AFrog::AFrog()
 	// 초기값 설정
 	bIsSwimming = false;
 	CharacterState = ECharacterStateEnum::None;
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("FrogCollision"));
+	GetCapsuleComponent()->CanCharacterStepUpOn = ECB_Yes;
 }
 
 void AFrog::NotifyControllerChanged()
@@ -255,7 +258,7 @@ void AFrog::StartJump()
 
 		return;
 	}
-	
+
 	// 슈퍼 점프
 	if (GetCharacterMovement()->IsCrouching())
 	{
@@ -270,10 +273,10 @@ void AFrog::StartJump()
 			//FLog::Log("LittleJump");
 			SetJumpAvailableBlock(2);
 		}
-		
+
 		StopCrouch();
 		Jump();
-		
+
 		return;
 	}
 
@@ -297,6 +300,7 @@ void AFrog::StopSprint()
 
 void AFrog::StartCrouch()
 {
+	// 공중에 있거나 수영 중이면 리턴
 	if (GetCharacterMovement()->IsFalling() || bIsSwimming)
 	{
 		return;
@@ -309,13 +313,14 @@ void AFrog::StartCrouch()
 	FTimerDelegate CrouchDelegate{
 		FTimerDelegate::CreateLambda([this]() {
 			CrouchTime += GetWorld()->GetDeltaSeconds();
-			
+
 			if (CrouchTime >= SuperJumpValue)
 			{
 				bIsSuperJump = true;
 			}
-			
+
 			SuperJumpRatio = FMath::Clamp(CrouchTime / SuperJumpValue, 0.f, 1.f);
+			OnSuperJumpRatioChanged.Broadcast(SuperJumpRatio);
 
 			//FLog::Log("Ratio", SuperJumpRatio);
 		})
@@ -342,6 +347,7 @@ void AFrog::StopCrouch()
 void AFrog::InitFrogState()
 {
 	SetJumpAvailableBlock(1);
+	ResetSuperJumpRatio();
 }
 
 void AFrog::SetJumpAvailableBlock(int32 Block)
@@ -366,5 +372,7 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 void AFrog::ResetSuperJumpRatio()
 {
 	SuperJumpRatio = 0.f;
+	OnSuperJumpRatioChanged.Broadcast(0.f);
+
 	bIsSuperJump = false;
 }

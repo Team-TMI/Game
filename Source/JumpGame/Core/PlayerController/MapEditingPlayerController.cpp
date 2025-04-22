@@ -45,7 +45,7 @@ bool AMapEditingPlayerController::OnGizmoClickOperation(APrimitiveProp* InContro
 		APrimitiveProp* PrimitiveProp = Cast<APrimitiveProp>(Actor);
 		if (PrimitiveProp && PrimitiveProp != InControlledProp)
 		{
-			PrimitiveProp->SetCollision(false);
+			PrimitiveProp->SetPrimitivePropCollision(false);
 		}
 	}
 
@@ -74,7 +74,7 @@ bool AMapEditingPlayerController::OnGizmoClickOperation(APrimitiveProp* InContro
 		APrimitiveProp* PrimitiveProp = Cast<APrimitiveProp>(Actor);
 		if (PrimitiveProp && PrimitiveProp != InControlledProp)
 		{
-			PrimitiveProp->SetCollision(true);
+			PrimitiveProp->SetPrimitivePropCollision(true);
 		}
 	}
 	
@@ -90,7 +90,7 @@ bool AMapEditingPlayerController::OnActorClickOperation(APrimitiveProp* InContro
 	// 현재의 InControlledProp가 nullptr이 아니라면 해당 액터의 Collision을 켜준다.
 	if (InControlledProp) 
 	{
-		InControlledProp->SetCollision(true);
+		InControlledProp->SetPrimitivePropCollision(true);
 	}
 
 	// 마우스 위치에 있는 액터를 HitResult로 가져온다.
@@ -99,7 +99,7 @@ bool AMapEditingPlayerController::OnActorClickOperation(APrimitiveProp* InContro
 	
 	if (InControlledProp)
 	{
-		InControlledProp->SetCollision(false);
+		InControlledProp->SetPrimitivePropCollision(false);
 	}
 
 	bool bResult = true;

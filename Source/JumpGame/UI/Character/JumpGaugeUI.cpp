@@ -1,29 +1,37 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "JumpGauge.h"
+#include "JumpGaugeUI.h"
 
 #include "Components/RadialSlider.h"
 #include "JumpGame/Characters/Frog.h"
 
-void UJumpGauge::NativeConstruct()
+void UJumpGaugeUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (Frog)
+	{
+		Frog->OnSuperJumpRatioChanged.AddDynamic(this, &UJumpGaugeUI::OnSuperJumpRatioChanged);
+	}
 }
 
-void UJumpGauge::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void UJumpGaugeUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
+	
+}
 
-	JumpGaugeSlider->SetValue(Frog->SuperJumpRatio);
+void UJumpGaugeUI::OnSuperJumpRatioChanged(float NewRatio)
+{
+	JumpGaugeSlider->SetValue(NewRatio);
 
-	if (JumpGaugeSlider->GetValue() >= 1.f)
+	if (NewRatio >= 1.f)
 	{
 		JumpGaugeSlider->SetSliderProgressColor(FColor::Red);
 	}
-	else if (JumpGaugeSlider->GetValue() >= 0.5f)
+	else if (NewRatio >= 0.5f)
 	{
 		JumpGaugeSlider->SetSliderProgressColor(FColor::Yellow);
 	}

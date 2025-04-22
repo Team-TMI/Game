@@ -22,8 +22,7 @@ ARisingWaterProp::ARisingWaterProp()
 
 	CollisionComp->SetBoxExtent(FVector(600.f, 600.f, 1300.f));
 	CollisionComp->SetCollisionProfileName(TEXT("Water"));
-
-
+	
 	DeepCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("DeepCollision"));
 	DeepCollision->SetupAttachment(RootComponent);
 	DeepCollision->SetBoxExtent(FVector(500.f, 500.f, 700.f));
@@ -68,12 +67,30 @@ void ARisingWaterProp::BeginPlay()
 
 	DeadZoneCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginDeadZoneOverlap);
 
-	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	// Todo: 오버랩 됐을 때 하고, 끝나면 null 초기화
+	if (AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn()))
+	{
+		Frog = Character;
+	}
 }
 
 void ARisingWaterProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	switch (WaterState)
+	{
+	case EWaterStateEnum::None:
+		break;
+	case EWaterStateEnum::Rise:
+		RiseWater(DeltaTime);
+		break;
+	}
+
+	if (!Frog)
+	{
+		return;
+	}
 
 	// 일정 시간이 흘렀는데 상태가 "None"인 경우, 강제로 "Surface"로 수정
 	if (!bIsChanged && Frog->bIsSwimming)
@@ -86,16 +103,7 @@ void ARisingWaterProp::Tick(float DeltaTime)
 			bIsChanged = true;
 		}
 	}
-
-	switch (WaterState)
-	{
-	case EWaterStateEnum::None:
-		break;
-	case EWaterStateEnum::Rise:
-		RiseWater(DeltaTime);
-		break;
-	}
-
+	
 	UCharacterMovementComponent* MovementComponent{Frog->GetCharacterMovement()};
 	if (MovementComponent)
 	{
@@ -213,12 +221,21 @@ void ARisingWaterProp::OnBeginDeadZoneOverlap(UPrimitiveComponent* OverlappedCom
 	}
 }
 
+void ARisingWaterProp::SetCollision(bool bEnable)
+{
+	Super::SetCollision(bEnable);
+}
+
 void ARisingWaterProp::RiseWater(float DeltaTime)
 {
 	float DeltaZ{DeltaTime * RisingSpeed};
-
-	Frog->SetActorLocation(FVector(Frog->GetActorLocation().X, Frog->GetActorLocation().Y,
+	
+	if (Frog)
+	{
+		Frog->SetActorLocation(FVector(Frog->GetActorLocation().X, Frog->GetActorLocation().Y,
 	                               Frog->GetActorLocation().Z + DeltaZ));
+	}
+	
 	SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y,
 	                         GetActorLocation().Z + DeltaZ));
 }

@@ -4,23 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "JumpGauge.generated.h"
+#include "EyeTrackingUI.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class JUMPGAME_API UJumpGauge : public UUserWidget
+class JUMPGAME_API UEyeTrackingUI : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void NativeConstruct() override;
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-
-	UPROPERTY(BlueprintReadWrite)
-	class AFrog* Frog;
+	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class URadialSlider* JumpGaugeSlider;
+	class UImage* TargetLocationImage;
 };
