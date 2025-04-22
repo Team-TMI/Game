@@ -4,6 +4,8 @@
 #include "ConnectionVerifyComponent.h"
 
 #include "GameFramework/PlayerState.h"
+#include "JumpGame/Core/GameMode/NetworkGameMode.h"
+#include "JumpGame/Core/GameState/NetworkGameState.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 // Sets default values for this component's properties
@@ -12,107 +14,88 @@ UConnectionVerifyComponent::UConnectionVerifyComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+	bWantsInitializeComponent = true;
 	SetIsReplicatedByDefault(true);
 	// ...
 }
 
+void UConnectionVerifyComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		RecursiveCheckClientVerified();
+	}
+}
+
+void UConnectionVerifyComponent::RecursiveCheckClientVerified()
+{
+	// 모든 클라이언트가 추가되지 않은 경우
+	GetWorld()->GetTimerManager().ClearTimer(ConnectionTimer);
+	
+	TArray<FString> UnVerifiedClients;
+	
+	if (CheckAllClientAdded(UnVerifiedClients))
+	{
+		return ;
+	}
+
+	if (UnVerifiedClients.Num() > 0)
+	{
+		ANetworkGameState* GameState = Cast<ANetworkGameState>(GetWorld()->GetGameState());
+		
+		GameState->MulticastRPC_RetryConnections(UnVerifiedClients);
+	}
+	
+	GetWorld()->GetTimerManager().SetTimer(ConnectionTimer, this, &UConnectionVerifyComponent::RecursiveCheckClientVerified,
+		CheckInterval, false);
+}
+
 void UConnectionVerifyComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (EndPlayReason == EEndPlayReason::Type::Destroyed)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(ConnectionTimerHandle);
-	}
+	// 타이머를 종료한다.
+	GetWorld()->GetTimerManager().ClearTimer(ConnectionTimer);
 	
 	Super::EndPlay(EndPlayReason);
 }
 
-// 서버가 총 플레이어 수를 설정한다.
 void UConnectionVerifyComponent::InitMaxPlayerCount(const int32 InMaxPlayerCount)
 {
-	if (GetOwnerRole() != ROLE_Authority)
-	{
-		return;
-	}
-	
+	// 최대 플레이어 수를 설정한다.
 	MaxPlayerCount = InMaxPlayerCount;
-	if (MaxPlayerCount <= 0)
-	{
-		FFastLogger::LogConsole(TEXT("ConnectionVerifyComponent::InitMaxPlayerCount: MaxPlayerCount is less than 0"));
-		return;
-	}
-	
-	RequestHandshake_Recursive();
 }
 
-void UConnectionVerifyComponent::RequestHandshake_Recursive()
+void UConnectionVerifyComponent::AddClient(const FString& NetID)
 {
-	GetWorld()->GetTimerManager().ClearTimer(ConnectionTimerHandle);
-	
-	// 전부 연결된 상태라면 더이상 요청하지 않는다.
-	if (ConnectionMap.Num() >= MaxPlayerCount)
+	if (ClientMap.Contains(NetID))
 	{
+		// 이미 추가된 클라이언트인 경우
 		return;
 	}
-	
-	// 서버에서 클라이언트에게 Handshake를 요청한다.
-	MulticastRPC_RequestHandshake();
 
-	GetWorld()->GetTimerManager().SetTimer(ConnectionTimerHandle, this, &ThisClass::RequestHandshake_Recursive, InitialConnectionInterval, false);
+	ClientMap.Add(NetID, false);
 }
 
-// 클라이언트는 서버에게 Handshake에 대한 응답을 한다.
-void UConnectionVerifyComponent::MulticastRPC_RequestHandshake_Implementation()
+void UConnectionVerifyComponent::ConfirmClient(const FString& NetID)
 {
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (!PC)
+	if (ClientMap.Contains(NetID) && !ClientMap[NetID])
 	{
+		ClientMap[NetID] = true;
+		OnClientAdded.Broadcast(NetID);
+	}
+	else
+	{
+		// 클라이언트가 추가되지 않은 경우
+		FFastLogger::LogConsole(TEXT("Error: Client %s is not added"), *NetID);
 		return;
 	}
-	APlayerState* PS = PC->GetPlayerState<APlayerState>();
-	if (!PS)
-	{
-		return;
-	}
-
-	const FUniqueNetIdRepl& NetID = PS->GetUniqueId();
-	const FUniqueNetIdPtr& NetIDPtr = NetID.GetUniqueNetId();
-	if (!NetIDPtr.IsValid())
-	{
-		return;
-	}
-	const FString& NetIDString = NetIDPtr->ToString();
-	
-	// 서버에서 클라이언트에게 Handshake에 대한 응답을 한다.
-	ServerRPC_ConfirmHandshake(NetIDString, true);
 }
 
-// 서버는 클라이언트에게 Handshake가 성공적으로 완료되었음을 알린다.
-void UConnectionVerifyComponent::ServerRPC_ConfirmHandshake_Implementation(const FString& NetID, bool bConnSucceded)
+void UConnectionVerifyComponent::SetClientVerify(bool bCond)
 {
-	if (ConnectionMap.Contains(NetID))
-	{
-		return;
-	}
-	ConnectionMap.Add(NetID, bConnSucceded);
-	OnClientAdded.Broadcast(NetID);
-	if (ConnectionMap.Num() >= MaxPlayerCount)
-	{
-		OnAllClientAdded.Broadcast();
-	}
-	ClientRPC_NotifyConfirmHandshake(true);
-}
-
-// 클라이언트만 이 함수를 받으면 됨
-void UConnectionVerifyComponent::ClientRPC_NotifyConfirmHandshake_Implementation(bool bConnSucceded)
-{
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		return;
-	}
-	
-	bConnectionSucceeded = bConnSucceded;
-	
-	if (bConnectionSucceeded)
+	bClientVerify = bCond;
+	if (bClientVerify)
 	{
 		OnConnectionSucceeded.Broadcast();
 	}
@@ -120,4 +103,32 @@ void UConnectionVerifyComponent::ClientRPC_NotifyConfirmHandshake_Implementation
 	{
 		OnConnectionBlocked.Broadcast();
 	}
+}
+
+
+bool UConnectionVerifyComponent::CheckAllClientAdded(TArray<FString>& UnVerifiedClients)
+{
+	bool bAllClientAdded = true;
+
+	if (ClientMap.Num() < MaxPlayerCount)
+	{
+		// 아직 모든 클라이언트가 추가되지 않은 경우
+		return false;
+	}
+	
+	for (const auto& Client : ClientMap)
+	{
+		if (!Client.Value)
+		{
+			UnVerifiedClients.Add(Client.Key);
+		}
+		bAllClientAdded &= Client.Value;
+	}
+
+	if (bAllClientAdded)
+	{
+		OnAllClientAdded.Broadcast();
+	}
+	
+	return bAllClientAdded;
 }

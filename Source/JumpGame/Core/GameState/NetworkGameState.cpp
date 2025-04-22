@@ -3,12 +3,34 @@
 
 #include "NetworkGameState.h"
 
+#include "GameFramework/PlayerState.h"
+#include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/Core/PlayerController/NetworkPlayerController.h"
+#include "JumpGame/Core/PlayerState/NetworkPlayerState.h"
+#include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
+#include "JumpGame/Utils/FastLogger.h"
+
+class ANetworkPlayerState;
 
 ANetworkGameState::ANetworkGameState()
 {
+	bReplicates = true;
+	
 	PrimaryActorTick.bCanEverTick = true;
+
+	ConnectionVerifyComponent = CreateDefaultSubobject<UConnectionVerifyComponent>(TEXT("ConnectionVerifyComponent"));
+	ConnectionVerifyComponent->SetNetAddressable();
+	ConnectionVerifyComponent->SetIsReplicated(true);
+	
+	ConnectionVerifyComponent->OnClientAdded.AddDynamic(this, &ANetworkGameState::OnClientAdded);
+	ConnectionVerifyComponent->OnAllClientAdded.AddDynamic(this, &ANetworkGameState::OnAllClientAdded);
+	ConnectionVerifyComponent->OnConnectionSucceeded.AddDynamic(this, &ANetworkGameState::OnConnectionSucceeded);
+	ConnectionVerifyComponent->OnConnectionBlocked.AddDynamic(this, &ANetworkGameState::OnConnectionBlocked);
+	ConnectionVerifyComponent->InitMaxPlayerCount(2);
+
+	IOManagerComponent = CreateDefaultSubobject<UIOManagerComponent>(TEXT("IOManagerComponent"));
 }
+
 
 double ANetworkGameState::GetServerWorldTimeSeconds() const
 {
@@ -30,5 +52,86 @@ double ANetworkGameState::GetServerWorldTimeSeconds() const
 	else
 	{
 		return GetWorld()->GetTimeSeconds();
+	}
+}
+
+void ANetworkGameState::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+void ANetworkGameState::VerifyConnection(const FString& NetID)
+{
+	ConnectionVerifyComponent->ConfirmClient(NetID);
+}
+
+void ANetworkGameState::HandleConnection(const FString& NetID)
+{
+	ConnectionVerifyComponent->AddClient(NetID);
+	MulticastRPC_ConnectionSucceeded(NetID);
+}
+
+void ANetworkGameState::MulticastRPC_ConnectionSucceeded_Implementation(const FString& NetID)
+{
+	ANetworkPlayerController* PlayerController = Cast<ANetworkPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (PlayerController == nullptr)
+	{
+		FFastLogger::LogConsole(TEXT("PlayerController is null"));
+		return;
+	}
+	ANetworkPlayerState* PlayerState = Cast<ANetworkPlayerState>(PlayerController->PlayerState);
+	if (PlayerState == nullptr)
+	{
+		FFastLogger::LogConsole(TEXT("PlayerState is null"));
+		return;
+	}
+	
+	// 서버에 연결되었을 때 서버에 자신의 NetID를 전송한다.
+	const FUniqueNetIdRepl& PlayerNetID = PlayerState->GetUniqueId();
+	FUniqueNetIdPtr PlayerNetIDPtr = PlayerNetID.GetUniqueNetId();
+	FString MyNetID = PlayerNetIDPtr->ToString();
+	if (NetID == MyNetID)
+	{
+		// 자신의 NetID와 같다면 연결이 성공한 것이다.
+		ConnectionVerifyComponent->SetClientVerify(true);
+		PlayerState->ServerRPC_ConnectionVerified(MyNetID);
+	}
+}
+
+void ANetworkGameState::OnClientAdded(const FString& NetID)
+{
+	FFastLogger::LogConsole(TEXT("GameState Client Added : %s"), *NetID);
+}
+
+void ANetworkGameState::OnAllClientAdded()
+{
+	FFastLogger::LogConsole(TEXT("GameState All Client Added"));
+}
+
+void ANetworkGameState::OnConnectionSucceeded()
+{
+	FFastLogger::LogConsole(TEXT("GameState Connection Succeeded"));
+}
+
+void ANetworkGameState::OnConnectionBlocked()
+{
+	FFastLogger::LogConsole(TEXT("GameState Connection Blocked"));
+}
+
+void ANetworkGameState::MulticastRPC_RetryConnections_Implementation(const TArray<FString>& NetIDs)
+{
+	ANetworkPlayerController* PlayerController = Cast<ANetworkPlayerController>(GetWorld()->GetFirstPlayerController());
+	ANetworkPlayerState* PlayerState = Cast<ANetworkPlayerState>(PlayerController->PlayerState);
+	
+	// 서버에 연결되었을 때 서버에 자신의 NetID를 전송한다.
+	const FUniqueNetIdRepl& PlayerNetID = PlayerState->GetUniqueId();
+	FUniqueNetIdPtr PlayerNetIDPtr = PlayerNetID.GetUniqueNetId();
+	FString MyNetID = PlayerNetIDPtr->ToString();
+	if (NetIDs.Contains(MyNetID))
+	{
+		// 자신의 NetID와 같다면 연결이 성공한 것이다.
+		ConnectionVerifyComponent->SetClientVerify(true);
+		PlayerState->ServerRPC_ConnectionVerified(MyNetID);
 	}
 }

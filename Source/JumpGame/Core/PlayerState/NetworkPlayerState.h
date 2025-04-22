@@ -13,4 +13,15 @@ UCLASS()
 class JUMPGAME_API ANetworkPlayerState : public APlayerState
 {
 	GENERATED_BODY()
+
+public:
+	virtual void OnSetUniqueId() override;
+	
+#pragma region NetworkVerify
+public:
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_HandShake(const FString& NetID);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ConnectionVerified(const FString& NetID);
+#pragma endregion
 };

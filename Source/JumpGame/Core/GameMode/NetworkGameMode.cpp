@@ -3,24 +3,22 @@
 
 #include "NetworkGameMode.h"
 
-#include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Core/GameState/NetworkGameState.h"
 #include "JumpGame/Core/PlayerController/NetworkPlayerController.h"
+#include "JumpGame/Core/PlayerState/NetworkPlayerState.h"
+#include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 ANetworkGameMode::ANetworkGameMode()
 {
+	bReplicates = true;
+	
 	PlayerControllerClass = ANetworkPlayerController::StaticClass();
-	DefaultPawnClass = AFrog::StaticClass();
+	GameStateClass = ANetworkGameState::StaticClass();
+	PlayerStateClass = ANetworkPlayerState::StaticClass();
 }
 
 void ANetworkGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// hide mouse cursor
-	APlayerController* PlayerController{GetWorld()->GetFirstPlayerController()};
-	if (PlayerController) {
-		PlayerController->bShowMouseCursor = false;
-		PlayerController->bEnableClickEvents = false;
-		PlayerController->bEnableMouseOverEvents = false;
-	}
 }

@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PrimitiveProp/PrimitiveProp.h"
 #include "BaseProp.generated.h"
 
 class UBoxComponent;
 
 UCLASS()
-class JUMPGAME_API ABaseProp : public AActor
+class JUMPGAME_API ABaseProp : public APrimitiveProp
 {
 	GENERATED_BODY()
 
@@ -20,6 +21,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void SetCollision(bool bEnable);
 
 public:
 	// Called every frame
