@@ -4,9 +4,14 @@
 #include "NetworkPlayerController.h"
 
 #include "NetworkClockComponent.h"
+#include "GameFramework/PlayerState.h"
+#include "JumpGame/Core/GameState/NetworkGameState.h"
+#include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
 
 ANetworkPlayerController::ANetworkPlayerController()
 {
+	bReplicates = true;
+	
 	NetworkClockComponent = CreateDefaultSubobject<UNetworkClockComponent>("Network Clock Component");
 	NetworkClockComponent->SetNetAddressable();
 	NetworkClockComponent->SetIsReplicated(true);
@@ -31,4 +36,9 @@ void ANetworkPlayerController::ReceivedPlayer()
 	{
 		NetworkClockComponent->RequestServerTime(this);
 	}
+}
+	
+void ANetworkPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
 }

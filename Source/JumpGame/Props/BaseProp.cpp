@@ -14,12 +14,16 @@ ABaseProp::ABaseProp()
 	Tags.Add("Prop");
 
 	PivotScene = CreateDefaultSubobject<USceneComponent>(TEXT("PivotScene"));
-	SetRootComponent(PivotScene);
+	PivotScene->SetupAttachment(RootComponent);
+	
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionComp"));
 	CollisionComp->SetBoxExtent(FVector(50.f));
-	CollisionComp->SetupAttachment(RootComponent);
+	CollisionComp->SetupAttachment(PivotScene);
+	CollisionComp->SetCollisionProfileName(TEXT("Prop"));
+
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(CollisionComp);
+	MeshComp->SetCollisionProfileName(TEXT("Prop"));
 }
 
 // Called when the game starts or when spawned
@@ -27,6 +31,20 @@ void ABaseProp::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ABaseProp::SetCollision(bool bEnable)
+{
+	if (bEnable)
+	{
+		CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+	else
+	{
+		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 // Called every frame
