@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ObstacleProp.h"
+#include "JumpGame/AIServices/Shared/Message.h"
 #include "EyeTrackingProp.generated.h"
 
 UCLASS()
@@ -43,6 +44,7 @@ public:
 	void TrackLocation(FVector2f Resolution, FVector2f ScreenLoc);
 
 public:
+	FMessageHeader Header;
 	uint8 QuizID;
 	// 퀴즈 시작 및 종료
 	uint8 Start;
@@ -61,4 +63,10 @@ public:
 public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UEyeTrackingUI> EyeTrackingUIClass;
+	UPROPERTY(EditAnywhere)
+	UEyeTrackingUI* TrackingUI;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UFlyingObjectUI> FlyingObjectUIClass;
+	UPROPERTY(EditAnywhere)
+	UFlyingObjectUI* FlyingObjectUI;
 };

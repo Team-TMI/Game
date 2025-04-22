@@ -6,8 +6,11 @@
 
 #include "Camera/CameraComponent.h"
 #include "Components/Image.h"
+#include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Core/GameState/NetworkGameState.h"
 #include "JumpGame/UI/Obstacle/EyeTrackingUI.h"
+#include "JumpGame/UI/Obstacle/FlyingObjectUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 
@@ -22,6 +25,21 @@ AEyeTrackingProp::AEyeTrackingProp()
 void AEyeTrackingProp::BeginPlay()
 {
 	Super::BeginPlay();
+
+	FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
+	if (FlyingObjectUI)
+	{
+		FlyingObjectUI->AddToViewport();
+	}
+
+	if (GEngine && GEngine->GameViewport)
+	{
+		// 내 뷰포트 사이즈 가져옴
+		FVector2D ViewportSize;
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+		FVector2D ScreenPosition(ScreenX, ScreenY);
+		TrackingUI->SetPositionInViewport(ScreenPosition);
+	}
 }
 
 void AEyeTrackingProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -72,66 +90,71 @@ void AEyeTrackingProp::SendEyeTrackingStart()
 {
 	FLog::Log("SendEyeTrackingStart");
 
-	QuizID = 100;
-	Start = 1;
-	End = 0;
+	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
 
-	// FEyeTrackingRequest.QuizID = QuizID;
-	// FEyeTrackingRequest.Start = Start;
-	// FEyeTrackingRequest.End = End;
+	FMessageUnion SendMessage;
+	SendMessage.EyeTrackingNotifyMessage.Header.Type = EMessageType::EyeTrackingNotify;
+	SendMessage.EyeTrackingNotifyMessage.Header.PayloadSize = sizeof(FEyeTrackingNotifyMessage);
+	SendMessage.EyeTrackingNotifyMessage.Header.SessionID[0] = 1;
+	SendMessage.EyeTrackingNotifyMessage.Header.PlayerID = 1;
 
-	// send
+	SendMessage.EyeTrackingNotifyMessage.QuizID = 100;
+	SendMessage.EyeTrackingNotifyMessage.Start = 1;
+	SendMessage.EyeTrackingNotifyMessage.End = 0;
+
+	GS->IOManagerComponent->SendGameMessage(SendMessage);
 }
 
 void AEyeTrackingProp::SendEyeTrackingEnd()
 {
 	FLog::Log("SendEyeTrackingEnd");
 
-	QuizID = 100;
-	Start = 0;
-	End = 1;
+	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
 
-	// FEyeTrackingRequest.QuizID = QuizID;
-	// FEyeTrackingRequest.Start = Start;
-	// FEyeTrackingRequest.End = End;
+	FMessageUnion SendMessage;
+	SendMessage.EyeTrackingNotifyMessage.Header.Type = EMessageType::EyeTrackingNotify;
+	SendMessage.EyeTrackingNotifyMessage.Header.PayloadSize = sizeof(FEyeTrackingNotifyMessage);
+	SendMessage.EyeTrackingNotifyMessage.Header.SessionID[0] = 1;
+	SendMessage.EyeTrackingNotifyMessage.Header.PlayerID = 1;
 
-	// send
+	SendMessage.EyeTrackingNotifyMessage.QuizID = 100;
+	SendMessage.EyeTrackingNotifyMessage.Start = 0;
+	SendMessage.EyeTrackingNotifyMessage.End = 1;
+
+	GS->IOManagerComponent->SendGameMessage(SendMessage);
 }
 
 void AEyeTrackingProp::RecvEyeTrackingInfo()
 {
 	FLog::Log("RecvEyeTrackingInfo");
 
-	// recv
+	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
 
-	// QuizID = FEyeTrackingResponse.QuizID;
-	// Start = FEyeTrackingResponse.Start;
-	// End = FEyeTrackingResponse.End;
-	// Width = FEyeTrackingResponse.Width;
-	// Height = FEyeTrackingResponse.Height;
-	// X = FEyeTrackingResponse.X;
-	// Y = FEyeTrackingResponse.Y;
-	// bBlink = FEyeTrackingResponse.bBlink;
-	// State = FEyeTrackingResponse.State;
+	if (!GS)
+	{
+		FLog::Log("No GameState");
+		return;
+	}
 
-	QuizID = 123;
-	Start = 1;
-	End = 0;
-	Width = 1000;
-	Height = 1000;
-	X = 500;
-	Y = 500;
-	bBlink = 0;
-	State = 100;
+	FMessageUnion RecvMessage;
+	if (GS->IOManagerComponent->PopMessage(EMessageType::EyeTrackingResponse, RecvMessage))
+	{
+		QuizID = RecvMessage.EyeTrackingResponseMessage.QuizID;
+		Width = RecvMessage.EyeTrackingResponseMessage.Width;
+		Height = RecvMessage.EyeTrackingResponseMessage.Height;
+		X = RecvMessage.EyeTrackingResponseMessage.X;
+		Y = RecvMessage.EyeTrackingResponseMessage.Y;
+		bBlink = RecvMessage.EyeTrackingResponseMessage.bBlink;
+		State = RecvMessage.EyeTrackingResponseMessage.State;
 
-	UE_LOG(LogTemp, Warning, TEXT("State: %d"), State);
-	UE_LOG(LogTemp, Warning, TEXT("Blink: %d"), bBlink);
-	UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f"), X, Y);
-	UE_LOG(LogTemp, Warning, TEXT("Width: %f, Height: %f"), Width, Height);
-	UE_LOG(LogTemp, Warning, TEXT("Start: %d, End: %d"), Start, End);
-	UE_LOG(LogTemp, Warning, TEXT("QuizID: %d"), QuizID);
+		UE_LOG(LogTemp, Warning, TEXT("State: %d"), State);
+		UE_LOG(LogTemp, Warning, TEXT("Blink: %d"), bBlink);
+		UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f"), X, Y);
+		UE_LOG(LogTemp, Warning, TEXT("Width: %f, Height: %f"), Width, Height);
+		UE_LOG(LogTemp, Warning, TEXT("QuizID: %d"), QuizID);
 
-	TrackLocation(FVector2f(Width, Height), FVector2f(X, Y));
+		TrackLocation(FVector2f(Width, Height), FVector2f(X, Y));
+	}
 }
 
 void AEyeTrackingProp::TrackLocation(FVector2f Resolution, FVector2f ScreenLoc)
@@ -149,15 +172,24 @@ void AEyeTrackingProp::TrackLocation(FVector2f Resolution, FVector2f ScreenLoc)
 		// Screen 좌표로 변환
 		float ScreenX{static_cast<float>(NormalizedX * ViewportSize.X)};
 		float ScreenY{static_cast<float>(NormalizedY * ViewportSize.Y)};
+
+		// UI 인스턴스 없으면 생성
+		if (!TrackingUI)
+		{
+			TrackingUI = CreateWidget<UEyeTrackingUI>(GetWorld(), EyeTrackingUIClass);
+		}
 		
-		UEyeTrackingUI* TrackingUI{CreateWidget<UEyeTrackingUI>(GetWorld(), EyeTrackingUIClass)};
 		if (TrackingUI)
 		{
-			TrackingUI->AddToViewport();
+			// 뷰포트에 없으면 추가
+			if (!TrackingUI->IsInViewport())
+			{
+				TrackingUI->AddToViewport();
+			}
+
+			// 위치 갱신
 			FVector2D ScreenPosition(ScreenX, ScreenY);
 			TrackingUI->SetPositionInViewport(ScreenPosition);
 		}
 	}
-
-
 }

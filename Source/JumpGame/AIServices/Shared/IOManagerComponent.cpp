@@ -46,6 +46,26 @@ void UIOManagerComponent::BeginPlay()
 
 	IPCHandler->Init(IOHandlerInitInfo, &MessageQueue);
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
+
+	// 더미 테스트
+	for (int32 i = 0; i < 100; i++)
+	{
+		FMessageUnion MessageUnion;
+		MessageUnion.EyeTrackingResponseMessage.Header.Type = EMessageType::EyeTrackingResponse;
+		MessageUnion.EyeTrackingResponseMessage.Header.PayloadSize = sizeof(FEyeTrackingResponse);
+		MessageUnion.EyeTrackingResponseMessage.Header.PlayerID = 1;
+		MessageUnion.EyeTrackingResponseMessage.Header.SessionID[0] = 1;
+		
+		MessageUnion.EyeTrackingResponseMessage.QuizID = 10;
+		MessageUnion.EyeTrackingResponseMessage.Width = 1000;
+		MessageUnion.EyeTrackingResponseMessage.Height = 1000;
+		MessageUnion.EyeTrackingResponseMessage.X = FMath::RandRange(50, 950);
+		MessageUnion.EyeTrackingResponseMessage.Y = FMath::RandRange(50, 950);
+		MessageUnion.EyeTrackingResponseMessage.bBlink = 0;
+		MessageUnion.EyeTrackingResponseMessage.State = 100;
+		
+		MessageQueue[EMessageType::EyeTrackingResponse].push(MessageUnion);
+	}
 }
 
 void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)
