@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Frog.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSuperJumpRatioChanged, float, NewRatio);
+
 UENUM()
 enum class ECharacterStateEnum : uint8
 {
@@ -90,6 +92,11 @@ public:
 	float SuperJumpValue{3.f};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsSuperJump{false};
+
+	// 델리게이트
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnSuperJumpRatioChanged OnSuperJumpRatioChanged;
 	
 	// 컴포넌트 
 public:
