@@ -9,11 +9,12 @@ FSocketHandler::FSocketHandler()
 {
 }
 
-void FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo)
+void FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo,
+	std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr)
 {
 	ServerURL = InitInfo.ServerUrl;
 	ServerProtocol = InitInfo.ServerProtocol;
-	MessageQueue = InitInfo.MessageQueue;
+	MessageQueue = InMessageQueuePtr;
 	// ...
 	Socket = FWebSocketsModule::Get().CreateWebSocket(ServerURL, ServerProtocol);
 

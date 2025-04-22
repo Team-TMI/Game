@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma pack(push, 1)
+// #pragma pack(push, 1)
 
 enum class EMessageType : uint8
 {
@@ -103,7 +103,7 @@ struct FEyeTrackingResponse {
 	uint8 State; // 100 : 정상성, 200 : 클라 에러, 300 : 서버 에러
 };
 
-#pragma pack(pop)
+// #pragma pack(pop)
 
 union FMessageUnion
 {

@@ -38,7 +38,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_RetryConnections(const TArray<FString>& NetIDs);
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="IO")
 	class UIOManagerComponent* IOManagerComponent = nullptr;
 private:
 	UPROPERTY()

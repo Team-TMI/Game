@@ -23,12 +23,10 @@ bool UIOManagerComponent::SendGameMessage(const FMessageUnion& Message)
 void UIOManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	// IOHandler 초기화
 	TSharedPtr<IIOHandlerInterface> IPCHandler = MakeShared<FIPCHandler>();
-	IPCHandler->Init(IOHandlerInitInfo);
 	TSharedPtr<IIOHandlerInterface> SocketHandler = MakeShared<FSocketHandler>();
-	SocketHandler->Init(IOHandlerInitInfo);
 	
 	RegisterIOHandler(EMessageType::Ping, SocketHandler);
 	RegisterIOHandler(EMessageType::Pong, SocketHandler);
@@ -39,12 +37,15 @@ void UIOManagerComponent::BeginPlay()
 	RegisterIOHandler(EMessageType::EyeTrackingNotify, IPCHandler);
 	RegisterIOHandler(EMessageType::EyeTrackingResponse, IPCHandler);
 	RegisterIOHandler(EMessageType::EyeTrackingRequest, IPCHandler);
-
+	
 	// queue 초기화
 	for (auto& Handler : IOHandlers)
 	{
 		MessageQueue[Handler.Key] = std::queue<FMessageUnion>();
 	}
+
+	IPCHandler->Init(IOHandlerInitInfo, &MessageQueue);
+	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
 }
 
 void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)
@@ -53,7 +54,7 @@ void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSh
 }
 
 void UIOManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                       FActorComponentTickFunction* ThisTickFunction)
+                                        FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 

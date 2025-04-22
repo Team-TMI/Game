@@ -13,7 +13,7 @@ class JUMPGAME_API IIOHandlerInterface
 public:
 	IIOHandlerInterface() {};
 
-	virtual void Init(const FIOHandlerInitInfo& InitInfo) = 0;
+	virtual void Init(const FIOHandlerInitInfo& InitInfo, std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr) = 0;
 	virtual bool SendGameMessage(const FMessageUnion& Message) = 0;
 	virtual bool ReceiveMessage() = 0;
 	

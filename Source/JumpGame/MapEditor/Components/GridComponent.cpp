@@ -154,8 +154,6 @@ void UGridComponent::Rotate(const FVector& Direction)
 
 	// 결과 적용
 	UpdatedActor->SetActorRotation(NewQuat);
-
-	FFastLogger::LogScreen(FColor::Red, TEXT("After Rotate : %s"), *Size.ToString());
 }
 
 void UGridComponent::SwapSize(const FVector& Direction)

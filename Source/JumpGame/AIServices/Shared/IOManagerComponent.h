@@ -24,7 +24,7 @@ public:
 
 	bool SendGameMessage(const FMessageUnion& Message);
 	bool PopMessage(const EMessageType& MessageType, FMessageUnion& OutMessage);
-
+	
 protected:
 	virtual void BeginPlay() override;
 	

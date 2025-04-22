@@ -41,8 +41,6 @@ void URotateHandlerManager::HandleRotate(FClickResponse& ClickResponse)
 
 	// PrimitiveProp->SetNewSizeByRotation(GridComponent->GetSize());
 	PrimitiveProp->RotateAllGizmos();
-	
-	FFastLogger::LogScreen(FColor::Red, TEXT("Rotate : %s"), *Axis.ToString());
 }
 
 void URotateHandlerManager::HandleAxis(FVector InAxis, FClickResponse& ClickResponse)
@@ -51,12 +49,10 @@ void URotateHandlerManager::HandleAxis(FVector InAxis, FClickResponse& ClickResp
 	if (!PrimitiveProp) return;
 
 	Axis = InAxis.GetSafeNormal().GetAbs();
-	FFastLogger::LogScreen(FColor::Red, TEXT("Axis : %s"), *Axis.ToString());
 }
 
 void URotateHandlerManager::ResetAxis()
 {
 	Axis = FVector(0, 0, 1);
-	FFastLogger::LogScreen(FColor::Red, TEXT("Reset Axis : %s"), *Axis.ToString());
 }
 
