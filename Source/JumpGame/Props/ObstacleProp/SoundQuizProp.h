@@ -33,9 +33,34 @@ public:
 	void SendEndSoundQuizNotify();
 
 	UPROPERTY()
-	int32 QuizID;
+	int32 QuizID = -1;
 	UPROPERTY()
-	float Similarity;
+	float Similarity = 0.f;
 	UPROPERTY()
-	int32 MessageSize;
+	uint32 MessageSize = 0;
+	UPROPERTY()
+	FString MessageStr = "";
+
+public:
+	// WAV 파일 로드 후 바이너리 데이터로 전환
+	UPROPERTY()
+	TArray<uint8> CachedBinaryWav;
+	UPROPERTY()
+	int32 CurrentSendIndex = 0;
+	UPROPERTY()
+	int32 TotalWavSize = 0;
+	UPROPERTY()
+	int32 ChunkSize = 1024;
+
+	// UNUSED: 나중에 0.01초 재귀로 바뀔수도있음
+	// FTimerHandle SendWavTimerHandle;
+	
+	void LoadWavFileBinary(const FString& FilePath, TArray<uint8>& BinaryData);
+
+public:
+	// UI 관련
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class USoundQuizUI> SoundQuizUIClass;
+	UPROPERTY(editAnywhere)
+	USoundQuizUI* SoundQuizUI;
 };
