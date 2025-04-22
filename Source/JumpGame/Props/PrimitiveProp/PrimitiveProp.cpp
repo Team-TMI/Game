@@ -158,7 +158,7 @@ void APrimitiveProp::SetUnSelected()
 	}
 }
 
-void APrimitiveProp::SetCollision(bool bCond)
+void APrimitiveProp::SetPrimitivePropCollision(bool bCond)
 {
 	if (bCond)
 	{

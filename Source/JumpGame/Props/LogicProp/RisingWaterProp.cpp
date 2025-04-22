@@ -22,8 +22,7 @@ ARisingWaterProp::ARisingWaterProp()
 
 	CollisionComp->SetBoxExtent(FVector(600.f, 600.f, 1300.f));
 	CollisionComp->SetCollisionProfileName(TEXT("Water"));
-
-
+	
 	DeepCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("DeepCollision"));
 	DeepCollision->SetupAttachment(RootComponent);
 	DeepCollision->SetBoxExtent(FVector(500.f, 500.f, 700.f));
@@ -67,7 +66,8 @@ void ARisingWaterProp::BeginPlay()
 	DeepCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginDeepOverlap);
 
 	DeadZoneCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginDeadZoneOverlap);
-	
+
+	// Todo: 오버랩 됐을 때 하고, 끝나면 null 초기화
 	if (AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn()))
 	{
 		Frog = Character;
@@ -219,6 +219,11 @@ void ARisingWaterProp::OnBeginDeadZoneOverlap(UPrimitiveComponent* OverlappedCom
 		Frog->CharacterState = ECharacterStateEnum::Deep;
 		Frog->SetActorLocation(RespawnPoint->GetComponentLocation());
 	}
+}
+
+void ARisingWaterProp::SetCollision(bool bEnable)
+{
+	Super::SetCollision(bEnable);
 }
 
 void ARisingWaterProp::RiseWater(float DeltaTime)

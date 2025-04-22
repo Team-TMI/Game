@@ -51,6 +51,8 @@ public:
 							   UPrimitiveComponent* OtherComp,
 							   int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	virtual void SetCollision(bool bEnable) override;
+
 public:
 	UFUNCTION()
 	void RiseWater(float DeltaTime);

@@ -18,13 +18,17 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-	UFUNCTION()
-	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-						int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
-	UFUNCTION()
-	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-					  int32 OtherBodyIndex) override;
+
+	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                              UPrimitiveComponent* OtherComp,
+	                              int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
+
+	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                            UPrimitiveComponent* OtherComp,
+	                            int32 OtherBodyIndex) override;
+
+	virtual void SetCollision(bool bEnable) override;
+
 
 public:
 	UPROPERTY()

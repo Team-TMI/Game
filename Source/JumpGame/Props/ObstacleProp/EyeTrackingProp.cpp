@@ -43,6 +43,11 @@ void AEyeTrackingProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}
 }
 
+void AEyeTrackingProp::SetCollision(bool bEnable)
+{
+	Super::SetCollision(bEnable);
+}
+
 // Called every frame
 void AEyeTrackingProp::Tick(float DeltaTime)
 {

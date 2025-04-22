@@ -123,6 +123,9 @@ AFrog::AFrog()
 	// 초기값 설정
 	bIsSwimming = false;
 	CharacterState = ECharacterStateEnum::None;
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("FrogCollision"));
+	GetCapsuleComponent()->CanCharacterStepUpOn = ECB_Yes;
 }
 
 void AFrog::NotifyControllerChanged()

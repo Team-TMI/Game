@@ -27,6 +27,9 @@ protected:
 	                            UPrimitiveComponent* OtherComp,
 	                            int32 OtherBodyIndex) override;
 
+	virtual void SetCollision(bool bEnable) override;
+
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
