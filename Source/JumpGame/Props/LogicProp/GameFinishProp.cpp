@@ -93,7 +93,7 @@ void AGameFinishProp::GameEnd()
 
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
-	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController());
+	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (Character != WinnerCharacter)
 	{
 		SetActorLocation(DefeatP->SpawnDefeatCharacter());
