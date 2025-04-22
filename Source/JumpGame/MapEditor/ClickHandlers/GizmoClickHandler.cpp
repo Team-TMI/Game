@@ -33,6 +33,7 @@ bool FGizmoClickHandler::HandleClick(FClickResponse& ClickResponse, AMapEditingP
 		if (UGizmoComponent* ControlledGizmo = ClickResponse.TargetGizmo)
 		{
 			ControlledGizmo->SetUnSelected();
+			ClickResponse.TargetGizmo = nullptr;
 		}
 		
 		ClickResponse.TargetGizmo = Cast<UGizmoComponent>(HitResult.GetComponent());

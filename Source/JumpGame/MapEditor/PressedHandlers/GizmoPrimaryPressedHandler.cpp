@@ -25,13 +25,14 @@ bool FGizmoPrimaryPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 	{
 		return false;
 	}
+	
 	if (!PressedResponse.TargetGizmo->IsA(UGizmoPrimaryComponent::StaticClass()))
 	{
 		return false;
 	}
-
+	
 	PressedResponse.TargetProp->SetGizmosCollision(false);
-
+	
 	FHitResult HitResult;
 	bool bResult = PlayerController->OnPressedOperation(PressedType, HitResult);
 	
@@ -41,15 +42,15 @@ bool FGizmoPrimaryPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 	{
 		return false;
 	}
-
+	
 	TWeakObjectPtr<UGridComponent> GridComponent = PressedResponse.TargetProp->GetGridComp();
 	UGridComponent* Grid = GridComponent.Get();
 	if (!Grid)
 	{
 		return false;
 	}
-
+	
 	Grid->MoveByGizmoPrimary(HitResult.Location, HitResult);
-
+	
 	return true;
 }
