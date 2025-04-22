@@ -3,6 +3,9 @@
 
 #include "GameStartProp.h"
 
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/PlayerStart.h"
+
 
 // Sets default values
 AGameStartProp::AGameStartProp()
@@ -10,13 +13,33 @@ AGameStartProp::AGameStartProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("GameStart");
+	
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
+		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
+	if (TempMesh.Succeeded())
+	{
+		MeshComp->SetStaticMesh(TempMesh.Object);
+	}
+	MeshComp->SetRelativeScale3D(FVector(10.f,10.f,0.5f));
+	
+	for (int32 i = 0; i <6; i++)
+	{
+		FString Name = FString::Printf(TEXT("StartPos%i"),i);
+		USceneComponent* StartPoint = CreateDefaultSubobject<USceneComponent>(*Name);
+		StartPoint->SetupAttachment(RootComponent);
+		
+		// 위치 지정
+		FVector Offset = FVector(0.f, i * Gap, 0.f) + FVector(0,0,100.f);
+		StartPoint->AddLocalOffset(Offset);
+
+		StartPoints.Add(StartPoint);
+	}
 }
 
 // Called when the game starts or when spawned
 void AGameStartProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -25,3 +48,17 @@ void AGameStartProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+/*FTransform AGameStartProp::PlayerStartTransform(int32 PlayerIdx) const
+{
+	// 스타트 포인트 값을 반환
+	if (StartPoints.IsValidIndex(PlayerIdx))
+	{
+		return StartPoints[PlayerIdx]->GetComponentTransform();
+	}
+}*/
+
+FTransform AGameStartProp::SinglePlayerStart()
+{
+	// 스타트 포인트 값을 반환
+	return StartPoints[0]->GetComponentTransform();
+}
