@@ -24,6 +24,9 @@ AConveyorBeltProp::AConveyorBeltProp()
 	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
 	Arrow->SetupAttachment(RootComponent);
 	Arrow->SetRelativeLocation(FVector(110, 0, 0));
+
+	// 컨베이어 벨트 콜리전과 overlap
+	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 }
 
 void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

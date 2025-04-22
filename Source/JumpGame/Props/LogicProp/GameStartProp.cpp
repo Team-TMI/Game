@@ -3,6 +3,7 @@
 
 #include "GameStartProp.h"
 
+#include "Components/BoxComponent.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerStart.h"
 
@@ -13,6 +14,8 @@ AGameStartProp::AGameStartProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("GameStart");
+
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
 		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));

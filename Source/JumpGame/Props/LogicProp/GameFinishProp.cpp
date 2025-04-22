@@ -30,6 +30,8 @@ AGameFinishProp::AGameFinishProp()
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
+	
+	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 }
 
 void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -77,20 +79,19 @@ void AGameFinishProp::GameEnd()
 		RisingWaterProp->StopRising();
 	}*/
 	
+	// 플레이어들 조작막기
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	PC->SetInputMode(FInputModeUIOnly());
+	PC->bShowMouseCursor = true;
+	// 우승자 앞에 보게 정렬하기
+	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
+	
 	// 시상대 스폰 (박스 위치부터 위로)
 	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,10000);
 	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
 	AVictoryPlatform* VictoryP = GetWorld()->SpawnActor<AVictoryPlatform>(VictoryPos, FRotator::ZeroRotator);
 	ADefeatPlatform* DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
-
-	// 플레이어들 조작막기
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	PC->SetInputMode(FInputModeUIOnly());
-	PC->bShowMouseCursor = true;
 	
-	// 우승자 앞에 보게 정렬하기
-	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
-
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
 	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());

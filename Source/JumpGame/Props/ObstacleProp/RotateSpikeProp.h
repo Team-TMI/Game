@@ -24,7 +24,7 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void SetCollision(bool bEnable) override;
 	virtual void CalculateForce(AFrog* Character) override;
 
 public:

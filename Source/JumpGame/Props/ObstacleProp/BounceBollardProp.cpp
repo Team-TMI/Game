@@ -14,7 +14,7 @@ ABounceBollardProp::ABounceBollardProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("BounceBollard");
 
-	// NOTE: scale로 0해버리면 밑의 자식들 안보임 Extent로 하시길
+	// NOTE: scale로 0해버리면 밑의 자식들 안보임 Extent로 하자
 	CollisionComp->SetBoxExtent(FVector(FVector::ZeroVector));
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
@@ -24,6 +24,10 @@ ABounceBollardProp::ABounceBollardProp()
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
 	MeshComp->SetRelativeLocation(FVector(0, 0, 0));
+
+	// 메쉬랑 부딪힘 (CollisionComp랑은 충돌하지 않는다)
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	MeshComp->SetCollisionProfileName(TEXT("Prop"));
 }
 
 void ABounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
