@@ -16,6 +16,11 @@ class JUMPGAME_API ANetworkPlayerController : public APlayerController
 
 public:
 	ANetworkPlayerController();
+
+	virtual void BeginPlay() override;
+
+
+	
 	
 // 네트워크 시계
 #pragma region NetworkClock
@@ -32,5 +37,4 @@ private:
 	UPROPERTY()
 	class UNetworkClockComponent* NetworkClockComponent = nullptr;
 #pragma endregion
-	
 };

@@ -41,7 +41,7 @@ void ABounceBollardProp::BeginPlay()
 	
 	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	// 콜리전 설정 (Block)
-	MeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	// MeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	MeshComp->OnComponentHit.AddDynamic(this, &ABounceBollardProp::OnBollardHit);
 }
 

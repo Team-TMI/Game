@@ -25,12 +25,20 @@ public:
 	UConnectionVerifyComponent();
 
 protected:
+	virtual void InitializeComponent() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	// 서버가 총 플레이어 수를 설정한다.
 	// 이게 설정이 되어야 타이머가 작동한다.
+	UFUNCTION()
 	void InitMaxPlayerCount(const int32 InMaxPlayerCount);
+	UFUNCTION()
+	void AddClient(const FString& NetID);
+	UFUNCTION()
+	void ConfirmClient(const FString& NetID);
+	UFUNCTION()
+	void SetClientVerify(bool bCond);
 
 	UPROPERTY()
 	FOnConnectionSucceeded OnConnectionSucceeded;
@@ -43,32 +51,19 @@ public:
 	
 private:
 	UFUNCTION()
-	void RequestHandshake_Recursive();
-	
-	// Three Way Handshake를 통해 연결 상태를 확인한다.
-	// 서버가 HandShake를 요청한다.
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPC_RequestHandshake();
-	// 클라이언트가 이에 응답한다.
-	UFUNCTION(Server, Reliable)
-	void ServerRPC_ConfirmHandshake(const FString& NetID, bool bConnSucceded);
-	// 서버가 클라이언트에게 결과를 전달한다.
-	UFUNCTION(Client, Reliable)
-	void ClientRPC_NotifyConfirmHandshake(bool bConnSucceded);
-	
-	// 서버에서 연결된 클라이언트들의 상태를 확인하기 위한 함수
-	UPROPERTY()
-	TMap<FString, bool> ConnectionMap;
-
-	// 클라이언트에서 Connection이 성공했는지 여부
-	UPROPERTY()
-	bool bConnectionSucceeded = false;
+	void RecursiveCheckClientVerified();
+	UFUNCTION()
+	bool CheckAllClientAdded(TArray<FString>& UnVerifiedClients);
 	
 	UPROPERTY()
-	float InitialConnectionInterval = 0.5f;
-	UPROPERTY()
-	FTimerHandle ConnectionTimerHandle;
-
+	bool bClientVerify = false;
 	UPROPERTY()
 	int32 MaxPlayerCount = 0;
+	UPROPERTY()
+	TMap<FString, bool> ClientMap;
+
+	UPROPERTY()
+	FTimerHandle ConnectionTimer;
+	UPROPERTY()
+	float CheckInterval = 0.5f;
 };
