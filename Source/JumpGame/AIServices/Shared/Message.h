@@ -13,6 +13,7 @@ enum class EMessageType : uint8
 	EyeTrackingNotify = 6,
 	EyeTrackingRequest = 7,
 	EyeTrackingResponse = 8,
+	ParsedWaveResponse = 100,
 };
 
 struct FMessageHeader
@@ -66,10 +67,23 @@ struct FWavResponseMessage {
 		
 	uint8 QuizID;
 	float Similarity; // 유사도
-	uint8 MessageSize; // [len(str), str]
-		
-	// 가변 길이 만큼 문자열을 뒤에 붙여서 보냄!
-	// STRING!!;
+	uint8 Message[1024]; // [len(str) : 4Byte, str]
+
+	/*
+		uint8 Message[1024];  // [len(str) : 4Byte, str]
+	
+		// 1. 먼저 문자열 길이(len)를 추출합니다.
+		uint32 len = 0;
+		FMemory::Memcpy(&len, Message, sizeof(uint32));  // Message의 처음 4바이트를 len에 복사
+	
+		// 2. 문자열을 추출하여 FString으로 변환합니다.
+		FString str;
+		if (len > 0)  // 문자열 길이가 0보다 클 때만
+		{
+		// Message + sizeof(uint32) 위치부터 길이만큼 복사하여 FString으로 생성
+		str = FString(UTF8_TO_TCHAR(reinterpret_cast<char*>(Message + sizeof(uint32)), len));
+		}
+	*/
 };
 
 // EyeTrackingNotify

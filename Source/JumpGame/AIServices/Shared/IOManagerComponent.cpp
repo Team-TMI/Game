@@ -46,6 +46,20 @@ void UIOManagerComponent::BeginPlay()
 
 	IPCHandler->Init(IOHandlerInitInfo, &MessageQueue);
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
+
+	// // Dummy Message
+	// for (int32 i = 0; i < 100; i++)
+	// {
+	// 	FPingMessage PingMessage;
+	// 	PingMessage.Header.Type = EMessageType::Ping;
+	// 	PingMessage.Header.PayloadSize = sizeof(FPingMessage);
+	// 	PingMessage.Header.PlayerID = 0;
+	// 	PingMessage.TimeStamp = FPlatformTime::Seconds();
+	//
+	// 	FMessageUnion MessageUnion;
+	// 	FMemory::Memcpy(&MessageUnion, &PingMessage, sizeof(FPingMessage));
+	// 	MessageQueue[EMessageType::Ping].push(MessageUnion);
+	// }
 }
 
 void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)
