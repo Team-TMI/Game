@@ -297,6 +297,7 @@ void AFrog::StopSprint()
 
 void AFrog::StartCrouch()
 {
+	// 공중에 있거나 수영 중이면 리턴
 	if (GetCharacterMovement()->IsFalling() || bIsSwimming)
 	{
 		return;
