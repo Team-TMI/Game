@@ -35,8 +35,8 @@ void ARotateHammerProp::Tick(float DeltaTime)
 void ARotateHammerProp::CalculateForce(AFrog* Character)
 {
 	FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
-	FVector Direction = CharacterDir + FVector::UpVector;
-	float Force = 300;
+	FVector Direction = CharacterDir*(-1) + FVector::UpVector;
+	float Force = 500;
 	
 	Super::LaunchCharacter(Character, Direction, Force);
 }

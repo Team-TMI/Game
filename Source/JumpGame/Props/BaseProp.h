@@ -36,7 +36,4 @@ protected:
 
 	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
 	USceneComponent* PivotScene;
-
-	// 콜리전 박스 크기 설정 (50이면 100큐브 딱맞음)
-	float BoxExtent = 50.0f;
 };

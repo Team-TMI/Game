@@ -23,7 +23,7 @@ AGameFinishProp::AGameFinishProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("GameFinish");
 
-	CollisionComp->SetBoxExtent(FVector(60));
+	CollisionComp->SetBoxExtent(FVector(60.f));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
 		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
 	if (TempMesh.Succeeded())

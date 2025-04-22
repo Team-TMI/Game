@@ -35,6 +35,7 @@ public:
 	void GameEnd();
 
 	// 첫번째 플레이어 저장 (1등)
+	UPROPERTY()
 	class AFrog* WinnerCharacter;
 
 	// 1등 정해졌나요?

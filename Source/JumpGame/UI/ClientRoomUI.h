@@ -35,10 +35,30 @@ public:
 	// 메인 관련
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoFind;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_GoCreateMap;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_GoFrogPass;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_GoSettings;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_GoCredit;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_GoGameEnd;
 	
 	// 눌렀을때 호출되는 함수
 	UFUNCTION()
 	void OnClickGoFindRoom();
+	UFUNCTION()
+	void OnClickGoCreateMap();
+	UFUNCTION()
+	void OnClickGoFrogPass();
+	UFUNCTION()
+	void OnClickGoSettings();
+	UFUNCTION()
+	void OnClickGoCredit();
+	UFUNCTION()
+	void OnClickGoGameEnd();
 
 	// WidgetSwitcher (1)
 	// 방 만들기 관련
