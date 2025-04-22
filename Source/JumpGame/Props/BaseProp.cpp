@@ -11,15 +11,15 @@ ABaseProp::ABaseProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	Tags.Add("Prop");
 
 	PivotScene = CreateDefaultSubobject<USceneComponent>(TEXT("PivotScene"));
 	SetRootComponent(PivotScene);
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionComp"));
-	CollisionComp->SetBoxExtent(FVector(BoxExtent));
+	CollisionComp->SetBoxExtent(FVector(50.f));
 	CollisionComp->SetupAttachment(RootComponent);
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(CollisionComp);
-	Tags.Add("Prop");
 }
 
 // Called when the game starts or when spawned

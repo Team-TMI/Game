@@ -13,6 +13,7 @@
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 void UClientRoomUI::NativeConstruct()
 {
@@ -22,10 +23,17 @@ void UClientRoomUI::NativeConstruct()
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
-	
+
+	// WidgetSwitcher (0)
 	// 메인 화면 버튼 클릭
 	Btn_GoFind->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoFindRoom);
-	
+	Btn_GoCreateMap->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoCreateMap);
+	Btn_GoFrogPass->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoFrogPass);
+	Btn_GoSettings->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoSettings);
+	Btn_GoCredit->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoCredit);
+	Btn_GoGameEnd->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoGameEnd);
+
+	// WidgetSwitcher (1)
 	// 방 만들기 화면 버튼 클릭
 	Btn_GoCreate->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoCreateRoom);
 	Btn_Create->OnClicked.AddDynamic(this, &UClientRoomUI::CreateSession);
@@ -48,6 +56,31 @@ void UClientRoomUI::OnClickGoFindRoom()
 
 	// 세션 검색 화면 넘어갈때 자동으로 한번은 세션을 검색해주자
 	OnClickFind();
+}
+
+void UClientRoomUI::OnClickGoCreateMap()
+{
+	UGameplayStatics::OpenLevel(GetWorld(),TEXT("SkyeTestMap"));
+}
+
+void UClientRoomUI::OnClickGoFrogPass()
+{
+	WidgetSwitcher->SetActiveWidgetIndex(2);
+}
+
+void UClientRoomUI::OnClickGoSettings()
+{
+	
+}
+
+void UClientRoomUI::OnClickGoCredit()
+{
+	WidgetSwitcher->SetActiveWidgetIndex(3);
+}
+
+void UClientRoomUI::OnClickGoGameEnd()
+{
+	
 }
 
 void UClientRoomUI::OnClickGoCreateRoom()
