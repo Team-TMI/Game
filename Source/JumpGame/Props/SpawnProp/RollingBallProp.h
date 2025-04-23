@@ -69,7 +69,7 @@ public:
 	FVector HitNormal = FVector::ZeroVector;
 	// 구르는 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RollingSpeed = 2500.f;
+	float RollingSpeed = 500.f;
 	
 	void RollingBall();
 };

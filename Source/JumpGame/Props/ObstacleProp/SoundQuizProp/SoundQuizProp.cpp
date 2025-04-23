@@ -3,12 +3,8 @@
 
 #include "SoundQuizProp.h"
 
-#include "HttpFwd.h"
-#include "HttpModule.h"
-#include "JsonObjectConverter.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/BoxComponent.h"
-#include "Interfaces/IHttpResponse.h"
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/AIServices/Shared/Message.h"
 #include "JumpGame/UI/Obstacle/SoundQuizUI.h"
@@ -26,6 +22,7 @@ void ASoundQuizProp::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// TODO: 나중에는 오버랩으로 옮김 (더미용)
 	NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
 
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
@@ -64,13 +61,6 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	// NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
 	// 이때 퀴즈 시작!
 	SendStartSoundQuizNotify();
-
-	// 시작하면 UI 띄우자
-	SoundQuizUI = CreateWidget<USoundQuizUI>(GetWorld(), SoundQuizUIClass);
-	if (SoundQuizUI)
-	{
-		SoundQuizUI->AddToViewport();
-	}
 }
 
 
@@ -190,9 +180,6 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	UE_LOG(LogTemp, Warning, TEXT("Receive Similarity: %f"), Similarity);
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageSize: %d"), MessageSize);
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageStr: %s"), *MessageStr);
-
-	// UI업데이트
-	SoundQuizUI->UpdateFromResponse(Similarity, MessageStr);
 }
 
 void ASoundQuizProp::SendEndSoundQuizNotify()
@@ -215,6 +202,11 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 
 	// 메세지 전송
 	// NetGS->IOManagerComponent->SendGameMessage(Msg);
+}
+
+void ASoundQuizProp::ResetSoundQuiz()
+{
+	
 }
 
 // WAV 파일을 로드하고 바이너리 데이터로 전환

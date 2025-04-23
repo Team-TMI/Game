@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "LogicProp.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/UI/VictoryPage.h"
 #include "GameFinishProp.generated.h"
 
 UCLASS()
@@ -40,4 +41,10 @@ public:
 
 	// 1등 정해졌나요?
 	bool bWinnerFound = false;
+
+	// UI관련
+	UPROPERTY(EditAnywhere, blueprintReadWrite)
+	TSubclassOf<class UVictoryPage> VictoryPageUIClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UVictoryPage* VictoryPageUI;
 };

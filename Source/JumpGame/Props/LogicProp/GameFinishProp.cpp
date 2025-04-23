@@ -82,6 +82,7 @@ void AGameFinishProp::GameEnd()
 	}
 	
 	// 플레이어들 조작막기
+	// TODO: 캐릭터 멈추는 함수 넣기
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	PC->SetInputMode(FInputModeUIOnly());
 	PC->bShowMouseCursor = true;
@@ -108,6 +109,14 @@ void AGameFinishProp::GameEnd()
 		PC->SetViewTargetWithBlend(VictoryP, 0.2f);
 	}
 
-	// TODO: 게임 종료 처리 (게임모드?)
+	// UI를 띄우자
+	VictoryPageUI = CreateWidget<UVictoryPage>(GetWorld(), VictoryPageUIClass);
+	if (VictoryPageUI)
+	{
+		VictoryPageUI->SetVictoryPlayerName(WinnerCharacter->GetName());
+		VictoryPageUI->AddToViewport();
+	}
+
+	// TODO: 게임 종료 처리 - 게임 한판 진행 시간 멈추기 (게임모드?)
 }
 

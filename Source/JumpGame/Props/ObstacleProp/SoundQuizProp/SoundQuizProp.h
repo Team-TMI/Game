@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ObstacleProp.h"
 #include "JumpGame/Core/GameState/NetworkGameState.h"
+#include "JumpGame/Props/ObstacleProp/ObstacleProp.h"
 #include "SoundQuizProp.generated.h"
 
 UCLASS()
@@ -27,10 +27,12 @@ public:
 
 public:
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
-	void SendStartSoundQuizNotify();
-	void SendSoundQuizMessage();
-	void ReceiveSoundQuizMessage();
-	void SendEndSoundQuizNotify();
+	virtual void SendStartSoundQuizNotify();
+	virtual void SendSoundQuizMessage();
+	virtual void ReceiveSoundQuizMessage();
+	virtual void SendEndSoundQuizNotify();
+	// TODO: 리셋함수 만들기
+	virtual void ResetSoundQuiz();
 
 	UPROPERTY()
 	int32 QuizID = -1;
@@ -56,11 +58,4 @@ public:
 	// FTimerHandle SendWavTimerHandle;
 	
 	void LoadWavFileBinary(const FString& FilePath, TArray<uint8>& BinaryData);
-
-public:
-	// UI 관련
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class USoundQuizUI> SoundQuizUIClass;
-	UPROPERTY(editAnywhere)
-	USoundQuizUI* SoundQuizUI;
 };

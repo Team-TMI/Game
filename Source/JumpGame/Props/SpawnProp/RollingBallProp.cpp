@@ -4,11 +4,11 @@
 #include "RollingBallProp.h"
 
 #include "ObjectPoolComponent.h"
-#include "Chaos/Utilities.h"
 #include "Components/ArrowComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -48,9 +48,18 @@ void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AAc
                                           UPrimitiveComponent* OtherComp, FVector NormalImpulse,
                                           const FHitResult& Hit)
 {
+	if (OtherActor->ActorHasTag("Frog")) return;
+	
 	FFastLogger::LogConsole(TEXT("Hit!!!: %s"), *OtherActor->GetName());
-	HitNormal = Hit.Normal;
-
+	HitNormal = Hit.ImpactNormal;
+	// NOTE: 구체가 Hit되었을 때, Hit.Normal 과 Hit.ImpactNormal에 대한 차이 
+	/*
+	Normal:
+	구체 트레이스 테스트의 경우, 법선 벡터는 "충돌 지점에서 구체의 중심을 향해 안쪽으로 향하는" 벡터입니다. 즉, 충돌 지점에서 구체의 중심으로 들어가는 방향입니다.
+	ImpactNormal:
+	구체가 평면에 부딪힐 때, 법선 벡터는 "평면으로부터 바깥쪽으로 향하는" 벡터입니다. 즉, 충돌 표면에서 구체 방향으로 나가는 방향입니다.
+	*/
+	
 	// TODO: 어떤 물체랑 부딪혔는지 분기처리 (장애물이면 bounce, 땅이면 구르기 등)
 	if (OtherActor->ActorHasTag("Ground"))
 	{
@@ -77,7 +86,7 @@ void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AAc
 		ReturnSelf();
 		FLog::Log(TEXT("물에 부딪힘, Clear Timer"));
 	}
-	 */
+	*/
 }
 
 // Called when the game starts or when spawned
@@ -154,12 +163,23 @@ void ARollingBallProp::RollingBall()
 {
 	if (bIsHitGround)
 	{
-		FVector MeshPos = MeshComp->GetRelativeLocation();
+		FVector MeshPos = GetActorLocation();
 		FVector NewPos;
+
+		// NOTE: 평지에서도, 경사면에서도 작동하는 법
+		// HitNormal을 Actor의 새로운 UpVector로 바꾼다 (회전값 생성)
+		FRotator NewRot = UKismetMathLibrary::MakeRotFromZY(HitNormal, GetActorRightVector());
+		// 새 회전값 적용
+		SetActorRotation(NewRot);
+
+		// 이걸 기준으로 액터의 앞 방향을 구해서 적용
+		GroundDir = GetActorForwardVector();
+		NewPos = MeshPos + GroundDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
+		SetActorLocation(NewPos, true);
 		
+		/* 기존 방식은: 경사면에서만 사용가능
 		GroundDir = FVector::CrossProduct(HitNormal, FVector::CrossProduct(GravityDir, HitNormal));
 		NewPos = MeshPos + GroundDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
-		
-		MeshComp->SetRelativeLocation(NewPos);
+		MeshComp->SetRelativeLocation(NewPos);*/
 	}
 }
