@@ -27,6 +27,9 @@ public:
 	virtual ~FIPCHandler() override;
 
 private:
+	bool PostProcessParsedMessage(const FMessageUnion& Message);
+	bool ParseMessage(FMessageUnion& Message, DWORD BytesRead);
+	
 	FString PipeName;
 
 	int32 BufferSize = BUFFER_SIZE;

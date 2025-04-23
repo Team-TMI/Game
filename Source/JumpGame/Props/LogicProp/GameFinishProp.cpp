@@ -39,7 +39,9 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	const FHitResult& SweepResult)
 {
 	if (!HasAuthority()) return;
-
+	if (!OtherActor->ActorHasTag("Frog")) return;
+	FFastLogger::LogConsole(TEXT("Overlap!!!: %s"), *OtherActor->GetName());
+	
 	AFrog* Character = Cast<AFrog>(OtherActor);
 	if (!bWinnerFound)
 	{
@@ -72,12 +74,12 @@ void AGameFinishProp::Tick(float DeltaTime)
 
 void AGameFinishProp::GameEnd()
 {
-	/*// 물 멈추자
+	// 물 멈추자
 	ARisingWaterProp* RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 	if (RisingWaterProp)
 	{
 		RisingWaterProp->StopRising();
-	}*/
+	}
 	
 	// 플레이어들 조작막기
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();

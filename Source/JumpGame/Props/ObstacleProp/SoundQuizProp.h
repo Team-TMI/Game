@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ObstacleProp.h"
+#include "JumpGame/Core/GameState/NetworkGameState.h"
 #include "SoundQuizProp.generated.h"
 
 UCLASS()
@@ -18,6 +19,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	class ANetworkGameState* NetGS;
 
 public:
 	// Called every frame
@@ -25,8 +27,40 @@ public:
 
 public:
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
-	void SendStartQuizNotify();
-	void SendDummyMessage();
-	void ReceiveDummyMessage();
-	void SendEndQuizNotify();
+	void SendStartSoundQuizNotify();
+	void SendSoundQuizMessage();
+	void ReceiveSoundQuizMessage();
+	void SendEndSoundQuizNotify();
+
+	UPROPERTY()
+	int32 QuizID = -1;
+	UPROPERTY()
+	float Similarity = 0.f;
+	UPROPERTY()
+	uint32 MessageSize = 0;
+	UPROPERTY()
+	FString MessageStr = "";
+
+public:
+	// WAV 파일 로드 후 바이너리 데이터로 전환
+	UPROPERTY()
+	TArray<uint8> CachedBinaryWav;
+	UPROPERTY()
+	int32 CurrentSendIndex = 0;
+	UPROPERTY()
+	int32 TotalWavSize = 0;
+	UPROPERTY()
+	int32 ChunkSize = 1024;
+
+	// UNUSED: 나중에 0.01초 재귀로 바뀔수도있음
+	// FTimerHandle SendWavTimerHandle;
+	
+	void LoadWavFileBinary(const FString& FilePath, TArray<uint8>& BinaryData);
+
+public:
+	// UI 관련
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class USoundQuizUI> SoundQuizUIClass;
+	UPROPERTY(editAnywhere)
+	USoundQuizUI* SoundQuizUI;
 };
