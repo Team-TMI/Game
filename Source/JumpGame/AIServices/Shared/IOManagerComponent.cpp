@@ -46,8 +46,8 @@ void UIOManagerComponent::BeginPlay()
 
 	IPCHandler->Init(IOHandlerInitInfo, &MessageQueue);
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
-
-	// 더미 테스트
+	
+	// EyeTracking용 더미 테스트
 	for (int32 i = 0; i < 100; i++)
 	{
 		FMessageUnion MessageUnion;
