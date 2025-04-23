@@ -4,6 +4,8 @@
 #include "SoundMommyQuizProp.h"
 
 #include "Blueprint/UserWidget.h"
+#include "JumpGame/UI/Obstacle/SoundQuizClear.h"
+#include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/UI/Obstacle/SoundQuizUI.h"
 
 
@@ -18,7 +20,6 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 void ASoundMommyQuizProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -47,5 +48,55 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	Super::ReceiveSoundQuizMessage();
 	
 	SoundQuizUI->UpdateFromResponse(Similarity, MessageStr);
+
+	// 20번 넘으면 자동 게임 종료, 디버프를 받는다 (못맞춤)
+	if (SendResponseIdx >= 20)
+	{
+		FLog::Log(TEXT("정답 못맞춤~~~"));
+		// UI 지우자
+		SoundQuizUI->RemoveFromParent();
+		bIsQuizFail = true;
+		// 실패...
+		SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
+		if (SoundQuizFail)
+		{
+			SoundQuizFail->AddToViewport();
+		}
+
+		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+	}
+
+	// 20번 안에, Fin되는 경우 -> 유사도가 높을때
+	if (SendResponseIdx < 20 && Similarity >= 90)
+	{
+		FLog::Log(TEXT("정답 입니다!!!"));
+		// UI 지우자
+		SoundQuizUI->RemoveFromParent();
+		// 성공!
+		SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
+		if (SoundQuizClear)
+		{
+			SoundQuizClear->AddToViewport();
+		}
+
+
+		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+	}
+
+	FFastLogger::LogConsole(TEXT("SendResponseIdx: %d"), SendResponseIdx);
+}
+
+void ASoundMommyQuizProp::RemoveSoundQuizUI()
+{
+	FLog::Log(TEXT("UI지웁니다"));
+	if (SoundQuizClear)
+	{
+		SoundQuizClear->RemoveFromParent();
+	}
+
+	if (SoundQuizFail)
+	{
+		SoundQuizFail->RemoveFromParent();
+	}
 }
 

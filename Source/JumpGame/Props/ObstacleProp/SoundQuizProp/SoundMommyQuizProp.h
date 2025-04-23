@@ -23,13 +23,26 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
-
 	virtual void ReceiveSoundQuizMessage() override;
+	
 public:
-	// UI 관련
+	// 퀴즈 플레이 UI
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class USoundQuizUI> SoundQuizUIClass;
 	UPROPERTY(editAnywhere)
 	USoundQuizUI* SoundQuizUI;
-	
+
+	// 퀴즈 성공 실패 UI
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class USoundQuizClear> SoundQuizClearUIClass;
+	UPROPERTY(EditAnywhere)
+	USoundQuizClear* SoundQuizClear;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class USoundQuizFail> SoundQuizFailUIClass;
+	UPROPERTY(EditAnywhere)
+	USoundQuizFail* SoundQuizFail;
+
+	// 몇 초 후에는 지우자
+	void RemoveSoundQuizUI();
+	FTimerHandle UIRemoveTimerHandle;
 };

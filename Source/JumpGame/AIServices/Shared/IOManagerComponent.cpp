@@ -61,13 +61,13 @@ void UIOManagerComponent::BeginPlay()
 	// 	MessageQueue[EMessageType::Ping].push(MessageUnion);
 	// }
 
-	// 사운드 퀴즈 더미 데이터
-	for (int32 i = 0; i < 3; i++)
+	// 사운드 퀴즈 Dummy Message
+	for (int32 i = 1; i <= 21; i++)
 	{
 		FWavResponseMessage ResponseMessage;
 		ResponseMessage.QuizID = i;
-		ResponseMessage.Similarity = 0.0f + i;
-		FString DummyStr = TEXT("Dummy");
+		ResponseMessage.Similarity = FMath::RandRange(0, 100);
+		FString DummyStr = TEXT("Dummy Hint");
 		FTCHARToUTF8 Converted(*DummyStr);
 		uint32 Len = Converted.Length();
 

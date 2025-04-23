@@ -7,6 +7,8 @@
 #include "JumpGame/Props/ObstacleProp/ObstacleProp.h"
 #include "SoundQuizProp.generated.h"
 
+class ARisingWaterProp;
+
 UCLASS()
 class JUMPGAME_API ASoundQuizProp : public AObstacleProp
 {
@@ -20,6 +22,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	class ANetworkGameState* NetGS;
+	ARisingWaterProp* RisingWaterProp;
+	// 퀴즈 실패했나요?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsQuizFail = false;
 
 public:
 	// Called every frame
@@ -42,6 +48,10 @@ public:
 	uint32 MessageSize = 0;
 	UPROPERTY()
 	FString MessageStr = "";
+
+	// 음성데이터를 몇번 주고 받으면 정답을 맞추지 못해도 게임을 종료
+	UPROPERTY()
+	uint32 SendResponseIdx = 0;
 
 public:
 	// WAV 파일 로드 후 바이너리 데이터로 전환

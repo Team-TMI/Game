@@ -3,11 +3,11 @@
 
 #include "SoundQuizProp.h"
 
-#include "Blueprint/UserWidget.h"
 #include "Components/BoxComponent.h"
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/AIServices/Shared/Message.h"
-#include "JumpGame/UI/Obstacle/SoundQuizUI.h"
+#include "JumpGame/Props/LogicProp/RisingWaterProp.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -24,6 +24,7 @@ void ASoundQuizProp::BeginPlay()
 
 	// TODO: 나중에는 오버랩으로 옮김 (더미용)
 	NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
+	RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 }
@@ -61,8 +62,13 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	// NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
 	// 이때 퀴즈 시작!
 	SendStartSoundQuizNotify();
-}
 
+	// 물 멈추자
+	if (RisingWaterProp)
+	{
+		RisingWaterProp->StopRising();
+	}
+}
 
 void ASoundQuizProp::SendStartSoundQuizNotify()
 {
@@ -180,13 +186,15 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	UE_LOG(LogTemp, Warning, TEXT("Receive Similarity: %f"), Similarity);
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageSize: %d"), MessageSize);
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageStr: %s"), *MessageStr);
+
+	// 총 몇번 응답 했는지를 체크한다
+	SendResponseIdx++;
 }
 
 void ASoundQuizProp::SendEndSoundQuizNotify()
 {
 	// 더미데이터 만들어서 보내기
-
-	// 정답을 맞췄거나, 횟수 20번이 끝났을때
+	
 	// 퀴즈 끝 메시지를 보내주자
 	FQuizNotifyMessage EndMessage;
 	EndMessage.Header.Type = EMessageType::QuizNotify;
@@ -202,6 +210,9 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 
 	// 메세지 전송
 	// NetGS->IOManagerComponent->SendGameMessage(Msg);
+
+	// 물 다시 차오르기
+	RisingWaterProp->StartRising();
 }
 
 void ASoundQuizProp::ResetSoundQuiz()
