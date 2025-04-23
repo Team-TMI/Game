@@ -9,8 +9,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "JumpGame/UI/Character/JumpGaugeUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -76,6 +78,20 @@ AFrog::AFrog()
 	if (Frog_Sprint.Succeeded())
 	{
 		SprintAction = Frog_Sprint.Object;
+	}
+
+	ConstructorHelpers::FClassFinder<UJumpGaugeUI> JumpGaugeUIWidget
+		(TEXT("/Game/UI/Character/WBP_JumpGauge.WBP_JumpGauge_C"));
+	if (JumpGaugeUIWidget.Succeeded())
+	{
+		JumpGaugeUIClass = JumpGaugeUIWidget.Class;
+		JumpGaugeUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("JumpGaugeUIComponent"));
+		JumpGaugeUIComponent->SetupAttachment(GetRootComponent());
+		JumpGaugeUIComponent->SetRelativeLocation(FVector(0, 0.f, 0));
+		JumpGaugeUIComponent->SetWidgetClass(JumpGaugeUIClass);
+		JumpGaugeUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
+		JumpGaugeUIComponent->SetDrawSize(FVector2D(240, 200));
+		JumpGaugeUIComponent->SetPivot(FVector2D(1.0, 0.5));
 	}
 
 	// CapsuleComponent Settings
@@ -202,7 +218,7 @@ void AFrog::Move(const struct FInputActionValue& Value)
 
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		
+
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
@@ -298,8 +314,27 @@ void AFrog::StopSprint()
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
 
+void AFrog::SetCrouchEnabled(bool bEnabled)
+{
+	bCanCrouch = bEnabled;
+
+	if (bCanCrouch)
+	{
+		SetJumpGaugeVisibility(true);
+	}
+	else
+	{
+		SetJumpGaugeVisibility(false);
+	}
+}
+
 void AFrog::StartCrouch()
 {
+	if (!bCanCrouch)
+	{
+		return;
+	}
+	
 	// 공중에 있거나 수영 중이면 리턴
 	if (GetCharacterMovement()->IsFalling() || bIsSwimming)
 	{
@@ -407,4 +442,9 @@ void AFrog::CameraMovementMode()
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->SetRelativeLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
 	CameraBoom->TargetArmLength = 400.f;
+}
+
+void AFrog::SetJumpGaugeVisibility(bool bVisibility)
+{
+	JumpGaugeUIComponent->SetVisibility(bVisibility);
 }

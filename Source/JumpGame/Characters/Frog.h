@@ -33,14 +33,14 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void NotifyControllerChanged() override;
 
 	virtual bool CanJumpInternal_Implementation() const override;
-	
+
 public:
 	// Input
 	void Move(const struct FInputActionValue& Value);
@@ -63,7 +63,8 @@ public:
 	bool GetCanMove() const;
 	void CameraMissionMode();
 	void CameraMovementMode();
-	
+	void SetJumpGaugeVisibility(bool bVisibility);
+	void SetCrouchEnabled(bool bEnabled);
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -81,7 +82,7 @@ public:
 	class UInputAction* CrouchAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* SprintAction;
-	
+
 	// 일반 변수
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -98,20 +99,24 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsSuperJump{false};
 	bool bCanMove{true};
-	
+	bool bCanCrouch{true};
+
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnSuperJumpRatioChanged OnSuperJumpRatioChanged;
-	
+
 	// 컴포넌트 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCharacterTrajectoryComponent* TrajectoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TSubclassOf<class UJumpGaugeUI> JumpGaugeUIClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UWidgetComponent* JumpGaugeUIComponent;
 
 	// Enum
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ECharacterStateEnum CharacterState;
-
 };

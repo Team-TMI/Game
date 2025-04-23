@@ -90,6 +90,7 @@ void AObjectEyeHunterProp::StopCharacter()
 		Frog->SetActorLocation(MissionLocation->GetComponentLocation());
 		Frog->CameraMissionMode();
 		Frog->StopMovementAndResetRotation();
+		Frog->SetCrouchEnabled(false);
 	}
 }
 
@@ -99,6 +100,7 @@ void AObjectEyeHunterProp::ResumeCharacter()
 	{
 		Frog->ResumeMovement();
 		Frog->CameraMovementMode();
+		Frog->SetCrouchEnabled(true);
 	}
 }
 

@@ -147,7 +147,8 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 		Frog->bIsSwimming = true;
 		Frog->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		//FLog::Log("Speed", Frog->GetCharacterMovement()->Velocity.Length());
-
+		Frog->SetCrouchEnabled(false);
+		
 		// 안빠르면 가라앉지 않게
 		if (Frog->GetCharacterMovement()->Velocity.Length() < 1'000.f)
 		{
@@ -171,6 +172,7 @@ void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
 		Frog->ResetSuperJumpRatio();
+		Frog->SetCrouchEnabled(true);
 		GetWorldTimerManager().ClearTimer(TimerHandle);
 		Frog->bIsSwimming = false;
 		Frog->CharacterState = ECharacterStateEnum::None;
