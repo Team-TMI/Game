@@ -214,7 +214,7 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 	Msg.Header.PayloadSize = sizeof(EndMessage);
 
 	// 메세지 전송
-	NetGS->IOManagerComponent->SendGameMessage(Msg);
+	// NetGS->IOManagerComponent->SendGameMessage(Msg);
 }
 
 // WAV 파일을 로드하고 바이너리 데이터로 전환

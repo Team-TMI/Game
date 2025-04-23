@@ -36,7 +36,7 @@ ARollingBallProp::ARollingBallProp()
 		MeshComp->SetStaticMesh(TempSphere.Object);
 	}
 	MeshComp->SetRelativeScale3D(FVector(3.f));
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComp->SetCollisionProfileName(TEXT("RollingBall"));
 
 	// 속도 설정
 	ProjectileComp->InitialSpeed = 1000.f;
@@ -57,16 +57,27 @@ void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AAc
 		bIsHitGround = true;
 		ProjectileComp->StopMovementImmediately();
 		ProjectileComp->Deactivate();
+		FLog::Log(TEXT("바닥이랑 닿았다!"));
 	}
-
-	ARisingWaterProp* water = Cast<ARisingWaterProp>(OtherActor);
-	if (water)
+	
+	ARisingWaterProp* Water = Cast<ARisingWaterProp>(OtherActor);
+	if (Water)
 	{
 		// 물에 부딪히면 타이머 초기화
 		GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
 		ReturnSelf();
-		FLog::Log("물에 부딪힘, Clear Timer");
+		FLog::Log(TEXT("물에 부딪힘, Clear Timer"));
 	}
+
+	/*
+	if (OtherActor->ActorHasTag("Water"))
+	{
+		// 물에 부딪히면 타이머 초기화
+		GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
+		ReturnSelf();
+		FLog::Log(TEXT("물에 부딪힘, Clear Timer"));
+	}
+	 */
 }
 
 // Called when the game starts or when spawned
@@ -102,7 +113,7 @@ void ARollingBallProp::SetActive(bool bIsActive)
 	SetActorTickEnabled(bIsActive);
 	if (bIsActive)
 	{
-		MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+		MeshComp->SetCollisionProfileName(TEXT("RollingBall"));
 	}
 	else
 	{
@@ -130,7 +141,7 @@ void ARollingBallProp::SetActive(bool bIsActive)
 
 void ARollingBallProp::LaunchProjectile()
 {
-	FVector LaunchDir = Arrow->GetForwardVector();
+	LaunchDir = Arrow->GetForwardVector();
 	ProjectileComp->Velocity = LaunchDir * ProjectileComp->InitialSpeed;
 
 	// 발사 후 다시 복귀하는 타이밍
@@ -143,9 +154,12 @@ void ARollingBallProp::RollingBall()
 {
 	if (bIsHitGround)
 	{
-		GroundDir = FVector::CrossProduct(HitNormal, FVector::CrossProduct(GravityDir, HitNormal));
 		FVector MeshPos = MeshComp->GetRelativeLocation();
-		FVector NewPos = MeshPos + GroundDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
+		FVector NewPos;
+		
+		GroundDir = FVector::CrossProduct(HitNormal, FVector::CrossProduct(GravityDir, HitNormal));
+		NewPos = MeshPos + GroundDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
+		
 		MeshComp->SetRelativeLocation(NewPos);
 	}
 }
