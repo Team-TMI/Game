@@ -68,4 +68,7 @@ public:
 	// FTimerHandle SendWavTimerHandle;
 	
 	void LoadWavFileBinary(const FString& FilePath, TArray<uint8>& BinaryData);
+
+	UPROPERTY(EditAnywhere)
+	class AFrog* Frog;
 };

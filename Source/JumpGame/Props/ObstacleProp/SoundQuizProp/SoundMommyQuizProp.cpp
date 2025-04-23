@@ -52,7 +52,6 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	// 20번 넘으면 자동 게임 종료, 디버프를 받는다 (못맞춤)
 	if (SendResponseIdx >= 20)
 	{
-		FLog::Log(TEXT("정답 못맞춤~~~"));
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
 		bIsQuizFail = true;
@@ -62,6 +61,7 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		{
 			SoundQuizFail->AddToViewport();
 		}
+		SendEndSoundQuizNotify();
 
 		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 	}
@@ -69,7 +69,6 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	// 20번 안에, Fin되는 경우 -> 유사도가 높을때
 	if (SendResponseIdx < 20 && Similarity >= 90)
 	{
-		FLog::Log(TEXT("정답 입니다!!!"));
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
 		// 성공!
@@ -78,17 +77,23 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		{
 			SoundQuizClear->AddToViewport();
 		}
-
-
+		SendEndSoundQuizNotify();
+		
 		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 	}
 
 	FFastLogger::LogConsole(TEXT("SendResponseIdx: %d"), SendResponseIdx);
 }
 
+void ASoundMommyQuizProp::SendEndSoundQuizNotify()
+{
+	Super::SendEndSoundQuizNotify();
+	
+	SoundQuizUI->RemoveFromParent();
+}
+
 void ASoundMommyQuizProp::RemoveSoundQuizUI()
 {
-	FLog::Log(TEXT("UI지웁니다"));
 	if (SoundQuizClear)
 	{
 		SoundQuizClear->RemoveFromParent();

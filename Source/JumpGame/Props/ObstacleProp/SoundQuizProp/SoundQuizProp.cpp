@@ -3,9 +3,11 @@
 
 #include "SoundQuizProp.h"
 
+#include "EdGraphSchema_K2_Actions.h"
 #include "Components/BoxComponent.h"
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/AIServices/Shared/Message.h"
+#include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -46,7 +48,7 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	}
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Seven))
 	{
-		// 7번 누르면 퀴즈 끝 메세지 전송
+		// 7번 누르면 퀴즈 메세지 받아오기
 		ReceiveSoundQuizMessage();
 	}
 }
@@ -63,6 +65,13 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	// 이때 퀴즈 시작!
 	SendStartSoundQuizNotify();
 
+	// 캐릭터 퀴즈 카메라로 전환
+	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (Frog)
+	{
+		Frog->CameraMissionMode();
+	}
+	
 	// 물 멈추자
 	if (RisingWaterProp)
 	{
@@ -211,13 +220,31 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 	// 메세지 전송
 	// NetGS->IOManagerComponent->SendGameMessage(Msg);
 
+	// 캐릭터 카메라 다시 원래대로
+	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (Frog)
+	{
+		Frog->CameraMovementMode();
+	}
+	
 	// 물 다시 차오르기
 	RisingWaterProp->StartRising();
+	
+	ResetSoundQuiz();
 }
 
 void ASoundQuizProp::ResetSoundQuiz()
 {
+	QuizID = -1;
+	Similarity = 0.f;
+	MessageSize = 0;
+	MessageStr = "";
+
+	SendResponseIdx = 0;
 	
+	CachedBinaryWav = { 0 };
+	CurrentSendIndex = 0;
+	TotalWavSize = 0;
 }
 
 // WAV 파일을 로드하고 바이너리 데이터로 전환

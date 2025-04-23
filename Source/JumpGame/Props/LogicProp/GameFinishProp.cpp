@@ -82,7 +82,9 @@ void AGameFinishProp::GameEnd()
 	}
 	
 	// 플레이어들 조작막기
-	// TODO: 캐릭터 멈추는 함수 넣기
+	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	Character->StopMovementAndResetRotation();
+	
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	PC->SetInputMode(FInputModeUIOnly());
 	PC->bShowMouseCursor = true;
@@ -90,14 +92,13 @@ void AGameFinishProp::GameEnd()
 	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
 	
 	// 시상대 스폰 (박스 위치부터 위로)
-	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,10000);
-	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
+	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
+	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,30000);
 	AVictoryPlatform* VictoryP = GetWorld()->SpawnActor<AVictoryPlatform>(VictoryPos, FRotator::ZeroRotator);
 	ADefeatPlatform* DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
 	
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
-	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (Character != WinnerCharacter)
 	{
 		SetActorLocation(DefeatP->SpawnDefeatCharacter());

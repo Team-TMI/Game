@@ -23,11 +23,11 @@ void UVictoryPage::OnClickGoLobby()
 	if (!PC->HasAuthority())
 	{
 		// 혼자나가면 연결끊기
-		PC->ClientTravel(TEXT("/Game/Maps/WaitRoomLevel?closed"), TRAVEL_Absolute);
+		PC->ClientTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"), TRAVEL_Absolute);
 	}
 	else
 	{
-		GetWorld()->ServerTravel(TEXT("/Game/Maps/WaitRoomLevel?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?listen"));
 		FLog::Log("Server Leaving Game, 로비로 이동");
 	}
 
