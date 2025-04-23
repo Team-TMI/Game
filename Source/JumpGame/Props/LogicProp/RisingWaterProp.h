@@ -53,6 +53,8 @@ public:
 
 	virtual void SetCollision(bool bEnable) override;
 
+	
+
 public:
 	UFUNCTION()
 	void RiseWater(float DeltaTime);
