@@ -66,7 +66,7 @@ void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AAc
 		bIsHitGround = true;
 		ProjectileComp->StopMovementImmediately();
 		ProjectileComp->Deactivate();
-		FLog::Log(TEXT("바닥이랑 닿았다!"));
+		// FLog::Log(TEXT("바닥이랑 닿았다!"));
 	}
 	
 	ARisingWaterProp* Water = Cast<ARisingWaterProp>(OtherActor);
@@ -75,7 +75,7 @@ void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AAc
 		// 물에 부딪히면 타이머 초기화
 		GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
 		ReturnSelf();
-		FLog::Log(TEXT("물에 부딪힘, Clear Timer"));
+		// FLog::Log(TEXT("물에 부딪힘, Clear Timer"));
 	}
 
 	/*

@@ -178,7 +178,7 @@ void UJumpGameInstance::LeaveSession(bool bDestroySession)
 			}
 		}
 	}
-	FLog::Log("UJumpGameInstance::LeaveSession, Server Leaving Session");
+	FFastLogger::LogConsole(TEXT("UJumpGameInstance::LeaveSession, Server Leaving Session"));
 }
 
 FString UJumpGameInstance::StringBase64Encode(FString Str)

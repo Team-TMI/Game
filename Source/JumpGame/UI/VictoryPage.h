@@ -22,6 +22,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoLobby;
 
+	UFUNCTION()
 	void OnClickGoLobby();
 	void SetVictoryPlayerName(FString PlayerName);
 };
