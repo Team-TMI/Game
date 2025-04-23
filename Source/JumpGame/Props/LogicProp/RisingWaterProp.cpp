@@ -141,12 +141,11 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
 {
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
 		Frog->ResetSuperJumpRatio();
 		Frog->bIsSwimming = true;
 		Frog->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		//FLog::Log("Speed", Frog->GetCharacterMovement()->Velocity.Length());
 		Frog->SetCrouchEnabled(false);
 		
 		// 안빠르면 가라앉지 않게
@@ -164,12 +163,35 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 		};
 		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
 	}
+	
+	// if (OtherActor->ActorHasTag(TEXT("Frog")))
+	// {
+	// 	Frog->ResetSuperJumpRatio();
+	// 	Frog->bIsSwimming = true;
+	// 	Frog->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	// 	Frog->SetCrouchEnabled(false);
+	// 	
+	// 	// 안빠르면 가라앉지 않게
+	// 	if (Frog->GetCharacterMovement()->Velocity.Length() < 1'000.f)
+	// 	{
+	// 		Frog->CharacterState = ECharacterStateEnum::Surface;
+	// 	}
+	//
+	// 	// 잠시 가라앉고 올라오게
+	// 	FTimerDelegate MovementModeDelegate{
+	// 		FTimerDelegate::CreateLambda([this]() {
+	// 			ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
+	// 			SurfaceCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
+	// 		})
+	// 	};
+	// 	GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
+	// }
 }
 
 void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
 		Frog->ResetSuperJumpRatio();
 		Frog->SetCrouchEnabled(true);
@@ -182,6 +204,20 @@ void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
 		SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
 	}
+	
+	// if (OtherActor->ActorHasTag(TEXT("Frog")))
+	// {
+	// 	Frog->ResetSuperJumpRatio();
+	// 	Frog->SetCrouchEnabled(true);
+	// 	GetWorldTimerManager().ClearTimer(TimerHandle);
+	// 	Frog->bIsSwimming = false;
+	// 	Frog->CharacterState = ECharacterStateEnum::None;
+	// 	Frog->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	// 	bIsChanged = false;
+	//
+	// 	ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
+	// 	SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
+	// }
 }
 
 void ARisingWaterProp::OnBeginDeepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

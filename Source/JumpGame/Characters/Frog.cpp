@@ -8,7 +8,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PostProcessComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -93,7 +95,17 @@ AFrog::AFrog()
 		JumpGaugeUIComponent->SetDrawSize(FVector2D(240, 200));
 		JumpGaugeUIComponent->SetPivot(FVector2D(1.0, 0.5));
 	}
-
+	ConstructorHelpers::FObjectFinder<UMaterial> WaterPostProcessFinder
+			(TEXT("/Game/PostProcess/MPP_InWater.MPP_InWater"));
+	if (WaterPostProcessFinder.Succeeded())
+	{
+		WaterPostProcessMaterial = WaterPostProcessFinder.Object;
+		WaterPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("WaterPostProcessComponent"));
+		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessMaterial, 0.5);
+		WaterPostProcessComponent->SetupAttachment(GetRootComponent());
+		WaterPostProcessComponent->bEnabled = false;
+	}
+	
 	// CapsuleComponent Settings
 	GetCapsuleComponent()->InitCapsuleSize(43.f, 70.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -133,6 +145,13 @@ AFrog::AFrog()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	CameraCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("CameraCollision"));
+	CameraCollision->SetupAttachment(FollowCamera);
+	CameraCollision->SetBoxExtent(FVector(32.f, 32.f, 32.f));
+	CameraCollision->SetRelativeLocation(FVector(0, 0, 0.f));
+	CameraCollision->SetCollisionProfileName(TEXT("CameraCollision"));
+	CameraCollision->ComponentTags.Add(TEXT("CameraCollision"));
+	
 	// MotionMatching
 	TrajectoryComponent = CreateDefaultSubobject<UCharacterTrajectoryComponent>(TEXT("TrajectoryComponent"));
 
@@ -142,13 +161,16 @@ AFrog::AFrog()
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("FrogCollision"));
 	GetCapsuleComponent()->CanCharacterStepUpOn = ECB_Yes;
+
+	GetCapsuleComponent()->ComponentTags.Add(TEXT("FrogCapsule"));
+	Tags.Add(TEXT("Frog"));
 }
 
 void AFrog::NotifyControllerChanged()
 {
 	Super::NotifyControllerChanged();
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	if (APlayerController* PlayerController{Cast<APlayerController>(Controller)})
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<
 			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -163,9 +185,29 @@ void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Tags.Add(TEXT("Frog"));
+	CameraCollision->OnComponentBeginOverlap.AddDynamic(this, &AFrog::OnCameraBeginOverlap);
+	CameraCollision->OnComponentEndOverlap.AddDynamic(this, &AFrog::OnCameraEndOverlap);
 
 	InitFrogState();
+}
+
+void AFrog::OnCameraBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                 const FHitResult& SweepResult)
+{
+	if (OtherActor->ActorHasTag(TEXT("Water")))
+	{
+		WaterPostProcessComponent->bEnabled = true;
+	}
+}
+
+void AFrog::OnCameraEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor->ActorHasTag(TEXT("Water")))
+	{
+		WaterPostProcessComponent->bEnabled = false;
+	}
 }
 
 // Called every frame
@@ -334,7 +376,7 @@ void AFrog::StartCrouch()
 	{
 		return;
 	}
-	
+
 	// 공중에 있거나 수영 중이면 리턴
 	if (GetCharacterMovement()->IsFalling() || bIsSwimming)
 	{
