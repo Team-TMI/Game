@@ -154,9 +154,9 @@ void ARollingBallProp::LaunchProjectile()
 	ProjectileComp->Velocity = LaunchDir * ProjectileComp->InitialSpeed;
 
 	// 발사 후 다시 복귀하는 타이밍
-	// 바닥에 닿지않으면, 6초후에 복귀하자
+	// 바닥에 닿지않으면, 4초후에 복귀하자
 	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, this, &ARollingBallProp::ReturnSelf,
-	                                       6.0f, false);
+	                                       4.0f, false);
 }
 
 void ARollingBallProp::RollingBall()
@@ -166,6 +166,7 @@ void ARollingBallProp::RollingBall()
 		FVector MeshPos = GetActorLocation();
 		FVector NewPos;
 
+		// TODO: 탱크방식으로 바꾸는게 나을 듯함 (근데 Linetrace 고정해놔야함 (mesh만 구르게)
 		// NOTE: 평지에서도, 경사면에서도 작동하는 법
 		// HitNormal을 Actor의 새로운 UpVector로 바꾼다 (회전값 생성)
 		FRotator NewRot = UKismetMathLibrary::MakeRotFromZY(HitNormal, GetActorRightVector());
@@ -175,6 +176,7 @@ void ARollingBallProp::RollingBall()
 		// 이걸 기준으로 액터의 앞 방향을 구해서 적용
 		GroundDir = GetActorForwardVector();
 		NewPos = MeshPos + GroundDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
+		// 해결: true를 붙여야만 Hit다시감지
 		SetActorLocation(NewPos, true);
 		
 		/* 기존 방식은: 경사면에서만 사용가능
