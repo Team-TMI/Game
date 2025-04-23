@@ -58,7 +58,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetJumpAvailableBlock(int32 Block);
 	void ResetSuperJumpRatio();
-
+	void StopMovementAndResetRotation();
+	void ResumeMovement();
+	bool GetCanMove() const;
+	void CameraMissionMode();
+	void CameraMovementMode();
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -92,7 +97,8 @@ public:
 	float SuperJumpValue{3.f};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsSuperJump{false};
-
+	bool bCanMove{true};
+	
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)

@@ -17,7 +17,16 @@ public:
 	virtual void NativeConstruct() override;
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	void ChangeGaugeValue(float Value);
+	float GetGaugeValue();
 	
+public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* TargetLocationImage;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UImage* GaugeImage;
+
+public:
+	float GaugeValue;
 };

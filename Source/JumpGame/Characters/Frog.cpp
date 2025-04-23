@@ -195,14 +195,14 @@ void AFrog::Move(const struct FInputActionValue& Value)
 {
 	FVector2D MovementVector{Value.Get<FVector2D>()};
 
-	if (Controller)
+	if (Controller && GetCanMove())
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
+		
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
@@ -212,7 +212,7 @@ void AFrog::Look(const struct FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (Controller)
+	if (Controller && GetCanMove())
 	{
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
@@ -375,4 +375,36 @@ void AFrog::ResetSuperJumpRatio()
 	OnSuperJumpRatioChanged.Broadcast(0.f);
 
 	bIsSuperJump = false;
+}
+
+void AFrog::StopMovementAndResetRotation()
+{
+	bCanMove = false;
+	SetActorRotation(FRotator::ZeroRotator);
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->Velocity = FVector::ZeroVector;
+}
+
+void AFrog::ResumeMovement()
+{
+	bCanMove = true;
+}
+
+bool AFrog::GetCanMove() const
+{
+	return bCanMove;
+}
+
+void AFrog::CameraMissionMode()
+{
+	CameraBoom->bUsePawnControlRotation = false;
+	CameraBoom->SetRelativeLocationAndRotation(FVector(0, 0, 150.f), FRotator(-20.f, 0, 0));
+	CameraBoom->TargetArmLength = 1'000.f;
+}
+
+void AFrog::CameraMovementMode()
+{
+	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->SetRelativeLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
+	CameraBoom->TargetArmLength = 400.f;
 }

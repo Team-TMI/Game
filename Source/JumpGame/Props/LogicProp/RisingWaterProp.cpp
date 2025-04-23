@@ -55,6 +55,8 @@ ARisingWaterProp::ARisingWaterProp()
 void ARisingWaterProp::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	Tags.Add(TEXT("Water"));
 
 	WaterState = EWaterStateEnum::Rise;
 

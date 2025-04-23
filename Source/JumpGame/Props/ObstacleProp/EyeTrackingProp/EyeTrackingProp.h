@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ObstacleProp.h"
 #include "JumpGame/AIServices/Shared/Message.h"
+#include "JumpGame/Props/ObstacleProp/ObstacleProp.h"
 #include "EyeTrackingProp.generated.h"
 
 UCLASS()
@@ -39,9 +39,8 @@ public:
 	void SendEyeTrackingStart();
 	void SendEyeTrackingEnd();
 
-	void RecvEyeTrackingInfo();
+	virtual void RecvEyeTrackingInfo();
 
-	void TrackLocation(FVector2f Resolution, FVector2f ScreenLoc);
 
 public:
 	FMessageHeader Header;
@@ -61,12 +60,5 @@ public:
 	uint8 State;
 
 public:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UEyeTrackingUI> EyeTrackingUIClass;
-	UPROPERTY(EditAnywhere)
-	UEyeTrackingUI* TrackingUI;
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UFlyingObjectUI> FlyingObjectUIClass;
-	UPROPERTY(EditAnywhere)
-	UFlyingObjectUI* FlyingObjectUI;
+	bool bIsStartHunt{false};
 };
