@@ -21,7 +21,7 @@ public:
 	FOnPropSlotClicked OnPropSlotClicked;
 	
 protected:
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 
 	// 해당 위젯이 클릭되었을 때 호출되는 함수
 	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
