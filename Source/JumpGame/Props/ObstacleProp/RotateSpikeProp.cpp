@@ -14,7 +14,7 @@ ARotateSpikeProp::ARotateSpikeProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("RotateSpike");
 
-	MeshComp->SetupAttachment(RootComponent);
+	MeshComp->SetupAttachment(PivotScene);
 	
 	Hammer = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hammer"));
 	Hammer->SetupAttachment(MeshComp);
@@ -26,7 +26,7 @@ ARotateSpikeProp::ARotateSpikeProp()
 	
 	// TODO: 가시 추가
 	Spike = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Spike"));
-	Spike->SetupAttachment(MeshComp);
+	Spike->SetupAttachment(PivotScene);
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TempCylinder(TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleCylinder.SM_ObstacleCylinder'"));
 	if (TempCylinder.Succeeded())

@@ -39,7 +39,7 @@ void ATrampolineProp::CalculateForce(AFrog* Character)
 
 	FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
 	FVector Direction = CharacterDir + FVector::UpVector;
-	float Force = 500;
+	float Force = 1000;
 
 	if (bDebug)
 	{

@@ -60,7 +60,7 @@ void UClientRoomUI::OnClickGoFindRoom()
 
 void UClientRoomUI::OnClickGoCreateMap()
 {
-	UGameplayStatics::OpenLevel(GetWorld(),TEXT("SkyeTestMap"));
+	UGameplayStatics::OpenLevel(GetWorld(),TEXT("MapEditorLevel"));
 }
 
 void UClientRoomUI::OnClickGoFrogPass()

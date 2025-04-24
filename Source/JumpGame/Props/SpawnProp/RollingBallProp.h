@@ -60,14 +60,16 @@ public:
 	UPROPERTY(editanywhere, BlueprintReadWrite)
 	bool bIsHitGround = false;
 	UPROPERTY()
+	FVector LaunchDir;
+	UPROPERTY()
 	FVector GravityDir = FVector(0.0f, 0.0f, -1.0f);
 	UPROPERTY()
 	FVector GroundDir = FVector::ZeroVector;
 	UPROPERTY()
 	FVector HitNormal = FVector::ZeroVector;
 	// 구르는 속도
-	UPROPERTY()
-	float RollingSpeed = 1500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RollingSpeed = 500.f;
 	
 	void RollingBall();
 };

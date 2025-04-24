@@ -39,7 +39,9 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	const FHitResult& SweepResult)
 {
 	if (!HasAuthority()) return;
-
+	if (!OtherActor->ActorHasTag("Frog")) return;
+	FFastLogger::LogConsole(TEXT("Overlap!!!: %s"), *OtherActor->GetName());
+	
 	AFrog* Character = Cast<AFrog>(OtherActor);
 	if (!bWinnerFound)
 	{
@@ -72,14 +74,17 @@ void AGameFinishProp::Tick(float DeltaTime)
 
 void AGameFinishProp::GameEnd()
 {
-	/*// 물 멈추자
+	// 물 멈추자
 	ARisingWaterProp* RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 	if (RisingWaterProp)
 	{
 		RisingWaterProp->StopRising();
-	}*/
+	}
 	
 	// 플레이어들 조작막기
+	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	Character->StopMovementAndResetRotation();
+	
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	PC->SetInputMode(FInputModeUIOnly());
 	PC->bShowMouseCursor = true;
@@ -87,14 +92,13 @@ void AGameFinishProp::GameEnd()
 	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
 	
 	// 시상대 스폰 (박스 위치부터 위로)
-	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,10000);
-	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
+	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
+	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,30000);
 	AVictoryPlatform* VictoryP = GetWorld()->SpawnActor<AVictoryPlatform>(VictoryPos, FRotator::ZeroRotator);
 	ADefeatPlatform* DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
 	
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
-	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (Character != WinnerCharacter)
 	{
 		SetActorLocation(DefeatP->SpawnDefeatCharacter());
@@ -106,6 +110,14 @@ void AGameFinishProp::GameEnd()
 		PC->SetViewTargetWithBlend(VictoryP, 0.2f);
 	}
 
-	// TODO: 게임 종료 처리 (게임모드?)
+	// UI를 띄우자
+	VictoryPageUI = CreateWidget<UVictoryPage>(GetWorld(), VictoryPageUIClass);
+	if (VictoryPageUI)
+	{
+		VictoryPageUI->SetVictoryPlayerName(WinnerCharacter->GetName());
+		VictoryPageUI->AddToViewport();
+	}
+
+	// TODO: 게임 종료 처리 - 게임 한판 진행 시간 멈추기 (게임모드?)
 }
 

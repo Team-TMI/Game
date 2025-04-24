@@ -66,6 +66,38 @@ void UIOManagerComponent::BeginPlay()
 		
 		MessageQueue[EMessageType::EyeTrackingResponse].push(MessageUnion);
 	}
+
+	// // Dummy Message
+	// for (int32 i = 0; i < 100; i++)
+	// {
+	// 	FPingMessage PingMessage;
+	// 	PingMessage.Header.Type = EMessageType::Ping;
+	// 	PingMessage.Header.PayloadSize = sizeof(FPingMessage);
+	// 	PingMessage.Header.PlayerID = 0;
+	// 	PingMessage.TimeStamp = FPlatformTime::Seconds();
+	//
+	// 	FMessageUnion MessageUnion;
+	// 	FMemory::Memcpy(&MessageUnion, &PingMessage, sizeof(FPingMessage));
+	// 	MessageQueue[EMessageType::Ping].push(MessageUnion);
+	// }
+
+	// 사운드 퀴즈 Dummy Message
+	for (int32 i = 1; i <= 21; i++)
+	{
+		FWavResponseMessage ResponseMessage;
+		ResponseMessage.QuizID = i;
+		ResponseMessage.Similarity = FMath::RandRange(0, 100);
+		FString DummyStr = TEXT("Dummy Hint");
+		FTCHARToUTF8 Converted(*DummyStr);
+		uint32 Len = Converted.Length();
+
+		FMemory::Memcpy(ResponseMessage.Message, &Len, sizeof(uint32));
+		FMemory::Memcpy(ResponseMessage.Message+sizeof(uint32), Converted.Get(), Len);
+
+		FMessageUnion MessageUnion;
+		FMemory::Memcpy(&MessageUnion, &ResponseMessage, sizeof(FWavResponseMessage));
+		MessageQueue[EMessageType::WaveResponse].push(MessageUnion);
+	}
 }
 
 void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)
