@@ -10,9 +10,9 @@ enum class EMessageType : uint8
 	QuizNotify = 3,
 	WaveRequest = 4,
 	WaveResponse = 5,
-	EyeTrackingNotify = 6,
-	EyeTrackingRequest = 7,
-	EyeTrackingResponse = 8,
+	EyeTrackingNotifyMessage = 6,
+	EyeTrackingRequestMessage = 7,
+	EyeTrackingResponseMessage = 8,
 	ParsedWaveResponse = 100,
 };
 
@@ -91,26 +91,27 @@ struct FEyeTrackingNotifyMessage {
 	FMessageHeader Header; // EyetrackingNotify
 		
 	uint8 QuizID;
+	uint8 SettingStart; // 감도 설정 요청할 때 1
 	uint8 Start; // 0~1
 	uint8 End; // 0~1
 };
 
 // EyeTrackingRequest
-struct FEyeTrackingRequest {
+struct FEyeTrackingRequestMessage {
 	FMessageHeader Header; // EyetrackingRequest
 		
 	uint8 QuizID;
-	uint8 Start;
+	float Width; // 해상도 너비
+	float Height; // 해상도 높이
+	uint8 Start; // 1 ~ 4 ( 1 : 좌상단, 2 : 우상단, 3 : 우하단, 4 : 좌하단 )
 	uint8 End;
 };
 
 // EyeTrackingResponse
-struct FEyeTrackingResponse {
+struct FEyeTrackingResponseMessage {
 	FMessageHeader Header;
 
 	uint8 QuizID;		
-	float Width; // 해상도 너비
-	float Height; // 해상도 높이
 	float X; // 좌표값 x
 	float Y; // 좌표값 y
 	uint8 bBlink; // 0~1(감았다: 1) 
@@ -128,7 +129,7 @@ union FMessageUnion
 	FWavRequestMessage WavRequestMessage;
 	FWavResponseMessage WavResponseMessage;
 	FEyeTrackingNotifyMessage EyeTrackingNotifyMessage;
-	FEyeTrackingRequest EyeTrackingRequestMessage;
-	FEyeTrackingResponse EyeTrackingResponseMessage;
+	FEyeTrackingRequestMessage EyeTrackingRequestMessage;
+	FEyeTrackingResponseMessage EyeTrackingResponseMessage;
 	uint8 RawData[1460];
 };

@@ -36,8 +36,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	void ReadyEyeTracking();
 	void SendEyeTrackingStart();
 	void SendEyeTrackingEnd();
+	void SendEyeTrackingSettingStart();
 
 	virtual void RecvEyeTrackingInfo();
 
