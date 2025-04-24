@@ -8,6 +8,7 @@
 #include "JumpGame/MapEditor/Components/GizmoPrimaryComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/MapEditor/DataTable/PropStruct.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
@@ -60,17 +61,9 @@ APrimitiveProp::APrimitiveProp()
 		Gizmo->SetVisibility(false);
 	}
 
-	ConstructorHelpers::FObjectFinder<UDataTable> DT_PROPDATA
-	(TEXT("/Game/MapEditor/DataTable/DT_PropData.DT_PropData"));
-	PropID.DataTable = DT_PROPDATA.Object;
+	PropDataComponent = CreateDefaultSubobject<UPropDataComponent>(TEXT("PropDataComponent"));
 	
 	SetSize(DefaultSize);
-}
-
-void APrimitiveProp::SetPropID(const FName& InPropID)
-{
-	PropID.RowName = InPropID;
-	// FPropStruct* Data = PropID.DataTable->FindRow<FPropStruct>(PropID.RowName, TEXT(""), true);
 }
 
 void APrimitiveProp::SetSize(const FVector& InSize)

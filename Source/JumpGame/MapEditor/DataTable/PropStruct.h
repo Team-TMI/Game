@@ -15,6 +15,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
 	FText PropDescription;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
+	FText PropCategory;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
+	FText PropSubCategory;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
 	class UTexture2D* PropIcon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
 	class UClass* PropClass;
