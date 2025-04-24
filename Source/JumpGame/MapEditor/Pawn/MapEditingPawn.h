@@ -108,8 +108,4 @@ private:
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UWidgetMapEditDragDropOperation* DragDropOperation = nullptr;
 
-	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> MapEditingHUDClass = nullptr;
-	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UMapEditingHUD* MapEditingHUD = nullptr;
 };

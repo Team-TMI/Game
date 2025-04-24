@@ -13,6 +13,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "JumpGame/Core/GameState/MapEditorState.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
@@ -106,13 +107,6 @@ AMapEditingPawn::AMapEditingPawn()
 	DeleteHandlerManager = CreateDefaultSubobject<UDeleteHandlerManager>(TEXT("DeleteHandlerManager"));
 	RotateHandlerManager = CreateDefaultSubobject<URotateHandlerManager>(TEXT("RotateHandlerManager"));
 	DragDropOperation = CreateDefaultSubobject<UWidgetMapEditDragDropOperation>(TEXT("DragDropOperation"));
-
-	static ConstructorHelpers::FClassFinder<UUserWidget> WBP_MAPEDITING_HUD
-	(TEXT("/Game/UI/MapEditing/WBP_MapEditingHUD.WBP_MapEditingHUD_C"));
-	if (WBP_MAPEDITING_HUD.Succeeded())
-	{
-		MapEditingHUDClass = WBP_MAPEDITING_HUD.Class;
-	}
 }
 
 // Called when the game starts or when spawned
@@ -123,17 +117,16 @@ void AMapEditingPawn::BeginPlay()
 	APlayerController* PC = Cast<APlayerController>(Controller);
 	if (PC)
 	{
-		MapEditingHUD = CreateWidget<UMapEditingHUD>(PC, MapEditingHUDClass);
-		if (MapEditingHUD)
-		{
-			MapEditingHUD->AddToViewport();
-			MapEditingHUD->InitWidget(ClickHandlerManager, DragDropOperation);
-		}
 		auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 		if (SubSystem)
 		{
 			SubSystem->AddMappingContext(IMC_MapEditing, 0);
 		}
+	}
+	AMapEditorState* MapEditorState = Cast<AMapEditorState>(GetWorld()->GetGameState());
+	if (MapEditorState)
+	{
+		MapEditorState->InitWidget(ClickHandlerManager, DragDropOperation);
 	}
 }
 
