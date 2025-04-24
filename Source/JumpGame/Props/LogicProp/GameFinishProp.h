@@ -47,4 +47,8 @@ public:
 	TSubclassOf<class UVictoryPage> VictoryPageUIClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UVictoryPage* VictoryPageUI;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class USoundQuizClear> SoundQuizClearUIClass;
+	UPROPERTY(EditAnywhere)
+	USoundQuizClear* SoundQuizClear;
 };

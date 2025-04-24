@@ -60,16 +60,24 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep,
 	                        SweepResult);
 
+	if (!OtherActor->ActorHasTag("Frog")) return;
+		
 	// GameState 캐스팅
 	// NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
+	
 	// 이때 퀴즈 시작!
 	SendStartSoundQuizNotify();
-
 	// 캐릭터 퀴즈 카메라로 전환
-	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (Frog)
+	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
-		Frog->CameraMissionMode();
+		Frog = Cast<AFrog>(OtherActor);
+		if (Frog)
+		{
+			Frog->StopMovementAndResetRotation();
+			Frog->CameraMissionMode();
+			Frog->SetCrouchEnabled(false);
+			Frog->SetJumpGaugeVisibility(false);
+		}
 	}
 	
 	// 물 멈추자
@@ -224,7 +232,10 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (Frog)
 	{
+		Frog->ResumeMovement();
 		Frog->CameraMovementMode();
+		Frog->SetCrouchEnabled(true);
+		Frog->SetJumpGaugeVisibility(true);
 	}
 	
 	// 물 다시 차오르기
