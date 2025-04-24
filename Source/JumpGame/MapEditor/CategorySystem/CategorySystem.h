@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ECategoryType.h"
 #include "Components/ActorComponent.h"
 #include "CategorySystem.generated.h"
-
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class JUMPGAME_API UCategorySystem : public UActorComponent
