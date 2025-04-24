@@ -11,6 +11,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PostProcessComponent.h"
+#include "Components/RadialSlider.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -87,7 +88,8 @@ AFrog::AFrog()
 	if (JumpGaugeUIWidget.Succeeded())
 	{
 		JumpGaugeUIClass = JumpGaugeUIWidget.Class;
-		JumpGaugeUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("JumpGaugeUIComponent"));
+		JumpGaugeUIComponent = CreateDefaultSubobject<UWidgetComponent>(
+			TEXT("JumpGaugeUIComponent"));
 		JumpGaugeUIComponent->SetupAttachment(GetRootComponent());
 		JumpGaugeUIComponent->SetRelativeLocation(FVector(0, 0.f, 0));
 		JumpGaugeUIComponent->SetWidgetClass(JumpGaugeUIClass);
@@ -96,16 +98,17 @@ AFrog::AFrog()
 		JumpGaugeUIComponent->SetPivot(FVector2D(1.0, 0.5));
 	}
 	ConstructorHelpers::FObjectFinder<UMaterial> WaterPostProcessFinder
-			(TEXT("/Game/PostProcess/MPP_InWater.MPP_InWater"));
+		(TEXT("/Game/PostProcess/MPP_InWater.MPP_InWater"));
 	if (WaterPostProcessFinder.Succeeded())
 	{
 		WaterPostProcessMaterial = WaterPostProcessFinder.Object;
-		WaterPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("WaterPostProcessComponent"));
+		WaterPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(
+			TEXT("WaterPostProcessComponent"));
 		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessMaterial, 0.5);
 		WaterPostProcessComponent->SetupAttachment(GetRootComponent());
 		WaterPostProcessComponent->bEnabled = false;
 	}
-	
+
 	// CapsuleComponent Settings
 	GetCapsuleComponent()->InitCapsuleSize(43.f, 70.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -151,9 +154,10 @@ AFrog::AFrog()
 	CameraCollision->SetRelativeLocation(FVector(0, 0, 0.f));
 	CameraCollision->SetCollisionProfileName(TEXT("CameraCollision"));
 	CameraCollision->ComponentTags.Add(TEXT("CameraCollision"));
-	
+
 	// MotionMatching
-	TrajectoryComponent = CreateDefaultSubobject<UCharacterTrajectoryComponent>(TEXT("TrajectoryComponent"));
+	TrajectoryComponent = CreateDefaultSubobject<UCharacterTrajectoryComponent>(
+		TEXT("TrajectoryComponent"));
 
 	// 초기값 설정
 	bIsSwimming = false;
@@ -197,13 +201,13 @@ void AFrog::Tick(float DeltaTime)
 	// 공중에 있을 때는 회전 잘 안되게
 	if (GetCharacterMovement()->IsFalling())
 	{
-		GetCharacterMovement()->RotationRate = FRotator(0.0f, 200.0f, 0.0f);
+		GetCharacterMovement()->RotationRate = FRotator(0.0f, 400.0f, 0.0f);
 	}
 	else
 	{
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
 	}
-	
+
 	PrevVelocityZLength = GetVelocity().Z * -1;
 }
 
@@ -212,19 +216,28 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(
+		PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AFrog::StartJump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AFrog::StopJumping);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this,
+		                                   &AFrog::StartJump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
+		                                   &AFrog::StopJumping);
 
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AFrog::StartCrouch);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AFrog::StopCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this,
+		                                   &AFrog::StartCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this,
+		                                   &AFrog::StopCrouch);
 
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AFrog::StartSprint);
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFrog::StopSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this,
+		                                   &AFrog::StartSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this,
+		                                   &AFrog::StopSprint);
 
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFrog::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrog::Look);
+		EnhancedInputComponent->
+			BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFrog::Move);
+		EnhancedInputComponent->
+			BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrog::Look);
 	}
 }
 
@@ -288,7 +301,8 @@ void AFrog::StartJump()
 
 		FTimerHandle TimerHandle;
 		FTimerDelegate MovementModeDelegate{
-			FTimerDelegate::CreateLambda([this]() {
+			FTimerDelegate::CreateLambda([this]()
+			{
 				GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
 			})
 		};
@@ -368,7 +382,8 @@ void AFrog::StartCrouch()
 
 	// 슈퍼 점프 게이지 충전
 	FTimerDelegate CrouchDelegate{
-		FTimerDelegate::CreateLambda([this]() {
+		FTimerDelegate::CreateLambda([this]()
+		{
 			CrouchTime += GetWorld()->GetDeltaSeconds();
 
 			if (CrouchTime >= SuperJumpValue)
@@ -382,7 +397,8 @@ void AFrog::StartCrouch()
 			//FLog::Log("Ratio", SuperJumpRatio);
 		})
 	};
-	GetWorldTimerManager().SetTimer(CrouchTimer, CrouchDelegate, GetWorld()->GetDeltaSeconds(), true);
+	GetWorldTimerManager().SetTimer(CrouchTimer, CrouchDelegate, GetWorld()->GetDeltaSeconds(),
+	                                true);
 }
 
 void AFrog::StopCrouch()
@@ -418,7 +434,8 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 	{
 		FTimerHandle TimerHandle;
 		FTimerDelegate JumpDelegate{
-			FTimerDelegate::CreateLambda([this]() {
+			FTimerDelegate::CreateLambda([this]()
+			{
 				SetJumpAvailableBlock(1);
 			})
 		};

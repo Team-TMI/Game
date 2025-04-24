@@ -15,7 +15,7 @@ class JUMPGAME_API USoundQuizUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_VoiceSend;
@@ -25,6 +25,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_MessageStr;
 
+	UFUNCTION()
 	void OnClickVoiceSend();
 	void UpdateFromResponse(uint32 Similarity, FString MessageStr);
 };

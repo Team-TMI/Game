@@ -5,11 +5,12 @@
 
 #include "Components/RadialSlider.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Utils/FastLogger.h"
 
-void UJumpGaugeUI::NativeConstruct()
+void UJumpGaugeUI::NativeOnInitialized()
 {
-	Super::NativeConstruct();
-
+	Super::NativeOnInitialized();
+	FLog::Log("1");
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (Frog)
 	{

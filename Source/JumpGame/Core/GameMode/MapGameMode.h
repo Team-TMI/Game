@@ -18,4 +18,8 @@ protected:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
 private:
+
+public:
+	AMapGameMode();
+	virtual void BeginPlay() override;
 };

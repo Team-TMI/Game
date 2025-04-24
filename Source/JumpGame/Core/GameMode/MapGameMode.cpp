@@ -7,6 +7,16 @@
 #include "JumpGame/Props/LogicProp/GameStartProp.h"
 #include "Kismet/GameplayStatics.h"
 
+AMapGameMode::AMapGameMode()
+{
+}
+
+void AMapGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
 AActor* AMapGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
 	// 태그로 찾기
@@ -18,3 +28,4 @@ AActor* AMapGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	APlayerStart* TempStart = GetWorld()->SpawnActor<APlayerStart>(APlayerStart::StaticClass(), Prop->SinglePlayerStart());
 	return TempStart;
 }
+
