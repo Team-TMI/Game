@@ -37,6 +37,9 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 void AObjectEyeHunterProp::BeginPlay()
 {
 	Super::BeginPlay();
+	FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
+	TrackingUI = CreateWidget<UEyeTrackingUI>(GetWorld(), EyeTrackingUIClass);
+
 }
 
 void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -48,8 +51,12 @@ void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
 		Frog = Cast<AFrog>(OtherActor);
+		
+		if (!FlyingObjectUI)
+		{
+			FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
+		}
 
-		FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
 		if (FlyingObjectUI)
 		{
 			FlyingObjectUI->AddToViewport();
@@ -272,7 +279,7 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 	if (bIsSuccess)
 	{
 		// 미션 성공 : 발사 !
-		FLog::Log("Success");
+		//FLog::Log("Success");
 
 		if (Frog)
 		{

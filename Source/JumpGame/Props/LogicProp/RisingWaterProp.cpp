@@ -60,7 +60,7 @@ void ARisingWaterProp::BeginPlay()
 
 	WaterState = EWaterStateEnum::Rise;
 
-	SetRisingSpeed(50.f);
+	SetRisingSpeed(30.f);
 
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginOverlap);
 	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndOverlap);

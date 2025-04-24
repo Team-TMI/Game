@@ -18,8 +18,8 @@
 // ========================================================================
 
 // 음성 녹음을 시작/끝낼 때 호출할 델리게이트 선언
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartRecording);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopRecording);
+// DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartRecording);
+// DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopRecording);
 
 
 #define SYNTHCOMPONENT_EX_OSCILATOR_ENABLED 0

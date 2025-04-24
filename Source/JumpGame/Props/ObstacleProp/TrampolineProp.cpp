@@ -50,7 +50,7 @@ void ATrampolineProp::CalculateForce(AFrog* Character)
 	}
 	else
 	{
-		Force = FMath::Clamp(static_cast<float>(Character->PrevVelocityZLength), 700.f, 700.f);
+		Force = FMath::Clamp(static_cast<float>(Character->PrevVelocityZLength), 790.f, 790.f);
 	}
 	
 	Force *= 1.2;

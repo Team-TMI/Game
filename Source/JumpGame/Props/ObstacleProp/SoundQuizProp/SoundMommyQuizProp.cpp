@@ -22,6 +22,9 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 void ASoundMommyQuizProp::BeginPlay()
 {
 	Super::BeginPlay();
+	SoundQuizUI = CreateWidget<USoundQuizUI>(GetWorld(), SoundQuizUIClass);
+	SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
+	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
 }
 
 // Called every frame
@@ -38,7 +41,6 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	                        SweepResult);
 
 	// 시작하면 UI 띄우자
-	SoundQuizUI = CreateWidget<USoundQuizUI>(GetWorld(), SoundQuizUIClass);
 	if (SoundQuizUI)
 	{
 		SoundQuizUI->AddToViewport();
@@ -58,7 +60,6 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		SoundQuizUI->RemoveFromParent();
 		bIsQuizFail = true;
 		// 실패...
-		SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
 		if (SoundQuizFail)
 		{
 			SoundQuizFail->AddToViewport();
@@ -74,7 +75,6 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
 		// 성공!
-		SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
 		if (SoundQuizClear)
 		{
 			SoundQuizClear->AddToViewport();

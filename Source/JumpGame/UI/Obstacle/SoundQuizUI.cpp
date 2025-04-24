@@ -6,10 +6,10 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 
-void USoundQuizUI::NativeConstruct()
+void USoundQuizUI::NativeOnInitialized()
 {
-	Super::NativeConstruct();
-
+	Super::NativeOnInitialized();
+	
 	Btn_VoiceSend->OnClicked.AddDynamic(this, &USoundQuizUI::OnClickVoiceSend);
 }
 
