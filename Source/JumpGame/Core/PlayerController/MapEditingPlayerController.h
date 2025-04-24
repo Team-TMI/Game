@@ -50,17 +50,27 @@ public:
 	bool OnPressedOperation(const EPressedHandlingResult EPressedOperation, FHitResult& InHitResult);
 
 	UFUNCTION()
+	bool OnPropSlotPressedOperation(FHitResult& InHitResult);
+	UFUNCTION()
 	bool OnGizmoPrimaryPressedOperation(FHitResult& InHitResult);
 	UFUNCTION()
 	bool OnGizmoPressedOperation(FHitResult& InHitResult);
+	UFUNCTION()
+	void OnMousePointUpdate(FVector2D InMousePosition);
+
+protected:
+	virtual void OnPossess(APawn* InPawn) override;
 
 private:
 	using FPressedOpFunc = bool (AMapEditingPlayerController::*)(FHitResult&);
 
 	TMap<EPressedHandlingResult, FPressedOpFunc> PressedOperations = {
+		{ EPressedHandlingResult::WidgetPressed, &AMapEditingPlayerController::OnPropSlotPressedOperation },
 		{ EPressedHandlingResult::GizmoPrimaryPressed, &AMapEditingPlayerController::OnGizmoPrimaryPressedOperation },
 		{ EPressedHandlingResult::GizmoPressed, &AMapEditingPlayerController::OnGizmoPressedOperation },
 	};
+
+	FVector2D MousePosition = FVector2D::ZeroVector;
 #pragma endregion
 	
 };

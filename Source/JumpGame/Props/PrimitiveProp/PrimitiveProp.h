@@ -23,6 +23,10 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	// 액터가 선택되었을 때 호출되는 함수
+	// 내부 Mesh 컴포넌트의 색상 및 충돌 설정
+	virtual void SetCollision(bool bEnable) {};
+	void SetPropID(const FName& InPropID);
 
 	UFUNCTION(BlueprintCallable)
 	void SetSize(const FVector& InSize);
@@ -93,4 +97,7 @@ protected:
 
 	UPROPERTY()
 	bool bSelected = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop Data")
+	FDataTableRowHandle PropID = FDataTableRowHandle();
 };

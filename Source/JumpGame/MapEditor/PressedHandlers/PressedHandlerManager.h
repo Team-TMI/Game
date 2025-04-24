@@ -20,9 +20,14 @@ public:
 	bool HandlePressed(FClickResponse& ControlledInfo, class AMapEditingPlayerController* PlayerController);
 	void InitializeSettings(FClickResponse& ControlledInfo, AMapEditingPlayerController* PlayerController);
 	void ResetPositions();
+	
+	UFUNCTION()
+	void OnWidgetDragging(FVector2D MousePosition);
+
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void InitializeComponent() override;
 
 private:
 	// GC의 관리 대상이 아님
@@ -30,4 +35,7 @@ private:
 	TArray<TSharedPtr<IPressedHandler>> Handlers;
 
 	FGizmoPressedInfo GizmoPressedInfo;
+
+	UPROPERTY()
+	class UClickHandlerManager* ClickHandlerManager = nullptr;
 };

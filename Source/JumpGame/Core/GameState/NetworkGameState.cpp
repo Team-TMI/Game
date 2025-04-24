@@ -26,7 +26,7 @@ ANetworkGameState::ANetworkGameState()
 	ConnectionVerifyComponent->OnAllClientAdded.AddDynamic(this, &ANetworkGameState::OnAllClientAdded);
 	ConnectionVerifyComponent->OnConnectionSucceeded.AddDynamic(this, &ANetworkGameState::OnConnectionSucceeded);
 	ConnectionVerifyComponent->OnConnectionBlocked.AddDynamic(this, &ANetworkGameState::OnConnectionBlocked);
-	ConnectionVerifyComponent->InitMaxPlayerCount(2);
+	ConnectionVerifyComponent->InitMaxPlayerCount(1);
 
 	IOManagerComponent = CreateDefaultSubobject<UIOManagerComponent>(TEXT("IOManagerComponent"));
 }
