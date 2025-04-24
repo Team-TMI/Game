@@ -23,26 +23,30 @@ protected:
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                              UPrimitiveComponent* OtherComp,
 	                              int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
-	
+
 	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                            UPrimitiveComponent* OtherComp,
 	                            int32 OtherBodyIndex) override;
 
 	virtual void SetCollision(bool bEnable) override;
 
-
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	void ReadyEyeTracking();
+	void RecvReadyEyeTracking();
 	void SendEyeTrackingStart();
 	void SendEyeTrackingEnd();
 	void SendEyeTrackingSettingStart();
 
 	virtual void RecvEyeTrackingInfo();
 
+public:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class USettingEyeTrackingUI> SettingEyeTrackingUIClass;
+	UPROPERTY(EditAnywhere)
+	USettingEyeTrackingUI* SettingEyeTrackingUI;
 
 public:
 	FMessageHeader Header;
@@ -63,4 +67,8 @@ public:
 
 public:
 	bool bIsStartHunt{false};
+	FVector2D SettingLocation[4]{};
+	int32 SettingCount{};
+	bool bIsSettingFinish{false};
+
 };
