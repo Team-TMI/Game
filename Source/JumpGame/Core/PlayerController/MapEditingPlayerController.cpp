@@ -3,6 +3,7 @@
 
 #include "MapEditingPlayerController.h"
 
+#include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "Kismet/GameplayStatics.h"
@@ -150,6 +151,30 @@ bool AMapEditingPlayerController::OnPressedOperation(const EPressedHandlingResul
 	return false;
 }
 
+bool AMapEditingPlayerController::OnPropSlotPressedOperation(FHitResult& InHitResult)
+{
+	FVector2D MouseScreenPosition = MousePosition;
+	
+	FHitResult HitResult;
+	GetHitResultAtScreenPosition(MouseScreenPosition, ECC_Visibility, true, HitResult);
+
+	if (HitResult.IsValidBlockingHit())
+	{
+		InHitResult = HitResult;
+		return true;
+	}
+
+	// 그 외에 공중에 마우스가 있는 경우
+	FVector MouseLocation;
+	FVector MouseDirection;
+	UGameplayStatics::DeprojectScreenToWorld(this, MouseScreenPosition, MouseLocation, MouseDirection);
+
+	HitResult.Location = MouseLocation + (MouseDirection * 1000.f);
+	InHitResult = HitResult;
+	
+	return true;
+}
+
 bool AMapEditingPlayerController::OnGizmoPrimaryPressedOperation(FHitResult& InHitResult)
 {
 	FVector2D MouseScreenPosition;
@@ -186,4 +211,20 @@ bool AMapEditingPlayerController::OnGizmoPressedOperation(FHitResult& InHitResul
 	InHitResult.Normal = MouseDirection;
 
 	return true;
+}
+
+void AMapEditingPlayerController::OnMousePointUpdate(FVector2D InMousePosition)
+{
+	MousePosition = InMousePosition;
+}
+
+void AMapEditingPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	AMapEditingPawn* MapEditingPawn = Cast<AMapEditingPawn>(InPawn);
+	if (MapEditingPawn)
+	{
+		MapEditingPawn->GetDragDropOperation()->OnDraggedWidget.AddDynamic(this, &AMapEditingPlayerController::OnMousePointUpdate);
+	}
 }

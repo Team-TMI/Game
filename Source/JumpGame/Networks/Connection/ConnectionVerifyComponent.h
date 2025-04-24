@@ -58,7 +58,7 @@ private:
 	UPROPERTY()
 	bool bClientVerify = false;
 	UPROPERTY()
-	int32 MaxPlayerCount = 0;
+	int32 MaxPlayerCount = -1;
 	UPROPERTY()
 	TMap<FString, bool> ClientMap;
 

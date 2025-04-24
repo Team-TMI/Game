@@ -7,8 +7,9 @@
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/Components/GizmoPrimaryComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
+#include "JumpGame/MapEditor/DataTable/PropStruct.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-
 
 // Sets default values
 APrimitiveProp::APrimitiveProp()
@@ -59,6 +60,8 @@ APrimitiveProp::APrimitiveProp()
 		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 		Gizmo->SetVisibility(false);
 	}
+
+	PropDataComponent = CreateDefaultSubobject<UPropDataComponent>(TEXT("PropDataComponent"));
 	
 	SetSize(DefaultSize);
 }
