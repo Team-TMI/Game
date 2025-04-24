@@ -27,6 +27,10 @@ struct FClickResponse
 	// 검출된 마우스의 위치
 	UPROPERTY(BlueprintReadOnly)
 	FVector MouseWorldPosition = FVector::ZeroVector;
+
+	// UI에서 PropSlot을 드래그 했을 때
+	UPROPERTY(BlueprintReadOnly)
+	class APrimitiveProp* ClickedPropByWidget = nullptr;
 	
 	// 디버그 메시지
 	UPROPERTY(BlueprintReadOnly)
@@ -34,8 +38,10 @@ struct FClickResponse
 
 	FClickResponse(const EClickHandlingResult InResult = EClickHandlingResult::None, class APrimitiveProp* InTargetProp = nullptr,
 		class UGizmoComponent* InTargetGizmo = nullptr, const FHitResult& InHitResult = FHitResult(),
-		const FVector& InMouseWorldPosition = FVector::ZeroVector, const FString& InDebug = TEXT(""))
+		const FVector& InMouseWorldPosition = FVector::ZeroVector, class APrimitiveProp* InClickedPropByWidget = nullptr,
+		const FString& InDebug = TEXT(""))
 			: Result(InResult), TargetProp(InTargetProp), TargetGizmo(InTargetGizmo),
-			HitResult(InHitResult), MouseWorldPosition(InMouseWorldPosition), DebugMessage(InDebug)
+			HitResult(InHitResult), MouseWorldPosition(InMouseWorldPosition),
+			ClickedPropByWidget(InClickedPropByWidget), DebugMessage(InDebug)
 	{}
 };

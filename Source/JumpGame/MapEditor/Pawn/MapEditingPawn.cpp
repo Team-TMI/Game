@@ -10,16 +10,20 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "TestActor.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "JumpGame/Core/GameState/MapEditorState.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/MapEditor/DeleteHandlers/DeleteHandlerManager.h"
+#include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/MapEditor/PressedHandlers/PressedHandlerManager.h"
 #include "JumpGame/MapEditor/RotateHandlers/RotateHandlerManager.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
+#include "JumpGame/UI/MapEditing/MapEditingHUD.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 // Sets default values
@@ -102,6 +106,7 @@ AMapEditingPawn::AMapEditingPawn()
 	PressedHandlerManager = CreateDefaultSubobject<UPressedHandlerManager>(TEXT("PressedHandlerManager"));
 	DeleteHandlerManager = CreateDefaultSubobject<UDeleteHandlerManager>(TEXT("DeleteHandlerManager"));
 	RotateHandlerManager = CreateDefaultSubobject<URotateHandlerManager>(TEXT("RotateHandlerManager"));
+	DragDropOperation = CreateDefaultSubobject<UWidgetMapEditDragDropOperation>(TEXT("DragDropOperation"));
 }
 
 // Called when the game starts or when spawned
@@ -117,6 +122,11 @@ void AMapEditingPawn::BeginPlay()
 		{
 			SubSystem->AddMappingContext(IMC_MapEditing, 0);
 		}
+	}
+	AMapEditorState* MapEditorState = Cast<AMapEditorState>(GetWorld()->GetGameState());
+	if (MapEditorState)
+	{
+		MapEditorState->InitWidget(ClickHandlerManager, DragDropOperation);
 	}
 }
 

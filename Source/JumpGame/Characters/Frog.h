@@ -30,14 +30,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UFUNCTION()
-	void OnCameraBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	                          UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	                          const FHitResult& SweepResult);
-	UFUNCTION()
-	void OnCameraEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	                        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -104,12 +96,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float SuperJumpRatio;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	float SuperJumpValue{3.f};
+	float SuperJumpValue{1.6f};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsSuperJump{false};
 	bool bCanMove{true};
 	bool bCanCrouch{true};
-
+	float PrevVelocityZLength{};
+	
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)

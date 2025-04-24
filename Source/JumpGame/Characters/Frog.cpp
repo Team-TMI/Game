@@ -185,29 +185,7 @@ void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CameraCollision->OnComponentBeginOverlap.AddDynamic(this, &AFrog::OnCameraBeginOverlap);
-	CameraCollision->OnComponentEndOverlap.AddDynamic(this, &AFrog::OnCameraEndOverlap);
-
 	InitFrogState();
-}
-
-void AFrog::OnCameraBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-                                 const FHitResult& SweepResult)
-{
-	if (OtherActor->ActorHasTag(TEXT("Water")))
-	{
-		WaterPostProcessComponent->bEnabled = true;
-	}
-}
-
-void AFrog::OnCameraEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (OtherActor->ActorHasTag(TEXT("Water")))
-	{
-		WaterPostProcessComponent->bEnabled = false;
-	}
 }
 
 // Called every frame
@@ -225,6 +203,8 @@ void AFrog::Tick(float DeltaTime)
 	{
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
 	}
+	
+	PrevVelocityZLength = GetVelocity().Z * -1;
 }
 
 // Called to bind functionality to input

@@ -3,17 +3,39 @@
 
 #include "MapEditorState.h"
 
+#include "Blueprint/UserWidget.h"
 #include "JumpGame/AIServices/Shared/WebSocketManageComponent.h"
+#include "JumpGame/UI/MapEditing/MapEditingHUD.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 AMapEditorState::AMapEditorState()
 {
-	// WebSocketManageComponent = CreateDefaultSubobject<UWebSocketManageComponent>(TEXT("WebSocketManageComponent"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> WBP_MAPEDITING_HUD
+	(TEXT("/Game/UI/MapEditing/WBP_MapEditingHUD.WBP_MapEditingHUD_C"));
+	if (WBP_MAPEDITING_HUD.Succeeded())
+	{
+		MapEditingHUDClass = WBP_MAPEDITING_HUD.Class;
+	}
 }
 
 void AMapEditorState::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	MapEditingHUD = CreateWidget<UMapEditingHUD>(GetWorld(), MapEditingHUDClass);
+	if (MapEditingHUD)
+	{
+		MapEditingHUD->AddToViewport();
+	}
+}
+
+void AMapEditorState::InitWidget(class UClickHandlerManager* ClickHandlerManager,
+	class UWidgetMapEditDragDropOperation* DragDropOperation)
+{
+	if (MapEditingHUD)
+	{
+		MapEditingHUD->InitWidget(ClickHandlerManager, DragDropOperation);
+	}
 }
 
 

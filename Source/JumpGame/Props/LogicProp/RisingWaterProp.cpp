@@ -2,7 +2,7 @@
 
 
 #include "RisingWaterProp.h"
-
+#include "Components/PostProcessComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
@@ -141,6 +141,11 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
 {
+	if (OtherComp->ComponentHasTag(TEXT("CameraCollision")))
+	{
+		Frog->WaterPostProcessComponent->bEnabled = true;
+	}
+	
 	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
 		Frog->ResetSuperJumpRatio();
@@ -191,6 +196,11 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (OtherComp->ComponentHasTag(TEXT("CameraCollision")))
+	{
+		Frog->WaterPostProcessComponent->bEnabled = false;
+	}
+	
 	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
 		Frog->ResetSuperJumpRatio();

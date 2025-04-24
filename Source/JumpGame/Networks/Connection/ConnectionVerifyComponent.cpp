@@ -1,10 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ConnectionVerifyComponent.h"
 
-#include "GameFramework/PlayerState.h"
-#include "JumpGame/Core/GameMode/NetworkGameMode.h"
 #include "JumpGame/Core/GameState/NetworkGameState.h"
 #include "JumpGame/Utils/FastLogger.h"
 
@@ -84,6 +79,11 @@ void UConnectionVerifyComponent::ConfirmClient(const FString& NetID)
 		ClientMap[NetID] = true;
 		OnClientAdded.Broadcast(NetID);
 	}
+	else if (ClientMap.Contains(NetID) && ClientMap[NetID])
+	{
+		// 이미 추가된 클라이언트인 경우
+		FFastLogger::LogConsole(TEXT("Error: Client %s is already added"), *NetID);
+	}
 	else
 	{
 		// 클라이언트가 추가되지 않은 경우
@@ -110,7 +110,7 @@ bool UConnectionVerifyComponent::CheckAllClientAdded(TArray<FString>& UnVerified
 {
 	bool bAllClientAdded = true;
 
-	if (ClientMap.Num() < MaxPlayerCount)
+	if (MaxPlayerCount < 0 && ClientMap.Num() < MaxPlayerCount)
 	{
 		// 아직 모든 클라이언트가 추가되지 않은 경우
 		return false;

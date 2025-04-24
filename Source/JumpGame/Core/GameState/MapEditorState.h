@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "NetworkGameState.h"
+#include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
+#include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
 #include "MapEditorState.generated.h"
 
 /**
@@ -19,6 +21,11 @@ public:
 
 	virtual void BeginPlay() override;
 
-	UPROPERTY()
-	class UWebSocketManageComponent* WebSocketManageComponent = nullptr;
+	UFUNCTION()
+	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* DragDropOperation);
+private:
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> MapEditingHUDClass = nullptr;
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UMapEditingHUD* MapEditingHUD = nullptr;
 };

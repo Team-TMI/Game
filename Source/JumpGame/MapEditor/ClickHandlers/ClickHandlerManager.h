@@ -20,6 +20,19 @@ public:
 	bool HandleClick(class AMapEditingPlayerController* PlayerController);
 	void ResetControl();;
 
+	// 처음 클릭될 때
+	UFUNCTION()
+	void OnPropSlotClicked(FName PropID);
+	// 액터가 생성되어야 하고 가리켜야 할는 경우
+	UFUNCTION()
+	void OnWidgetDragLeave();
+	// 액터를 다시 파괴해야 함 : Widget이 다시 나와야 함
+	UFUNCTION()
+	void OnWidgetDragEnter();
+	// 드래그가 취소된 경우
+	UFUNCTION()
+	void OnPropDragCancelled();
+
 	GETTER(FClickResponse, ControlledClickResponse)
 
 	UPROPERTY()
@@ -27,6 +40,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void InitializeComponent() override;
 
 private:
 	// GC의 관리 대상이 아님
@@ -35,4 +49,12 @@ private:
 
 	UPROPERTY()
 	FClickResponse ControlledClickResponse;
+
+	UPROPERTY()
+	FName ControlledPropSlotID = NAME_None;
+
+	UPROPERTY()
+	TSubclassOf<class APrimitiveProp> TEST_PROP;
+
+	bool bMouseEnterUI = false;
 };

@@ -29,6 +29,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	GETTER(class UClickHandlerManager*, ClickHandlerManager);
+	GETTER(class UWidgetMapEditDragDropOperation*, DragDropOperation);
 
 private:
 	UFUNCTION()
@@ -96,11 +97,6 @@ private:
 	class USphereComponent* CollisionComponent = nullptr;
 
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class APrimitiveProp* ControlledActor = nullptr;
-	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UGizmoComponent* CachedGizmo = nullptr;
-
-	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UClickHandlerManager* ClickHandlerManager = nullptr;
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UPressedHandlerManager* PressedHandlerManager = nullptr;
@@ -108,4 +104,8 @@ private:
 	class UDeleteHandlerManager* DeleteHandlerManager = nullptr;
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class URotateHandlerManager* RotateHandlerManager = nullptr;
+
+	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UWidgetMapEditDragDropOperation* DragDropOperation = nullptr;
+
 };
