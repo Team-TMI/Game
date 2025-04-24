@@ -88,7 +88,7 @@ void UWebSocketManageComponent::SendPongMessage()
 	
 	FMessageUnion PongMessage;
 	PongMessage.PongMessage.Header.Type = EMessageType::Pong;
-	PongMessage.PongMessage.Header.PayloadSize = sizeof(FPongMessage);
+	PongMessage.PongMessage.Header.PayloadSize = sizeof(FEyeTrackingNotifyMessage);
 	PongMessage.PongMessage.Header.PlayerID = 1;
 	PongMessage.PongMessage.Header.SessionID[0] = 1;
 	PongMessage.PongMessage.TimeStamp = TimeStamp;

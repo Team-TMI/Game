@@ -46,6 +46,26 @@ void UIOManagerComponent::BeginPlay()
 
 	IPCHandler->Init(IOHandlerInitInfo, &MessageQueue);
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
+	
+	// EyeTracking용 더미 테스트
+	for (int32 i = 0; i < 100; i++)
+	{
+		FMessageUnion MessageUnion;
+		MessageUnion.EyeTrackingResponseMessage.Header.Type = EMessageType::EyeTrackingResponse;
+		MessageUnion.EyeTrackingResponseMessage.Header.PayloadSize = sizeof(FEyeTrackingResponse);
+		MessageUnion.EyeTrackingResponseMessage.Header.PlayerID = 1;
+		MessageUnion.EyeTrackingResponseMessage.Header.SessionID[0] = 1;
+		
+		MessageUnion.EyeTrackingResponseMessage.QuizID = 10;
+		MessageUnion.EyeTrackingResponseMessage.Width = 1000;
+		MessageUnion.EyeTrackingResponseMessage.Height = 1000;
+		MessageUnion.EyeTrackingResponseMessage.X = FMath::RandRange(50, 950);
+		MessageUnion.EyeTrackingResponseMessage.Y = FMath::RandRange(50, 950);
+		MessageUnion.EyeTrackingResponseMessage.bBlink = 0;
+		MessageUnion.EyeTrackingResponseMessage.State = 100;
+		
+		MessageQueue[EMessageType::EyeTrackingResponse].push(MessageUnion);
+	}
 
 	// // Dummy Message
 	// for (int32 i = 0; i < 100; i++)
@@ -60,6 +80,24 @@ void UIOManagerComponent::BeginPlay()
 	// 	FMemory::Memcpy(&MessageUnion, &PingMessage, sizeof(FPingMessage));
 	// 	MessageQueue[EMessageType::Ping].push(MessageUnion);
 	// }
+
+	// 사운드 퀴즈 Dummy Message
+	for (int32 i = 1; i <= 21; i++)
+	{
+		FWavResponseMessage ResponseMessage;
+		ResponseMessage.QuizID = i;
+		ResponseMessage.Similarity = FMath::RandRange(0, 100);
+		FString DummyStr = TEXT("Dummy Hint");
+		FTCHARToUTF8 Converted(*DummyStr);
+		uint32 Len = Converted.Length();
+
+		FMemory::Memcpy(ResponseMessage.Message, &Len, sizeof(uint32));
+		FMemory::Memcpy(ResponseMessage.Message+sizeof(uint32), Converted.Get(), Len);
+
+		FMessageUnion MessageUnion;
+		FMemory::Memcpy(&MessageUnion, &ResponseMessage, sizeof(FWavResponseMessage));
+		MessageQueue[EMessageType::WaveResponse].push(MessageUnion);
+	}
 }
 
 void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)

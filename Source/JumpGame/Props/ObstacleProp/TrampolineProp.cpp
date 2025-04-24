@@ -32,18 +32,32 @@ void ATrampolineProp::BeginPlay()
 void ATrampolineProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 }
 
 void ATrampolineProp::CalculateForce(AFrog* Character)
 {
 
-	FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
-	FVector Direction = CharacterDir + FVector::UpVector;
-	float Force = 500;
-
+	//FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
+	//FVector Direction = CharacterDir + FVector::UpVector;
+	
+	FVector Direction{GetActorUpVector()};
+	
+	float Force;
+	if (temp)
+	{
+		Force = FMath::Clamp(static_cast<float>(Character->PrevVelocityZLength), 800.f, 1'500.f);
+	}
+	else
+	{
+		Force = FMath::Clamp(static_cast<float>(Character->PrevVelocityZLength), 700.f, 700.f);
+	}
+	
+	Force *= 1.2;
+	
 	if (bDebug)
 	{
-		FLog::Log("ATrampolineProp::CalculateForce");
+		FLog::Log("Z Speed", Character->PrevVelocityZLength);
 	}
 	
 	Super::LaunchCharacter(Character, Direction, Force);

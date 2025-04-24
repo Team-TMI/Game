@@ -58,11 +58,13 @@ void UObjectPoolComponent::Expand()
 	// 풀에 오브젝트 부족하면 추가생성
 	for (int32 i = 0; i < ExpandSize; i++)
 	{
+		ARollingCannonProp* Cannon = Cast<ARollingCannonProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollingCannonProp::StaticClass()));
+		UE_LOG(LogTemp, Log, TEXT("Forward: %s"), *Cannon->GetActorRightVector().ToString());
+
 		ARollingBallProp* BallProp = GetWorld()->SpawnActor<ARollingBallProp>(PooledObjectClass,
-			FVector::ZeroVector, FRotator::ZeroRotator);
-
-		// ARollingCannonProp* cannon = Cast<ARollingCannonProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollingCannonProp::StaticClass()));
-
+			FVector::ZeroVector, Cannon->GetActorRotation());
+		UE_LOG(LogTemp, Log, TEXT("Forward: %s"), *BallProp->GetActorRightVector().ToString());
+		
 		// 소속풀 지정
 		// Queue 로 연습하기
 		BallProp->SetObjectPool(this);

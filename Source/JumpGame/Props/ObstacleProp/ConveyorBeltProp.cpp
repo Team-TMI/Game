@@ -15,7 +15,6 @@ AConveyorBeltProp::AConveyorBeltProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("ConveyorBelt");
 	
-	// TODO: 컨베이어 벨트 크기 설정
 	CollisionComp->SetBoxExtent(FVector(102.f, 51.f, 60.f));
 	CollisionComp->SetRelativeLocation(FVector(0, 0, 0));
 	MeshComp->SetRelativeLocation(FVector(0, 0, -10));
@@ -33,7 +32,10 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	Character = Cast<AFrog>(OtherActor);
+	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	{
+		Character = Cast<AFrog>(OtherActor);
+	}
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
 

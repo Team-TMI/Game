@@ -47,7 +47,7 @@ void UWaitRoomUI::OnClickBackFromLobby()
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!PC->HasAuthority())
 	{
-		PC->ClientTravel(TEXT("/Game/Maps/ClientRoomLevel"), TRAVEL_Absolute);
+		PC->ClientTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"), TRAVEL_Absolute);
 	}
 	else
 	{
