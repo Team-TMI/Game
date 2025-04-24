@@ -12,6 +12,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -50,6 +51,14 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		// 1등 캐릭터 저장
 		WinnerCharacter = Character;
 
+		// 1등 캐릭터에게 Clear UI 띄우자
+		SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
+		if (SoundQuizClear)
+		{
+			SoundQuizClear->AddToViewport();
+		}
+		WinnerCharacter->SetJumpGaugeVisibility(false);
+		
 		// 10초 후에 게임을 끝내자
 		FTimerHandle EndTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(EndTimerHandle, this, &AGameFinishProp::GameEnd, 10.0f, false);
@@ -74,6 +83,12 @@ void AGameFinishProp::Tick(float DeltaTime)
 
 void AGameFinishProp::GameEnd()
 {
+	// UI 지우기
+	if (SoundQuizClear)
+	{
+		SoundQuizClear->RemoveFromParent();
+	}
+	
 	// 물 멈추자
 	ARisingWaterProp* RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 	if (RisingWaterProp)

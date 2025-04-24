@@ -32,7 +32,10 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	Character = Cast<AFrog>(OtherActor);
+	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	{
+		Character = Cast<AFrog>(OtherActor);
+	}
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
 

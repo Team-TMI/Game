@@ -4,6 +4,7 @@
 #include "SoundMommyQuizProp.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Components/BoxComponent.h"
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/UI/Obstacle/SoundQuizUI.h"
@@ -14,6 +15,7 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 }
 
 // Called when the game starts or when spawned
