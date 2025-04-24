@@ -111,8 +111,6 @@ void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedCompone
 
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
-		Frog = nullptr;
-
 		if (bIsStartHunt)
 		{
 			EndMission(false);
@@ -323,4 +321,6 @@ void AObjectEyeHunterProp::ResetMission()
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 
 	Super::SendEyeTrackingEnd();
+	
+	Frog = nullptr;
 }

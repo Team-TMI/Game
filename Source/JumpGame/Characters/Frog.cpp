@@ -225,6 +225,8 @@ void AFrog::Tick(float DeltaTime)
 	{
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
 	}
+	
+	PrevVelocityZLength = GetVelocity().Z * -1;
 }
 
 // Called to bind functionality to input

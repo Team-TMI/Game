@@ -109,7 +109,8 @@ public:
 	bool bIsSuperJump{false};
 	bool bCanMove{true};
 	bool bCanCrouch{true};
-
+	float PrevVelocityZLength{};
+	
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)
