@@ -7,7 +7,7 @@
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/Components/GizmoPrimaryComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
-#include "JumpGame/MapEditor/DataTable/PropStruct.h"
+#include "JumpGame/MapEditor/CategorySystem/PropStruct.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 

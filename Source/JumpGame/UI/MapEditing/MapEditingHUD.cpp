@@ -9,10 +9,10 @@
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/Utils/FastLogger.h"
 
-void UMapEditingHUD::NativeConstruct()
+void UMapEditingHUD::NativeOnInitialized()
 {
-	Super::NativeConstruct();
-
+	Super::NativeOnInitialized();
+	
 	PropSlot = CreateWidget<UPropSlot>(GetWorld(), PropSlotClass);
 	// PropSlot->AddToViewport();
 	TestBorder->AddChild(PropSlot);

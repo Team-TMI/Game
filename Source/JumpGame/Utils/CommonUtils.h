@@ -32,4 +32,17 @@ public:
 		}
 		return EnumKey[1];
 	}
+	template<typename TEnum>
+	static FText GetEnumDisplayName(TEnum EnumValue)
+	{
+		static_assert(TIsEnum<TEnum>::Value, "TEnum must be an enum type.");
+
+		const UEnum* EnumPtr = StaticEnum<TEnum>();
+		if (!EnumPtr)
+		{
+			return FText::FromString(TEXT("Invalid"));
+		}
+
+		return EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(EnumValue));
+	}
 };
