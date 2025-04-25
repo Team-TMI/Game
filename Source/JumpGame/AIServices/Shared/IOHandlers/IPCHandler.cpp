@@ -9,7 +9,7 @@ FIPCHandler::FIPCHandler()
 {
 }
 
-void FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo, 
+bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo, 
 	std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr)
 {
 	PipeName = PIPE_PREFIX + InitInfo.PipeName;
@@ -32,14 +32,21 @@ void FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo,
 	// 만약 연결이 실패했다면
 	if (Pipe == INVALID_HANDLE_VALUE) {
 		FFastLogger::LogConsole(TEXT("Failed to connect to pipe: %s"), *PipeName);
-		return;
+		return false;
 	}
 
 	FFastLogger::LogConsole(TEXT("Succeeded to connect to pipe: %s"), *PipeName);
+	bConnected = true;
+	return true;
 }
 
 bool FIPCHandler::SendGameMessage(const FMessageUnion& Message)
 {
+	if (!bConnected)
+	{
+		// FFastLogger::LogConsole(TEXT("Not connected to pipe: %s"), *PipeName);
+		return false;
+	}
 	DWORD BytesWritten;
 	if (!WriteFile(Pipe, Message.RawData, Message.Header.PayloadSize, &BytesWritten, NULL))
 	{
@@ -55,6 +62,11 @@ bool FIPCHandler::SendGameMessage(const FMessageUnion& Message)
 
 bool FIPCHandler::ReceiveMessage()
 {
+	if (!bConnected)
+	{
+		// FFastLogger::LogConsole(TEXT("Not connected to pipe: %s"), *PipeName);
+		return false;
+	}
 	DWORD BytesRead;
 
 	BOOL Result = ReadFile(Pipe, Buffer, BufferSize, &BytesRead, NULL);

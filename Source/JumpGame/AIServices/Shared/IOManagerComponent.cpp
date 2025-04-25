@@ -2,6 +2,7 @@
 
 #include "IOHandlers/IPCHandler.h"
 #include "IOHandlers/SocketHandler.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 UIOManagerComponent::UIOManagerComponent()
 {
@@ -44,7 +45,11 @@ void UIOManagerComponent::BeginPlay()
 		MessageQueue[Handler.Key] = std::queue<FMessageUnion>();
 	}
 
-	IPCHandler->Init(IOHandlerInitInfo, &MessageQueue);
+	if (!IPCHandler->Init(IOHandlerInitInfo, &MessageQueue))
+	{
+		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCHandler);
+		RetryConnectToPipe(SharedIPC);
+	}
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
 	
 	for (int32 i = 0; i < 5; i++)
@@ -139,4 +144,26 @@ bool UIOManagerComponent::PopMessage(const EMessageType& MessageType, FMessageUn
 		return true;
 	}
 	return false;
+}
+
+void UIOManagerComponent::RetryConnectToPipe(TSharedPtr<FIPCHandler> IPCHandlerToRetry)
+{
+	TWeakObjectPtr<UIOManagerComponent> WeakThis = this;
+
+	GetWorld()->GetTimerManager().SetTimer(RetryTimer, FTimerDelegate::CreateLambda([WeakThis, IPCHandlerToRetry]()
+	{
+		if (!WeakThis.IsValid())
+			return;
+
+		UIOManagerComponent* StrongThis = WeakThis.Get();
+		if (IPCHandlerToRetry->Init(StrongThis->IOHandlerInitInfo, &StrongThis->MessageQueue))
+		{
+			FFastLogger::LogScreen(FColor::Red, TEXT("Reconnected to pipe Succedded!!"));
+		}
+		else
+		{
+			FFastLogger::LogScreen(FColor::Red, TEXT("Reconnecting to pipe..."));
+			StrongThis->RetryConnectToPipe(IPCHandlerToRetry);
+		}
+	}), RetryInterval, false);
 }

@@ -24,8 +24,10 @@ public:
 	UFUNCTION()
 	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* DragDropOperation);
 private:
-	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = EditorState, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UUserWidget> MapEditingHUDClass = nullptr;
-	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = EditorState, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMapEditingHUD* MapEditingHUD = nullptr;
+	UPROPERTY(Category = EditorState, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UCategorySystem* CategorySystem = nullptr;
 };

@@ -5,6 +5,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "JumpGame/AIServices/Shared/WebSocketManageComponent.h"
+#include "JumpGame/MapEditor/CategorySystem/CategorySystem.h"
 #include "JumpGame/UI/MapEditing/MapEditingHUD.h"
 #include "JumpGame/Utils/FastLogger.h"
 
@@ -16,6 +17,8 @@ AMapEditorState::AMapEditorState()
 	{
 		MapEditingHUDClass = WBP_MAPEDITING_HUD.Class;
 	}
+
+	CategorySystem = CreateDefaultSubobject<UCategorySystem>(TEXT("CategorySystem"));
 }
 
 void AMapEditorState::BeginPlay()

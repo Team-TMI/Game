@@ -24,6 +24,7 @@ public:
 
 	bool SendGameMessage(const FMessageUnion& Message);
 	bool PopMessage(const EMessageType& MessageType, FMessageUnion& OutMessage);
+	void RetryConnectToPipe(TSharedPtr<class FIPCHandler> IPCHandlerToRetry);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -41,4 +42,9 @@ public:
 	TMap<EMessageType, TSharedPtr<IIOHandlerInterface>> IOHandlers;
 	
 	std::map<EMessageType, std::queue<FMessageUnion>> MessageQueue;
+
+	UPROPERTY()
+	FTimerHandle RetryTimer;
+	UPROPERTY()
+	float RetryInterval = 0.5f;
 };

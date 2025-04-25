@@ -13,12 +13,13 @@ class JUMPGAME_API IIOHandlerInterface
 public:
 	IIOHandlerInterface() {};
 
-	virtual void Init(const FIOHandlerInitInfo& InitInfo, std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr) = 0;
+	virtual bool Init(const FIOHandlerInitInfo& InitInfo, std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr) = 0;
 	virtual bool SendGameMessage(const FMessageUnion& Message) = 0;
 	virtual bool ReceiveMessage() = 0;
 	
 	virtual ~IIOHandlerInterface() {};
 
+	bool bConnected = false;
 protected:
 	std::map<EMessageType, std::queue<FMessageUnion>>* MessageQueue = nullptr;
 };
