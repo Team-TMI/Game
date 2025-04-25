@@ -55,8 +55,7 @@ bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult&
 	// X = Sign.X < 0.f ? X - 1 : X;
 	// Y = Sign.Y < 0.f ? Y - 1 : Y;
 	// Z = Sign.Z < 0.f ? Z - 1 : Z;
-	FFastLogger::LogScreen(FColor::Red, TEXT("Grid Origin : %d %d %d"), X, Y, Z);
-
+	
 	// 충돌이 발생했을 때 접촉 면의 Normal을 받아와서 만약 해당 Normal이 -1이면 해당 방향으로 1칸 이동
 	if (HitResult.IsValidBlockingHit())
 	{

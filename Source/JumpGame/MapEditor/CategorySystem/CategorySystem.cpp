@@ -1,5 +1,8 @@
 #include "CategorySystem.h"
 
+#include "MajorTableInfo.h"
+#include "JumpGame/Utils/CommonUtils.h"
+
 UCategorySystem::UCategorySystem()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -7,6 +10,10 @@ UCategorySystem::UCategorySystem()
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_PROPDATA
 	(TEXT("/Game/MapEditor/DataTable/DT_PropData.DT_PropData"));
 	CategoryDataTable = DT_PROPDATA.Object;
+	
+	static ConstructorHelpers::FObjectFinder<UDataTable> DT_MAJORINFO
+	(TEXT("/Game/MapEditor/DataTable/DT_MajorTable.DT_MajorTable"));
+	MajorTableInfoTable = DT_MAJORINFO.Object;
 }
 
 // 카테고리 시스템을 만들어보자!!
@@ -14,5 +21,182 @@ void UCategorySystem::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// CategoryDataTable을 순회하고, 아이템들을 인덱싱해준다.
+	if (!CategoryDataTable)
+	{
+		return;
+	}
+	TArray<FPropStruct*> Rows;
+	CategoryDataTable->GetAllRows<FPropStruct>(TEXT(""), Rows);
+	for (auto& Row : Rows)
+	{
+		if (Row)
+		{
+			AddProp(*Row);
+		}
+	}
+
+	const TArray<FPropStruct*> PropListTest = GetPropsByMajor(EMajorCategoryType::Basic);
+	for (auto& Prop : PropListTest)
+	{
+		FFastLogger::LogConsole(TEXT("PropID : %s, MajorCategory : %s"), *Prop->PropID.ToString(), *FCommonUtil::GetEnumDisplayName(Prop->PropCategory).ToString());
+	}
+	const TArray<FPropStruct*> PropListTest2 = GetPropsBySub(EMajorCategoryType::Basic, ESubCategoryType::Wood);
+	for (auto& Prop : PropListTest2)
+	{
+		FFastLogger::LogConsole(TEXT("PropID : %s, MajorCategory : %s, SubCategory : %s"), *Prop->PropID.ToString(), *FCommonUtil::GetEnumDisplayName(Prop->PropCategory).ToString(), *FCommonUtil::GetEnumDisplayName(ESubCategoryType::Wood).ToString());
+	}
+}
+
+bool UCategorySystem::SubBelongsToMajorCategory(const EMajorCategoryType InMajorCategoryType,
+	const ESubCategoryType InSubCategoryType)
+{
+	if (!MajorTableInfoTable)
+	{
+		return false;
+	}
+
+	const FMajorTableInfo* Found = FindMajorTableInfoRow(InMajorCategoryType);
+
+	return Found && Found->SubCategoryTypes.Contains(InSubCategoryType);
+}
+
+bool UCategorySystem::ValidateProp(const FPropStruct& InPropStruct)
+{
+	for (const auto& SubCategory : InPropStruct.PropSubCategories)
+	{
+		if (!SubBelongsToMajorCategory(InPropStruct.PropCategory, SubCategory))
+		{
+			FFastLogger::LogConsole(TEXT("PropID : %s, SubCategory : %s is not belong to MajorCategory : %s"), *InPropStruct.PropID.ToString(), *FCommonUtil::GetEnumDisplayName(SubCategory).ToString(), *FCommonUtil::GetEnumDisplayName(InPropStruct.PropCategory).ToString());
+			
+			return false;
+		}
+	}
+	return true;
+}
+
+const FMajorTableInfo* UCategorySystem::FindMajorTableInfoRow(const EMajorCategoryType InMajorCategoryType)
+{
+	if (!MajorTableInfoTable)
+	{
+		return nullptr;
+	}
+
+	FName RowName = FName(*FCommonUtil::GetEnumDisplayName(InMajorCategoryType).ToString());
+	const FMajorTableInfo* MajorTableInfo = MajorTableInfoTable->FindRow<FMajorTableInfo>(RowName, TEXT(""));
+	if (!MajorTableInfo)
+	{
+		return nullptr;
+	}
 	
+	return MajorTableInfo;
+}
+
+bool UCategorySystem::AddProp(const FPropStruct& NewProp)
+{
+	if (!ValidateProp(NewProp))
+	{
+		FFastLogger::LogConsole(TEXT("PropID : %s is not valid"), *NewProp.PropID.ToString());
+	}
+
+	PropList.Add(NewProp);
+	// 단일 인덱싱
+	IndexProp(PropList.Last());
+	OnPropAdded.Broadcast(PropList.Last());
+	return true;
+}
+
+bool UCategorySystem::RemovePropByID(FName ID)
+{
+	int32 Removed = PropList.RemoveAll([ID](const FPropStruct& It)
+	{
+		return It.PropID == ID;
+	});
+	if (Removed)
+	{
+		ReIndex();
+		// 필요시 제거된 PROP 전달
+		OnPropRemoved.Broadcast(FPropStruct{});
+		return true;
+	}
+	return false;
+}
+
+const TArray<FPropStruct*>& UCategorySystem::GetPropsByMajor(EMajorCategoryType Major)
+{
+	static const TArray<FPropStruct*> EmptyArray;
+	TMap<ESubCategoryType, TArray<FPropStruct*>>* Found = Index.Find(Major);
+	if (!Found)
+	{
+		return EmptyArray;
+	}
+
+	static TArray<FPropStruct*> Buffer;
+	Buffer.Reset();
+
+	TSet<FPropStruct*> Seen; // 중복 체크용
+	Seen.Reserve(128);
+	
+	for (auto& KV : *Found)
+	{
+		for (FPropStruct* Prop : KV.Value) {
+			if (!Seen.Contains(Prop))
+			{
+				Seen.Add(Prop);
+				Buffer.Add(Prop);
+			}
+		}
+	}
+	return Buffer;
+}
+
+const TArray<FPropStruct*>& UCategorySystem::GetPropsBySub(EMajorCategoryType Major, ESubCategoryType Sub)
+{
+	static const TArray<FPropStruct*> EmptyArray;
+	TMap<ESubCategoryType, TArray<FPropStruct*>>* Found = Index.Find(Major);
+	if (!Found)
+	{
+		return EmptyArray;
+	}
+
+	const TArray<FPropStruct*>* FoundSub = Found->Find(Sub);
+	return FoundSub ? *FoundSub : EmptyArray;
+}
+
+const FPropStruct* UCategorySystem::GetPropsByID(FName ID)
+{
+	FPropStruct* Found = PropList.FindByPredicate([ID](const FPropStruct& It)
+	{
+		return It.PropID == ID;
+	});
+	return Found ? Found : nullptr;
+}
+
+void UCategorySystem::ReIndex()
+{
+	Index.Empty();
+	for (auto& Prop : PropList)
+	{
+		IndexProp(Prop);
+	}
+}
+
+void UCategorySystem::IndexProp(FPropStruct& InPropStruct)
+{
+	if (InPropStruct.PropSubCategories.Num() == 0)
+	{
+		// 만약 SubCategory가 없다면 MajorCategory에만 넣어준다.
+		Index.FindOrAdd(InPropStruct.PropCategory)
+			.FindOrAdd(ESubCategoryType::None)
+			.Add(&InPropStruct);
+	}
+	else
+	{
+		for (auto& SubCategory : InPropStruct.PropSubCategories)
+		{
+			Index.FindOrAdd(InPropStruct.PropCategory)
+				.FindOrAdd(SubCategory)
+				.Add(&InPropStruct);
+		}
+	}
 }
