@@ -45,8 +45,9 @@ void ASoundQuizProp::BeginPlay()
 void ASoundQuizProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
+
+	// 테스트용 키바인딩
+	/*if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
 	{
 		// 9번 누르면 퀴즈 음성 파일 메세지 전송
 		SendSoundQuizMessage();
@@ -70,6 +71,12 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	{
 		// 7번 누르면 퀴즈 메세지 받아오기
 		ReceiveSoundQuizMessage();
+	}*/
+
+	if (bIsMessageReceived)
+	{
+		// 메세지가 왔는지 확인하자
+		ReceiveSoundQuizMessage();
 	}
 }
 
@@ -87,6 +94,7 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	
 	// 이때 퀴즈 시작!
 	SendStartSoundQuizNotify();
+	
 	// 캐릭터 퀴즈 카메라로 전환
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
@@ -105,6 +113,13 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	{
 		RisingWaterProp->StopRising();
 	}
+}
+
+void ASoundQuizProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
+	
 }
 
 void ASoundQuizProp::SendStartSoundQuizNotify()
@@ -128,6 +143,9 @@ void ASoundQuizProp::SendStartSoundQuizNotify()
 
 	// 메세지 전송
 	NetGS->IOManagerComponent->SendGameMessage(Msg);
+
+	// 틱 활성화
+	bIsMessageReceived = true;
 }
 
 void ASoundQuizProp::SendSoundQuizMessage()
@@ -136,7 +154,7 @@ void ASoundQuizProp::SendSoundQuizMessage()
 	// 1. 바이너리 데이터를 로딩하자 (처음 한번만!)
 	if (CurrentSendIndex == 0)
 	{
-		FString FilePath = TEXT("C:/FinalProject/Game/Saved/SounQuizFile.wav");
+		FString FilePath = TEXT("C:/FinalProject/Game/Saved/SoundQuizResponseFile.wav");
 		LoadWavFileBinary(FilePath, CachedBinaryWav);
 		// 없으면 로그 출력
 		if (CachedBinaryWav.Num() == 0)
@@ -198,24 +216,24 @@ void ASoundQuizProp::SendSoundQuizMessage()
 void ASoundQuizProp::ReceiveSoundQuizMessage()
 {
 	FMessageUnion RespMessage;
-	FFastLogger::LogConsole(TEXT("HIHIHIHI"));
+	FFastLogger::LogConsole(TEXT("메세지 받을거야!"));
 	// AI가 보내준 메세지를 받자
 	if (!NetGS->IOManagerComponent->PopMessage(EMessageType::WaveResponse, RespMessage))
 	{
 		return;
 	}
 
-	FFastLogger::LogConsole(TEXT("hkhkhkhk"));
+	FFastLogger::LogConsole(TEXT("메세지 받았습니다@@@@@@@@"));
 	// 내가 만든 변수에 넣자
 	QuizID = RespMessage.WavResponseMessage.QuizID;
 	Similarity = RespMessage.WavResponseMessage.Similarity;
 	// 먼저, 보내준 메세지에서 문자열의 길이를 추출한다 (몇글자니)
 	FMemory::Memcpy(&MessageSize, RespMessage.WavResponseMessage.Message, sizeof(uint32));
-	// 그 다음, 문자열 길이가 0보다 크면 길이만큼 문자열을 복사해서 생성
 
 	FFastLogger::LogConsole(TEXT("Payload Size: %d"), RespMessage.Header.PayloadSize);
 	FFastLogger::LogConsole(TEXT("Received Message Size : %d"), MessageSize);
 
+	// 그 다음, 문자열 길이가 0보다 크면 길이만큼 문자열을 복사해서 생성
 	if (MessageSize > 0)
 	{
 		unsigned char* StrSize = RespMessage.WavResponseMessage.Message + sizeof(uint32);
@@ -231,6 +249,16 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 
 	// 총 몇번 응답 했는지를 체크한다
 	SendResponseIdx++;
+
+	// 메세지를 받았으니, 녹음 시작
+	StartRecord();
+
+	// 틱 비활성화
+	bIsMessageReceived = false;
+
+	// TODO: 녹음 길이 확인 (5초가 적당한지, 정확히 말하는 내용이 전부 녹음되는지)
+	// 5초뒤에 녹음 자동 종료
+	GetWorld()->GetTimerManager().SetTimer(RecordTimer, this, &ASoundQuizProp::StopRecord, 5.0f, false);
 }
 
 void ASoundQuizProp::SendEndSoundQuizNotify()
@@ -263,8 +291,12 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 	
 	// 물 다시 차오르기
 	RisingWaterProp->StartRising();
-	
+
+	// 퀴즈 정보 초기화
 	ResetSoundQuiz();
+
+	// 틱 비활성화
+	bIsMessageReceived = false;
 }
 
 void ASoundQuizProp::ResetSoundQuiz()
@@ -298,6 +330,12 @@ void ASoundQuizProp::StopRecord()
 		VoiceRecorderComponent->StopRecording();
 		FFastLogger::LogConsole(TEXT("녹음끝임@@@@@@@@@@@@@@@@@@@@@@@"));
 	}
+
+	// 녹음을 끝냈으니, 파일을 전송해주자
+	SendSoundQuizMessage();
+
+	// 틱도 다시 활성화
+	bIsMessageReceived = true;
 }
 
 // WAV 파일을 로드하고 바이너리 데이터로 전환

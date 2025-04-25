@@ -20,15 +20,12 @@ void USoundQuizUI::NativeOnInitialized()
 
 void USoundQuizUI::OnClickVoiceSend()
 {
-	// 녹음을 끝내고 AI에게 녹음 파일을 보내자
+	// (5초전에 보내고 싶을때)녹음을 끝내고 AI에게 녹음 파일을 보내자
 	if (VoiceRecorderComponent.IsValid())
 	{
 		VoiceRecorderComponent->StopRecording();
 		FFastLogger::LogConsole(TEXT("녹음끝@@@@@@@@@@@@@@@@@@@@@@@"));
 	}
-
-	// 5초 안에 안누르면 자동으로 보내자
-	// GetWorld()->GetTimerManager().SetTimer(RecordTimer, this, USoundQuizUI::OnClickVoiceSend, 5.0f, false);
 }
 
 void USoundQuizUI::UpdateFromResponse(uint32 Similarity, FString MessageStr)

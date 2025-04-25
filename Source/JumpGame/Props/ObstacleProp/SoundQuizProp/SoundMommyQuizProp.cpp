@@ -65,11 +65,14 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		{
 			SoundQuizFail->AddToViewport();
 		}
+
+		// 퀴즈 끝났다고 알리자!
 		SendEndSoundQuizNotify();
 
 		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 	}
 
+	// TODO: 정답과 일치할때로 변경해야함
 	// 20번 안에, Fin되는 경우 -> 유사도가 높을때
 	if (SendResponseIdx < 20 && Similarity >= 90)
 	{
@@ -80,6 +83,8 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		{
 			SoundQuizClear->AddToViewport();
 		}
+
+		// 퀴즈 끝났다고 알리자!
 		SendEndSoundQuizNotify();
 		
 		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);

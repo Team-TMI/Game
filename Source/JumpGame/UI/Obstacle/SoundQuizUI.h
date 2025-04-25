@@ -28,12 +28,13 @@ public:
 
 	UFUNCTION()
 	void OnClickVoiceSend();
+	UFUNCTION()
 	void UpdateFromResponse(uint32 Similarity, FString MessageStr);
-
-	FTimerHandle RecordTimer;
-
+	
 	// 녹음 컴포넌트 동작
+	UPROPERTY()
 	TWeakObjectPtr<UVoiceRecorderComponent> VoiceRecorderComponent = nullptr;
-
+	
+	UFUNCTION()
 	void SetVoiceRecorderComponent(UVoiceRecorderComponent* VoiceRecorderComp);
 };
