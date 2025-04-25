@@ -2,6 +2,7 @@
 
 
 #include "EyeTrackingProp.h"
+#include "JumpGame/UI/Obstacle/SettingEyeTrackingUI.h"
 
 #include "Components/BoxComponent.h"
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
@@ -15,6 +16,13 @@ AEyeTrackingProp::AEyeTrackingProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	ConstructorHelpers::FClassFinder<USettingEyeTrackingUI> SettingEyeTrackingUIWidget
+		(TEXT("/Game/UI/Obstacle/WBP_SettingEyeTracking.WBP_SettingEyeTracking_C"));
+	if (SettingEyeTrackingUIWidget.Succeeded())
+	{
+		SettingEyeTrackingUIClass = SettingEyeTrackingUIWidget.Class;
+	}
+
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 30.f));
 }
@@ -23,6 +31,8 @@ AEyeTrackingProp::AEyeTrackingProp()
 void AEyeTrackingProp::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SettingEyeTrackingUI = CreateWidget<USettingEyeTrackingUI>(GetWorld(), SettingEyeTrackingUIClass);
 }
 
 void AEyeTrackingProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -54,6 +64,16 @@ void AEyeTrackingProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Four))
+	{
+		RecvReadyEyeTracking();
+	}
+	
+	if (!bIsStartHunt)
+	{
+		return;
+	}
+	
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::One))
 	{
 		SendEyeTrackingStart();
@@ -63,12 +83,56 @@ void AEyeTrackingProp::Tick(float DeltaTime)
 	{
 		SendEyeTrackingEnd();
 	}
-	
+
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Three))
 	{
 		RecvEyeTrackingInfo();
 	}
+
+}
+
+void AEyeTrackingProp::RecvReadyEyeTracking()
+{
+	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
+
+	FMessageUnion RecvMessage;
+	if (GS->IOManagerComponent->PopMessage(EMessageType::EyeTrackingRequestMessage, RecvMessage))
+	{
+		QuizID = RecvMessage.EyeTrackingRequestMessage.QuizID;
+		Width = RecvMessage.EyeTrackingRequestMessage.Width;
+		Height = RecvMessage.EyeTrackingRequestMessage.Height;
+		Start = RecvMessage.EyeTrackingRequestMessage.Start;
+		End = RecvMessage.EyeTrackingRequestMessage.End;
+	}
+
+	if (End == 0)
+	{
+		SettingEyeTrackingUI->RemoveFromParent();
+
+		bIsSettingFinish = true;
+	}
 	
+	if (GEngine && GEngine->GameViewport && GEngine->GameUserSettings)
+	{
+		FVector2D ViewportSize;
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+		
+		SettingLocation[0] = {50.f, 50.f};
+		SettingLocation[1] = {ViewportSize.X - 50.f, 50.f};
+		SettingLocation[2] = {ViewportSize.X - 50.f, ViewportSize.Y - 50.f};
+		SettingLocation[3] = {50.f, ViewportSize.Y - 50.f};
+	}
+	
+	if (SettingEyeTrackingUI)
+	{
+		if (!SettingEyeTrackingUI->IsInViewport())
+		{
+			SettingEyeTrackingUI->AddToViewport();
+		}
+
+		SettingEyeTrackingUI->SetPositionInViewport(SettingLocation[SettingCount]);
+		++SettingCount;
+	}
 }
 
 void AEyeTrackingProp::SendEyeTrackingStart()
@@ -78,12 +142,13 @@ void AEyeTrackingProp::SendEyeTrackingStart()
 	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
 
 	FMessageUnion SendMessage;
-	SendMessage.EyeTrackingNotifyMessage.Header.Type = EMessageType::EyeTrackingNotify;
+	SendMessage.EyeTrackingNotifyMessage.Header.Type = EMessageType::EyeTrackingNotifyMessage;
 	SendMessage.EyeTrackingNotifyMessage.Header.PayloadSize = sizeof(FEyeTrackingNotifyMessage);
 	SendMessage.EyeTrackingNotifyMessage.Header.SessionID[0] = 1;
 	SendMessage.EyeTrackingNotifyMessage.Header.PlayerID = 1;
 
 	SendMessage.EyeTrackingNotifyMessage.QuizID = 100;
+	SendMessage.EyeTrackingNotifyMessage.SettingStart = 0;
 	SendMessage.EyeTrackingNotifyMessage.Start = 1;
 	SendMessage.EyeTrackingNotifyMessage.End = 0;
 
@@ -97,14 +162,33 @@ void AEyeTrackingProp::SendEyeTrackingEnd()
 	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
 
 	FMessageUnion SendMessage;
-	SendMessage.EyeTrackingNotifyMessage.Header.Type = EMessageType::EyeTrackingNotify;
+	SendMessage.EyeTrackingNotifyMessage.Header.Type = EMessageType::EyeTrackingNotifyMessage;
 	SendMessage.EyeTrackingNotifyMessage.Header.PayloadSize = sizeof(FEyeTrackingNotifyMessage);
 	SendMessage.EyeTrackingNotifyMessage.Header.SessionID[0] = 1;
 	SendMessage.EyeTrackingNotifyMessage.Header.PlayerID = 1;
 
 	SendMessage.EyeTrackingNotifyMessage.QuizID = 100;
+	SendMessage.EyeTrackingNotifyMessage.SettingStart = 0;
 	SendMessage.EyeTrackingNotifyMessage.Start = 0;
 	SendMessage.EyeTrackingNotifyMessage.End = 1;
+
+	GS->IOManagerComponent->SendGameMessage(SendMessage);
+}
+
+void AEyeTrackingProp::SendEyeTrackingSettingStart()
+{
+	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
+
+	FMessageUnion SendMessage;
+	SendMessage.EyeTrackingNotifyMessage.Header.Type = EMessageType::EyeTrackingNotifyMessage;
+	SendMessage.EyeTrackingNotifyMessage.Header.PayloadSize = sizeof(FEyeTrackingNotifyMessage);
+	SendMessage.EyeTrackingNotifyMessage.Header.SessionID[0] = 1;
+	SendMessage.EyeTrackingNotifyMessage.Header.PlayerID = 1;
+
+	SendMessage.EyeTrackingNotifyMessage.QuizID = 100;
+	SendMessage.EyeTrackingNotifyMessage.SettingStart = 1;
+	SendMessage.EyeTrackingNotifyMessage.Start = 0;
+	SendMessage.EyeTrackingNotifyMessage.End = 0;
 
 	GS->IOManagerComponent->SendGameMessage(SendMessage);
 }
@@ -113,7 +197,7 @@ void AEyeTrackingProp::RecvEyeTrackingInfo()
 {
 	FLog::Log("RecvEyeTrackingInfo");
 	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
-	
+
 	if (!GS)
 	{
 		FLog::Log("No GameState");
@@ -121,11 +205,9 @@ void AEyeTrackingProp::RecvEyeTrackingInfo()
 	}
 
 	FMessageUnion RecvMessage;
-	if (GS->IOManagerComponent->PopMessage(EMessageType::EyeTrackingResponse, RecvMessage))
+	if (GS->IOManagerComponent->PopMessage(EMessageType::EyeTrackingResponseMessage, RecvMessage))
 	{
 		QuizID = RecvMessage.EyeTrackingResponseMessage.QuizID;
-		Width = RecvMessage.EyeTrackingResponseMessage.Width;
-		Height = RecvMessage.EyeTrackingResponseMessage.Height;
 		X = RecvMessage.EyeTrackingResponseMessage.X;
 		Y = RecvMessage.EyeTrackingResponseMessage.Y;
 		bBlink = RecvMessage.EyeTrackingResponseMessage.bBlink;
@@ -134,7 +216,6 @@ void AEyeTrackingProp::RecvEyeTrackingInfo()
 		// UE_LOG(LogTemp, Warning, TEXT("State: %d"), State);
 		// UE_LOG(LogTemp, Warning, TEXT("Blink: %d"), bBlink);
 		// UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f"), X, Y);
-		// UE_LOG(LogTemp, Warning, TEXT("Width: %f, Height: %f"), Width, Height);
 		// UE_LOG(LogTemp, Warning, TEXT("QuizID: %d"), QuizID);
 	}
 }

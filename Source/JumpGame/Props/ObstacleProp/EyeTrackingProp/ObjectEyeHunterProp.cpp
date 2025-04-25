@@ -127,12 +127,12 @@ void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedCompone
 
 void AObjectEyeHunterProp::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+	
 	if (!bIsStartHunt)
 	{
 		return;
 	}
-
-	Super::Tick(DeltaTime);
 
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Five))
 	{

@@ -10,7 +10,6 @@
 void UJumpGaugeUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	FLog::Log("1");
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (Frog)
 	{
