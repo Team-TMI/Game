@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "VoiceRecorderComponent.h"
 #include "JumpGame/Core/GameState/NetworkGameState.h"
 #include "JumpGame/Props/ObstacleProp/ObstacleProp.h"
 #include "SoundQuizProp.generated.h"
@@ -40,6 +41,9 @@ public:
 	// TODO: 리셋함수 만들기
 	virtual void ResetSoundQuiz();
 
+	void StartRecord();
+	void StopRecord();
+
 	UPROPERTY()
 	int32 QuizID = -1;
 	UPROPERTY()
@@ -71,4 +75,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class AFrog* Frog;
+
+protected:
+	// 녹음 컴포넌트 붙이기
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UVoiceRecorderComponent> VoiceRecorderComponent = nullptr;
+
 };

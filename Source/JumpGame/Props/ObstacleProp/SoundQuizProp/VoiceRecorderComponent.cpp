@@ -3,6 +3,10 @@
 
 #include "VoiceRecorderComponent.h"
 
+#include "AudioMixerBlueprintLibrary.h"
+#include "AudioMixerDevice.h"
+#include "JumpGame/Utils/FastLogger.h"
+
 bool UVoiceRecorderComponent::Init(int32& SampleRate)
 {
 	NumChannels = 1;
@@ -13,7 +17,13 @@ bool UVoiceRecorderComponent::Init(int32& SampleRate)
 	Osc.SetFrequency(440.0f);
 	Osc.Start();
 #endif // SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+	
 
+	if (RecordSoundSubmix)
+	{
+		this->SoundSubmix = RecordSoundSubmix;
+	}
+	
 	return true;
 }
 
@@ -27,7 +37,7 @@ int32 UVoiceRecorderComponent::OnGenerateAudio(float* OutAudio, int32 NumSamples
 	}
 #endif // SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
 
-	return NumSamples;
+	return Super::OnGenerateAudio(OutAudio, NumSamples);
 }
 
 void UVoiceRecorderComponent::SetFrequency(const float InFrequencyHz)
@@ -44,8 +54,57 @@ void UVoiceRecorderComponent::SetFrequency(const float InFrequencyHz)
 
 void UVoiceRecorderComponent::StartRecording()
 {
-}
+	this->Start();
+	UAudioMixerBlueprintLibrary::StartRecordingOutput(GetWorld(), 0.0f, RecordSoundSubmix.Get());
+	FFastLogger::LogConsole(TEXT("녹음 시작했습니다"));
 
+	OnStartRecording.Broadcast();
+}
 void UVoiceRecorderComponent::StopRecording(const bool bIsStop)
 {
+	if (!IsRecording()) return;
+
+	if (!bIsStop)
+	{
+		FString FiledirectoryPath = FPaths::ProjectSavedDir();
+		FFastLogger::LogConsole(TEXT("FiledirectoryPath: %s"), *FiledirectoryPath);
+		Audio::FMixerDevice* MixerDevice = FAudioDeviceManager::GetAudioMixerDeviceFromWorldContext(GetWorld());
+		if (MixerDevice)
+		{
+			float OutSampleRate = 0.0f;
+			float OutChannelCount = 0.0f;
+
+			Audio::FAlignedFloatBuffer& RecordedBuffer = MixerDevice->StopRecording(RecordSoundSubmix.Get(), OutChannelCount, OutSampleRate);
+
+			if (RecordedBuffer.Num() == 0)
+			{
+				FFastLogger::LogConsole(TEXT("오디오 데이터가 없습니다"));
+				return;
+			}
+
+			RecordingData.Reset(new Audio::FAudioRecordingData());
+			RecordingData->InputBuffer = Audio::TSampleBuffer<int16>(RecordedBuffer, OutChannelCount, OutSampleRate);
+
+			RecordingData->Writer.BeginWriteToWavFile(RecordingData->InputBuffer, TEXT("SounQuizFile"), FiledirectoryPath, [this]()
+			{
+				if (RecordSoundSubmix && RecordSoundSubmix->OnSubmixRecordedFileDone.IsBound())
+				{
+					RecordSoundSubmix->OnSubmixRecordedFileDone.Broadcast(nullptr);
+				}
+				RecordingData.Reset();
+			});
+		}
+		else
+		{
+			FFastLogger::LogConsole(TEXT("nullptr"));
+		}
+	}
+	this->Stop();
+	OnStopRecording.Broadcast();
 }
+
+const bool UVoiceRecorderComponent::IsRecording() const
+{
+	return IsPlaying();
+}
+
