@@ -49,6 +49,8 @@ bool FGizmoPrimaryPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 	{
 		return false;
 	}
+
+	FFastLogger::LogScreen(FColor::Orange, TEXT("Gizmo Primary : %f %f %f"), HitResult.Location.X, HitResult.Location.Y, HitResult.Location.Z);
 	
 	Grid->MoveByGizmoPrimary(HitResult.Location, HitResult);
 	

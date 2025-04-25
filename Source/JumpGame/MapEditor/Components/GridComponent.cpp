@@ -55,14 +55,23 @@ bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult&
 	// X = Sign.X < 0.f ? X - 1 : X;
 	// Y = Sign.Y < 0.f ? Y - 1 : Y;
 	// Z = Sign.Z < 0.f ? Z - 1 : Z;
+	FFastLogger::LogScreen(FColor::Red, TEXT("Grid Origin : %d %d %d"), X, Y, Z);
 
 	// 충돌이 발생했을 때 접촉 면의 Normal을 받아와서 만약 해당 Normal이 -1이면 해당 방향으로 1칸 이동
 	if (HitResult.IsValidBlockingHit())
 	{
-		FVector ImpactNormal = HitResult.ImpactNormal;
-		ImpactNormal.Normalize();
+		// Impact Normal도 Round Int를 해야함. 왜냐하면 짤릴 수 있음.
+		FIntVector3 ImpactNormal = {
+			(int32)FMath::RoundToInt(HitResult.ImpactNormal.X),
+			(int32)FMath::RoundToInt(HitResult.ImpactNormal.Y),
+			(int32)FMath::RoundToInt(HitResult.ImpactNormal.Z)
+		};
 		// 충돌이 발생한 Normal을 기준으로 이동
-		FVector Offset = ImpactNormal * Size;
+		FIntVector3 Offset = {
+			ImpactNormal.X * (int32)FMath::RoundToInt(Size.X),
+			ImpactNormal.Y * (int32)FMath::RoundToInt(Size.Y),
+			ImpactNormal.Z * (int32)FMath::RoundToInt(Size.Z)
+		};
 		// X = (int32)ImpactNormal.X < 0.f ? X - Size.X : X + Size.X;
 		// Y = (int32)ImpactNormal.Y < 0.f ? Y - Size.Y : Y + Size.Y;
 		// Z = (int32)ImpactNormal.Z < 0.f ? Z - Size.Z : Z + Size.Z;
@@ -73,6 +82,8 @@ bool UGridComponent::MoveByGizmoPrimary(FVector MouseLocation, const FHitResult&
 
 	// 100 단위 그리드 기준이지만, 블록의 중심을 고려하여 보정
 	FVector GridOrigin = FVector(X, Y, Z) * SnapSize;
+
+	
 	// FVector CenterOffset = FVector(Size) * SnapSize * 0.5f;
 	
 	// 물체의 중점을 그리드의 교차점으로 옮김
