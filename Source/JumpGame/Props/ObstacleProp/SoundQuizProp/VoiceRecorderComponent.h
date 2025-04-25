@@ -18,8 +18,8 @@
 // ========================================================================
 
 // 음성 녹음을 시작/끝낼 때 호출할 델리게이트 선언
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartRecording);
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopRecording);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartRecording);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopRecording);
 
 
 #define SYNTHCOMPONENT_EX_OSCILATOR_ENABLED 0
@@ -50,5 +50,20 @@ public:
 	void StartRecording();
 	UFUNCTION(BlueprintCallable, Category = "RecordObstacle")
 	void StopRecording(const bool bIsStop = false);
+	UFUNCTION(BlueprintCallable, Category = "RecordObstacle")
+	const bool IsRecording() const;
+
+protected:
+	FOnStartRecording OnStartRecording;
+	FOnStopRecording OnStopRecording;
 	
+public:
+	FOnStartRecording& GetOnStartRecording() { return OnStartRecording; }
+	FOnStopRecording& GetOnStopRecording() { return OnStopRecording; }
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "RecordObstacle")
+	TObjectPtr<USoundSubmix> RecordSoundSubmix;
+
+	TUniquePtr<Audio::FAudioRecordingData> RecordingData;
 };

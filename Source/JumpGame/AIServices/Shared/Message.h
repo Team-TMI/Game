@@ -1,6 +1,6 @@
 #pragma once
 
-// #pragma pack(push, 1)
+#pragma pack(push, 1)
 
 enum class EMessageType : uint8
 {
@@ -54,10 +54,10 @@ struct FWavRequestMessage {
 		 
 	uint8 QuizID;
 	uint8 Start; // 0 ~ 1
-	uint8 Index; // 패킷의 순서
+	uint32 Index; // 패킷의 순서
 	uint8 Fin; // 0 ~ 1
-	uint8 Size; // 총 음성 사이즈
-	uint8 ChunkSize; // 청크 사이즈
+	uint32 Size; // 총 음성 사이즈
+	uint32 ChunkSize; // 청크 사이즈
 	uint8 RawData[1024]; // 음성 바이너리 데이터
 };
 
@@ -67,6 +67,8 @@ struct FWavResponseMessage {
 		
 	uint8 QuizID;
 	float Similarity; // 유사도
+	uint8 bSuccess; // 정답
+	// uint8 Answer;
 	uint8 Message[1024]; // [len(str) : 4Byte, str]
 
 	/*
@@ -117,7 +119,7 @@ struct FEyeTrackingResponse {
 	uint8 State; // 100 : 정상성, 200 : 클라 에러, 300 : 서버 에러
 };
 
-// #pragma pack(pop)
+#pragma pack(pop)
 
 union FMessageUnion
 {

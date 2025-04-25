@@ -50,7 +50,7 @@ void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AAc
 {
 	if (OtherActor->ActorHasTag("Frog")) return;
 	
-	FFastLogger::LogConsole(TEXT("Hit!!!: %s"), *OtherActor->GetName());
+	// FFastLogger::LogConsole(TEXT("Hit!!!: %s"), *OtherActor->GetName());
 	HitNormal = Hit.ImpactNormal;
 	// NOTE: 구체가 Hit되었을 때, Hit.Normal 과 Hit.ImpactNormal에 대한 차이 
 	/*
@@ -145,7 +145,7 @@ void ARollingBallProp::SetActive(bool bIsActive)
 		MeshComp->IgnoreActorWhenMoving(this, true);
 	}
 
-	FFastLogger::LogConsole(TEXT("SetActive: %d"), bIsActive);
+	// FFastLogger::LogConsole(TEXT("SetActive: %d"), bIsActive);
 }
 
 void ARollingBallProp::LaunchProjectile()

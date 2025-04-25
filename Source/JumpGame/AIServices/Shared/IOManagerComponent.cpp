@@ -82,12 +82,12 @@ void UIOManagerComponent::BeginPlay()
 	// }
 
 	// 사운드 퀴즈 Dummy Message
-	for (int32 i = 1; i <= 21; i++)
+	/*for (int32 i = 1; i <= 21; i++)
 	{
 		FWavResponseMessage ResponseMessage;
 		ResponseMessage.QuizID = i;
 		ResponseMessage.Similarity = FMath::RandRange(0, 100);
-		FString DummyStr = TEXT("Dummy Hint");
+		FString DummyStr = TEXT("한글한글한글");
 		FTCHARToUTF8 Converted(*DummyStr);
 		uint32 Len = Converted.Length();
 
@@ -97,7 +97,7 @@ void UIOManagerComponent::BeginPlay()
 		FMessageUnion MessageUnion;
 		FMemory::Memcpy(&MessageUnion, &ResponseMessage, sizeof(FWavResponseMessage));
 		MessageQueue[EMessageType::WaveResponse].push(MessageUnion);
-	}
+	}*/
 }
 
 void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)
