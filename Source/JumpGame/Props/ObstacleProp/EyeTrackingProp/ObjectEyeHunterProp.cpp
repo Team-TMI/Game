@@ -34,7 +34,7 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 	}
 }
 
-void AObjectEyeHunterProp::BeginPlay()
+void AObjectEyeHunterProp::BeginPlay()	
 {
 	Super::BeginPlay();
 	FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);

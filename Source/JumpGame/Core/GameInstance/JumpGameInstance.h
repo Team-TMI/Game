@@ -69,4 +69,7 @@ public:
 	TMap<FString, FPlayerInfo>& GetPlayerInfo() { return PlayerMap; }
 	// 승리 판별 (bIsWin값 변경)
 	void SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin);
+
+public:
+	void RunEyeTrackingScript();
 };
