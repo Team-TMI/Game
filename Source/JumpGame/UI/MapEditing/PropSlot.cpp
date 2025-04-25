@@ -18,9 +18,9 @@ void UPropSlot::SetPropID(FName InPropID)
 	PropID = InPropID;
 }
 
-void UPropSlot::NativeConstruct()
+void UPropSlot::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	
 	PropDragVisual = CreateWidget<UUserWidget>(GetWorld(), PropWidgetClass);
 }

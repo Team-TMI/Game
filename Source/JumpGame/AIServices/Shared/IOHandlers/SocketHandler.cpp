@@ -10,7 +10,7 @@ FSocketHandler::FSocketHandler()
 {
 }
 
-void FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo,
+bool FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo,
 	std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr)
 {
 	ServerURL = InitInfo.ServerUrl;
@@ -25,6 +25,8 @@ void FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo,
 		if (!WeakSharedThis.IsValid()) return;
 
 		TSharedPtr<FSocketHandler> StrongThis = WeakSharedThis.Pin();
+
+		StrongThis->bConnected = true;
 		
 		UE_LOG(LogTemp, Warning, TEXT("Connected to WebSocket server."));
 	});
@@ -33,6 +35,11 @@ void FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo,
 		if (!WeakSharedThis.IsValid()) return;
 
 		TSharedPtr<FSocketHandler> StrongThis = WeakSharedThis.Pin();
+
+		StrongThis->bConnected = false;
+
+		// Retry Code
+		StrongThis->Socket->Connect();
 		
 		UE_LOG(LogTemp, Error, TEXT("Connection error: %s"), *Error);
 	});
@@ -46,13 +53,18 @@ void FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo,
 	});
 
 	Socket->Connect();
+	
+	return true;
 }
 
 bool FSocketHandler::SendGameMessage(const FMessageUnion& Message)
 {
-	FFastLogger::LogConsole(TEXT("FSocketHandler::SendGameMessage : Packet Size : %d"), Message.Header.PayloadSize);
-	FFastLogger::LogConsole(TEXT("Test Fin: %d"), Message.WavRequestMessage.Fin);
-	
+	if (!bConnected)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Not connected to WebSocket server."));
+		return false;
+	}
+  
 	Socket->Send(Message.RawData, Message.Header.PayloadSize, true);
 	return true;
 }

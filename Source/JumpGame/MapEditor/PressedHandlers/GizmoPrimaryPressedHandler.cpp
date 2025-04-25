@@ -49,7 +49,7 @@ bool FGizmoPrimaryPressedHandler::HandlePressed(FClickResponse& PressedResponse,
 	{
 		return false;
 	}
-	
+
 	Grid->MoveByGizmoPrimary(HitResult.Location, HitResult);
 	
 	return true;
