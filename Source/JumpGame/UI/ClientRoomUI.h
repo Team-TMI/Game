@@ -21,7 +21,7 @@ class JUMPGAME_API UClientRoomUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 
 	UPROPERTY()
 	class UJumpGameInstance* GI;
