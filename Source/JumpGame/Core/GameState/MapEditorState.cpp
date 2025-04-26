@@ -28,6 +28,7 @@ void AMapEditorState::BeginPlay()
 	MapEditingHUD = CreateWidget<UMapEditingHUD>(GetWorld(), MapEditingHUDClass);
 	if (MapEditingHUD)
 	{
+		FFastLogger::LogScreen(FColor:: Red, TEXT("MapEditingHUD Created"));
 		MapEditingHUD->AddToViewport();
 	}
 }

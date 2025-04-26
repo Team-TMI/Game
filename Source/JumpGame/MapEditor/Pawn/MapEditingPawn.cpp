@@ -168,6 +168,8 @@ void AMapEditingPawn::HandleLeftClick(const FInputActionValue& InputActionValue)
 	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
 	if (!PC) return ;
 
+	FFastLogger::LogScreen(FColor::Red, TEXT("Left Click"));
+	
 	PC->SetShowMouseCursor(true);
 	PC->SetInputMode(FInputModeGameAndUI());
 	
