@@ -5,6 +5,7 @@
 /*
  * 이 오류는 RHITransientResourceAllocator.h 파일에서 max 매크로 충돌이 발생했기 때문에 생긴 것입니다. Visual Studio나 Windows 헤더에서는 흔히 <windows.h>가 max와 min을 매크로로 정의하기 때문에, C++ 표준 라이브러리의 std::max / std::min과 충돌하게 됩니다.
  */
+#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
 
@@ -27,7 +28,6 @@ public:
 	virtual ~FIPCHandler() override;
 
 private:
-	bool PostProcessParsedMessage(const FMessageUnion& Message);
 	bool ParseMessage(FMessageUnion& Message, DWORD BytesRead);
 	
 	FString PipeName;

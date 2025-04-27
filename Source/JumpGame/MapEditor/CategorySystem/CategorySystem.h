@@ -18,14 +18,14 @@ class JUMPGAME_API UCategorySystem : public UActorComponent
 public:
 	UCategorySystem();
 
-protected:
-	virtual void BeginPlay() override;
-
 	// CRUD 함수
 	UFUNCTION(BlueprintCallable)
 	bool AddProp(const FPropStruct& NewProp);
 	UFUNCTION(BlueprintCallable)
 	bool RemovePropByID(FName ID);
+	
+	const TArray<EMajorCategoryType>& GetMajorCategories();
+	const TArray<ESubCategoryType>& GetSubCategoriesByMajor(EMajorCategoryType Major);
 
 	// 조회 함수
 	const TArray<FPropStruct*>& GetPropsByMajor(EMajorCategoryType Major);
@@ -36,6 +36,9 @@ protected:
 	FOnPropAdded OnPropAdded;
 	UPROPERTY(BlueprintAssignable)
 	FOnPropRemoved OnPropRemoved;
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	UFUNCTION()

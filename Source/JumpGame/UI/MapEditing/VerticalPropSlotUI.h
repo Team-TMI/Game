@@ -1,14 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "JumpGame/MapEditor/CategorySystem/PropStruct.h"
+#include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "VerticalPropSlotUI.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class JUMPGAME_API UVerticalPropSlotUI : public UUserWidget
 {
@@ -17,6 +14,16 @@ class JUMPGAME_API UVerticalPropSlotUI : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 
-private:
+	UFUNCTION()
+	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* CachedDragDropOperation);
 	
+	void SetPropSlots(FPropStruct* Top, FPropStruct* Below = nullptr);
+	void ClearInfo();
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UPropSlot* PropTop;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UPropSlot* PropBelow;
 };
