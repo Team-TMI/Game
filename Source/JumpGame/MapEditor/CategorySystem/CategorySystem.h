@@ -52,9 +52,9 @@ private:
 	
 	const FMajorTableInfo* FindMajorTableInfoRow(const EMajorCategoryType InMajorCategoryType);
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
 	class UDataTable* CategoryDataTable = nullptr;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
 	class UDataTable* MajorTableInfoTable = nullptr;
 
 	// 카테고리별로 Prop을 관리하기 위한 Map

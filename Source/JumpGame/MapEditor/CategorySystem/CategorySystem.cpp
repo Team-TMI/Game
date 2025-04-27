@@ -7,13 +7,13 @@ UCategorySystem::UCategorySystem()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> DT_PROPDATA
-	(TEXT("/Game/MapEditor/DataTable/DT_PropData.DT_PropData"));
-	CategoryDataTable = DT_PROPDATA.Object;
-	
-	static ConstructorHelpers::FObjectFinder<UDataTable> DT_MAJORINFO
-	(TEXT("/Game/MapEditor/DataTable/DT_MajorTable.DT_MajorTable"));
-	MajorTableInfoTable = DT_MAJORINFO.Object;
+	// static ConstructorHelpers::FObjectFinder<UDataTable> DT_PROPDATA
+	// (TEXT("/Game/MapEditor/DataTable/DT_PropData.DT_PropData"));
+	// CategoryDataTable = DT_PROPDATA.Object;
+	//
+	// static ConstructorHelpers::FObjectFinder<UDataTable> DT_MAJORINFO
+	// (TEXT("/Game/MapEditor/DataTable/DT_MajorTable.DT_MajorTable"));
+	// MajorTableInfoTable = DT_MAJORINFO.Object;
 }
 
 // 카테고리 시스템을 만들어보자!!
