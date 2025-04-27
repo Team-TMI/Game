@@ -8,7 +8,7 @@
 
 class AFrog;
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API AObstacleProp : public ABaseProp
 {
 	GENERATED_BODY()

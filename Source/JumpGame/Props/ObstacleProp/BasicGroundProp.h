@@ -6,7 +6,7 @@
 #include "ObstacleProp.h"
 #include "BasicGroundProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ABasicGroundProp : public AObstacleProp
 {
 	GENERATED_BODY()

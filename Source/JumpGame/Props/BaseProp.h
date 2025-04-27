@@ -9,7 +9,7 @@
 
 class UBoxComponent;
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ABaseProp : public APrimitiveProp
 {
 	GENERATED_BODY()

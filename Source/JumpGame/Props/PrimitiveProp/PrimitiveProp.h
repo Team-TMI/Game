@@ -7,7 +7,7 @@
 #include "JumpGame/Utils/CommonUtils.h"
 #include "PrimitiveProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API APrimitiveProp : public AActor
 {
 	GENERATED_BODY()

@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
 	class UTexture2D* PropIcon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
-	class UClass* PropClass;
+	TSubclassOf<class APrimitiveProp> PropClass;
 
 	FPropStruct(
 		const FText&                   InPropName         = FText::GetEmpty(),
@@ -32,7 +32,7 @@ public:
 		EMajorCategoryType             InPropCategory     = EMajorCategoryType::None,
 		TArray<ESubCategoryType>       InPropSubCategories = {},
 		TObjectPtr<const UTexture2D>   InPropIcon          = nullptr,
-		TSubclassOf<UObject>           InPropClass         = nullptr)
+		TSubclassOf<class APrimitiveProp>           InPropClass         = nullptr)
 		: PropName        (InPropName)
 		, PropDescription (InPropDescription)
 		, PropCategory    (InPropCategory)

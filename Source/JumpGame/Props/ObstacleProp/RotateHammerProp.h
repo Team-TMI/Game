@@ -6,7 +6,7 @@
 #include "ObstacleProp.h"
 #include "RotateHammerProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ARotateHammerProp : public AObstacleProp
 {
 	GENERATED_BODY()

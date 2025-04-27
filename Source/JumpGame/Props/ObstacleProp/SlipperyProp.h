@@ -6,7 +6,7 @@
 #include "ObstacleProp.h"
 #include "SlipperyProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ASlipperyProp : public AObstacleProp
 {
 	GENERATED_BODY()

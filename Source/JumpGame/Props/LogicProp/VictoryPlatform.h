@@ -6,7 +6,7 @@
 #include "LogicProp.h"
 #include "VictoryPlatform.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API AVictoryPlatform : public ALogicProp
 {
 	GENERATED_BODY()
