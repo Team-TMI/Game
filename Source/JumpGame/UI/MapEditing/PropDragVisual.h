@@ -13,4 +13,7 @@ UCLASS()
 class JUMPGAME_API UPropDragVisual : public UUserWidget
 {
 	GENERATED_BODY()
+
+private:
+	
 };

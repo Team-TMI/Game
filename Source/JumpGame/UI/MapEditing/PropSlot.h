@@ -6,7 +6,7 @@
 #include "JumpGame/Utils/CommonUtils.h"
 #include "PropSlot.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPropSlotClicked, FName, PropID);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPropSlotClicked, FName, PropID, class UClass*, InPropClass);
 
 UCLASS()
 class JUMPGAME_API UPropSlot : public UUserWidget
@@ -45,4 +45,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UImage* PropImage;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UClass* PropClass;
 };
