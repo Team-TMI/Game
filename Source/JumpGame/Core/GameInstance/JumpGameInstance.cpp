@@ -220,45 +220,9 @@ void UJumpGameInstance::SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin)
 
 void UJumpGameInstance::RunEyeTrackingScript()
 {
-	// 1. Conda 환경으로 Python 스크립트 비동기 실행
-	// FString CondaBatPath = TEXT("C:\\Users\\user\\miniconda3\\Scripts\\activate.bat");
-	// FString CondaEnv = TEXT("myenv_311");
-	// FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\main.py");
-	//
-	// // 명령어 구성 (Hidden 창에서 실행)
-	// FString Command = FString::Printf(
-	// 	TEXT("/C \"\"%s\" %s && python \"%s\"\""),
-	// 	*CondaBatPath,
-	// 	*CondaEnv,
-	// 	*ScriptPath
-	// );
-	//
-	// // 비동기로 Python 실행 (창 숨김)
-	// Async(EAsyncExecution::Thread, [Command]() {
-	// 	std::system(TCHAR_TO_ANSI(*Command));
-	// });
-
-	// FString CondaBatPath = TEXT("C:\\Users\\user\\miniconda3\\Scripts\\activate.bat");
-	// FString CondaEnv = TEXT("myenv_311");
-	// FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\main.py");
-	//
-	//
-	// // 명령어 구성 (비동기 실행 보장)
-	// FString Command = FString::Printf(
-	// 	TEXT("start \"\" cmd /c \"\"%s\" %s && python \"%s\"\""),
-	// 	*CondaBatPath,
-	// 	*CondaEnv,
-	// 	*ScriptPath
-	// );
-	//
-	// // 비동기로 실행 (프로세스 완전 분리)
-	// Async(EAsyncExecution::Thread, [Command]()
-	// {
-	// 	std::system(TCHAR_TO_UTF8(*Command));
-	// });
-	
 	FString PythonPath = TEXT("C:\\Users\\user\\miniconda3\\envs\\myenv_311\\python.exe");
 	FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\main.py");
+	//FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\infinite_counter.py");
 	FString WorkingDirectory = FPaths::GetPath(ScriptPath);
 
 	// Python 실행 명령 구성
