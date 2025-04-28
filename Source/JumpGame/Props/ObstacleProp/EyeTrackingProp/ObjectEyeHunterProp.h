@@ -36,7 +36,7 @@ public:
 	virtual void RecvEyeTrackingInfo() override;
 
 public:
-	void FlyingObjectMovement(float DelaTime);
+	void FlyingObjectMovement(float DeltaTime);
 	void TrackLocation(FVector2f Resolution, FVector2f ScreenLoc);
 	bool IsObjectAndEyeOverlap(FVector2D ObjectLocation, FVector2D EyeLocation);
 	// 수치 변화시키는 함수
@@ -46,6 +46,7 @@ public:
 	void StopCharacter();
 	void ResumeCharacter();
 	void ResetMission();
+	void InitializeMission();
 
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -71,4 +72,23 @@ public:
 	float SuccessRatio{0.f};
 	float SuccessTime{3.f};
 	float FlowTime{0.f};
+
+	FVector2D ViewportSize;
+
+	// Flying Object
+	float BezierAlpha{0.f};
+	UPROPERTY(EditAnywhere)
+	float ObjectSpeed;
+	FTimerHandle MovementTimerHandle;
+	FVector2D StartPosition;
+	FVector2D TargetPosition;
+	FVector2D ControlPoint1;
+	FVector2D ControlPoint2;
+	TArray<FVector2D> TargetPositions;
+	int32 CurrentTargetIndex;
+
+	void SetNextTargetPosition();
+	void UpdateObjectRotation(float DeltaTime);
+	FVector2D GetBezierPoint(FVector2D P0, FVector2D P1, FVector2D P2, FVector2D P3, float t);
+	FVector2D GenerateRandomControlPoint(FVector2D StartPos, FVector2D EndPos, float RandomRadius);
 };
