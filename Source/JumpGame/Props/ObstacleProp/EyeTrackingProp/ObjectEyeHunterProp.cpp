@@ -29,7 +29,7 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 	}
 
 	ConstructorHelpers::FClassFinder<UTimeRemainUI> TimeRemainWidget
-	(TEXT("/Game/UI/Obstacle/WBP_TimeRemain.WBP_TimeRemain_C"));
+		(TEXT("/Game/UI/Obstacle/WBP_TimeRemain.WBP_TimeRemain_C"));
 	if (TimeRemainWidget.Succeeded())
 	{
 		TimeRemainUIClass = TimeRemainWidget.Class;
@@ -89,7 +89,7 @@ void AObjectEyeHunterProp::StartMission()
 	{
 		FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
 	}
-	
+
 	FlyingObjectUI->InitializeParameters();
 
 	if (!TimeRemainUI)
@@ -102,24 +102,32 @@ void AObjectEyeHunterProp::StartMission()
 		TimeRemainUI->AddToViewport();
 	}
 	
-	// Object가 움직일 경로 추가
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+	
+	// Object가 움직일 경로 (비율로 저장)
 	// 오른쪽 상단
-	TargetPositions.Add(FVector2D(150.f, 150.f));
+	TargetPositionsRatio.Add(FVector2D(0.15f, 0.15f));
 	// 오른쪽 하단
-	TargetPositions.Add(FVector2D(150.f, ViewportSize.Y - 150.f));
+	TargetPositionsRatio.Add(FVector2D(0.15f, 0.85f));
 	// 중간
-	TargetPositions.Add(ViewportSize / 2.f);
+	TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
 	// 왼쪽 상단
-	TargetPositions.Add(FVector2D(ViewportSize.X - 150.f, 150.f));
+	TargetPositionsRatio.Add(FVector2D(0.85f, 0.15f));
 	// 왼쪽 하단
-	TargetPositions.Add(FVector2D(ViewportSize.X - 150.f, ViewportSize.Y - 150.f));
+	TargetPositionsRatio.Add(FVector2D(0.85f, 0.85f));
 	// 중간
-	TargetPositions.Add(ViewportSize / 2.f);
+	TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+
+	// 초기 목표 위치 계산
+	SetTargetPositionsByViewport();
 
 	CurrentTargetIndex = 0;
 	BezierAlpha = 0.f;
 	ObjectSpeed = 0.5f;
-	
+
 	if (FlyingObjectUI)
 	{
 		FlyingObjectUI->AddToViewport();
@@ -154,7 +162,7 @@ void AObjectEyeHunterProp::StartMission()
 	FTimerDelegate MissionDelegate{
 		FTimerDelegate::CreateLambda([this]() {
 			MissionFlowTime += GetWorld()->GetDeltaSeconds();
-			
+
 			TimeRemainUI->ChangeGaugeValue(MissionFlowTime / MissionTime);
 
 			//FLog::Log("Mission Time", MissionFlowTime);
@@ -244,8 +252,17 @@ void AObjectEyeHunterProp::Tick(float DeltaTime)
 	}
 
 	// Viewport 크기 게임 중 바뀔 수 있으니까
-	GEngine->GameViewport->GetViewportSize(ViewportSize);
-	// TODO: ViewpointSize 바뀌면 TargetPoints 들도 다 바꿔줘야함
+	if (GEngine && GEngine->GameViewport)
+	{
+		FVector2D CurrentViewportSize;
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+
+		if (CurrentViewportSize != ViewportSize)
+		{
+			SetTargetPositionsByViewport();
+			ViewportSize = CurrentViewportSize;
+		}
+	}
 }
 
 void AObjectEyeHunterProp::RecvEyeTrackingInfo()
@@ -361,7 +378,7 @@ void AObjectEyeHunterProp::ChangeValue(bool bIsOverlap)
 	{
 		FlowTime = FMath::Clamp(FlowTime - (GetWorld()->GetDeltaSeconds() / 2), 0.f, SuccessTime);
 	}
-	
+
 	SuccessRatio = FMath::Clamp(FlowTime / SuccessTime, 0.f, 1.f);
 	FlyingObjectUI->ChangeGaugeValue(SuccessRatio);
 
@@ -521,4 +538,13 @@ FVector2D AObjectEyeHunterProp::GenerateRandomControlPoint(FVector2D StartPos, F
 
 	// 시작, 끝 사이 무작위 지점 리턴
 	return MidPoint + RandomOffset;
+}
+
+void AObjectEyeHunterProp::SetTargetPositionsByViewport()
+{
+	TargetPositions.Empty();
+	for (const FVector2D& Ratio : TargetPositionsRatio)
+	{
+		TargetPositions.Add(FVector2D(ViewportSize.X * Ratio.X, ViewportSize.Y * Ratio.Y));
+	}
 }

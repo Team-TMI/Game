@@ -53,6 +53,8 @@ public:
 	void UpdateObjectRotation(float DeltaTime);
 	FVector2D GetBezierPoint(FVector2D P0, FVector2D P1, FVector2D P2, FVector2D P3, float t);
 	FVector2D GenerateRandomControlPoint(FVector2D StartPos, FVector2D EndPos, float RandomRadius);
+	// 뷰포트에 따른 TargetPositions 위치 결정 함수
+	void SetTargetPositionsByViewport();
 	
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -103,4 +105,7 @@ public:
 	FTimerHandle MissionTimerHandle;
 	float MissionTime{10.f};
 	float MissionFlowTime{0.f};
+
+	// 뷰포트 크기 변화 고려
+	TArray<FVector2D> TargetPositionsRatio;
 };
