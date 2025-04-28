@@ -9,7 +9,7 @@
 
 bool UVoiceRecorderComponent::Init(int32& SampleRate)
 {
-	NumChannels = 1;
+	NumChannels = 2;
 
 #if SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
 	// Initialize the DSP objects

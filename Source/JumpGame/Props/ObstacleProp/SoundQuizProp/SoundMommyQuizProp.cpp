@@ -5,6 +5,8 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Components/BoxComponent.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/UI/Obstacle/SoundQuizUI.h"
@@ -23,7 +25,8 @@ void ASoundMommyQuizProp::BeginPlay()
 {
 	Super::BeginPlay();
 	SoundQuizUI = CreateWidget<USoundQuizUI>(GetWorld(), SoundQuizUIClass);
-	SoundQuizUI->VoiceRecorderComponent = VoiceRecorderComponent;
+	// SoundQuizUI->VoiceRecorderComponent = VoiceRecorderComponent;
+	SoundQuizUI->SetVoiceRecorderComponent(VoiceRecorderComponent);
 	SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
 	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
 }
@@ -93,11 +96,36 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	FFastLogger::LogConsole(TEXT("SendResponseIdx: %d"), SendResponseIdx);
 }
 
+void ASoundMommyQuizProp::SendSoundQuizMessage()
+{
+	Super::SendSoundQuizMessage();
+
+	
+}
+
 void ASoundMommyQuizProp::SendEndSoundQuizNotify()
 {
 	Super::SendEndSoundQuizNotify();
 	
 	SoundQuizUI->RemoveFromParent();
+}
+
+void ASoundMommyQuizProp::StartRecord()
+{
+	Super::StartRecord();
+	
+	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Recording..."));
+	// 버튼 비활성화
+	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(false);
+}
+
+void ASoundMommyQuizProp::StopRecord()
+{
+	Super::StopRecord();
+
+	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Wait"));
+	// 버튼 다시 활성화
+	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(true);
 }
 
 void ASoundMommyQuizProp::RemoveSoundQuizUI()

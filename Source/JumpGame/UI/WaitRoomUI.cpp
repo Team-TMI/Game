@@ -61,12 +61,12 @@ void UWaitRoomUI::UpdateWaitPlayer()
 	// 플레이어 이름 배열
 	TArray<UTextBlock*> UpdateNames = { Text_Player1, Text_Player2, Text_Player3, Text_Player4, Text_Player5, Text_Player6, Text_Player7, Text_Player8 };
 	
-	TMap<FString, FPlayerInfo> Info = GI->GetPlayerInfo();
+	TMap<FString, FPlayerInfo> PlayerInfo = GI->GetPlayerInfo();
 	FString Key;
 	
 	for (int i = 0; i < UpdateImgs.Num(); i++)
 	{
-		for (auto& it : Info)
+		for (auto& it : PlayerInfo)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Stored Key : %s"), *it.Key);
 			if (it.Value.PlayerID == i)

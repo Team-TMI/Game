@@ -4,6 +4,7 @@
 #include "SoundQuizUI.h"
 
 #include "Components/Button.h"
+#include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "JumpGame/Props/ObstacleProp/SoundQuizProp/VoiceRecorderComponent.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -16,6 +17,14 @@ void USoundQuizUI::NativeOnInitialized()
 	Btn_VoiceSend->OnClicked.AddDynamic(this, &USoundQuizUI::OnClickVoiceSend);
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameAndUI());
+	
+}
+
+void USoundQuizUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	
+	SetVoiceProgress();
 }
 
 void USoundQuizUI::OnClickVoiceSend()
@@ -43,7 +52,20 @@ void USoundQuizUI::SetVoiceRecorderComponent(UVoiceRecorderComponent* VoiceRecor
 	if (!VoiceRecorderComp) return;
 
 	VoiceRecorderComponent = VoiceRecorderComp;
-	VoiceRecorderComponent->GetOnStopRecording().AddDynamic(this, &USoundQuizUI::OnClickVoiceSend);
+	// VoiceRecorderComponent->GetOnStopRecording().AddDynamic(this, &USoundQuizUI::OnClickVoiceSend);
+	VoiceRecorderComponent->OnAudioEnvelopeValueNative.AddUObject(this, &USoundQuizUI::OnAudioEnvelopeValue);
 }
 
+void USoundQuizUI::OnAudioEnvelopeValue(const class UAudioComponent* AudioComponent,
+	const float EnvelopeValue)
+{
+	// EnvelopeValue값이 0 ~ 0.04정도로 확인됨
+	float ScaledValue = EnvelopeValue * 20.0f;
+	CurrentEnvelopeValue = FMath::Clamp(ScaledValue, 0.0f, 1.0f);
+	FFastLogger::LogScreen(FColor::Red, TEXT("EnvelopeValue: %f"), EnvelopeValue);
+}
 
+void USoundQuizUI::SetVoiceProgress()
+{
+	VoiceProgressBar->SetPercent(CurrentEnvelopeValue);
+}

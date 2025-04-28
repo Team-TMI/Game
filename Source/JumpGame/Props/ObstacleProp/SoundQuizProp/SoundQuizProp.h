@@ -49,9 +49,9 @@ public:
 	virtual void ResetSoundQuiz();
 
 	UFUNCTION()
-	void StartRecord();
+	virtual void StartRecord();
 	UFUNCTION()
-	void StopRecord();
+	virtual void StopRecord();
 
 	UPROPERTY()
 	int32 QuizID = -1;
