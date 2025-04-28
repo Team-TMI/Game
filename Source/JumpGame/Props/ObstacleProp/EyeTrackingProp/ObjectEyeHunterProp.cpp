@@ -3,10 +3,12 @@
 
 #include "ObjectEyeHunterProp.h"
 
+#include "Components/Image.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/UI/Obstacle/EyeTrackingUI.h"
 #include "JumpGame/UI/Obstacle/FlyingObjectUI.h"
+#include "JumpGame/UI/Obstacle/TimeRemainUI.h"
 
 AObjectEyeHunterProp::AObjectEyeHunterProp()
 {
@@ -24,6 +26,13 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 	if (FlyingObjectWidget.Succeeded())
 	{
 		FlyingObjectUIClass = FlyingObjectWidget.Class;
+	}
+
+	ConstructorHelpers::FClassFinder<UTimeRemainUI> TimeRemainWidget
+	(TEXT("/Game/UI/Obstacle/WBP_TimeRemain.WBP_TimeRemain_C"));
+	if (TimeRemainWidget.Succeeded())
+	{
+		TimeRemainUIClass = TimeRemainWidget.Class;
 	}
 
 	MissionLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MissionLocation"));
@@ -47,29 +56,12 @@ void AObjectEyeHunterProp::InitializeMission()
 	// 위젯 미리 생성
 	FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
 	TrackingUI = CreateWidget<UEyeTrackingUI>(GetWorld(), EyeTrackingUIClass);
+	TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
 
 	if (GEngine && GEngine->GameViewport)
 	{
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 	}
-
-	// Object가 움직일 경로 추가
-	// 오른쪽 상단
-	TargetPositions.Add(FVector2D(150.f, 150.f));
-	// 오른쪽 하단
-	TargetPositions.Add(FVector2D(150.f, ViewportSize.Y - 150.f));
-	// 중간
-	TargetPositions.Add(ViewportSize / 2.f);
-	// 왼쪽 상단
-	TargetPositions.Add(FVector2D(ViewportSize.X - 150.f, 150.f));
-	// 왼쪽 하단
-	TargetPositions.Add(FVector2D(ViewportSize.X - 150.f, ViewportSize.Y - 150.f));
-	// 중간
-	TargetPositions.Add(ViewportSize / 2.f);
-
-	CurrentTargetIndex = 0;
-	BezierAlpha = 0.f;
-	ObjectSpeed = 0.5f;
 }
 
 
@@ -97,7 +89,37 @@ void AObjectEyeHunterProp::StartMission()
 	{
 		FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
 	}
+	
+	FlyingObjectUI->InitializeParameters();
 
+	if (!TimeRemainUI)
+	{
+		TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
+		TimeRemainUI->AddToViewport();
+	}
+	else
+	{
+		TimeRemainUI->AddToViewport();
+	}
+	
+	// Object가 움직일 경로 추가
+	// 오른쪽 상단
+	TargetPositions.Add(FVector2D(150.f, 150.f));
+	// 오른쪽 하단
+	TargetPositions.Add(FVector2D(150.f, ViewportSize.Y - 150.f));
+	// 중간
+	TargetPositions.Add(ViewportSize / 2.f);
+	// 왼쪽 상단
+	TargetPositions.Add(FVector2D(ViewportSize.X - 150.f, 150.f));
+	// 왼쪽 하단
+	TargetPositions.Add(FVector2D(ViewportSize.X - 150.f, ViewportSize.Y - 150.f));
+	// 중간
+	TargetPositions.Add(ViewportSize / 2.f);
+
+	CurrentTargetIndex = 0;
+	BezierAlpha = 0.f;
+	ObjectSpeed = 0.5f;
+	
 	if (FlyingObjectUI)
 	{
 		FlyingObjectUI->AddToViewport();
@@ -114,6 +136,8 @@ void AObjectEyeHunterProp::StartMission()
 	// 미션 시작
 	bIsStartHunt = true;
 
+	MissionFlowTime = 0.f;
+
 	// 시작 위치 설정
 	StartPosition = ObjectScreenLocation;
 	if (TargetPositions.IsValidIndex(CurrentTargetIndex))
@@ -124,6 +148,24 @@ void AObjectEyeHunterProp::StartMission()
 		ControlPoint1 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.0f);
 		ControlPoint2 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.0f);
 	}
+
+	GetWorldTimerManager().SetTimer(MissionTimerHandle, this, &AObjectEyeHunterProp::MissionTimeEnd, 10.f, false);
+
+	FTimerDelegate MissionDelegate{
+		FTimerDelegate::CreateLambda([this]() {
+			MissionFlowTime += GetWorld()->GetDeltaSeconds();
+			
+			TimeRemainUI->ChangeGaugeValue(MissionFlowTime / MissionTime);
+
+			//FLog::Log("Mission Time", MissionFlowTime);
+			if (MissionFlowTime > MissionTime)
+			{
+				MissionTimeEnd();
+			}
+		})
+	};
+	GetWorldTimerManager().SetTimer(MissionTimerHandle, MissionDelegate, GetWorld()->GetDeltaSeconds(),
+	                                true);
 }
 
 void AObjectEyeHunterProp::StopCharacter()
@@ -184,6 +226,8 @@ void AObjectEyeHunterProp::Tick(float DeltaTime)
 		}
 	}
 
+	// 현재 위치를 이전 위치로 (회전 계산 위해)
+	PreviousPosition = ObjectScreenLocation;
 	FlyingObjectMovement(DeltaTime);
 
 	if (bIsDebug && TrackingUI)
@@ -234,7 +278,7 @@ void AObjectEyeHunterProp::FlyingObjectMovement(float DeltaTime)
 				// 시작점 설정
 				StartPosition = ObjectScreenLocation;
 				SetNextTargetPosition();
-				
+
 				// 새로운 제어점 생성
 				ControlPoint1 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.f);
 				ControlPoint2 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.f);
@@ -317,7 +361,7 @@ void AObjectEyeHunterProp::ChangeValue(bool bIsOverlap)
 	{
 		FlowTime = FMath::Clamp(FlowTime - (GetWorld()->GetDeltaSeconds() / 2), 0.f, SuccessTime);
 	}
-
+	
 	SuccessRatio = FMath::Clamp(FlowTime / SuccessTime, 0.f, 1.f);
 	FlyingObjectUI->ChangeGaugeValue(SuccessRatio);
 
@@ -327,6 +371,10 @@ void AObjectEyeHunterProp::ChangeValue(bool bIsOverlap)
 	}
 }
 
+void AObjectEyeHunterProp::MissionTimeEnd()
+{
+	EndMission(false);
+}
 
 void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 {
@@ -342,16 +390,27 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 
 			Super::LaunchCharacter(Frog, Direction, Force);
 		}
+
+		FlyingObjectUI->SuccessMission();
 	}
 	else
 	{
 		// 미션 실패 및 비정상 종료
-		FLog::Log("Failure");
+		// FLog::Log("Failure");
+
+		if (Frog)
+		{
+			FVector Direction{-1 * Frog->GetActorForwardVector() + FVector::UpVector};
+			float Force{300};
+
+			Super::LaunchCharacter(Frog, Direction, Force);
+		}
+
+		FlyingObjectUI->FailMission();
 	}
 
 	ResetMission();
 }
-
 
 void AObjectEyeHunterProp::ResetMission()
 {
@@ -367,25 +426,29 @@ void AObjectEyeHunterProp::ResetMission()
 
 	bIsDebug = false;
 
+	MissionFlowTime = 0.f;
+
 	ObjectScreenLocation = FVector2D::Zero();
 	EyeScreenLocation = FVector2D::Zero();
 
-	if (FlyingObjectUI)
-	{
-		FlyingObjectUI->RemoveFromParent();
-	}
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+
+	Super::SendEyeTrackingEnd();
+
+	Frog = nullptr;
 
 	if (TrackingUI)
 	{
 		TrackingUI->RemoveFromParent();
 	}
 
-	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+	if (TimeRemainUI)
+	{
+		TimeRemainUI->RemoveFromParent();
+	}
 
-	Super::SendEyeTrackingEnd();
-
-
-	Frog = nullptr;
+	GetWorldTimerManager().ClearTimer(MissionTimerHandle);
+	GetWorldTimerManager().SetTimer(EndTimerHandle, FlyingObjectUI, &UFlyingObjectUI::VanishMission, 0.5f, false);
 }
 
 void AObjectEyeHunterProp::SetNextTargetPosition()
@@ -404,7 +467,30 @@ void AObjectEyeHunterProp::SetNextTargetPosition()
 }
 
 void AObjectEyeHunterProp::UpdateObjectRotation(float DeltaTime)
-{}
+{
+	if (FlyingObjectUI)
+	{
+		FVector2D Direction{(ObjectScreenLocation - PreviousPosition).GetSafeNormal()};
+
+		// 방향 벡터가 (0, 0)이 아닌 경우에만 회전 계산
+		if (Direction.SizeSquared() > 0.f)
+		{
+			// Radian 계산
+			float AngleRad = FMath::Atan2(Direction.Y, Direction.X);
+			// Degree로 변환
+			float AngleDeg = FMath::RadiansToDegrees(AngleRad);
+
+			if (UFlyingObjectUI* FlyUIWidget = Cast<UFlyingObjectUI>(FlyingObjectUI))
+			{
+				if (UImage* TargetImage = FlyUIWidget->TargetLocationImage)
+				{
+					// 이미지 회전
+					TargetImage->SetRenderTransformAngle(AngleDeg + 180.f);
+				}
+			}
+		}
+	}
+}
 
 FVector2D AObjectEyeHunterProp::GetBezierPoint(FVector2D P0, FVector2D P1, FVector2D P2, FVector2D P3, float t)
 {

@@ -43,11 +43,17 @@ public:
 	void ChangeValue(bool bIsOverlap);
 	void StartMission();
 	void EndMission(bool bIsSuccess);
+	void MissionTimeEnd();
 	void StopCharacter();
 	void ResumeCharacter();
 	void ResetMission();
 	void InitializeMission();
-
+	// Object 이동 관련 함수
+	void SetNextTargetPosition();
+	void UpdateObjectRotation(float DeltaTime);
+	FVector2D GetBezierPoint(FVector2D P0, FVector2D P1, FVector2D P2, FVector2D P3, float t);
+	FVector2D GenerateRandomControlPoint(FVector2D StartPos, FVector2D EndPos, float RandomRadius);
+	
 public:
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* MissionLocation;
@@ -61,7 +67,10 @@ public:
 	TSubclassOf<class UFlyingObjectUI> FlyingObjectUIClass;
 	UPROPERTY(EditAnywhere)
 	UFlyingObjectUI* FlyingObjectUI;
-
+	TSubclassOf<class UTimeRemainUI> TimeRemainUIClass;
+	UPROPERTY(EditAnywhere)
+	UTimeRemainUI* TimeRemainUI;
+	
 public:
 	UPROPERTY(EditAnywhere)
 	class AFrog* Frog;
@@ -86,9 +95,12 @@ public:
 	FVector2D ControlPoint2;
 	TArray<FVector2D> TargetPositions;
 	int32 CurrentTargetIndex;
-
-	void SetNextTargetPosition();
-	void UpdateObjectRotation(float DeltaTime);
-	FVector2D GetBezierPoint(FVector2D P0, FVector2D P1, FVector2D P2, FVector2D P3, float t);
-	FVector2D GenerateRandomControlPoint(FVector2D StartPos, FVector2D EndPos, float RandomRadius);
+	
+	// 회전 위한 변수
+	FVector2D PreviousPosition;
+	
+	FTimerHandle EndTimerHandle;
+	FTimerHandle MissionTimerHandle;
+	float MissionTime{10.f};
+	float MissionFlowTime{0.f};
 };

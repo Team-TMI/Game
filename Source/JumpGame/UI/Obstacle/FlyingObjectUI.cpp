@@ -5,10 +5,21 @@
 
 #include "Components/Image.h"
 
+
 void UFlyingObjectUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	InitializeParameters();
+}
+
+void UFlyingObjectUI::InitializeParameters()
+{
+	TargetLocationImage->SetRenderOpacity(1.f);
+	SuccessImage->SetRenderOpacity(0.f);
+	FailImage->SetRenderOpacity(0.f);
+	GaugeImage->SetRenderOpacity(1.f);
+	GaugeValue = 0.f;
 }
 
 void UFlyingObjectUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -29,4 +40,20 @@ void UFlyingObjectUI::ChangeGaugeValue(float Value)
 float UFlyingObjectUI::GetGaugeValue()
 {
 	return GaugeValue;
+}
+
+void UFlyingObjectUI::SuccessMission()
+{
+	TargetLocationImage->SetRenderOpacity(0.f);
+	SuccessImage->SetRenderOpacity(1.f);
+	FailImage->SetRenderOpacity(0.f);
+	GaugeImage->SetRenderOpacity(0.f);
+}
+
+void UFlyingObjectUI::FailMission()
+{
+	TargetLocationImage->SetRenderOpacity(0.f);
+	SuccessImage->SetRenderOpacity(0.f);
+	FailImage->SetRenderOpacity(1.f);
+	GaugeImage->SetRenderOpacity(0.f);
 }
