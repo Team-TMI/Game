@@ -22,7 +22,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	UPROPERTY()
 	class ANetworkGameState* NetGS;
+	UPROPERTY()
 	ARisingWaterProp* RisingWaterProp;
 	// 퀴즈 실패했나요?
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -92,7 +94,9 @@ protected:
 	TObjectPtr<UVoiceRecorderComponent> VoiceRecorderComponent = nullptr;
 
 	UPROPERTY()
-	FTimerHandle RecordTimer;
+	FTimerHandle RecordStartTimer;
+	UPROPERTY()
+	FTimerHandle RecordStopTimer;
 
 	// Tick을 활성화, 비활성화하는 변수
 	UPROPERTY()
