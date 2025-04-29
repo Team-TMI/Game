@@ -468,7 +468,6 @@ void AObjectEyeHunterProp::ResetMission()
 		TimeRemainUI->RemoveFromParent();
 	}
 	
-	//GetWorldTimerManager().ClearTimer(MissionTimerHandle);	
 	GetWorldTimerManager().SetTimer(EndTimerHandle, FlyingObjectUI, &UFlyingObjectUI::VanishMission,
 	                                0.5f, false);
 }

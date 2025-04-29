@@ -33,6 +33,11 @@ void AEyeTrackingProp::BeginPlay()
 	Super::BeginPlay();
 
 	SettingEyeTrackingUI = CreateWidget<USettingEyeTrackingUI>(GetWorld(), SettingEyeTrackingUIClass);
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEyeTrackingProp::SendEyeTrackingSettingStart,3.f, false);
+
+	//SendEyeTrackingSettingStart();
 }
 
 void AEyeTrackingProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

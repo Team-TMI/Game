@@ -32,9 +32,17 @@ bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo,
 	// 만약 연결이 실패했다면
 	if (Pipe == INVALID_HANDLE_VALUE) {
 		FFastLogger::LogConsole(TEXT("Failed to connect to pipe: %s"), *PipeName);
+
 		return false;
 	}
 
+	DWORD mode = PIPE_READMODE_BYTE | PIPE_NOWAIT;
+	BOOL success = SetNamedPipeHandleState(Pipe, &mode, NULL, NULL);
+	if (!success) {
+		FFastLogger::LogConsole(TEXT("Failed to open pipe as non-blocking"));
+		return false;
+	}
+	
 	FFastLogger::LogConsole(TEXT("Succeeded to connect to pipe: %s"), *PipeName);
 	bConnected = true;
 	return true;
@@ -64,7 +72,7 @@ bool FIPCHandler::ReceiveMessage()
 {
 	if (!bConnected)
 	{
-		// FFastLogger::LogConsole(TEXT("Not connected to pipe: %s"), *PipeName);
+		FFastLogger::LogConsole(TEXT("Not connected to pipe: %s"), *PipeName);
 		return false;
 	}
 	DWORD BytesRead;
@@ -72,8 +80,11 @@ bool FIPCHandler::ReceiveMessage()
 	BOOL Result = ReadFile(Pipe, Buffer, BufferSize, &BytesRead, NULL);
 	if (!Result)
 	{
-		// FFasterLogger::LogConsole(TEXT("Failed to read message: %s"), *PipeName);
-		return false;
+		if (GetLastError() != ERROR_NO_DATA)
+		{
+			return false;
+		}
+		FFastLogger::LogConsole(TEXT("Failed to read message: %s"), *PipeName);
 	}
 	
 	// 1. 버퍼에 읽은 내용을 누적 저장 (문자열 아님!)
@@ -86,12 +97,14 @@ bool FIPCHandler::ReceiveMessage()
 	FMemory::Memcpy(CachedBuffer + CachedLength, Buffer, BytesRead);
 	CachedLength += BytesRead;
 
+	FFastLogger::LogConsole(TEXT("Cached Length : %d"), CachedLength);
 	// 2. 메시지 파싱
 	while (true)
 	{
 		FMessageUnion Message;
 		if (!ParseMessage(Message, BytesRead))
 		{
+			FFastLogger::LogConsole(TEXT("Failed to parse message: %s"), *PipeName);
 			break ;
 		}
 
