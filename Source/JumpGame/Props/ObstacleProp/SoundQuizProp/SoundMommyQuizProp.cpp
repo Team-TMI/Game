@@ -104,7 +104,6 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 void ASoundMommyQuizProp::SendSoundQuizMessage()
 {
 	Super::SendSoundQuizMessage();
-
 	
 }
 
@@ -113,6 +112,7 @@ void ASoundMommyQuizProp::SendEndSoundQuizNotify()
 	Super::SendEndSoundQuizNotify();
 	
 	SoundQuizUI->RemoveFromParent();
+	TimeRemainUI->RemoveFromParent();
 }
 
 void ASoundMommyQuizProp::StartRecord()
@@ -133,7 +133,7 @@ void ASoundMommyQuizProp::StopRecord()
 {
 	Super::StopRecord();
 
-	TimeRemainUI->RemoveFromParent();
+	//TimeRemainUI->RemoveFromParent();
 	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Wait"));
 	// 버튼 다시 활성화
 	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(true);

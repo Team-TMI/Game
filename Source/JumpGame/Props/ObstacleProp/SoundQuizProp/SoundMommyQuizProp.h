@@ -26,7 +26,7 @@ public:
 	virtual void ReceiveSoundQuizMessage() override;
 	virtual void SendSoundQuizMessage() override;
 	virtual void SendEndSoundQuizNotify() override;
-
+	
 	virtual void StartRecord() override;
 	virtual void StopRecord() override;
 	

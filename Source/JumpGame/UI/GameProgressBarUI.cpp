@@ -31,10 +31,8 @@ void UGameProgressBarUI::NativeOnInitialized()
 	WaterPropZ = WaterProp->SurfaceCollision->GetComponentLocation().Z;
 	
 	Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (Character)
-	{
-		MyPlayerID = Character->GetPlayerState()->GetPlayerId();	// 플레이어 ID 저장
-	}
+
+	// MyPlayerID 는 PlayerInfo의 Value의 PlayerID로 저장해놔야함
 	
 	CreatePlayerMarkers();
 }
@@ -140,6 +138,7 @@ void UGameProgressBarUI::CreatePlayerMarkers()
             
 			// 플레이어 ID와 정보 설정
 			PlayerMarker->SetPlayerID(PlayerIndex);
+			FFastLogger::LogConsole(TEXT("PlayerIndex : %d"), PlayerIndex);
             
 			// 로컬 플레이어 확인하여 색상 설정
 			if (PlayerIndex == MyPlayerID)
