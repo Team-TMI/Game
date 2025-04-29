@@ -6,7 +6,7 @@
 #include "JumpGame/Props/BaseProp.h"
 #include "LogicProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ALogicProp : public ABaseProp
 {
 	GENERATED_BODY()

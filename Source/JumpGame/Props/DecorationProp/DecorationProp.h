@@ -6,7 +6,7 @@
 #include "JumpGame/Props/BaseProp.h"
 #include "DecorationProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ADecorationProp : public ABaseProp
 {
 	GENERATED_BODY()

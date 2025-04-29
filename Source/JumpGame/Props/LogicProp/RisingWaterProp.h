@@ -6,7 +6,7 @@
 #include "LogicProp.h"
 #include "RisingWaterProp.generated.h"
 
-UENUM()
+UENUM(BlueprintType)
 enum class EWaterStateEnum : uint8
 {
 	None,
@@ -16,7 +16,7 @@ enum class EWaterStateEnum : uint8
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ARisingWaterProp : public ALogicProp
 {
 	GENERATED_BODY()

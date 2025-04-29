@@ -22,7 +22,7 @@ public:
 
 	// 처음 클릭될 때
 	UFUNCTION()
-	void OnPropSlotClicked(FName PropID);
+	void OnPropSlotClicked(FName PropID, class UClass* InPropClass);
 	// 액터가 생성되어야 하고 가리켜야 할는 경우
 	UFUNCTION()
 	void OnWidgetDragLeave();
@@ -54,7 +54,7 @@ private:
 	FName ControlledPropSlotID = NAME_None;
 
 	UPROPERTY()
-	TSubclassOf<class APrimitiveProp> TEST_PROP;
+	TSubclassOf<class APrimitiveProp> ControlledPropClass = nullptr;
 
 	bool bMouseEnterUI = false;
 };

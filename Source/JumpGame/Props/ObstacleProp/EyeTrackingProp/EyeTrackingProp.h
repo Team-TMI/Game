@@ -7,7 +7,7 @@
 #include "JumpGame/Props/ObstacleProp/ObstacleProp.h"
 #include "EyeTrackingProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API AEyeTrackingProp : public AObstacleProp
 {
 	GENERATED_BODY()

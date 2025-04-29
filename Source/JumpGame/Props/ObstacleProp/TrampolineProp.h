@@ -6,7 +6,7 @@
 #include "ObstacleProp.h"
 #include "TrampolineProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ATrampolineProp : public AObstacleProp
 {
 	GENERATED_BODY()
