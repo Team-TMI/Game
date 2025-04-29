@@ -77,7 +77,7 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 
 	// TODO: 정답과 일치할때로 변경해야함
 	// 20번 안에, Fin되는 경우 -> 유사도가 높을때
-	if (SendResponseIdx < 20 && Similarity >= 90)
+	if (SendResponseIdx < 20 && Similarity*100 >= 90)
 	{
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
