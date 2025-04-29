@@ -92,7 +92,9 @@ protected:
 	TObjectPtr<UVoiceRecorderComponent> VoiceRecorderComponent = nullptr;
 
 	UPROPERTY()
-	FTimerHandle RecordTimer;
+	FTimerHandle RecordStartTimer;
+	UPROPERTY()
+	FTimerHandle RecordStopTimer;
 
 	// Tick을 활성화, 비활성화하는 변수
 	UPROPERTY()

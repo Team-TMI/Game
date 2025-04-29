@@ -258,15 +258,14 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 총 몇번 응답 했는지를 체크한다
 	SendResponseIdx++;
 
-	// 메세지를 받았으니, 녹음 시작
-	StartRecord();
+	// 메세지를 받았다! 2초 후에 녹음 시작
+	GetWorld()->GetTimerManager().SetTimer(RecordStopTimer, this, &ASoundQuizProp::StartRecord, 2.0f, false);
 
 	// 틱 비활성화
 	bIsMessageReceived = false;
-
-	// TODO: 녹음 길이 확인 (5초가 적당한지, 정확히 말하는 내용이 전부 녹음되는지), UI 띄우기
-	// 5초뒤에 녹음 자동 종료
-	GetWorld()->GetTimerManager().SetTimer(RecordTimer, this, &ASoundQuizProp::StopRecord, 5.0f, false);
+	
+	// 녹음 시작 3초뒤에 녹음 자동 종료
+	GetWorld()->GetTimerManager().SetTimer(RecordStopTimer, this, &ASoundQuizProp::StopRecord, 5.0f, false);
 }
 
 void ASoundQuizProp::SendEndSoundQuizNotify()
@@ -323,6 +322,7 @@ void ASoundQuizProp::ResetSoundQuiz()
 
 void ASoundQuizProp::StartRecord()
 {
+	// TODO: UI띄우기
 	// 녹음 시작
 	if (VoiceRecorderComponent)
 	{
