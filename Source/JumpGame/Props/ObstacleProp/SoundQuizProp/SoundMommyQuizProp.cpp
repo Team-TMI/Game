@@ -60,7 +60,7 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 {
 	Super::ReceiveSoundQuizMessage();
 	
-	SoundQuizUI->UpdateFromResponse(Similarity, MessageStr);
+	SoundQuizUI->UpdateFromResponse(Similarity*100, MessageStr);
 
 	// 20번 넘으면 자동 게임 종료, 디버프를 받는다 (못맞춤)
 	if (SendResponseIdx >= 20)
