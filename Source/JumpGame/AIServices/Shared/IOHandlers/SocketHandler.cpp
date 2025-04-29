@@ -4,6 +4,7 @@
 #include "SocketHandler.h"
 
 #include "WebSocketsModule.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 FSocketHandler::FSocketHandler()
 {
@@ -63,6 +64,7 @@ bool FSocketHandler::SendGameMessage(const FMessageUnion& Message)
 		UE_LOG(LogTemp, Error, TEXT("Not connected to WebSocket server."));
 		return false;
 	}
+  
 	Socket->Send(Message.RawData, Message.Header.PayloadSize, true);
 	return true;
 }
@@ -74,8 +76,10 @@ void FSocketHandler::ReceiveSocketMessage(const void* Data, SIZE_T Size, SIZE_T 
 	FMessageUnion Message;
 	// memory copy
 	FMemory::Memcpy(&Message, RawData, Size);
+	FFastLogger::LogConsole(TEXT("Inside ReceiveSocketMessage"));
 	if (MessageQueue && MessageQueue->find(Message.Header.Type) != MessageQueue->end())
 	{
+		FFastLogger::LogConsole(TEXT("Recieved Message (Size: %d)"), Size);
 		MessageQueue->at(Message.Header.Type).push(Message);
 	}
 }

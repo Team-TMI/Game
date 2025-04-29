@@ -23,6 +23,7 @@ void ASoundMommyQuizProp::BeginPlay()
 {
 	Super::BeginPlay();
 	SoundQuizUI = CreateWidget<USoundQuizUI>(GetWorld(), SoundQuizUIClass);
+	SoundQuizUI->VoiceRecorderComponent = VoiceRecorderComponent;
 	SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
 	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
 }

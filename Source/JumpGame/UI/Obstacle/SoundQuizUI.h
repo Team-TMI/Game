@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SoundQuizUI.generated.h"
 
+class UVoiceRecorderComponent;
 /**
  * 
  */
@@ -28,4 +29,11 @@ public:
 	UFUNCTION()
 	void OnClickVoiceSend();
 	void UpdateFromResponse(uint32 Similarity, FString MessageStr);
+
+	FTimerHandle RecordTimer;
+
+	// 녹음 컴포넌트 동작
+	TWeakObjectPtr<UVoiceRecorderComponent> VoiceRecorderComponent = nullptr;
+
+	void SetVoiceRecorderComponent(UVoiceRecorderComponent* VoiceRecorderComp);
 };
