@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API AObjectEyeHunterProp : public AEyeTrackingProp
 {
 	GENERATED_BODY()

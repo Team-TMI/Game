@@ -4,6 +4,7 @@
 #include "PropSlot.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/Image.h"
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/KismetInputLibrary.h"
@@ -16,6 +17,27 @@ void UPropSlot::InitWidget(UWidgetMapEditDragDropOperation* InDragDropOperation)
 void UPropSlot::SetPropID(FName InPropID)
 {
 	PropID = InPropID;
+}
+
+void UPropSlot::SetPropInfo(FPropStruct* PropInfo)
+{
+	if (!PropInfo)
+	{
+		return;
+	}
+	PropID = PropInfo->PropID;
+	PropImage->SetBrushFromTexture(PropInfo->PropIcon);
+	PropClass = PropInfo->PropClass;
+	this->SetVisibility(ESlateVisibility::Visible);
+	// DragVisual을 세팅해줘야 함.
+}
+
+void UPropSlot::ClearInfo()
+{
+	PropID = NAME_None;
+	PropImage->SetBrushFromTexture(nullptr);
+	PropClass = nullptr;
+	this->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UPropSlot::NativeOnInitialized()
@@ -33,6 +55,10 @@ FReply UPropSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, co
 	{
 		return FReply::Unhandled();
 	}
+	if (PropID == NAME_None)
+	{
+		return FReply::Unhandled();
+	}
 	FEventReply Reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
 
 	FFastLogger::LogScreen(FColor::Orange, TEXT("PropSlot::NativeOnPreviewMouseButtonDown"));
@@ -41,7 +67,7 @@ FReply UPropSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, co
 	DragDropOperation->DefaultDragVisual = PropDragVisual;
 	
 	// 여기서 어떤 Prop이 선택되었는 지를 BroadCast 해준다.
-	OnPropSlotClicked.Broadcast(PropID);
+	OnPropSlotClicked.Broadcast(PropID, PropClass);
 	
 	return Reply.NativeReply;
 }

@@ -8,7 +8,7 @@
 
 // 회전 + 가시가 달려있는데 가시에 부딪히면 약하게 넉백
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ARotateSpikeProp : public AObstacleProp
 {
 	GENERATED_BODY()

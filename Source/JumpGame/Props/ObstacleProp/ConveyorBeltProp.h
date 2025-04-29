@@ -6,7 +6,7 @@
 #include "ObstacleProp.h"
 #include "ConveyorBeltProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API AConveyorBeltProp : public AObstacleProp
 {
 	GENERATED_BODY()

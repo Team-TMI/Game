@@ -6,7 +6,7 @@
 #include "ObstacleProp.h"
 #include "BounceBollardProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API ABounceBollardProp : public AObstacleProp
 {
 	GENERATED_BODY()

@@ -25,12 +25,6 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnDragLeaveWidget OnDragLeaveWidget;
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapEditing", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> PropSlotClass = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapEditing", meta = (AllowPrivateAccess = "true"))
-	class UPropSlot* PropSlot = nullptr;
-
-	UPROPERTY(meta = (BindWidget))
-	class UBorder* TestBorder = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UCategoryUI* EditCategoryUI;
 };
