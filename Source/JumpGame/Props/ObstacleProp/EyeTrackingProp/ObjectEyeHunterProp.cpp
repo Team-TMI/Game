@@ -336,7 +336,7 @@ void AObjectEyeHunterProp::TrackLocation(FVector2f Resolution, FVector2f ScreenL
 	float ScreenX{static_cast<float>(NormalizedX * ViewportSize.X)};
 	float ScreenY{static_cast<float>(NormalizedY * ViewportSize.Y)};
 
-	//FLog::Log("Loc", ScreenX, ScreenY);
+	FLog::Log("Loc", ScreenX, ScreenY);
 	// UI 인스턴스 없으면 생성
 	if (!TrackingUI)
 	{
