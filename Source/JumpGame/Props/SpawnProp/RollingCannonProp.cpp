@@ -25,7 +25,7 @@ ARollingCannonProp::ARollingCannonProp()
 void ARollingCannonProp::OnProjectileReturn()
 {
 	// 알림 받으면 다시 발사!
-	FFastLogger::LogConsole(TEXT("알림받았다!! 다시 발사"));
+	// FFastLogger::LogConsole(TEXT("알림받았다!! 다시 발사"));
 	FireRollingBall();
 }
 
@@ -56,7 +56,7 @@ void ARollingCannonProp::FireRollingBall()
 	ARollingBallProp* Projectile = ObjectPool->GetRollingBallProp();
 	if (Projectile)
 	{
-		FFastLogger::LogConsole(TEXT("Projectile!!!!!!"));
+		// FFastLogger::LogConsole(TEXT("Projectile!!!!!!"));
 		Projectile->SetActorLocation(GetActorLocation());
 		Projectile->SetActorRotation(GetActorRotation());
 		Projectile->SetActive(true);

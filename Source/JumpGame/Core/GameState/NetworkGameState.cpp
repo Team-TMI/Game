@@ -29,6 +29,10 @@ ANetworkGameState::ANetworkGameState()
 	ConnectionVerifyComponent->InitMaxPlayerCount(1);
 
 	IOManagerComponent = CreateDefaultSubobject<UIOManagerComponent>(TEXT("IOManagerComponent"));
+
+	FFastLogger::LogConsole(TEXT("FQuizNotify Message : %llu"), sizeof(FQuizNotifyMessage));
+	FFastLogger::LogConsole(TEXT("FWavResponseMessage Message : %llu"), sizeof(FWavResponseMessage));
+
 }
 
 
