@@ -98,7 +98,7 @@ bool FIPCHandler::ReceiveMessage()
 		// 3. 처리 완료
 		if (MessageQueue && MessageQueue->find(Message.Header.Type) != MessageQueue->end())
 		{
-			FFastLogger::LogConsole(TEXT("Add Message to Queue"));
+			//FFastLogger::LogConsole(TEXT("Add Message to Queue"));
 			MessageQueue->at(Message.Header.Type).push(Message);
 		}
 		else

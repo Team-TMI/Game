@@ -40,7 +40,10 @@ void UJumpGameInstance::Init()
 		SessionInterface->OnEndSessionCompleteDelegates.AddUObject(this, &UJumpGameInstance::OnEndSessionComplete);
 	}
 
-	RunEyeTrackingScript();
+	if (bIsRunEyeScript)
+	{
+		RunEyeTrackingScript();
+	}
 }
 
 void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount)
@@ -281,29 +284,29 @@ void UJumpGameInstance::RunEyeTrackingScript()
 	FString Command = FString::Printf(TEXT("\"%s\" \"%s\""), *PythonPath, *ScriptPath);
 
 	// 비동기 작업 실행
-	// AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [Command, WorkingDirectory, PythonPath, ScriptPath]() {
-	// 	FProcHandle ProcHandle = FPlatformProcess::CreateProc(
-	// 	   *PythonPath,        // 실행 파일 경로
-	// 	   *FString::Printf(TEXT("\"%s\""), *ScriptPath), // 인수 (스크립트 경로)
-	// 	   false,              // bLaunchHidden
-	// 	   false,              // bLaunchReallyHidden
-	// 	   false,              // bLaunchInBackground (AsyncTask가 이미 백그라운드에서 실행)
-	// 	   nullptr,            // OutProcessID
-	// 	   0,                  // PriorityModifier
-	// 	   *WorkingDirectory,      // OptionalWorkingDirectory (FString 내용을 const TCHAR*로 전달)
-	// 	   nullptr,            // PipeWriteChild
-	// 	   nullptr             // PipeReadChild
-	// 	);
-	//
-	// 	if (!ProcHandle.IsValid())
-	// 	{
-	// 	   UE_LOG(LogTemp, Error, TEXT("비동기 Python 프로세스 생성 실패"));
-	// 	}
-	// 	else
-	// 	{
-	// 	   UE_LOG(LogTemp, Log, TEXT("비동기 Python 프로세스 시작"));
-	// 	   // FPlatformProcess::WaitForProc(ProcHandle); // 제거: 비동기 유지를 위해 대기하지 않음
-	// 	   FPlatformProcess::CloseProc(ProcHandle);
-	// 	}
-	// });
+	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [Command, WorkingDirectory, PythonPath, ScriptPath]() {
+		FProcHandle ProcHandle = FPlatformProcess::CreateProc(
+		   *PythonPath,        // 실행 파일 경로
+		   *FString::Printf(TEXT("\"%s\""), *ScriptPath), // 인수 (스크립트 경로)
+		   false,              // bLaunchHidden
+		   false,              // bLaunchReallyHidden
+		   false,              // bLaunchInBackground (AsyncTask가 이미 백그라운드에서 실행)
+		   nullptr,            // OutProcessID
+		   0,                  // PriorityModifier
+		   *WorkingDirectory,      // OptionalWorkingDirectory (FString 내용을 const TCHAR*로 전달)
+		   nullptr,            // PipeWriteChild
+		   nullptr             // PipeReadChild
+		);
+	
+		if (!ProcHandle.IsValid())
+		{
+		   UE_LOG(LogTemp, Error, TEXT("비동기 Python 프로세스 생성 실패"));
+		}
+		else
+		{
+		   UE_LOG(LogTemp, Log, TEXT("비동기 Python 프로세스 시작"));
+		   // FPlatformProcess::WaitForProc(ProcHandle); // 제거: 비동기 유지를 위해 대기하지 않음
+		   FPlatformProcess::CloseProc(ProcHandle);
+		}
+	});
 }

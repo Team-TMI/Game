@@ -150,10 +150,13 @@ void AObjectEyeHunterProp::StartMission()
 		FlyingObjectUI->SetPositionInViewport(ObjectScreenLocation);
 	}
 
+	if (TrackingUI)
+	{
+		TrackingUI->AddToViewport();	
+	}
+	
 	// 미션 시작
 	bIsStartHunt = true;
-
-	MissionFlowTime = 0.f;
 
 	// 시작 위치 설정
 	StartPosition = ObjectScreenLocation;
@@ -167,25 +170,7 @@ void AObjectEyeHunterProp::StartMission()
 	}
 
 	// 10초 후 미션 종료 ( 타이머 설정 )
-	TimeRemainUI->StartMissionTimer(10.f);
-	//
-	// FTimerDelegate MissionDelegate{
-	// 	FTimerDelegate::CreateLambda([this]()
-	// 	{
-	// 		MissionFlowTime += GetWorld()->GetDeltaSeconds();
-	//
-	// 		TimeRemainUI->ChangeGaugeValue(MissionFlowTime / MissionTime);
-	//
-	// 		//FLog::Log("Mission Time", MissionFlowTime);
-	// 		if (MissionFlowTime > MissionTime)
-	// 		{
-	// 			MissionTimeEnd();
-	// 		}
-	// 	})
-	// };
-	// GetWorldTimerManager().SetTimer(MissionTimerHandle, MissionDelegate,
-	//                                 GetWorld()->GetDeltaSeconds(),
-	//                                 true);
+	TimeRemainUI->StartMissionTimer(100.f);
 }
 
 void AObjectEyeHunterProp::StopCharacter()
@@ -268,7 +253,7 @@ void AObjectEyeHunterProp::Tick(float DeltaTime)
 	if (GEngine && GEngine->GameViewport)
 	{
 		FVector2D CurrentViewportSize;
-		GEngine->GameViewport->GetViewportSize(ViewportSize);
+		GEngine->GameViewport->GetViewportSize(CurrentViewportSize);
 
 		if (CurrentViewportSize != ViewportSize)
 		{
@@ -276,13 +261,17 @@ void AObjectEyeHunterProp::Tick(float DeltaTime)
 			ViewportSize = CurrentViewportSize;
 		}
 	}
+
+	RecvEyeTrackingInfo();
 }
 
 void AObjectEyeHunterProp::RecvEyeTrackingInfo()
 {
 	Super::RecvEyeTrackingInfo();
 
-	TrackLocation(FVector2f(Width, Height), FVector2f(X, Y));
+	// TODO : 받아오는 값으로 수정
+	TrackLocation(static_cast<FVector2f>(ViewportSize), FVector2f(X, Y));
+	//TrackLocation(FVector2f(Width, Height), FVector2f(X, Y));
 }
 
 void AObjectEyeHunterProp::FlyingObjectMovement(float DeltaTime)
@@ -347,6 +336,7 @@ void AObjectEyeHunterProp::TrackLocation(FVector2f Resolution, FVector2f ScreenL
 	float ScreenX{static_cast<float>(NormalizedX * ViewportSize.X)};
 	float ScreenY{static_cast<float>(NormalizedY * ViewportSize.Y)};
 
+	//FLog::Log("Loc", ScreenX, ScreenY);
 	// UI 인스턴스 없으면 생성
 	if (!TrackingUI)
 	{
@@ -458,8 +448,6 @@ void AObjectEyeHunterProp::ResetMission()
 	SuccessRatio = 0.f;
 
 	bIsDebug = false;
-
-	MissionFlowTime = 0.f;
 
 	ObjectScreenLocation = FVector2D::Zero();
 	EyeScreenLocation = FVector2D::Zero();

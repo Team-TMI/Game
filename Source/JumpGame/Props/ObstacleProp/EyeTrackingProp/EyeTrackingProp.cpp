@@ -39,19 +39,19 @@ void AEyeTrackingProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent
                                         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                         const FHitResult& SweepResult)
 {
-	// if (OtherActor->ActorHasTag(TEXT("Frog")))
-	// {
-	// 	SendEyeTrackingStart();
-	// }
+	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	{
+		SendEyeTrackingStart();
+	}
 }
 
 void AEyeTrackingProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// if (OtherActor->ActorHasTag(TEXT("Frog")))
-	// {
-	// 	SendEyeTrackingEnd();
-	// }
+	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	{
+		SendEyeTrackingEnd();
+	}
 }
 
 void AEyeTrackingProp::SetCollision(bool bEnable)
@@ -200,7 +200,7 @@ void AEyeTrackingProp::SendEyeTrackingSettingStart()
 
 void AEyeTrackingProp::RecvEyeTrackingInfo()
 {
-	FLog::Log("RecvEyeTrackingInfo");
+	//FLog::Log("RecvEyeTrackingInfo");
 	const ANetworkGameState* GS{Cast<ANetworkGameState>(GetWorld()->GetGameState())};
 
 	if (!GS)
@@ -220,7 +220,7 @@ void AEyeTrackingProp::RecvEyeTrackingInfo()
 
 		// UE_LOG(LogTemp, Warning, TEXT("State: %d"), State);
 		// UE_LOG(LogTemp, Warning, TEXT("Blink: %d"), bBlink);
-		UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f"), X, Y);
+		//UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f"), X, Y);
 		// UE_LOG(LogTemp, Warning, TEXT("QuizID: %d"), QuizID);
 	}
 }

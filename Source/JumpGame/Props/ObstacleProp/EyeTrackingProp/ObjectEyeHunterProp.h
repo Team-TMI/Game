@@ -103,9 +103,6 @@ public:
 	FVector2D PreviousPosition;
 	
 	FTimerHandle EndTimerHandle;
-	FTimerHandle MissionTimerHandle;
-	float MissionTime{10.f};
-	float MissionFlowTime{0.f};
 
 	// 뷰포트 크기 변화 고려
 	TArray<FVector2D> TargetPositionsRatio;
