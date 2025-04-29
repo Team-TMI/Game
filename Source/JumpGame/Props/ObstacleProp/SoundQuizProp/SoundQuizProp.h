@@ -22,7 +22,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	UPROPERTY()
 	class ANetworkGameState* NetGS;
+	UPROPERTY()
 	ARisingWaterProp* RisingWaterProp;
 	// 퀴즈 실패했나요?
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

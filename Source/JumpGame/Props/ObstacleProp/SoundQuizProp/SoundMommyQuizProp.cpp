@@ -10,6 +10,7 @@
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/UI/Obstacle/SoundQuizUI.h"
+#include "JumpGame/UI/Obstacle/TimeRemainUI.h"
 
 
 // Sets default values
@@ -29,6 +30,10 @@ void ASoundMommyQuizProp::BeginPlay()
 	SoundQuizUI->SetVoiceRecorderComponent(VoiceRecorderComponent);
 	SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
 	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
+
+	TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
+	// 미션 종료 시 실행할 함수 바인딩
+	TimeRemainUI->OnMissionTimerEnd.AddDynamic(this, &ASoundMommyQuizProp::StopRecord);
 }
 
 // Called every frame
@@ -113,7 +118,12 @@ void ASoundMommyQuizProp::SendEndSoundQuizNotify()
 void ASoundMommyQuizProp::StartRecord()
 {
 	Super::StartRecord();
-	
+
+	// 남은 시간 UI
+	TimeRemainUI->AddToViewport();
+	TimeRemainUI->StartMissionTimer(3.0f);
+
+	// 버튼 이름 바꾸고
 	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Recording..."));
 	// 버튼 비활성화
 	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(false);
@@ -123,6 +133,7 @@ void ASoundMommyQuizProp::StopRecord()
 {
 	Super::StopRecord();
 
+	TimeRemainUI->RemoveFromParent();
 	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Wait"));
 	// 버튼 다시 활성화
 	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(true);

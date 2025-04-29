@@ -58,6 +58,12 @@ void AObjectEyeHunterProp::InitializeMission()
 	TrackingUI = CreateWidget<UEyeTrackingUI>(GetWorld(), EyeTrackingUIClass);
 	TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
 
+	if (TimeRemainUI)
+	{
+		// 미션 타이머 종료 바인드
+		TimeRemainUI->OnMissionTimerEnd.AddDynamic(this, &AObjectEyeHunterProp::MissionTimeEnd);
+	}
+
 	if (GEngine && GEngine->GameViewport)
 	{
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
@@ -65,11 +71,14 @@ void AObjectEyeHunterProp::InitializeMission()
 }
 
 
-void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+                                            AActor* OtherActor,
+                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+                                            bool bFromSweep,
                                             const FHitResult& SweepResult)
 {
-	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep,
+	                        SweepResult);
 
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
@@ -101,12 +110,12 @@ void AObjectEyeHunterProp::StartMission()
 	{
 		TimeRemainUI->AddToViewport();
 	}
-	
+
 	if (GEngine && GEngine->GameViewport)
 	{
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 	}
-	
+
 	// Object가 움직일 경로 (비율로 저장)
 	// 오른쪽 상단
 	TargetPositionsRatio.Add(FVector2D(0.15f, 0.15f));
@@ -157,23 +166,26 @@ void AObjectEyeHunterProp::StartMission()
 		ControlPoint2 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.0f);
 	}
 
-	GetWorldTimerManager().SetTimer(MissionTimerHandle, this, &AObjectEyeHunterProp::MissionTimeEnd, 10.f, false);
-
-	FTimerDelegate MissionDelegate{
-		FTimerDelegate::CreateLambda([this]() {
-			MissionFlowTime += GetWorld()->GetDeltaSeconds();
-
-			TimeRemainUI->ChangeGaugeValue(MissionFlowTime / MissionTime);
-
-			//FLog::Log("Mission Time", MissionFlowTime);
-			if (MissionFlowTime > MissionTime)
-			{
-				MissionTimeEnd();
-			}
-		})
-	};
-	GetWorldTimerManager().SetTimer(MissionTimerHandle, MissionDelegate, GetWorld()->GetDeltaSeconds(),
-	                                true);
+	// 10초 후 미션 종료 ( 타이머 설정 )
+	TimeRemainUI->StartMissionTimer(10.f);
+	//
+	// FTimerDelegate MissionDelegate{
+	// 	FTimerDelegate::CreateLambda([this]()
+	// 	{
+	// 		MissionFlowTime += GetWorld()->GetDeltaSeconds();
+	//
+	// 		TimeRemainUI->ChangeGaugeValue(MissionFlowTime / MissionTime);
+	//
+	// 		//FLog::Log("Mission Time", MissionFlowTime);
+	// 		if (MissionFlowTime > MissionTime)
+	// 		{
+	// 			MissionTimeEnd();
+	// 		}
+	// 	})
+	// };
+	// GetWorldTimerManager().SetTimer(MissionTimerHandle, MissionDelegate,
+	//                                 GetWorld()->GetDeltaSeconds(),
+	//                                 true);
 }
 
 void AObjectEyeHunterProp::StopCharacter()
@@ -197,7 +209,8 @@ void AObjectEyeHunterProp::ResumeCharacter()
 	}
 }
 
-void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent,
+                                          AActor* OtherActor,
                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
@@ -303,7 +316,8 @@ void AObjectEyeHunterProp::FlyingObjectMovement(float DeltaTime)
 			else
 			{
 				// 베지어 곡선 따라 현재 위치 계산
-				ObjectScreenLocation = GetBezierPoint(StartPosition, ControlPoint1, ControlPoint2, TargetPosition,
+				ObjectScreenLocation = GetBezierPoint(StartPosition, ControlPoint1, ControlPoint2,
+				                                      TargetPosition,
 				                                      BezierAlpha);
 			}
 
@@ -357,7 +371,9 @@ bool AObjectEyeHunterProp::IsObjectAndEyeOverlap(FVector2D ObjectLocation, FVect
 {
 	if (TrackingUI && FlyingObjectUI)
 	{
-		float Length{static_cast<float>(FMath::Abs(FVector2D::Distance(EyeLocation, ObjectLocation)))};
+		float Length{
+			static_cast<float>(FMath::Abs(FVector2D::Distance(EyeLocation, ObjectLocation)))
+		};
 
 		if (Length <= 100.f)
 		{
@@ -463,9 +479,10 @@ void AObjectEyeHunterProp::ResetMission()
 	{
 		TimeRemainUI->RemoveFromParent();
 	}
-
-	GetWorldTimerManager().ClearTimer(MissionTimerHandle);
-	GetWorldTimerManager().SetTimer(EndTimerHandle, FlyingObjectUI, &UFlyingObjectUI::VanishMission, 0.5f, false);
+	
+	//GetWorldTimerManager().ClearTimer(MissionTimerHandle);	
+	GetWorldTimerManager().SetTimer(EndTimerHandle, FlyingObjectUI, &UFlyingObjectUI::VanishMission,
+	                                0.5f, false);
 }
 
 void AObjectEyeHunterProp::SetNextTargetPosition()
@@ -509,7 +526,8 @@ void AObjectEyeHunterProp::UpdateObjectRotation(float DeltaTime)
 	}
 }
 
-FVector2D AObjectEyeHunterProp::GetBezierPoint(FVector2D P0, FVector2D P1, FVector2D P2, FVector2D P3, float t)
+FVector2D AObjectEyeHunterProp::GetBezierPoint(FVector2D P0, FVector2D P1, FVector2D P2,
+                                               FVector2D P3, float t)
 {
 	float u{1.f - t};
 	float tt{t * t};
@@ -531,7 +549,8 @@ FVector2D AObjectEyeHunterProp::GetBezierPoint(FVector2D P0, FVector2D P1, FVect
 	return p;
 }
 
-FVector2D AObjectEyeHunterProp::GenerateRandomControlPoint(FVector2D StartPos, FVector2D EndPos, float RandomRadius)
+FVector2D AObjectEyeHunterProp::GenerateRandomControlPoint(FVector2D StartPos, FVector2D EndPos,
+                                                           float RandomRadius)
 {
 	FVector2D MidPoint{(StartPos + EndPos) / 2.0f};
 	FVector2D RandomOffset{FMath::RandPointInCircle(RandomRadius)};

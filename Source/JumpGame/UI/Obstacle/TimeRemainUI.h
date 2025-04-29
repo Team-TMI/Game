@@ -6,9 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "TimeRemainUI.generated.h"
 
-/**
- * 
- */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTimerEndDelegate);
+
 UCLASS()
 class JUMPGAME_API UTimeRemainUI : public UUserWidget
 {
@@ -21,4 +20,18 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class URadialSlider* MissionTimeRemainSlider;
+
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnTimerEndDelegate OnMissionTimerEnd;
+
+	void StartMissionTimer(float InMissionTime);
+	void StopMissionTimer();
+
+private:
+	void MissionTimerTick();
+
+	FTimerHandle MissionTimerHandle;
+	float CurrentMissionTime = 0;
+	float MissionTime = 0;
 };

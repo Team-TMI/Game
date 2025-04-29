@@ -43,6 +43,7 @@ public:
 	void ChangeValue(bool bIsOverlap);
 	void StartMission();
 	void EndMission(bool bIsSuccess);
+	UFUNCTION()
 	void MissionTimeEnd();
 	void StopCharacter();
 	void ResumeCharacter();

@@ -48,7 +48,7 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 테스트용 키바인딩
-	/*if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
 	{
 		// 9번 누르면 퀴즈 음성 파일 메세지 전송
 		SendSoundQuizMessage();
@@ -72,7 +72,7 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	{
 		// 8번 누르면 퀴즈 끝 메세지 전송
 		SendEndSoundQuizNotify();
-	}*/
+	}
 
 	if (bIsMessageReceived)
 	{
@@ -224,7 +224,7 @@ void ASoundQuizProp::SendSoundQuizMessage()
 void ASoundQuizProp::ReceiveSoundQuizMessage()
 {
 	FMessageUnion RespMessage;
-	FFastLogger::LogConsole(TEXT("메세지 받을거야!"));
+	// FFastLogger::LogConsole(TEXT("메세지 받을거야!"));
 	// AI가 보내준 메세지를 받자
 	if (!NetGS->IOManagerComponent->PopMessage(EMessageType::WaveResponse, RespMessage))
 	{
