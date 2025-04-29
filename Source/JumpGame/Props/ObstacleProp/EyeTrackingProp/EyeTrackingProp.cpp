@@ -69,6 +69,11 @@ void AEyeTrackingProp::Tick(float DeltaTime)
 		RecvReadyEyeTracking();
 	}
 	
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Six))
+	{
+		SendEyeTrackingSettingStart();
+	}
+	
 	if (!bIsStartHunt)
 	{
 		return;
@@ -215,7 +220,7 @@ void AEyeTrackingProp::RecvEyeTrackingInfo()
 
 		// UE_LOG(LogTemp, Warning, TEXT("State: %d"), State);
 		// UE_LOG(LogTemp, Warning, TEXT("Blink: %d"), bBlink);
-		// UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f"), X, Y);
+		UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f"), X, Y);
 		// UE_LOG(LogTemp, Warning, TEXT("QuizID: %d"), QuizID);
 	}
 }

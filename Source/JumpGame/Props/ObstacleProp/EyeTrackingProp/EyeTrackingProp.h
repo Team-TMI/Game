@@ -69,6 +69,6 @@ public:
 	bool bIsStartHunt{false};
 	FVector2D SettingLocation[4]{};
 	int32 SettingCount{};
-	bool bIsSettingFinish{false};
-
+	// bool bIsSettingFinish{false};	// Todo : 추후 수정 예정
+	bool bIsSettingFinish{true};
 };
