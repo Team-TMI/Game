@@ -14,13 +14,6 @@ UClickHandlerManager::UClickHandlerManager()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
-
-	static ConstructorHelpers::FClassFinder<APrimitiveProp> TEST_PROP_CLASS
-	(TEXT("/Game/MapEditor/Blueprints/BP_PrimitiveProp.BP_PrimitiveProp_C"));
-	if (TEST_PROP_CLASS.Succeeded())
-	{
-		this->TEST_PROP = TEST_PROP_CLASS.Class;
-	}
 }
 
 void UClickHandlerManager::RegisterHandler(TSharedPtr<IClickHandler> Handler)
@@ -79,9 +72,10 @@ void UClickHandlerManager::InitializeComponent()
 }
 
 
-void UClickHandlerManager::OnPropSlotClicked(FName PropID)
+void UClickHandlerManager::OnPropSlotClicked(FName PropID, UClass* InPropClass)
 {
 	ControlledPropSlotID = PropID;
+	ControlledPropClass = InPropClass;
 }
 
 void UClickHandlerManager::OnWidgetDragLeave()
@@ -99,7 +93,7 @@ void UClickHandlerManager::OnWidgetDragEnter()
 	{
 		ControlledClickResponse.Result = EClickHandlingResult::UIEditing;
 		
-		APrimitiveProp* Prop = GetWorld()->SpawnActor<APrimitiveProp>(TEST_PROP, FVector::ZeroVector, FRotator::ZeroRotator);
+		APrimitiveProp* Prop = GetWorld()->SpawnActor<APrimitiveProp>(ControlledPropClass, FVector::ZeroVector, FRotator::ZeroRotator);
 		ControlledClickResponse.ClickedPropByWidget = Prop;
 		
 		AMapEditingPlayerController* PlayerController = Cast<AMapEditingPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -112,7 +106,8 @@ void UClickHandlerManager::OnWidgetDragEnter()
 void UClickHandlerManager::OnPropDragCancelled()
 {
 	ControlledPropSlotID = NAME_None;
-
+	ControlledPropClass = nullptr;
+	
 	if (bMouseEnterUI)
 	{
 		ControlledClickResponse.TargetProp->Destroy();

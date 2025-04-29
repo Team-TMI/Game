@@ -24,7 +24,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	virtual void ReceiveSoundQuizMessage() override;
+	virtual void SendSoundQuizMessage() override;
 	virtual void SendEndSoundQuizNotify() override;
+
+	virtual void StartRecord() override;
+	virtual void StopRecord() override;
 	
 public:
 	// 퀴즈 플레이 UI

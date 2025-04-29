@@ -3,6 +3,7 @@
 
 #include "MapEditingHUD.h"
 
+#include "CategoryUI.h"
 #include "PropSlot.h"
 #include "Components/Border.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
@@ -13,9 +14,6 @@ void UMapEditingHUD::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	
-	PropSlot = CreateWidget<UPropSlot>(GetWorld(), PropSlotClass);
-	// PropSlot->AddToViewport();
-	TestBorder->AddChild(PropSlot);
 }
 
 void UMapEditingHUD::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
@@ -40,7 +38,7 @@ void UMapEditingHUD::NativeOnDragEnter(const FGeometry& InGeometry, const FDragD
 
 void UMapEditingHUD::InitWidget(UClickHandlerManager* ClickHandlerManager, UWidgetMapEditDragDropOperation* DragDropOperation)
 {
-	PropSlot->InitWidget(DragDropOperation);
+	EditCategoryUI->InitWidget(ClickHandlerManager, DragDropOperation);
 
 	AddDragDropFunctionsToDelegate(DragDropOperation);
 	AddClickFunctionsToDelegate(ClickHandlerManager);
@@ -49,7 +47,7 @@ void UMapEditingHUD::InitWidget(UClickHandlerManager* ClickHandlerManager, UWidg
 void UMapEditingHUD::AddClickFunctionsToDelegate(UClickHandlerManager* ClickHandlerManager)
 {
 	// TODO : 나중엔 모든 PropSlot에 대해서도 Delegate를 추가해야 함.
-	PropSlot->OnPropSlotClicked.AddDynamic(ClickHandlerManager, &UClickHandlerManager::OnPropSlotClicked);
+	// PropSlot->OnPropSlotClicked.AddDynamic(ClickHandlerManager, &UClickHandlerManager::OnPropSlotClicked);
 	
 	OnDragEnterWidget.AddDynamic(ClickHandlerManager, &UClickHandlerManager::OnWidgetDragEnter);
 	OnDragLeaveWidget.AddDynamic(ClickHandlerManager, &UClickHandlerManager::OnWidgetDragLeave);
@@ -59,5 +57,4 @@ void UMapEditingHUD::AddDragDropFunctionsToDelegate(UWidgetMapEditDragDropOperat
 {
 	OnDragEnterWidget.AddDynamic(DragDropOperation, &UWidgetMapEditDragDropOperation::OnDragEnter);
 	OnDragLeaveWidget.AddDynamic(DragDropOperation, &UWidgetMapEditDragDropOperation::OnDragLeave);
-
 }

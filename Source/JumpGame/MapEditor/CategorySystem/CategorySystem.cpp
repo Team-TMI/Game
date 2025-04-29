@@ -7,13 +7,13 @@ UCategorySystem::UCategorySystem()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> DT_PROPDATA
-	(TEXT("/Game/MapEditor/DataTable/DT_PropData.DT_PropData"));
-	CategoryDataTable = DT_PROPDATA.Object;
-	
-	static ConstructorHelpers::FObjectFinder<UDataTable> DT_MAJORINFO
-	(TEXT("/Game/MapEditor/DataTable/DT_MajorTable.DT_MajorTable"));
-	MajorTableInfoTable = DT_MAJORINFO.Object;
+	// static ConstructorHelpers::FObjectFinder<UDataTable> DT_PROPDATA
+	// (TEXT("/Game/MapEditor/DataTable/DT_PropData.DT_PropData"));
+	// CategoryDataTable = DT_PROPDATA.Object;
+	//
+	// static ConstructorHelpers::FObjectFinder<UDataTable> DT_MAJORINFO
+	// (TEXT("/Game/MapEditor/DataTable/DT_MajorTable.DT_MajorTable"));
+	// MajorTableInfoTable = DT_MAJORINFO.Object;
 }
 
 // 카테고리 시스템을 만들어보자!!
@@ -26,6 +26,7 @@ void UCategorySystem::BeginPlay()
 	{
 		return;
 	}
+	
 	TArray<FPropStruct*> Rows;
 	CategoryDataTable->GetAllRows<FPropStruct>(TEXT(""), Rows);
 	for (auto& Row : Rows)
@@ -56,8 +57,10 @@ bool UCategorySystem::SubBelongsToMajorCategory(const EMajorCategoryType InMajor
 		return false;
 	}
 
+	// 카테고리의 관계를 가진 테이블을 가져옴
 	const FMajorTableInfo* Found = FindMajorTableInfoRow(InMajorCategoryType);
 
+	// 찾아진게 있고 SubCategory에 대한 정보가 있는지를 반환
 	return Found && Found->SubCategoryTypes.Contains(InSubCategoryType);
 }
 
@@ -170,6 +173,45 @@ const FPropStruct* UCategorySystem::GetPropsByID(FName ID)
 		return It.PropID == ID;
 	});
 	return Found ? Found : nullptr;
+}
+
+const TArray<EMajorCategoryType>& UCategorySystem::GetMajorCategories()
+{
+	static TArray<EMajorCategoryType> MajorCategories;
+	MajorCategories.Reset();
+
+	TArray<FMajorTableInfo*> MajorTableInfoRows;
+	MajorTableInfoTable->GetAllRows<FMajorTableInfo>(TEXT(""), MajorTableInfoRows);
+	for (auto& MajorTableInfo : MajorTableInfoRows)
+	{
+		if (MajorTableInfo)
+		{
+			MajorCategories.Add(MajorTableInfo->MajorCategoryType);
+		}
+	}
+	
+	return MajorCategories;
+}
+
+const TArray<ESubCategoryType>& UCategorySystem::GetSubCategoriesByMajor(EMajorCategoryType Major)
+{
+	static const TArray<ESubCategoryType> EmptyArray;
+	
+	static TArray<ESubCategoryType> SubCategories;
+	SubCategories.Reset();
+	
+	const FMajorTableInfo* MajorTableInfo = FindMajorTableInfoRow(Major);
+	if (!MajorTableInfo)
+	{
+		return EmptyArray;
+	}
+
+	for (auto& SubCategory : MajorTableInfo->SubCategoryTypes)
+	{
+		SubCategories.Add(SubCategory);
+	}
+	
+	return SubCategories;
 }
 
 void UCategorySystem::ReIndex()

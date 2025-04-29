@@ -23,6 +23,9 @@ public:
 
 	UFUNCTION()
 	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* DragDropOperation);
+
+	GETTER(class UCategorySystem*, CategorySystem);
+	
 private:
 	UPROPERTY(Category = EditorState, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UUserWidget> MapEditingHUDClass = nullptr;

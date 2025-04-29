@@ -34,15 +34,24 @@ public:
 
 public:
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
+	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
+	
+	UFUNCTION()
 	virtual void SendStartSoundQuizNotify();
+	UFUNCTION()
 	virtual void SendSoundQuizMessage();
+	UFUNCTION()
 	virtual void ReceiveSoundQuizMessage();
+	UFUNCTION()
 	virtual void SendEndSoundQuizNotify();
-	// TODO: 리셋함수 만들기
+
+	UFUNCTION()
 	virtual void ResetSoundQuiz();
 
-	void StartRecord();
-	void StopRecord();
+	UFUNCTION()
+	virtual void StartRecord();
+	UFUNCTION()
+	virtual void StopRecord();
 
 	UPROPERTY()
 	int32 QuizID = -1;
@@ -71,6 +80,7 @@ public:
 	// UNUSED: 나중에 0.01초 재귀로 바뀔수도있음
 	// FTimerHandle SendWavTimerHandle;
 	
+	UFUNCTION()
 	void LoadWavFileBinary(const FString& FilePath, TArray<uint8>& BinaryData);
 
 	UPROPERTY(EditAnywhere)
@@ -81,4 +91,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UVoiceRecorderComponent> VoiceRecorderComponent = nullptr;
 
+	UPROPERTY()
+	FTimerHandle RecordTimer;
+
+	// Tick을 활성화, 비활성화하는 변수
+	UPROPERTY()
+	bool bIsMessageReceived = false;
 };

@@ -39,7 +39,7 @@ bool FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo,
 		StrongThis->bConnected = false;
 
 		// Retry Code
-		StrongThis->Socket->Connect();
+		// StrongThis->Socket->Connect();
 		
 		UE_LOG(LogTemp, Error, TEXT("Connection error: %s"), *Error);
 	});

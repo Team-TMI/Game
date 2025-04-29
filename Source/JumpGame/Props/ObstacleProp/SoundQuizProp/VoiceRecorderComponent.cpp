@@ -9,7 +9,7 @@
 
 bool UVoiceRecorderComponent::Init(int32& SampleRate)
 {
-	NumChannels = 1;
+	NumChannels = 2;
 
 #if SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
 	// Initialize the DSP objects
@@ -85,7 +85,7 @@ void UVoiceRecorderComponent::StopRecording(const bool bIsStop)
 			RecordingData.Reset(new Audio::FAudioRecordingData());
 			RecordingData->InputBuffer = Audio::TSampleBuffer<int16>(RecordedBuffer, OutChannelCount, OutSampleRate);
 
-			RecordingData->Writer.BeginWriteToWavFile(RecordingData->InputBuffer, TEXT("SounQuizFile"), FiledirectoryPath, [this]()
+			RecordingData->Writer.BeginWriteToWavFile(RecordingData->InputBuffer, TEXT("SoundQuizResponseFile"), FiledirectoryPath, [this]()
 			{
 				if (RecordSoundSubmix && RecordSoundSubmix->OnSubmixRecordedFileDone.IsBound())
 				{

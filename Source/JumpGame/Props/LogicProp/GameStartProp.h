@@ -6,7 +6,7 @@
 #include "LogicProp.h"
 #include "GameStartProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API AGameStartProp : public ALogicProp
 {
 	GENERATED_BODY()

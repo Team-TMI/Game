@@ -8,7 +8,7 @@
 #include "JumpGame/UI/VictoryPage.h"
 #include "GameFinishProp.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class JUMPGAME_API AGameFinishProp : public ALogicProp
 {
 	GENERATED_BODY()

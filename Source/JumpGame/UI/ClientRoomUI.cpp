@@ -15,10 +15,10 @@
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
-void UClientRoomUI::NativeConstruct()
-{
-	Super::NativeConstruct();
 
+void UClientRoomUI::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
 	// 마우스 활성화
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 

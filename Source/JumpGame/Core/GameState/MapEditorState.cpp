@@ -11,14 +11,14 @@
 
 AMapEditorState::AMapEditorState()
 {
+	CategorySystem = CreateDefaultSubobject<UCategorySystem>(TEXT("CategorySystem"));
+	
 	static ConstructorHelpers::FClassFinder<UUserWidget> WBP_MAPEDITING_HUD
 	(TEXT("/Game/UI/MapEditing/WBP_MapEditingHUD.WBP_MapEditingHUD_C"));
 	if (WBP_MAPEDITING_HUD.Succeeded())
 	{
 		MapEditingHUDClass = WBP_MAPEDITING_HUD.Class;
 	}
-
-	CategorySystem = CreateDefaultSubobject<UCategorySystem>(TEXT("CategorySystem"));
 }
 
 void AMapEditorState::BeginPlay()
@@ -28,6 +28,7 @@ void AMapEditorState::BeginPlay()
 	MapEditingHUD = CreateWidget<UMapEditingHUD>(GetWorld(), MapEditingHUDClass);
 	if (MapEditingHUD)
 	{
+		FFastLogger::LogScreen(FColor:: Red, TEXT("MapEditingHUD Created"));
 		MapEditingHUD->AddToViewport();
 	}
 }
