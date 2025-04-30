@@ -16,9 +16,8 @@ class JUMPGAME_API UFrogAnimInstance : public UAnimInstance
 
 public:
 	virtual void NativeInitializeAnimation() override;
-
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
+	
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	class AFrog* Frog;

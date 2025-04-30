@@ -11,13 +11,12 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PostProcessComponent.h"
-#include "Components/RadialSlider.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
 #include "JumpGame/Utils/FastLogger.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -168,6 +167,9 @@ AFrog::AFrog()
 
 	GetCapsuleComponent()->ComponentTags.Add(TEXT("FrogCapsule"));
 	Tags.Add(TEXT("Frog"));
+
+	// 동기화 좀 더 빨라지게
+	SetNetUpdateFrequency(200.f);
 }
 
 void AFrog::NotifyControllerChanged()
@@ -209,6 +211,38 @@ void AFrog::Tick(float DeltaTime)
 	}
 
 	PrevVelocityZLength = GetVelocity().Z * -1;
+
+	if (HasAuthority())
+	{
+		// Pitch, Yaw 계산
+		// GetBaseAimRotation()는 서버 카메라의 회전값 사용하므로 클라와 서버의 카메라 방향이 다르면 문제가 생김
+		// --> 상대값으로 해야함 ( meshRotation - baseRotation )
+		const FRotator MeshRotation = GetMesh()->GetComponentRotation();
+		const FRotator AimRotation = GetBaseAimRotation();
+		// Pitch: 메시 기준 상대값 계산
+		Pitch = (AimRotation - MeshRotation).GetNormalized().Pitch;
+
+		// 상대 Yaw
+		const float CharacterYaw{static_cast<float>(GetActorRotation().Yaw)};
+		// 절대 Yaw
+		const float AimYaw{static_cast<float>(AimRotation.Yaw)};
+		// AimYaw - CharacterYaw
+		const float RelativeYaw{FMath::FindDeltaAngleDegrees(CharacterYaw, AimYaw)};
+
+		//카메라로 캐릭터 정면 볼 때 고려
+		if (RelativeYaw >= 90.f)
+		{
+			Yaw = 90.f - (RelativeYaw - 90.f);
+		}
+		else if (RelativeYaw <= -90.f)
+		{
+			Yaw = -90 - (RelativeYaw + 90.f);
+		}
+		else
+		{
+			Yaw = RelativeYaw;
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -270,13 +304,14 @@ void AFrog::Look(const struct FInputActionValue& Value)
 	}
 }
 
+// 웅크리면서 점프 가능하게
 bool AFrog::CanJumpInternal_Implementation() const
 {
 	// 원래 점프 로직
 	bool bCanJump{Super::CanJumpInternal_Implementation()};
 
 	// 앉은 상태라면 ?
-	if (!bCanJump && bIsCrouched)
+	if (!bCanJump && GetCharacterMovement()->IsCrouching())
 	{
 		// 현재 지면에 서 있는지
 		// 더 점프할 수 있는지
@@ -291,48 +326,7 @@ bool AFrog::CanJumpInternal_Implementation() const
 
 void AFrog::StartJump()
 {
-	// 수면 점프
-	if (CharacterState == ECharacterStateEnum::Surface)
-	{
-		// 1초 동안 물에 충돌 없앰
-		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Jumping"));
-		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
-		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
-
-		FTimerHandle TimerHandle;
-		FTimerDelegate MovementModeDelegate{
-			FTimerDelegate::CreateLambda([this]()
-			{
-				GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
-			})
-		};
-		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
-
-		return;
-	}
-
-	// 슈퍼 점프
-	if (GetCharacterMovement()->IsCrouching())
-	{
-		//FLog::Log("Time", CrouchTime);
-		if (bIsSuperJump)
-		{
-			//FLog::Log("SuperJump");
-			SetJumpAvailableBlock(3);
-		}
-		else if (SuperJumpRatio >= 0.5f)
-		{
-			//FLog::Log("LittleJump");
-			SetJumpAvailableBlock(2);
-		}
-
-		StopCrouch();
-		Jump();
-
-		return;
-	}
-
-	Jump();
+	MulticastRPC_StartJump();
 }
 
 void AFrog::StopJump()
@@ -342,12 +336,12 @@ void AFrog::StopJump()
 
 void AFrog::StartSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	ServerRPC_StartSprint();
 }
 
 void AFrog::StopSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	ServerRPC_StopSprint();
 }
 
 void AFrog::SetCrouchEnabled(bool bEnabled)
@@ -366,6 +360,68 @@ void AFrog::SetCrouchEnabled(bool bEnabled)
 
 void AFrog::StartCrouch()
 {
+	MulticastRPC_StartCrouch();
+}
+
+void AFrog::StopCrouch()
+{
+	MulticastRPC_StopCrouch();
+}
+
+void AFrog::MulticastRPC_StartJump_Implementation()
+{
+	// 수면 점프
+	if (CharacterState == ECharacterStateEnum::Surface)
+	{
+		// 1초 동안 물에 충돌 없앰
+		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Jumping"));
+		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
+		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+
+		FTimerHandle TimerHandle;
+		FTimerDelegate MovementModeDelegate{
+			FTimerDelegate::CreateLambda([this]() {
+				GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
+			})
+		};
+		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
+
+		return;
+	}
+
+	// 슈퍼 점프
+	if (GetCharacterMovement()->IsCrouching())
+	{
+		FLog::Log("Time", CrouchTime);
+		if (bIsSuperJump)
+		{
+			FLog::Log("SuperJump");
+			SetJumpAvailableBlock(3);
+		}
+		else if (SuperJumpRatio >= 0.5f)
+		{
+			FLog::Log("LittleJump");
+			SetJumpAvailableBlock(2);
+		}
+
+		StopCrouch();
+
+		if (CanJump())
+		{
+			Jump();
+		}
+
+		return;
+	}
+
+	if (CanJump())
+	{
+		Jump();
+	}
+}
+
+void AFrog::MulticastRPC_StartCrouch_Implementation()
+{
 	if (!bCanCrouch)
 	{
 		return;
@@ -382,8 +438,7 @@ void AFrog::StartCrouch()
 
 	// 슈퍼 점프 게이지 충전
 	FTimerDelegate CrouchDelegate{
-		FTimerDelegate::CreateLambda([this]()
-		{
+		FTimerDelegate::CreateLambda([this]() {
 			CrouchTime += GetWorld()->GetDeltaSeconds();
 
 			if (CrouchTime >= SuperJumpValue)
@@ -401,7 +456,7 @@ void AFrog::StartCrouch()
 	                                true);
 }
 
-void AFrog::StopCrouch()
+void AFrog::MulticastRPC_StopCrouch_Implementation()
 {
 	if (GetCharacterMovement()->IsFalling())
 	{
@@ -417,10 +472,31 @@ void AFrog::StopCrouch()
 	ResetSuperJumpRatio();
 }
 
+void AFrog::ServerRPC_StartSprint_Implementation()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+}
+
+void AFrog::ServerRPC_StopSprint_Implementation()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+}
+
 void AFrog::InitFrogState()
 {
 	SetJumpAvailableBlock(1);
 	ResetSuperJumpRatio();
+
+	// 로컬 클라만 점프 게이지 보이게
+	if (IsLocallyControlled())
+	{
+		SetJumpGaugeVisibility(true);
+	}
+	else
+	{
+		// 다른 클라에서 삭제
+		JumpGaugeUIComponent->DestroyComponent();
+	}
 }
 
 void AFrog::SetJumpAvailableBlock(int32 Block)
@@ -434,13 +510,13 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 	{
 		FTimerHandle TimerHandle;
 		FTimerDelegate JumpDelegate{
-			FTimerDelegate::CreateLambda([this]()
-			{
+			FTimerDelegate::CreateLambda([this]() {
 				SetJumpAvailableBlock(1);
 			})
 		};
 		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
 	}
+	ServerRPC_SetJumpAvailableBlock(Block);
 }
 
 void AFrog::ResetSuperJumpRatio()
@@ -486,4 +562,47 @@ void AFrog::CameraMovementMode()
 void AFrog::SetJumpGaugeVisibility(bool bVisibility)
 {
 	JumpGaugeUIComponent->SetVisibility(bVisibility);
+}
+
+void AFrog::OnRep_SuperJumpRatio()
+{
+	if (IsLocallyControlled())
+	{
+		SuperJumpRatio = FMath::Clamp(CrouchTime / SuperJumpValue, 0.f, 1.f);
+		OnSuperJumpRatioChanged.Broadcast(SuperJumpRatio);
+	}
+}
+
+void AFrog::ServerRPC_SetJumpAvailableBlock_Implementation(int32 Block)
+{
+	float Height{Block * 100.f + 10.f};
+	float Value{FMath::Sqrt(Height * FMath::Abs(GetCharacterMovement()->GetGravityZ()) * 2)};
+	GetCharacterMovement()->JumpZVelocity = Value;
+
+	// 점프력 높게 설정하면 다시 원래대로 점프력 돌아오게
+	if (Block != 1)
+	{
+		FTimerHandle TimerHandle;
+		FTimerDelegate JumpDelegate{
+			FTimerDelegate::CreateLambda([this]() {
+				SetJumpAvailableBlock(1);
+			})
+		};
+		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
+	}
+}
+
+void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFrog, Pitch);
+	DOREPLIFETIME(AFrog, Yaw);
+	DOREPLIFETIME(AFrog, bIsCrouching);
+	DOREPLIFETIME(AFrog, bIsSwimming);
+	DOREPLIFETIME(AFrog, bIsSuperJump);
+	DOREPLIFETIME(AFrog, CrouchTime);
+	DOREPLIFETIME(AFrog, CharacterState);
+	// COND_SkipOwner : 소유자 클라이언트는 업데이트 안해서 중복 실행 방지
+	DOREPLIFETIME_CONDITION(AFrog, SuperJumpRatio, COND_SkipOwner);
 }

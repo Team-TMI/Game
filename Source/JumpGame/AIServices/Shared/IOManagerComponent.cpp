@@ -48,7 +48,7 @@ void UIOManagerComponent::BeginPlay()
 	if (!IPCHandler->Init(IOHandlerInitInfo, &MessageQueue))
 	{
 		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCHandler);
-		// RetryConnectToPipe(SharedIPC);
+		RetryConnectToPipe(SharedIPC);
 	}
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
 	
