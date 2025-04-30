@@ -49,10 +49,12 @@ void URotateHandlerManager::HandleAxis(FVector InAxis, FClickResponse& ClickResp
 	if (!PrimitiveProp) return;
 
 	Axis = InAxis.GetSafeNormal().GetAbs();
+	OnAxisChanged.Broadcast(Axis);
 }
 
 void URotateHandlerManager::ResetAxis()
 {
 	Axis = FVector(0, 0, 1);
+	OnAxisChanged.Broadcast(Axis);
 }
 

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,15 +11,12 @@ class JUMPGAME_API APrimitiveProp : public AActor
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	APrimitiveProp();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// 액터가 선택되었을 때 호출되는 함수
 	// 내부 Mesh 컴포넌트의 색상 및 충돌 설정
@@ -46,6 +41,7 @@ public:
 	GETTER(class UBoxComponent*, GridOuterCollision)
 	GETTER(class UBoxComponent*, GridInnerCollision);
 	GETTER(class UGridComponent*, GridComp);
+	GETTER(class UPropDataComponent*, PropDataComponent);
 
 protected:
 	UFUNCTION()
@@ -100,4 +96,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PropDataComponent")
 	class UPropDataComponent* PropDataComponent = nullptr;
+
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
+	// class UWidgetComponent* RotateWidgetComponent = nullptr;
 };

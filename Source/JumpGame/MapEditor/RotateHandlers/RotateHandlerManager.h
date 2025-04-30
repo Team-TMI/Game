@@ -5,6 +5,8 @@
 #include "JumpGame/MapEditor/ClickHandlers/ClickResponse.h"
 #include "RotateHandlerManager.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAxisChanged, FVector, NewAxis);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class JUMPGAME_API URotateHandlerManager : public UActorComponent
 {
@@ -15,6 +17,9 @@ public:
 
 	void HandleRotate(FClickResponse& ClickResponse);
 	void HandleAxis(FVector InAxis, FClickResponse& ClickResponse);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAxisChanged OnAxisChanged;
 	
 protected:
 	virtual void BeginPlay() override;

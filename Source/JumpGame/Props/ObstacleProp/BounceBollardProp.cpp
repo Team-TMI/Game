@@ -5,6 +5,7 @@
 
 #include "Components/BoxComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 
 
 // Sets default values
@@ -28,6 +29,8 @@ ABounceBollardProp::ABounceBollardProp()
 	// 메쉬랑 부딪힘 (CollisionComp랑은 충돌하지 않는다)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	MeshComp->SetCollisionProfileName(TEXT("Prop"));
+
+	PropDataComponent->SetPropID(TEXT("1003"));
 }
 
 void ABounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

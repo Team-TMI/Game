@@ -6,6 +6,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
+#include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/KismetInputLibrary.h"
 

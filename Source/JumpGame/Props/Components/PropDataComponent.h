@@ -15,6 +15,8 @@ public:
 
 	UFUNCTION()
 	void SetPropID(const FName& InPropID);
+	UFUNCTION()
+	FName GetPropID() const { return PropID.RowName; }
 protected:
 	virtual void BeginPlay() override;
 
