@@ -64,6 +64,8 @@ public:
 	UPROPERTY()
 	float Similarity = 0.f;
 	UPROPERTY()
+	int32 bSuccess = 0;
+	UPROPERTY()
 	uint32 MessageSize = 0;
 	UPROPERTY()
 	FString MessageStr = "";

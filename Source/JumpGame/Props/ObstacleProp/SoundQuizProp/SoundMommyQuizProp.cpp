@@ -82,20 +82,23 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 
 	// TODO: 정답과 일치할때로 변경해야함
 	// 20번 안에, Fin되는 경우 -> 유사도가 높을때
-	if (SendResponseIdx < 20 && Similarity*100 >= 90)
+	if (SendResponseIdx < 20)
 	{
-		// UI 지우자
-		SoundQuizUI->RemoveFromParent();
-		// 성공!
-		if (SoundQuizClear)
+		if (bSuccess == 1 || Similarity*100 >= 90)
 		{
-			SoundQuizClear->AddToViewport();
-		}
+			// UI 지우자
+			SoundQuizUI->RemoveFromParent();
+			// 성공!
+			if (SoundQuizClear)
+			{
+				SoundQuizClear->AddToViewport();
+			}
 
-		// 퀴즈 끝났다고 알리자!
-		SendEndSoundQuizNotify();
-		
-		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+			// 퀴즈 끝났다고 알리자!
+			SendEndSoundQuizNotify();
+			
+			GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+		}
 	}
 
 	FFastLogger::LogConsole(TEXT("SendResponseIdx: %d"), SendResponseIdx);

@@ -249,6 +249,8 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 내가 만든 변수에 넣자
 	QuizID = RespMessage.WavResponseMessage.QuizID;
 	Similarity = RespMessage.WavResponseMessage.Similarity;
+	// 정답 여부 판단
+	bSuccess = RespMessage.WavResponseMessage.bSuccess;
 	// 먼저, 보내준 메세지에서 문자열의 길이를 추출한다 (몇글자니)
 	FMemory::Memcpy(&MessageSize, RespMessage.WavResponseMessage.Message, sizeof(uint32));
 
@@ -266,6 +268,7 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 받은 메세지를 출력한다
 	UE_LOG(LogTemp, Warning, TEXT("Receive QuizID: %d"), QuizID);
 	UE_LOG(LogTemp, Warning, TEXT("Receive Similarity: %f"), Similarity);
+	UE_LOG(LogTemp, Warning, TEXT("Receive BSuccess: %d"), bSuccess);
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageSize: %d"), MessageSize);
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageStr: %s"), *MessageStr);
 

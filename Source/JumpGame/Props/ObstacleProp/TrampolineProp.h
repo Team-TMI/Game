@@ -26,7 +26,5 @@ public:
 
 	// Todo : 낙하 가속도를 받을 수 있는 녀석인지 확인, 나중에 수정해야함
 	UPROPERTY(EditAnywhere)
-	bool temp{false};
-	
-	
+	bool temp{false};	
 };
