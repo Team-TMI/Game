@@ -2,26 +2,57 @@
 
 #include "JsonObjectConverter.h"
 #include "JumpGame/MapEditor/CategorySystem/PropStruct.h"
-#include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
+#include "DesktopPlatformModule.h"
+#include "Developer/DesktopPlatform/Public/IDesktopPlatform.h"
+#include "JumpGame/MapEditor/Components/GridComponent.h"
 
 ULoadMapComponent::ULoadMapComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
 }
 
 void ULoadMapComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	//
+	// TArray<FString> OutFileNames;
+	// OpenFileDialog(FString(TEXT("Open File Dialog")), FString(TEXT("C:/")), FString(TEXT("All Files (*.*)|*.*")), OutFileNames);
+	// if (OutFileNames.IsValidIndex(0))
+	// {
+	// 	PrintData(OutFileNames[0]);
+	// }
 }
 
-void ULoadMapComponent::LoadMap(const FString& FilePath)
+void ULoadMapComponent::LoadMap()
 {
 	FString JsonString;
 
-	if (!LoadFileToJsonString(FilePath, JsonString))
+	TArray<FString> OutFileNames;
+	OpenFileDialog(FString(TEXT("Open File Dialog")), FString(TEXT("C:/")), FString(TEXT("All Files (*.*)|*.*")), OutFileNames);
+	if (OutFileNames.IsValidIndex(0))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("%s"), *OutFileNames[0]);
+		// PrintData(OutFileNames[0]);
+	
+		if (!LoadFileToJsonString(OutFileNames[0], JsonString))
+		{
+			return ;
+		}
+		if (!ParseJsonStringToMap(JsonString))
+		{
+			return ;
+		}
+	
+		BuildMapFromSaveData();
+	}
+}
+
+void ULoadMapComponent::LoadMapWithString(const FString& FileName)
+{
+	FString JsonString;
+
+	if (!LoadFileToJsonString(FileName, JsonString))
 	{
 		return ;
 	}
@@ -32,6 +63,7 @@ void ULoadMapComponent::LoadMap(const FString& FilePath)
 
 	BuildMapFromSaveData();
 }
+
 
 bool ULoadMapComponent::LoadFileToJsonString(const FString& FilePath, FString& JsonString)
 {
@@ -82,7 +114,7 @@ void ULoadMapComponent::SpawnProp(TSubclassOf<APrimitiveProp> PropClass, const F
 
 	FTransform SpawnTransform;
 	SpawnTransform.SetLocation(Location);
-	SpawnTransform.SetRotation(FQuat(Rotation));
+	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
 	SpawnTransform.SetScale3D({1.f, 1.f, 1.f});
 	
 	FVector Size = SaveData.Size;
@@ -90,11 +122,48 @@ void ULoadMapComponent::SpawnProp(TSubclassOf<APrimitiveProp> PropClass, const F
 	APrimitiveProp* NewProp = GetWorld()->SpawnActorDeferred<APrimitiveProp>(PropClass,	SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (NewProp)
 	{
-		NewProp->SetSize(Size);
+		// NewProp->SetSize(Size);
 		NewProp->FinishSpawning(SpawnTransform);
+		NewProp->GetGridComp()->SetSize(Size);
+		NewProp->SetActorRotation(Rotation);
+		NewProp->RotateAllGizmos();
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Prop Spawn 실패"));
+	}
+}
+
+void ULoadMapComponent::OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes,
+	TArray<FString>& OutFileNames)
+{
+	if (GEngine)
+	{
+		if (GEngine->GameViewport)
+		{
+			void* ParentWindowHandle = GEngine->GameViewport->GetWindow()->GetNativeWindow()->GetOSWindowHandle();
+			IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+			if (DesktopPlatform)
+			{
+				//Opening the file picker!
+				uint32 SelectionFlag = 0; //A value of 0 represents single file selection while a value of 1 represents multiple file selection
+				DesktopPlatform->OpenFileDialog(ParentWindowHandle, DialogTitle, DefaultPath, FString(""), FileTypes, SelectionFlag, OutFileNames);
+			}
+		}
+	}
+}
+
+void ULoadMapComponent::PrintData(const FString& File)
+{
+	//Parse the data into a string array
+	FFastLogger::LogScreen(FColor::Red, TEXT("File: %s"), *File);
+	
+	TArray<FString> LoadedText;
+	FFileHelper::LoadFileToStringArray(LoadedText, *File);
+	//Print the contents
+	for (int32 i = 0; i < LoadedText.Num(); i++)
+	{
+		// GLog->Log(LoadedText[i]);
+		FFastLogger::LogScreen(FColor::Red, TEXT("%s"), *LoadedText[i]);
 	}
 }

@@ -15,7 +15,15 @@ class JUMPGAME_API ULoadMapComponent : public UActorComponent
 public:
 	ULoadMapComponent();
 
-	void LoadMap(const FString& FilePath);
+	UFUNCTION()
+	void LoadMap();
+	UFUNCTION()
+	void LoadMapWithString(const FString& FileName);
+
+	UFUNCTION()
+	void OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames);
+	UFUNCTION()
+	void PrintData(const FString& File);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnMapLoaded OnMapLoaded;

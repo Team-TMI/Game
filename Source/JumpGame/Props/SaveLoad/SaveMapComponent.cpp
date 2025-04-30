@@ -20,6 +20,7 @@ void USaveMapComponent::BeginPlay()
 void USaveMapComponent::SaveMap(const FString& FileName)
 {
 	GetAllPropsInfo(SaveDataArray.SaveDataArray);
+	SaveDataToFile(SaveDataArray, FileName);
 }
 
 void USaveMapComponent::GetAllPropsInfo(TArray<FSaveData>& OutSaveDataArray)

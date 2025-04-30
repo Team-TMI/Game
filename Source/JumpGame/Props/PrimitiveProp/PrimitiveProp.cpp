@@ -64,6 +64,8 @@ APrimitiveProp::APrimitiveProp()
 	PropDataComponent = CreateDefaultSubobject<UPropDataComponent>(TEXT("PropDataComponent"));
 	
 	SetSize(DefaultSize);
+
+	PropDataComponent->SetPropID(TEXT("1002"));
 }
 
 void APrimitiveProp::SetSize(const FVector& InSize)
