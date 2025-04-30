@@ -33,13 +33,11 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	virtual void NotifyControllerChanged() override;
-
 	virtual bool CanJumpInternal_Implementation() const override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	// Input
@@ -52,6 +50,16 @@ public:
 	void StartCrouch();
 	void StopCrouch();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_StartJump();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_StartCrouch();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_StopCrouch();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StartSprint();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StopSprint();
 public:
 	UFUNCTION(BlueprintCallable)
 	void InitFrogState();
@@ -65,7 +73,14 @@ public:
 	void CameraMovementMode();
 	void SetJumpGaugeVisibility(bool bVisibility);
 	void SetCrouchEnabled(bool bEnabled);
-
+	UFUNCTION()
+	void OnRep_SuperJumpRatio();
+	
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetJumpAvailableBlock(int32 Block);
+	// UFUNCTION(Server, Reliable)
+	// void ServerRPC_ResetSuperJumpRatio();
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -86,18 +101,22 @@ public:
 
 	// 일반 변수
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
+	float Pitch;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
+	float Yaw;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool bIsCrouching;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool bIsSwimming;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	float CrouchTime{};
 	FTimerHandle CrouchTimer;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing=OnRep_SuperJumpRatio)
 	float SuperJumpRatio;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float SuperJumpValue{1.6f};
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool bIsSuperJump{false};
 	bool bCanMove{true};
 	bool bCanCrouch{true};
@@ -125,6 +144,6 @@ public:
 	
 	// Enum
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	ECharacterStateEnum CharacterState;
 };

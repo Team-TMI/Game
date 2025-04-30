@@ -4,6 +4,13 @@
 #include "IPCHandler.h"
 
 #include "JumpGame/Utils/FastLogger.h"
+/*
+ * 이 오류는 RHITransientResourceAllocator.h 파일에서 max 매크로 충돌이 발생했기 때문에 생긴 것입니다. Visual Studio나 Windows 헤더에서는 흔히 <windows.h>가 max와 min을 매크로로 정의하기 때문에, C++ 표준 라이브러리의 std::max / std::min과 충돌하게 됩니다.
+ */
+#define WIN32_LEAN_AND_MEAN
+#define NORESOURCE      // UpdateResource 함수 제거 (중요!)
+#define NOMINMAX
+#include <windows.h>
 
 FIPCHandler::FIPCHandler()
 {
@@ -17,7 +24,7 @@ bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo,
 
 	const char* PipeNameA = TCHAR_TO_ANSI(*PipeName);
 	
-	FFastLogger::LogConsole(TEXT("Connecting To Pipe : %s"), *PipeName);
+	//FFastLogger::LogConsole(TEXT("Connecting To Pipe : %s"), *PipeName);
 	Pipe = CreateFileA(
 		PipeNameA,
 		GENERIC_READ | GENERIC_WRITE,
@@ -32,9 +39,17 @@ bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo,
 	// 만약 연결이 실패했다면
 	if (Pipe == INVALID_HANDLE_VALUE) {
 		FFastLogger::LogConsole(TEXT("Failed to connect to pipe: %s"), *PipeName);
+
 		return false;
 	}
 
+	DWORD mode = PIPE_READMODE_BYTE | PIPE_NOWAIT;
+	BOOL success = SetNamedPipeHandleState(Pipe, &mode, NULL, NULL);
+	if (!success) {
+		//FFastLogger::LogConsole(TEXT("Failed to open pipe as non-blocking"));
+		return false;
+	}
+	
 	FFastLogger::LogConsole(TEXT("Succeeded to connect to pipe: %s"), *PipeName);
 	bConnected = true;
 	return true;
@@ -64,7 +79,7 @@ bool FIPCHandler::ReceiveMessage()
 {
 	if (!bConnected)
 	{
-		// FFastLogger::LogConsole(TEXT("Not connected to pipe: %s"), *PipeName);
+		//FFastLogger::LogConsole(TEXT("Not connected to pipe: %s"), *PipeName);
 		return false;
 	}
 	DWORD BytesRead;
@@ -72,8 +87,11 @@ bool FIPCHandler::ReceiveMessage()
 	BOOL Result = ReadFile(Pipe, Buffer, BufferSize, &BytesRead, NULL);
 	if (!Result)
 	{
-		// FFasterLogger::LogConsole(TEXT("Failed to read message: %s"), *PipeName);
-		return false;
+		if (GetLastError() != ERROR_NO_DATA)
+		{
+			return false;
+		}
+		FFastLogger::LogConsole(TEXT("Failed to read message: %s"), *PipeName);
 	}
 	
 	// 1. 버퍼에 읽은 내용을 누적 저장 (문자열 아님!)
@@ -86,19 +104,21 @@ bool FIPCHandler::ReceiveMessage()
 	FMemory::Memcpy(CachedBuffer + CachedLength, Buffer, BytesRead);
 	CachedLength += BytesRead;
 
+	FFastLogger::LogConsole(TEXT("Cached Length : %d"), CachedLength);
 	// 2. 메시지 파싱
 	while (true)
 	{
 		FMessageUnion Message;
 		if (!ParseMessage(Message, BytesRead))
 		{
+			FFastLogger::LogConsole(TEXT("Failed to parse message: %s"), *PipeName);
 			break ;
 		}
 
 		// 3. 처리 완료
 		if (MessageQueue && MessageQueue->find(Message.Header.Type) != MessageQueue->end())
 		{
-			FFastLogger::LogConsole(TEXT("Add Message to Queue"));
+			//FFastLogger::LogConsole(TEXT("Add Message to Queue"));
 			MessageQueue->at(Message.Header.Type).push(Message);
 		}
 		else
@@ -123,7 +143,7 @@ bool FIPCHandler::ParseMessage(FMessageUnion& Message, DWORD BytesRead)
 
 	// 2. 헤더 파싱
 	FMessageHeader Header;
-	FMemory::Memcpy(&Header, CachedBuffer, sizeof(FMessageHeader));
+	FMemory::Memcpy(&Header, CachedBuffer, sizeof(FMessageHeader));	
 
 	// 3. 전체 메시지 길이 계산
 	size_t TotalMessageSize = Header.PayloadSize;

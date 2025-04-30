@@ -61,7 +61,7 @@ bool FSocketHandler::SendGameMessage(const FMessageUnion& Message)
 {
 	if (!bConnected)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Not connected to WebSocket server."));
+		//UE_LOG(LogTemp, Error, TEXT("Not connected to WebSocket server."));
 		return false;
 	}
   
