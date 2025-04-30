@@ -16,26 +16,23 @@ class JUMPGAME_API UFrogAnimInstance : public UAnimInstance
 
 public:
 	virtual void NativeInitializeAnimation() override;
-
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	class AFrog* Frog;
 
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float Speed;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsFalling;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsCrouching;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float Pitch;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float Yaw;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsSwimming;
 };

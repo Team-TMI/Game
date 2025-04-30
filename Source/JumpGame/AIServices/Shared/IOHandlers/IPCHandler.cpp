@@ -17,7 +17,7 @@ bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo,
 
 	const char* PipeNameA = TCHAR_TO_ANSI(*PipeName);
 	
-	FFastLogger::LogConsole(TEXT("Connecting To Pipe : %s"), *PipeName);
+	//FFastLogger::LogConsole(TEXT("Connecting To Pipe : %s"), *PipeName);
 	Pipe = CreateFileA(
 		PipeNameA,
 		GENERIC_READ | GENERIC_WRITE,
@@ -39,7 +39,7 @@ bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo,
 	DWORD mode = PIPE_READMODE_BYTE | PIPE_NOWAIT;
 	BOOL success = SetNamedPipeHandleState(Pipe, &mode, NULL, NULL);
 	if (!success) {
-		FFastLogger::LogConsole(TEXT("Failed to open pipe as non-blocking"));
+		//FFastLogger::LogConsole(TEXT("Failed to open pipe as non-blocking"));
 		return false;
 	}
 	
@@ -72,7 +72,7 @@ bool FIPCHandler::ReceiveMessage()
 {
 	if (!bConnected)
 	{
-		FFastLogger::LogConsole(TEXT("Not connected to pipe: %s"), *PipeName);
+		//FFastLogger::LogConsole(TEXT("Not connected to pipe: %s"), *PipeName);
 		return false;
 	}
 	DWORD BytesRead;
@@ -136,7 +136,7 @@ bool FIPCHandler::ParseMessage(FMessageUnion& Message, DWORD BytesRead)
 
 	// 2. 헤더 파싱
 	FMessageHeader Header;
-	FMemory::Memcpy(&Header, CachedBuffer, sizeof(FMessageHeader));
+	FMemory::Memcpy(&Header, CachedBuffer, sizeof(FMessageHeader));	
 
 	// 3. 전체 메시지 길이 계산
 	size_t TotalMessageSize = Header.PayloadSize;

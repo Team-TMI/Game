@@ -270,7 +270,8 @@ void AObjectEyeHunterProp::RecvEyeTrackingInfo()
 	Super::RecvEyeTrackingInfo();
 
 	// TODO : 받아오는 값으로 수정
-	TrackLocation(static_cast<FVector2f>(ViewportSize), FVector2f(X, Y));
+	//TrackLocation(static_cast<FVector2f>(ViewportSize), FVector2f(X, Y));
+	TrackLocation({2880, 1800}, FVector2f(X, Y));
 	//TrackLocation(FVector2f(Width, Height), FVector2f(X, Y));
 }
 
