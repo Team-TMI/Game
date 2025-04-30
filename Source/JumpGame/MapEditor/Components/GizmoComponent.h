@@ -25,8 +25,12 @@ public:
 	virtual void SetUnSelected();
 
 	virtual ~UGizmoComponent() override {}
-	
+
+	UFUNCTION()
+	void ChangeColorByNewAxis(const FVector& NewAxis);
 protected:
+	virtual void BeginPlay() override;
+	
 	UPROPERTY()
 	class UStaticMesh* GizmoMesh;
 
@@ -34,6 +38,10 @@ protected:
 	class UMaterialInstance* GizmoMaterial;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	class UMaterialInstance* GizmoSelectedMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	class UMaterialInstanceDynamic* GizmoDynamicMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	class UMaterialInstanceDynamic* GizmoSelectedDynamicMaterial;
 
 	UPROPERTY()
 	bool bSelected = false;

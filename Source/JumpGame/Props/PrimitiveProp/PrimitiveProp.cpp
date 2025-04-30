@@ -4,6 +4,7 @@
 #include "PrimitiveProp.h"
 
 #include "Components/BoxComponent.h"
+#include "Components/WidgetComponent.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/Components/GizmoPrimaryComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
@@ -64,6 +65,11 @@ APrimitiveProp::APrimitiveProp()
 	PropDataComponent = CreateDefaultSubobject<UPropDataComponent>(TEXT("PropDataComponent"));
 	
 	SetSize(DefaultSize);
+
+	PropDataComponent->SetPropID(TEXT("1002"));
+
+	// RotateWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("RotateWidgetComponent"));
+	// RotateWidgetComponent->SetupAttachment(RootComponent);
 }
 
 void APrimitiveProp::SetSize(const FVector& InSize)
@@ -85,7 +91,12 @@ void APrimitiveProp::SetSize(const FVector& InSize)
 	{
 		SetGizmoLocation(GizmoArray[i], GizmoDirectionArray[i], BoxExtent);
 		SetGizmoRotation(GizmoArray[i], GizmoDirectionArray[i]);
+		// TODO: 기즈모 색상 어떻게 하지 어떤 축으로 도는지 모르겠음
+		// GizmoArray[i]->ChangeColorByNewAxis(GizmoDirectionArray[i]);
 	}
+
+	// 항상 정면 앞에 RotateWidgetComponent이 위치해야 함
+	// RotateWidgetComponent->SetWorldLocation()
 }
 
 void APrimitiveProp::SetNewSizeByRotation(const FVector& InSize)
@@ -201,4 +212,10 @@ void APrimitiveProp::RotateAllGizmos()
 		FVector Direction = Gizmo->GetDirection();
 		SetGizmoRotation(Gizmo, Direction);
 	}
+	// TODO: 기즈모 색상 어떻게 하지 어떤 축으로 도는지 모르겠음
+	// for (auto& Gizmo : GizmoArray)
+	// {
+	// 	FVector Direction = Gizmo->GetDirection();
+	// 	Gizmo->ChangeColorByNewAxis(Direction);
+	// }
 }
