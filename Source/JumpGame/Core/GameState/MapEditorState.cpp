@@ -45,7 +45,7 @@ void AMapEditorState::Tick(float DeltaSeconds)
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
 	{
 		FFastLogger::LogScreen(FColor::Red, TEXT("Save Map!!"));
-		SaveMapComponent->SaveMap(TEXT(R"(C:\Users\user\Documents\Github\MapData.json)"));
+		SaveMapComponent->SaveMap(TEXT(R"(MapData.json)"));
 	}
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
 	{

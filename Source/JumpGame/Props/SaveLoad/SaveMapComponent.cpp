@@ -53,7 +53,7 @@ void USaveMapComponent::SaveDataToFile(const FSaveDataArray& InSaveDataArray, co
 	FJsonObjectConverter::UStructToJsonObjectString(InSaveDataArray, JsonString);
 
 	// 경로에서 디렉토리만 추출
-	FString Directory = FPaths::GetPath(FileName);
+	FString Directory = DefaultDirectory + FPaths::GetPath(FileName);
     
 	// 디렉토리 없으면 생성
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();

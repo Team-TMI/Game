@@ -8,6 +8,7 @@
 #include "Net/Core/NetBitArray.h"
 #include "SaveMapComponent.generated.h"
 
+#define SAVE_MAP_DEFAULT_DIRECTORY TEXT(R"(C:\Users\user\Desktop\)")
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class JUMPGAME_API USaveMapComponent : public UActorComponent
@@ -29,4 +30,6 @@ private:
 
 	UPROPERTY()
 	FSaveDataArray SaveDataArray;
+	UPROPERTY()
+	FString DefaultDirectory = SAVE_MAP_DEFAULT_DIRECTORY;
 };
