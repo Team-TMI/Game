@@ -30,6 +30,7 @@ public:
 
 	GETTER(class UClickHandlerManager*, ClickHandlerManager);
 	GETTER(class UWidgetMapEditDragDropOperation*, DragDropOperation);
+	GETTER(class URotateHandlerManager*, RotateHandlerManager);
 
 private:
 	UFUNCTION()
