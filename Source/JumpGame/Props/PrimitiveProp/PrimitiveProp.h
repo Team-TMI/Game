@@ -46,6 +46,7 @@ public:
 	GETTER(class UBoxComponent*, GridOuterCollision)
 	GETTER(class UBoxComponent*, GridInnerCollision);
 	GETTER(class UGridComponent*, GridComp);
+	GETTER(class UPropDataComponent*, PropDataComponent);
 
 protected:
 	UFUNCTION()
