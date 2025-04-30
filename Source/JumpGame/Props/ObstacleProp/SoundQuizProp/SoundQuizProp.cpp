@@ -6,6 +6,7 @@
 #include "EdGraphSchema_K2_Actions.h"
 #include "SoundMommyQuizProp.h"
 #include "Components/BoxComponent.h"
+#include "Misc/DateTime.h"
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/AIServices/Shared/Message.h"
 #include "JumpGame/Characters/Frog.h"
@@ -38,8 +39,6 @@ void ASoundQuizProp::BeginPlay()
 	RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
-
-	// FTimerHandle Rece
 }
 
 // Called every frame
@@ -48,12 +47,7 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 테스트용 키바인딩
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
-	{
-		// 9번 누르면 퀴즈 음성 파일 메세지 전송
-		SendSoundQuizMessage();
-	}
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Six))
+	/*if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Six))
 	{
 		// 6번 누르면 녹음시작
 		StartRecord();
@@ -73,6 +67,11 @@ void ASoundQuizProp::Tick(float DeltaTime)
 		// 8번 누르면 퀴즈 끝 메세지 전송
 		SendEndSoundQuizNotify();
 	}
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
+	{
+		// 9번 누르면 퀴즈 음성 파일 메세지 전송
+		SendSoundQuizMessage();
+	}*/
 
 	if (bIsMessageReceived)
 	{
@@ -151,6 +150,14 @@ void ASoundQuizProp::SendStartSoundQuizNotify()
 
 void ASoundQuizProp::SendSoundQuizMessage()
 {
+	FFastLogger::LogScreen(FColor::Red,TEXT("음성파일 보냅니다"));
+	
+	FDateTime Now = FDateTime::Now();
+	int32 Hour = Now.GetHour();
+	int32 Minute = Now.GetMinute();
+	int32 Second = Now.GetSecond();
+	UE_LOG(LogTemp, Warning, TEXT("SendSoundQuizMessage 현재 시간: %02d:%02d:%02d"), Hour, Minute, Second);
+
 	// 더미 데이터 만들어서 보내기 (음성 녹음 파일)
 	// 1. 바이너리 데이터를 로딩하자 (처음 한번만!)
 	if (CurrentSendIndex == 0)
@@ -169,7 +176,7 @@ void ASoundQuizProp::SendSoundQuizMessage()
 	
 	while (true)
 	{
-		FFastLogger::LogConsole(TEXT("TotalSize: %d"), TotalWavSize);
+		// FFastLogger::LogConsole(TEXT("TotalSize: %d"), TotalWavSize);
 
 		// 2. 쪼개서 여러 패킷으로 전송 (1024바이트 단위로)
 		// 현재 인덱스 기준으로 청크를 생성
@@ -209,16 +216,17 @@ void ASoundQuizProp::SendSoundQuizMessage()
 		// Fin이면 타이머 종료 및 초기화
 		if (ReqMessage.Fin)
 		{
+			FFastLogger::LogScreen(FColor::Red,TEXT("음성파일 전송완료"));
 			UE_LOG(LogTemp, Log, TEXT("모든 WAV 패킷 전송 완료"));
 			CurrentSendIndex = 0;
 			TotalWavSize = 0;
 			CachedBinaryWav.Empty();
+
+			// 타이머 전부 초기화
+			ClearAllTimer();
 			return;
 		}
 	}
-
-	// SetTimer 방식이라면
-	// GetWorldTimerManager().SetTimer(SendWavTimerHandle, this, &ASoundQuizProp::SendSoundQuizMessage, 0.01f, false);
 }
 
 void ASoundQuizProp::ReceiveSoundQuizMessage()
@@ -232,9 +240,17 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	}
 
 	FFastLogger::LogConsole(TEXT("메세지 받았습니다@@@@@@@@"));
+	FDateTime Now = FDateTime::Now();
+	int32 Hour = Now.GetHour();
+	int32 Minute = Now.GetMinute();
+	int32 Second = Now.GetSecond();
+	UE_LOG(LogTemp, Warning, TEXT("ReceiveSoundQuizMessage 현재 시간: %02d:%02d:%02d"), Hour, Minute, Second);
+
 	// 내가 만든 변수에 넣자
 	QuizID = RespMessage.WavResponseMessage.QuizID;
 	Similarity = RespMessage.WavResponseMessage.Similarity;
+	// 정답 여부 판단
+	bSuccess = RespMessage.WavResponseMessage.bSuccess;
 	// 먼저, 보내준 메세지에서 문자열의 길이를 추출한다 (몇글자니)
 	FMemory::Memcpy(&MessageSize, RespMessage.WavResponseMessage.Message, sizeof(uint32));
 
@@ -252,20 +268,18 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 받은 메세지를 출력한다
 	UE_LOG(LogTemp, Warning, TEXT("Receive QuizID: %d"), QuizID);
 	UE_LOG(LogTemp, Warning, TEXT("Receive Similarity: %f"), Similarity);
+	UE_LOG(LogTemp, Warning, TEXT("Receive BSuccess: %d"), bSuccess);
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageSize: %d"), MessageSize);
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageStr: %s"), *MessageStr);
 
 	// 총 몇번 응답 했는지를 체크한다
 	SendResponseIdx++;
 
-	// 메세지를 받았다! 2초 후에 녹음 시작
-	GetWorld()->GetTimerManager().SetTimer(RecordStopTimer, this, &ASoundQuizProp::StartRecord, 2.0f, false);
-
 	// 틱 비활성화
 	bIsMessageReceived = false;
 	
-	// 녹음 시작 3초뒤에 녹음 자동 종료
-	GetWorld()->GetTimerManager().SetTimer(RecordStopTimer, this, &ASoundQuizProp::StopRecord, 5.0f, false);
+	// 메세지를 받았다! 2초 후에 녹음 시작
+	GetWorld()->GetTimerManager().SetTimer(RecordStartTimer, this, &ASoundQuizProp::StartRecord, 2.0f, false);
 }
 
 void ASoundQuizProp::SendEndSoundQuizNotify()
@@ -284,7 +298,7 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 	Msg.Header.PayloadSize = sizeof(EndMessage);
 
 	// 메세지 전송
-	// NetGS->IOManagerComponent->SendGameMessage(Msg);
+	NetGS->IOManagerComponent->SendGameMessage(Msg);
 
 	// 캐릭터 카메라 다시 원래대로
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
@@ -322,13 +336,15 @@ void ASoundQuizProp::ResetSoundQuiz()
 
 void ASoundQuizProp::StartRecord()
 {
-	// TODO: UI띄우기
 	// 녹음 시작
 	if (VoiceRecorderComponent)
 	{
 		VoiceRecorderComponent->StartRecording();
 		FFastLogger::LogConsole(TEXT("녹음시작@@@@@@@@@@@@@@@@@@@@@@@"));
 	}
+	
+	// 녹음 시작 3초뒤에 녹음 자동 종료
+	GetWorld()->GetTimerManager().SetTimer(RecordStopTimer, this, &ASoundQuizProp::StopRecord, 3.0f, false);
 }
 
 void ASoundQuizProp::StopRecord()
@@ -341,11 +357,8 @@ void ASoundQuizProp::StopRecord()
 
 	// NOTE: 바로 보내면 안됨, 1초후에 전송
 	// 녹음을 끝냈으니, 파일을 전송해주자 (1초후에)
-	FTimerHandle SendFileMessage;
 	GetWorld()->GetTimerManager().SetTimer(SendFileMessage, this, &ASoundQuizProp::SendSoundQuizMessage, 1.0f, false);
-
-	// SendSoundQuizMessage();
-
+	
 	// 틱도 다시 활성화
 	bIsMessageReceived = true;
 }
@@ -362,4 +375,11 @@ void ASoundQuizProp::LoadWavFileBinary(const FString& FilePath, TArray<uint8>& B
     }
     // 로드 성공 시
     UE_LOG(LogTemp, Log, TEXT("Successfully loaded WAV file: %s"), *FilePath);
+}
+
+void ASoundQuizProp::ClearAllTimer()
+{
+	GetWorld()->GetTimerManager().ClearTimer(RecordStartTimer);
+	GetWorld()->GetTimerManager().ClearTimer(RecordStopTimer);
+	GetWorld()->GetTimerManager().ClearTimer(SendFileMessage);
 }

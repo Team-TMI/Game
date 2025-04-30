@@ -36,6 +36,8 @@ void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
                             UPrimitiveComponent* OtherComp, FVector NormalImpulse,
                             const FHitResult& Hit)
 {
+	if (!OtherActor->ActorHasTag("Frog")) return;
+	
 	AFrog* Character = Cast<AFrog>(OtherActor);
 	if (Character)
 	{
@@ -52,6 +54,8 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	if (!OtherActor->ActorHasTag("Frog")) return;
+	
 	if (bDebug)
 	{
 		FLog::Log("AObstacleProp::OnMyBeginOverlap");
@@ -97,18 +101,23 @@ void AObstacleProp::Tick(float DeltaTime)
 void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float Force,
                                     bool bXYOverride, bool bZOverride)
 {
-	if (bDebug)
+	// 가상 함수: 기본 로직
+	// 서버라면
+	if (HasAuthority())
 	{
-		FLog::Log("AObstacleProp::LaunchCharacter", Direction.Z, Force);
-	}
-
-	// 물어보기
-	if (Character->IsLocallyControlled())
-	{
-		// 가상 함수: 기본 로직
 		LaunchVelocity = Direction.GetSafeNormal() * Force;
 		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 	}
+	else
+	{
+		ServerRPC_LaunchCharacter(Character, Direction, bXYOverride, bZOverride);
+	}
+}
+
+void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction,
+	float Force, bool bXYOverride, bool bZOverride)
+{
+	LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
 }
 
 void AObstacleProp::CalculateForce(AFrog* Character)

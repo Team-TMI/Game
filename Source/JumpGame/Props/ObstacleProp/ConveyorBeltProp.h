@@ -28,13 +28,21 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	// 이동 방향
 	UPROPERTY(EditAnywhere)
 	class UArrowComponent* Arrow;
-
-	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
-	float BeltSpeed = 350.f;
+	UPROPERTY()
+	FVector BeltDir = FVector::ZeroVector;
+	UPROPERTY()
+	float BeltSpeed = 300.f;
 
 	// 플레이어 캐스팅
 	UPROPERTY()
 	class AFrog* Character;
+	// 여러 플레이어가 오버랩될 경우
+	UPROPERTY()
+	TSet<AFrog*> OverlappingFrogs;
+
+	// 이동
+	void ConveyorMove();
 };

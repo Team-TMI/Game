@@ -58,7 +58,7 @@ struct FWavRequestMessage {
 	uint8 Fin; // 0 ~ 1
 	uint32 Size; // 총 음성 사이즈
 	uint32 ChunkSize; // 청크 사이즈
-	uint8 RawData[1024]; // 음성 바이너리 데이터
+	uint8 RawData[30720]; // 음성 바이너리 데이터
 };
 
 // WaveResponse

@@ -3,9 +3,12 @@
 
 #include "ConveyorBeltProp.h"
 
+#include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -32,17 +35,23 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	Character = Cast<AFrog>(OtherActor);
+	if (Character && !OverlappingFrogs.Contains(Character))
 	{
-		Character = Cast<AFrog>(OtherActor);
+		OverlappingFrogs.Add(Character); // 중복 체크 후 추가
 	}
+	
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
 
 void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	Character = nullptr;
+	if (Character)
+	{
+		OverlappingFrogs.Remove(Character); // 정확히 그 개체만 제거
+	}
+	
 	Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
@@ -50,19 +59,32 @@ void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent,
 void AConveyorBeltProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	BeltDir = Arrow->GetForwardVector().GetSafeNormal();
 }
 
 // Called every frame
 void AConveyorBeltProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	// 서버에서만 실행
+	if (!HasAuthority()) return;
 
-	BeltSpeed = 350.f;
-	if (Character)
+	ConveyorMove();
+}
+
+void AConveyorBeltProp::ConveyorMove()
+{
+	// 유효한 Frog들만 처리
+	for (AFrog* Frog : OverlappingFrogs)
 	{
-		FVector DeltaPos = (BeltSpeed * DeltaTime) * Arrow->GetForwardVector();
-		Character->AddActorWorldOffset(DeltaPos);
+		if (IsValid(Frog))
+		{
+			FVector DeltaPos = BeltSpeed * GetWorld()->DeltaTimeSeconds * BeltDir;
+			Frog->AddActorWorldOffset(DeltaPos);
+		}
 	}
 }
+
 

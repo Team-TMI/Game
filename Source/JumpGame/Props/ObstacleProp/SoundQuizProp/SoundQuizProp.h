@@ -37,7 +37,8 @@ public:
 public:
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
-	
+
+	// 퀴즈 소켓 전송 관련
 	UFUNCTION()
 	virtual void SendStartSoundQuizNotify();
 	UFUNCTION()
@@ -47,18 +48,23 @@ public:
 	UFUNCTION()
 	virtual void SendEndSoundQuizNotify();
 
+	// 퀴즈 초기화
 	UFUNCTION()
 	virtual void ResetSoundQuiz();
 
+	// 녹음 시작, 끝
 	UFUNCTION()
 	virtual void StartRecord();
 	UFUNCTION()
 	virtual void StopRecord();
 
+	// 퀴즈 정보
 	UPROPERTY()
 	int32 QuizID = -1;
 	UPROPERTY()
 	float Similarity = 0.f;
+	UPROPERTY()
+	int32 bSuccess = 0;
 	UPROPERTY()
 	uint32 MessageSize = 0;
 	UPROPERTY()
@@ -77,10 +83,7 @@ public:
 	UPROPERTY()
 	int32 TotalWavSize = 0;
 	UPROPERTY()
-	int32 ChunkSize = 1024;
-
-	// UNUSED: 나중에 0.01초 재귀로 바뀔수도있음
-	// FTimerHandle SendWavTimerHandle;
+	int32 ChunkSize = 30720;
 	
 	UFUNCTION()
 	void LoadWavFileBinary(const FString& FilePath, TArray<uint8>& BinaryData);
@@ -97,8 +100,14 @@ protected:
 	FTimerHandle RecordStartTimer;
 	UPROPERTY()
 	FTimerHandle RecordStopTimer;
+	UPROPERTY()
+	FTimerHandle SendFileMessage;
 
 	// Tick을 활성화, 비활성화하는 변수
 	UPROPERTY()
 	bool bIsMessageReceived = false;
+
+private:
+	UFUNCTION()
+	void ClearAllTimer();
 };

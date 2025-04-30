@@ -20,16 +20,7 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaSeconds) override;
 
-	UPROPERTY()
-	class UJumpGameInstance* GI;
-	UPROPERTY()
-	TMap<FString, FPlayerInfo> PlayerInfo;
-	
-	UPROPERTY()
-	class AFrog* Character;
-	UPROPERTY()
-	uint32 MyPlayerID = -1;
-
+	// UI
 	UPROPERTY(meta = (BindWidget))
 	class UOverlay* Overlay_Player;
 	UPROPERTY(meta = (BindWidget))
@@ -44,6 +35,24 @@ public:
 	UPROPERTY()
 	float WaterPropZ = 0;
 
+	// 업데이트 값들
+	UPROPERTY()
+	class UJumpGameInstance* GI;
+	UPROPERTY()
+	class APlayerController* PC;
+	UPROPERTY()
+	class AFrog* Character;
+	UPROPERTY()
+	TMap<FString, FPlayerInfo> PlayerInfo;
+	// 배열에 포함된 플레이어 수
+	UPROPERTY()
+	int32 MaxPlayerID = -1;
+	// 내 플레이어의 인덱스(ID)
+	UPROPERTY()
+	uint32 MyPlayerID = -1;
+	UPROPERTY()
+	FString PlayerKey;
+	
 	// 나를 포함한 모든 플레이어의 위치
 	UPROPERTY()
 	TArray<float> PlayerPos = { 0 };
@@ -63,7 +72,11 @@ public:
 	UFUNCTION()
 	void UpdatePlayerMarkers();
 
-	// 플레이어 목록 위젯
+	// 모든 정보가 업데이트 되었을때 호출될 함수
+	UFUNCTION()
+	void InitUISetting();
+
+	// 플레이어  Marker 위젯 추가
 	UPROPERTY(editanywhere)
 	TSubclassOf<class UPlayerMarkerWidget> PlayerMarkerFactory;
 	UPROPERTY(editanywhere)

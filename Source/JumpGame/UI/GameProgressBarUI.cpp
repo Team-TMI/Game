@@ -17,10 +17,7 @@
 void UGameProgressBarUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
-	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
-	PlayerInfo = GI->GetPlayerInfo();
-
+	
 	// 프로그레스 바에서 표시할 마커 위치값
 	AGameStartProp* StartProp = Cast<AGameStartProp>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameStartProp::StaticClass()));
 	AGameFinishProp* FinishProp = Cast<AGameFinishProp>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameFinishProp::StaticClass()));
@@ -29,53 +26,76 @@ void UGameProgressBarUI::NativeOnInitialized()
 	StartPropZ = StartProp->GetActorLocation().Z;
 	FinPropZ = FinishProp->GetActorLocation().Z;
 	WaterPropZ = WaterProp->SurfaceCollision->GetComponentLocation().Z;
-	
-	Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (Character)
-	{
-		MyPlayerID = Character->GetPlayerState()->GetPlayerId();	// 플레이어 ID 저장
-	}
-	
-	CreatePlayerMarkers();
+
+	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+	PC = GetWorld()->GetFirstPlayerController();
+	Character = Cast<AFrog>(PC->GetPawn());
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UGameProgressBarUI::InitUISetting, 10, false);
+	// 모든 플레이어들의 값이 업데이트 되었다면 이 함수를 실행해야함
+	// InitUISetting();
 }
 
 void UGameProgressBarUI::NativeTick(const FGeometry& MyGeometry, float DeltaSeconds)
 {
 	Super::NativeTick(MyGeometry, DeltaSeconds);
 
+	// 지속적으로 업데이트 하자
 	UpdateProgressBar();
+}
+
+void UGameProgressBarUI::InitUISetting()
+{
+	PlayerInfo = GI->GetPlayerInfo();
+	
+	const FUniqueNetIdRepl& NetIdRepl = Character->GetPlayerState<APlayerState>()->GetUniqueId();
+	if (NetIdRepl.IsValid())
+	{
+		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+		PlayerKey = NetId->ToString();
+	}
+	
+	for (auto& it : PlayerInfo)
+	{
+		if (it.Key == PlayerKey)
+		{
+			MyPlayerID = it.Value.PlayerID;
+		}
+	}
+	
+	// 최대 플레이어 수 설정은 한번만 (배열 크기 결정)
+	int32 MaxPlayerIDLocal = 0;
+	for (auto& It : PlayerInfo)
+	{
+		MaxPlayerIDLocal = FMath::Max(MaxPlayerIDLocal, It.Value.PlayerID);
+	}
+	this->MaxPlayerID = MaxPlayerIDLocal;
+	
+	CreatePlayerMarkers();
 }
 
 void UGameProgressBarUI::UpdatePlayerPos()
 {
-	// Max Player ID 찾기
-	int32 MaxPlayerID = -1;
-	for (auto& It : PlayerInfo)
-	{
-		MaxPlayerID = FMath::Max(MaxPlayerID, It.Value.PlayerID);
-	}
-
+	// 나를 포함한 모든 플레이어의 위치값 배열: TArray<float> PlayerPos
 	PlayerPos.SetNum(MaxPlayerID + 1);
 	PlayerPos.Init(0.f, MaxPlayerID + 1);
+	// 그 중 1등 플레이어의 위치
 	WinnerPos = 0.f;
 	
 	// 각 플레이어 정보를 맵에서 가져와 PlayerID 순서대로 저장하고 싶음
 	for (auto& it : PlayerInfo)
 	{
 		// PlayerID를 배열 인덱스로 사용하자
-		FPlayerInfo& Player = it.Value;
-		int32 PlayerIndex = Player.PlayerID; 
+		int32 PlayerIndex = it.Value.PlayerID;
         
 		// PlayerID가 유효한 범위인지 확인하고
 		if (PlayerPos.IsValidIndex(PlayerIndex))
 		{
-			APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex);
-			if (PC && PC->GetPawn())
+			if (PC && Character)
 			{
-				APawn* Pawn = PC->GetPawn();
-                
 				// 플레이어 위치값(Z좌표임) 저장
-				float Position = Pawn->GetActorLocation().Z;
+				float Position = Character->GetActorLocation().Z;
 				PlayerPos[PlayerIndex] = Position; // PlayerID에 해당하는 인덱스에 저장
                 
 				// 1등 플레이어 위치 갱신
@@ -87,10 +107,10 @@ void UGameProgressBarUI::UpdatePlayerPos()
 
 void UGameProgressBarUI::UpdateProgressBar()
 {
-	// 플레이어 정보 업데이트받고
+	// 플레이어 정보 업데이트받고 (1등 포함)
 	UpdatePlayerPos();
 	
-	// 1등 플레이어 기준으로 업데이트 됨
+	// 1등 플레이어 기준으로 프로그레스 바 업데이트 시키자
 	float CurrentWinnerPos = WinnerPos - StartPropZ;
 	TotalGamePos = FinPropZ - StartPropZ;
 	GameProgressBar->SetPercent(CurrentWinnerPos / TotalGamePos);
@@ -111,21 +131,13 @@ void UGameProgressBarUI::CreatePlayerMarkers()
 	}
 	PlayerMarkers.Empty();
     
-	// PlayerID 최대값 찾기 (배열 크기 결정용)
-	int32 MaxPlayerID = -1;
-	for (auto& it : PlayerInfo)
-	{
-		MaxPlayerID = FMath::Max(MaxPlayerID, it.Value.PlayerID);
-	}
-    
 	// 플레이어 마커 배열 크기 설정
 	PlayerMarkers.SetNum(MaxPlayerID + 1);
     
 	// 각 플레이어에 대한 마커 생성
 	for (auto& it : PlayerInfo)
 	{
-		FPlayerInfo& Player = it.Value;
-		int32 PlayerIndex = Player.PlayerID;
+		int32 PlayerIndex = it.Value.PlayerID;
         
 		// 마커 위젯 생성
 		PlayerMarker = CreateWidget<UPlayerMarkerWidget>(GetWorld(), PlayerMarkerFactory);
@@ -135,11 +147,16 @@ void UGameProgressBarUI::CreatePlayerMarkers()
 			Overlay_Player->AddChild(PlayerMarker);
             
 			// 위젯 초기 위치 설정
-			FVector2D StartPos = Overlay_Player->GetCachedGeometry().GetAbsolutePosition();
-			PlayerMarker->SetRenderTranslation(StartPos);
+			FVector2D TopLeft = Overlay_Player->GetCachedGeometry().GetAbsolutePosition(); // 좌측 상단
+			FVector2D Size = Overlay_Player->GetCachedGeometry().GetLocalSize(); // 위젯 크기
+			
+			FVector2D BottomLeft = TopLeft + FVector2D(0, Size.Y); // 좌측 하단
+			FVector2D BottomRight = TopLeft + FVector2D(Size.X, Size.Y); // 우측 하단
+			PlayerMarker->SetRenderTranslation(BottomRight);
             
 			// 플레이어 ID와 정보 설정
 			PlayerMarker->SetPlayerID(PlayerIndex);
+			FFastLogger::LogConsole(TEXT("PlayerIndex : %d"), PlayerIndex);
             
 			// 로컬 플레이어 확인하여 색상 설정
 			if (PlayerIndex == MyPlayerID)
@@ -160,7 +177,7 @@ void UGameProgressBarUI::CreatePlayerMarkers()
 void UGameProgressBarUI::UpdatePlayerMarkers()
 {
 	// ProgressBar 크기 기준으로 위치 결정
-	float BarWidth = GameProgressBar->GetCachedGeometry().GetLocalSize().X;
+	float BarHeight = GameProgressBar->GetCachedGeometry().GetLocalSize().Y;
 	
 	// 모든 플레이어 마커 위치 업데이트
 	for (int32 i = 0; i < PlayerMarkers.Num(); i++)
@@ -172,8 +189,8 @@ void UGameProgressBarUI::UpdatePlayerMarkers()
 		float PlayerProgress = (PlayerPos[i] - StartPropZ) / TotalGamePos;
 		PlayerProgress = FMath::Clamp(PlayerProgress, 0.0f, 1.0f);
         
-		float MarkerX = BarWidth * PlayerProgress;
-		FVector2D MarkerPos(MarkerX, 0.f);
+		float MarkerY = BarHeight * (1.0f - PlayerProgress);
+		FVector2D MarkerPos(0.f, MarkerY);
 		
 		// 마커 위치 설정
 		Marker->SetRenderTranslation(MarkerPos);
