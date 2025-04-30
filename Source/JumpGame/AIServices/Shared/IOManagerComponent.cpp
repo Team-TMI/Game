@@ -52,48 +52,48 @@ void UIOManagerComponent::BeginPlay()
 	}
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
 	
-	for (int32 i = 0; i < 5; i++)
-	{
-		FMessageUnion MessageUnion;
-		MessageUnion.EyeTrackingRequestMessage.Header.Type = EMessageType::EyeTrackingRequestMessage;
-		MessageUnion.EyeTrackingRequestMessage.Header.PayloadSize = sizeof(FEyeTrackingRequestMessage);
-		MessageUnion.EyeTrackingRequestMessage.Header.PlayerID = 1;
-		MessageUnion.EyeTrackingRequestMessage.Header.SessionID[0] = 1;
+	// for (int32 i = 0; i < 5; i++)
+	// {
+	// 	FMessageUnion MessageUnion;
+	// 	MessageUnion.EyeTrackingRequestMessage.Header.Type = EMessageType::EyeTrackingRequestMessage;
+	// 	MessageUnion.EyeTrackingRequestMessage.Header.PayloadSize = sizeof(FEyeTrackingRequestMessage);
+	// 	MessageUnion.EyeTrackingRequestMessage.Header.PlayerID = 1;
+	// 	MessageUnion.EyeTrackingRequestMessage.Header.SessionID[0] = 1;
+	//
+	// 	MessageUnion.EyeTrackingRequestMessage.QuizID = 10;
+	// 	MessageUnion.EyeTrackingRequestMessage.Width = 1000;
+	// 	MessageUnion.EyeTrackingRequestMessage.Height = 1000;
+	// 	
+	// 	if (i < 4)
+	// 	{
+	// 		MessageUnion.EyeTrackingRequestMessage.Start = i + 1;
+	// 		MessageUnion.EyeTrackingRequestMessage.End = 0;
+	// 	}
+	// 	else
+	// 	{
+	// 		MessageUnion.EyeTrackingRequestMessage.Start = 0;
+	// 		MessageUnion.EyeTrackingRequestMessage.End = 1;
+	// 	}
+	//
+	// 	MessageQueue[EMessageType::EyeTrackingRequestMessage].push(MessageUnion);
+	// }
 
-		MessageUnion.EyeTrackingRequestMessage.QuizID = 10;
-		MessageUnion.EyeTrackingRequestMessage.Width = 1000;
-		MessageUnion.EyeTrackingRequestMessage.Height = 1000;
-		
-		if (i < 4)
-		{
-			MessageUnion.EyeTrackingRequestMessage.Start = i + 1;
-			MessageUnion.EyeTrackingRequestMessage.End = 0;
-		}
-		else
-		{
-			MessageUnion.EyeTrackingRequestMessage.Start = 0;
-			MessageUnion.EyeTrackingRequestMessage.End = 1;
-		}
-
-		MessageQueue[EMessageType::EyeTrackingRequestMessage].push(MessageUnion);
-	}
-	
-	for (int32 i = 0; i < 100; i++)
-	{
-		FMessageUnion MessageUnion;
-		MessageUnion.EyeTrackingResponseMessage.Header.Type = EMessageType::EyeTrackingResponseMessage;
-		MessageUnion.EyeTrackingResponseMessage.Header.PayloadSize = sizeof(FEyeTrackingResponseMessage);
-		MessageUnion.EyeTrackingResponseMessage.Header.PlayerID = 1;
-		MessageUnion.EyeTrackingResponseMessage.Header.SessionID[0] = 1;
-		
-		MessageUnion.EyeTrackingResponseMessage.QuizID = 10;
-		MessageUnion.EyeTrackingResponseMessage.X = FMath::RandRange(50, 950);
-		MessageUnion.EyeTrackingResponseMessage.Y = FMath::RandRange(50, 950);
-		MessageUnion.EyeTrackingResponseMessage.bBlink = 0;
-		MessageUnion.EyeTrackingResponseMessage.State = 100;
-		
-		MessageQueue[EMessageType::EyeTrackingResponseMessage].push(MessageUnion);
-	}
+	// for (int32 i = 0; i < 100; i++)
+	// {
+	// 	FMessageUnion MessageUnion;
+	// 	MessageUnion.EyeTrackingResponseMessage.Header.Type = EMessageType::EyeTrackingResponseMessage;
+	// 	MessageUnion.EyeTrackingResponseMessage.Header.PayloadSize = sizeof(FEyeTrackingResponseMessage);
+	// 	MessageUnion.EyeTrackingResponseMessage.Header.PlayerID = 1;
+	// 	MessageUnion.EyeTrackingResponseMessage.Header.SessionID[0] = 1;
+	//
+	// 	MessageUnion.EyeTrackingResponseMessage.QuizID = 10;
+	// 	MessageUnion.EyeTrackingResponseMessage.X = FMath::RandRange(50, 950);
+	// 	MessageUnion.EyeTrackingResponseMessage.Y = FMath::RandRange(50, 950);
+	// 	MessageUnion.EyeTrackingResponseMessage.bBlink = 0;
+	// 	MessageUnion.EyeTrackingResponseMessage.State = 100;
+	//
+	// 	MessageQueue[EMessageType::EyeTrackingResponseMessage].push(MessageUnion);
+	// }
 
 	// 사운드 퀴즈 Dummy Message
 	/*for (int32 i = 1; i <= 21; i++)

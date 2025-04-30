@@ -24,7 +24,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	virtual void ReceiveSoundQuizMessage() override;
+	virtual void SendSoundQuizMessage() override;
 	virtual void SendEndSoundQuizNotify() override;
+
+	virtual void StartRecord() override;
+	virtual void StopRecord() override;
 	
 public:
 	// 퀴즈 플레이 UI
@@ -32,6 +36,12 @@ public:
 	TSubclassOf<class USoundQuizUI> SoundQuizUIClass;
 	UPROPERTY(editAnywhere)
 	USoundQuizUI* SoundQuizUI;
+
+	// 타이머 UI
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UTimeRemainUI> TimeRemainUIClass;
+	UPROPERTY(EditAnywhere)
+	UTimeRemainUI* TimeRemainUI;
 
 	// 퀴즈 성공 실패 UI
 	UPROPERTY(EditAnywhere)

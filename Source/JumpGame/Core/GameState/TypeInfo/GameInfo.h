@@ -9,9 +9,11 @@ struct FPlayerInfo
 {
 	GENERATED_BODY()
 public:
+	// 플레이어 인덱스
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int32 PlayerID;
-	
+
+	// 플레이어 진짜 이름 (스팀)
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString PlayerName;
 
@@ -23,6 +25,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsAlive;
 
+	// 승리했는지, 패배했는지
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsWin;
 

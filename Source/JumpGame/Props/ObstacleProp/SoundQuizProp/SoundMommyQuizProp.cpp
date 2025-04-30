@@ -5,9 +5,12 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Components/BoxComponent.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/UI/Obstacle/SoundQuizUI.h"
+#include "JumpGame/UI/Obstacle/TimeRemainUI.h"
 
 
 // Sets default values
@@ -23,9 +26,14 @@ void ASoundMommyQuizProp::BeginPlay()
 {
 	Super::BeginPlay();
 	SoundQuizUI = CreateWidget<USoundQuizUI>(GetWorld(), SoundQuizUIClass);
-	SoundQuizUI->VoiceRecorderComponent = VoiceRecorderComponent;
+	// SoundQuizUI->VoiceRecorderComponent = VoiceRecorderComponent;
+	SoundQuizUI->SetVoiceRecorderComponent(VoiceRecorderComponent);
 	SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
 	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
+
+	TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
+	// 미션 종료 시 실행할 함수 바인딩
+	TimeRemainUI->OnMissionTimerEnd.AddDynamic(this, &ASoundMommyQuizProp::StopRecord);
 }
 
 // Called every frame
@@ -65,13 +73,16 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		{
 			SoundQuizFail->AddToViewport();
 		}
+
+		// 퀴즈 끝났다고 알리자!
 		SendEndSoundQuizNotify();
 
 		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 	}
 
+	// TODO: 정답과 일치할때로 변경해야함
 	// 20번 안에, Fin되는 경우 -> 유사도가 높을때
-	if (SendResponseIdx < 20 && Similarity >= 90)
+	if (SendResponseIdx < 20 && Similarity*100 >= 90)
 	{
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
@@ -80,6 +91,8 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		{
 			SoundQuizClear->AddToViewport();
 		}
+
+		// 퀴즈 끝났다고 알리자!
 		SendEndSoundQuizNotify();
 		
 		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
@@ -88,11 +101,42 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	FFastLogger::LogConsole(TEXT("SendResponseIdx: %d"), SendResponseIdx);
 }
 
+void ASoundMommyQuizProp::SendSoundQuizMessage()
+{
+	Super::SendSoundQuizMessage();
+
+	
+}
+
 void ASoundMommyQuizProp::SendEndSoundQuizNotify()
 {
 	Super::SendEndSoundQuizNotify();
 	
 	SoundQuizUI->RemoveFromParent();
+}
+
+void ASoundMommyQuizProp::StartRecord()
+{
+	Super::StartRecord();
+
+	// 남은 시간 UI
+	TimeRemainUI->AddToViewport();
+	TimeRemainUI->StartMissionTimer(3.0f);
+
+	// 버튼 이름 바꾸고
+	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Recording..."));
+	// 버튼 비활성화
+	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(false);
+}
+
+void ASoundMommyQuizProp::StopRecord()
+{
+	Super::StopRecord();
+
+	TimeRemainUI->RemoveFromParent();
+	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Wait"));
+	// 버튼 다시 활성화
+	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(true);
 }
 
 void ASoundMommyQuizProp::RemoveSoundQuizUI()

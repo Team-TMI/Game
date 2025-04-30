@@ -29,6 +29,7 @@ public:
 	// 세션 생성 관련
 	UFUNCTION(BlueprintCallable)
 	void CreateMySession(FString DisplayName, int32 PlayerCount);
+	UFUNCTION(BlueprintCallable)
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 
 	// 세션 조회 관련
@@ -43,8 +44,14 @@ public:
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	// 세션 파괴 관련
+	UFUNCTION(BlueprintCallable)
 	void LeaveSession(bool bDestroySession);
+	UFUNCTION(BlueprintCallable)
+	void OnDestroySessionComplete(FName Name, bool bArg);
 
+	void OnFailureSessionDetected(const FUniqueNetId& UniqueNetId, ESessionFailure::Type Arg);
+	void OnEndSessionComplete(FName Name, bool bArg);
+	
 	// 스팀 세션 제목을 한글로 했을 때 깨짐 현상
 	FString StringBase64Encode(FString Str);
 	FString StringBase64Decode(FString Str);
@@ -69,4 +76,7 @@ public:
 	TMap<FString, FPlayerInfo>& GetPlayerInfo() { return PlayerMap; }
 	// 승리 판별 (bIsWin값 변경)
 	void SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin);
+
+public:
+	void RunEyeTrackingScript();
 };

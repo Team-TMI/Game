@@ -19,11 +19,21 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void ChangeGaugeValue(float Value);
+	void InitializeParameters();
 	float GetGaugeValue();
+	void SuccessMission();
+	void FailMission();
+	// 애니메이션 재생하고 UI 지움
+	UFUNCTION(BlueprintImplementableEvent)
+	void VanishMission();
 	
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* TargetLocationImage;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UImage* SuccessImage;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UImage* FailImage;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* GaugeImage;
 

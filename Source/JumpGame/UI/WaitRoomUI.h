@@ -60,6 +60,24 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* Image_user8;
 
+	// 이름 배열
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_Player1;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_Player2;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_Player3;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_Player4;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_Player5;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_Player6;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_Player7;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_Player8;
+
 	// 이미지 업데이트 함수
-	void UpdateWaitImage();
+	void UpdateWaitPlayer();
 };

@@ -36,17 +36,27 @@ public:
 	virtual void RecvEyeTrackingInfo() override;
 
 public:
-	void FlyingObjectMovement(float DelaTime);
+	void FlyingObjectMovement(float DeltaTime);
 	void TrackLocation(FVector2f Resolution, FVector2f ScreenLoc);
 	bool IsObjectAndEyeOverlap(FVector2D ObjectLocation, FVector2D EyeLocation);
 	// 수치 변화시키는 함수
 	void ChangeValue(bool bIsOverlap);
 	void StartMission();
 	void EndMission(bool bIsSuccess);
+	UFUNCTION()
+	void MissionTimeEnd();
 	void StopCharacter();
 	void ResumeCharacter();
 	void ResetMission();
-
+	void InitializeMission();
+	// Object 이동 관련 함수
+	void SetNextTargetPosition();
+	void UpdateObjectRotation(float DeltaTime);
+	FVector2D GetBezierPoint(FVector2D P0, FVector2D P1, FVector2D P2, FVector2D P3, float t);
+	FVector2D GenerateRandomControlPoint(FVector2D StartPos, FVector2D EndPos, float RandomRadius);
+	// 뷰포트에 따른 TargetPositions 위치 결정 함수
+	void SetTargetPositionsByViewport();
+	
 public:
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* MissionLocation;
@@ -60,7 +70,10 @@ public:
 	TSubclassOf<class UFlyingObjectUI> FlyingObjectUIClass;
 	UPROPERTY(EditAnywhere)
 	UFlyingObjectUI* FlyingObjectUI;
-
+	TSubclassOf<class UTimeRemainUI> TimeRemainUIClass;
+	UPROPERTY(EditAnywhere)
+	UTimeRemainUI* TimeRemainUI;
+	
 public:
 	UPROPERTY(EditAnywhere)
 	class AFrog* Frog;
@@ -71,4 +84,29 @@ public:
 	float SuccessRatio{0.f};
 	float SuccessTime{3.f};
 	float FlowTime{0.f};
+
+	FVector2D ViewportSize;
+
+	// Flying Object
+	float BezierAlpha{0.f};
+	UPROPERTY(EditAnywhere)
+	float ObjectSpeed;
+	FTimerHandle MovementTimerHandle;
+	FVector2D StartPosition;
+	FVector2D TargetPosition;
+	FVector2D ControlPoint1;
+	FVector2D ControlPoint2;
+	TArray<FVector2D> TargetPositions;
+	int32 CurrentTargetIndex;
+	
+	// 회전 위한 변수
+	FVector2D PreviousPosition;
+	
+	FTimerHandle EndTimerHandle;
+	FTimerHandle MissionTimerHandle;
+	float MissionTime{10.f};
+	float MissionFlowTime{0.f};
+
+	// 뷰포트 크기 변화 고려
+	TArray<FVector2D> TargetPositionsRatio;
 };
