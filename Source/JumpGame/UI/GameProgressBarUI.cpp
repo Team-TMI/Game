@@ -32,7 +32,7 @@ void UGameProgressBarUI::NativeOnInitialized()
 	Character = Cast<AFrog>(PC->GetPawn());
 
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UGameProgressBarUI::InitUISetting, 20, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UGameProgressBarUI::InitUISetting, 10, false);
 	// 모든 플레이어들의 값이 업데이트 되었다면 이 함수를 실행해야함
 	// InitUISetting();
 }

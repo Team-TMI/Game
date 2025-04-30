@@ -36,16 +36,21 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	// 디버깅
+	UPROPERTY(EditAnywhere)
+	bool bDebug = false;
+	
 	// Launch 관련
 	// 장애물: 트램펄린, 튕기기막대, 회전망치
 	// LaunchVelocity를 초기값으로 주면 튕겨내지 않음
 	UPROPERTY(EditAnywhere, Category = "Launch")
 	FVector LaunchVelocity	= FVector(0, 0, 0);
-	
-	// 디버깅
-	UPROPERTY(EditAnywhere)
-	bool bDebug = false;
-	
+	// 서버에서
+	virtual void LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool bXYOverride = false, bool bZOverride = false);
+	UFUNCTION(server, reliable)
+	virtual void ServerRPC_LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool bXYOverride = false, bool bZOverride = false);
+	virtual void CalculateForce(AFrog* Character);
+
 	// Rotate (자체 회전)관련
 	// 장애물: 회전망치, 뿔망치, 굴러오는 공
 	UPROPERTY(ReplicatedUsing=OnRep_ObstacleRotate)
@@ -54,13 +59,10 @@ public:
 	float RotAngle = 0;
 	UPROPERTY (EditAnywhere, Category = "Rotate")
 	FRotator RotAxis = FRotator(0, 0, 0);
-
-	virtual void LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool XYOverride = false, bool ZOverride = false);
-	virtual void CalculateForce(AFrog* Character);
-
 	// 서버에서
 	virtual void ObstacleRotate();
 	// 클라이언트에서
 	UFUNCTION()
 	void OnRep_ObstacleRotate();
 };
+
