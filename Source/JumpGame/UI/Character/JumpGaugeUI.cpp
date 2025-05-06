@@ -10,11 +10,16 @@
 void UJumpGaugeUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+	
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	
 	if (Frog)
 	{
 		Frog->OnSuperJumpRatioChanged.AddDynamic(this, &UJumpGaugeUI::OnSuperJumpRatioChanged);
 	}
+
+	JumpGaugeSlider->IsFocusable = false;
+	JumpGaugeSlider->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
 void UJumpGaugeUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
