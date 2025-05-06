@@ -65,10 +65,12 @@ void UConnectionVerifyComponent::AddClient(const FString& NetID)
 {
 	if (ClientMap.Contains(NetID))
 	{
+		FFastLogger::LogConsole(TEXT("Error: Client %s is already added"), *NetID);
 		// 이미 추가된 클라이언트인 경우
 		return;
 	}
 
+	FFastLogger::LogConsole(TEXT("Add Client %s"), *NetID);
 	ClientMap.Add(NetID, false);
 }
 
@@ -110,7 +112,7 @@ bool UConnectionVerifyComponent::CheckAllClientAdded(TArray<FString>& UnVerified
 {
 	bool bAllClientAdded = true;
 
-	if (MaxPlayerCount < 0 && ClientMap.Num() < MaxPlayerCount)
+	if (MaxPlayerCount < 0 || ClientMap.Num() < MaxPlayerCount)
 	{
 		// 아직 모든 클라이언트가 추가되지 않은 경우
 		return false;

@@ -16,6 +16,7 @@ class JUMPGAME_API ANetworkPlayerState : public APlayerState
 
 public:
 	virtual void OnSetUniqueId() override;
+	bool ConnectToServer();
 	
 #pragma region NetworkVerify
 public:
@@ -24,4 +25,6 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ConnectionVerified(const FString& NetID);
 #pragma endregion
+	
+	bool bIsSetUniqueId = false;
 };

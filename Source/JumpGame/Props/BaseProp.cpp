@@ -34,16 +34,22 @@ void ABaseProp::BeginPlay()
 	
 	// 동작 동기화
 	SetReplicateMovement(true);
+
+	UnSelectedObjectMaterial = MeshComp->CreateAndSetMaterialInstanceDynamic(0);
 }
 
 void ABaseProp::SetCollision(bool bEnable)
 {
+	Super::SetCollision(bEnable);
+	
 	// 장애물에 추가 메쉬가 있는 경우에 override
 	if (bEnable)
 	{
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		// 추가 메쉬 설정
+		MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
+		MeshComp->SetRenderCustomDepth(false);
 	}
 	else
 	{
@@ -51,12 +57,33 @@ void ABaseProp::SetCollision(bool bEnable)
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		// 추가 메쉬 설정
 		// TODO: Material 불투명하게 바꿔주기
+		MeshComp->SetMaterial(0, SelectedObjectMaterial);
+		MeshComp->SetRenderCustomDepth(true);
 	}
 }
+
 
 // Called every frame
 void ABaseProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	MaterialChangeOnTick();
 }
 
+void ABaseProp::MaterialChangeOnTick()
+{
+	Super::MaterialChangeOnTick();
+	
+	if (bSelected && bIsOnCollision)
+	{
+		MeshComp->SetMaterial(0, OnCollisionObjectMaterial);
+		return ;
+	}
+	if (bSelected)
+	{
+		MeshComp->SetMaterial(0, SelectedObjectMaterial);
+		return ;
+	}
+	MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
+}
