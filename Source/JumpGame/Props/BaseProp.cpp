@@ -49,6 +49,7 @@ void ABaseProp::SetCollision(bool bEnable)
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		// 추가 메쉬 설정
 		MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
+		MeshComp->SetRenderCustomDepth(false);
 	}
 	else
 	{
@@ -57,6 +58,7 @@ void ABaseProp::SetCollision(bool bEnable)
 		// 추가 메쉬 설정
 		// TODO: Material 불투명하게 바꿔주기
 		MeshComp->SetMaterial(0, SelectedObjectMaterial);
+		MeshComp->SetRenderCustomDepth(true);
 	}
 }
 

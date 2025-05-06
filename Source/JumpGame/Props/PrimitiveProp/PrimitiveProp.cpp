@@ -88,14 +88,12 @@ APrimitiveProp::APrimitiveProp()
 void APrimitiveProp::OnGridPropBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	FFastLogger::LogScreen(FColor::Red, TEXT("OnGridPropBeginOverlap"));
 	bIsOnCollision = true;
 }
 
 void APrimitiveProp::OnGridPropEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	FFastLogger::LogScreen(FColor::Blue, TEXT("OnGridPropEndOverlap"));
 	bIsOnCollision = false;
 }
 
@@ -177,10 +175,12 @@ void APrimitiveProp::SetSelected()
 
 	GizmoPrimary->SetVisibility(true);
 	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	GizmoPrimary->SetRenderCustomDepth(true);
 	for (auto& Gizmo : GizmoArray)
 	{
 		Gizmo->SetVisibility(true);
 		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+		Gizmo->SetRenderCustomDepth(true);
 	}
 
 	this->SetCollision(false);
@@ -196,11 +196,13 @@ void APrimitiveProp::SetUnSelected()
 	GizmoPrimary->SetVisibility(false);
 	GizmoPrimary->SetUnSelected();
 	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	GizmoPrimary->SetRenderCustomDepth(false);
 	for (auto& Gizmo : GizmoArray)
 	{
 		Gizmo->SetVisibility(false);
 		Gizmo->SetUnSelected();
 		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+		Gizmo->SetRenderCustomDepth(false);
 	}
 
 	this->SetCollision(true);
