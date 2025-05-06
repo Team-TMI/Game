@@ -34,7 +34,7 @@ public:
 	UPROPERTY()
 	FVector BeltDir = FVector::ZeroVector;
 	UPROPERTY()
-	float BeltSpeed = 300.f;
+	float BeltSpeed = 250.f;
 
 	/*// 플레이어 캐스팅
 	UPROPERTY()
