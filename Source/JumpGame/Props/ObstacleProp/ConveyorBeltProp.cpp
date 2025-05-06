@@ -18,9 +18,8 @@ AConveyorBeltProp::AConveyorBeltProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("ConveyorBelt");
 	
-	CollisionComp->SetBoxExtent(FVector(102.f, 51.f, 60.f));
+	CollisionComp->SetBoxExtent(FVector(100.f, 50.f, 70.f));
 	CollisionComp->SetRelativeLocation(FVector(0, 0, 0));
-	MeshComp->SetRelativeLocation(FVector(0, 0, -10));
 	MeshComp->SetRelativeScale3D(FVector(2, 1, 1));
 	
 	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
@@ -29,6 +28,8 @@ AConveyorBeltProp::AConveyorBeltProp()
 
 	// 컨베이어 벨트 콜리전과 overlap
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
+
+	Super::SetSize(FVector(2, 1, 1));
 }
 
 void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

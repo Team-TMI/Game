@@ -28,8 +28,8 @@ AObstacleProp::AObstacleProp()
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
 	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 0));
-	CollisionComp->SetRelativeLocation(FVector(0, 0, 100));
-	MeshComp->SetRelativeLocation(FVector(0, 0, -50));
+	
+	Super::SetSize(FVector(1,1,1));
 }
 
 void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

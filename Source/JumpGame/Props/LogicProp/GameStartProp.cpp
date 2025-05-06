@@ -14,7 +14,7 @@ AGameStartProp::AGameStartProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("GameStart");
-
+	
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
@@ -23,7 +23,8 @@ AGameStartProp::AGameStartProp()
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
-	MeshComp->SetRelativeScale3D(FVector(10.f,10.f,0.5f));
+	MeshComp->SetRelativeScale3D(FVector(5.f,20.f,1.f));
+	CollisionComp->SetBoxExtent(FVector(250,1000,50));
 	
 	for (int32 i = 0; i <6; i++)
 	{
@@ -32,11 +33,13 @@ AGameStartProp::AGameStartProp()
 		StartPoint->SetupAttachment(RootComponent);
 		
 		// 위치 지정
-		FVector Offset = FVector(0.f, i * Gap, 0.f) + FVector(0,0,100.f);
+		FVector Offset = FVector(0.f, i * Gap - 550, 0.f) + FVector(0,0,100.f);
 		StartPoint->AddLocalOffset(Offset);
 
 		StartPoints.Add(StartPoint);
 	}
+
+	Super::SetSize(FVector(5,20,1));
 }
 
 // Called when the game starts or when spawned
