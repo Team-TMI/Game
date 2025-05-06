@@ -36,9 +36,9 @@ public:
 	UPROPERTY()
 	float BeltSpeed = 300.f;
 
-	// 플레이어 캐스팅
+	/*// 플레이어 캐스팅
 	UPROPERTY()
-	class AFrog* Character;
+	class AFrog* Character;*/
 	// 여러 플레이어가 오버랩될 경우
 	UPROPERTY()
 	TSet<AFrog*> OverlappingFrogs;

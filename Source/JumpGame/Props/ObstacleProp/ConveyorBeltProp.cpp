@@ -35,10 +35,11 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	Character = Cast<AFrog>(OtherActor);
-	if (Character && !OverlappingFrogs.Contains(Character))
+	AFrog* Frog = Cast<AFrog>(OtherActor);
+	if (Frog && !OverlappingFrogs.Contains(Frog))
 	{
-		OverlappingFrogs.Add(Character); // 중복 체크 후 추가
+		
+		OverlappingFrogs.Add(Frog);
 	}
 	
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
@@ -47,9 +48,11 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (Character)
+	AFrog* Frog = Cast<AFrog>(OtherActor);
+	if (Frog)
 	{
-		OverlappingFrogs.Remove(Character); // 정확히 그 개체만 제거
+	
+		OverlappingFrogs.Remove(Frog);
 	}
 	
 	Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
@@ -67,10 +70,8 @@ void AConveyorBeltProp::BeginPlay()
 void AConveyorBeltProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	// 서버에서만 실행
-	if (!HasAuthority()) return;
 
+	// 클라 서버 둘다 각자 실행
 	ConveyorMove();
 }
 
@@ -79,11 +80,73 @@ void AConveyorBeltProp::ConveyorMove()
 	// 유효한 Frog들만 처리
 	for (AFrog* Frog : OverlappingFrogs)
 	{
-		if (IsValid(Frog))
+		if (!IsValid(Frog)) continue;
+		
+		FVector DeltaPos = BeltSpeed * GetWorld()->DeltaTimeSeconds * BeltDir;
+		
+		// if (Frog->GetVelocity().IsNearlyZero())
+		// {
+			// Frog->AddActorWorldOffset(DeltaPos, true);
+			Frog->SetActorLocation(Frog->GetActorLocation() + DeltaPos);
+		// }
+		
+		// 클라, 서버 동일한 로직 처리
+		/*if (Frog->IsLocallyControlled())
 		{
-			FVector DeltaPos = BeltSpeed * GetWorld()->DeltaTimeSeconds * BeltDir;
-			Frog->AddActorWorldOffset(DeltaPos);
-		}
+			UCharacterMovementComponent* MovementComp = Frog->GetCharacterMovement();
+			
+			if (!Frog->GetVelocity().IsNearlyZero())
+			{
+				// 조작 있다면, AddActorWorldOffset말고 velocity에 더한다
+				// *벨트 방향과 비교하기
+				FVector InputDir = Frog->GetVelocity().GetSafeNormal();
+				float Dot = FVector::DotProduct(InputDir, BeltDir);
+
+				// 기본 최대 속도
+				float OriginMaxSpeed = MovementComp->GetMaxSpeed();
+				// 컨베이어 벨트에서 추가해줄 속도
+				float BeltBoostSpeed = 300.f;
+				// 최대 허용 속도
+				float MaxAllowSpeed = OriginMaxSpeed + BeltBoostSpeed;
+
+				FFastLogger::LogScreen(FColor::Red, TEXT("움직이고 있음"));
+				FFastLogger::LogScreen(FColor::Red, TEXT("OriginMaxSpeed : %f"), OriginMaxSpeed);
+				
+
+				// 벨트 방향쪽이라면 (+1)
+				if (Dot > 0.7f)
+				{
+					// 속도 추가 후 Clamp 하자
+					MovementComp->Velocity += DeltaPos;
+					float CurrentSpeed = MovementComp->Velocity.Size();
+					FFastLogger::LogScreen(FColor::Red,TEXT("CurrentSpeed : %f"), CurrentSpeed);
+                    
+					if (CurrentSpeed > MaxAllowSpeed)
+					{
+						// 속도의 방향은 유지하되 크기를 제한
+						MovementComp->Velocity = MovementComp->Velocity.GetSafeNormal() * MaxAllowSpeed;
+						FFastLogger::LogScreen(FColor::Red,TEXT("MovementComp->Velocity : %f"), MovementComp->Velocity.Size());
+					}
+				}
+				else if (Dot < -0.7f)
+				{
+					// 속도 감소 후 최소 속도 보장
+					MovementComp->Velocity -= DeltaPos;
+					float CurrentSpeed = MovementComp->Velocity.Size();
+                    
+					// 최소 속도가 0보다 작아지지 않도록
+					if (CurrentSpeed < 0.0f)
+					{
+						MovementComp->Velocity = FVector::ZeroVector;
+					}
+				}
+				else
+				{
+					// 벨트와 수직 방향일때는 (뛸때, 측면으로 이동할때)
+					// 일단 아무 영향이 없다 
+				}
+			}
+		}*/
 	}
 }
 
