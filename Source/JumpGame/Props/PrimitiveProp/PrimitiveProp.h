@@ -14,14 +14,22 @@ public:
 	APrimitiveProp();
 
 protected:
+	UFUNCTION()
+	void OnGridPropBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	                            const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnGridPropEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	virtual void BeginPlay() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
 	// 액터가 선택되었을 때 호출되는 함수
 	// 내부 Mesh 컴포넌트의 색상 및 충돌 설정
+	UFUNCTION(Blueprintable, BlueprintCallable)
 	virtual void SetCollision(bool bEnable) {};
-
+	UFUNCTION()
+	virtual void MaterialChangeOnTick() {};
 
 	UFUNCTION(BlueprintCallable)
 	void SetSize(const FVector& InSize);
@@ -99,4 +107,14 @@ protected:
 
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
 	// class UWidgetComponent* RotateWidgetComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
+	class UMaterialInstance* SelectedObjectMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
+	class UMaterialInstanceDynamic* UnSelectedObjectMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
+	class UMaterialInstance* OnCollisionObjectMaterial = nullptr;
+
+	UPROPERTY()
+	bool bIsOnCollision = false;
 };
