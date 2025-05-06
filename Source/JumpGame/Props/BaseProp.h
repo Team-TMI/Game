@@ -23,6 +23,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetCollision(bool bEnable) override;
 
+	virtual void MaterialChangeOnTick() override;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -35,6 +37,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UBoxComponent* CollisionComp;
 
-	UPROPERTY(visibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USceneComponent* PivotScene;
 };

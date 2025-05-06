@@ -26,6 +26,8 @@ public:
 	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* DragDropOperation);
 
 	GETTER(class UCategorySystem*, CategorySystem);
+	GETTER(class USaveMapComponent*, SaveMapComponent);
+	GETTER(class ULoadMapComponent*, LoadMapComponent);
 
 private:
 	UPROPERTY(Category = EditorState, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

@@ -70,6 +70,31 @@ APrimitiveProp::APrimitiveProp()
 
 	// RotateWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("RotateWidgetComponent"));
 	// RotateWidgetComponent->SetupAttachment(RootComponent);
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInstance> M_SELECTED_OBJECT_MATERIAL
+	(TEXT("/Game/MapEditor/Material/MI_SelectedObject.MI_SelectedObject"));
+	if (M_SELECTED_OBJECT_MATERIAL.Succeeded())
+	{
+		SelectedObjectMaterial = M_SELECTED_OBJECT_MATERIAL.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UMaterialInstance> M_COLLISION_MATERIAL
+	(TEXT("/Game/MapEditor/Material/MI_CollisionObject.MI_CollisionObject"));
+	if (M_COLLISION_MATERIAL.Succeeded())
+	{
+		OnCollisionObjectMaterial = M_COLLISION_MATERIAL.Object;
+	}
+}
+
+void APrimitiveProp::OnGridPropBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	bIsOnCollision = true;
+}
+
+void APrimitiveProp::OnGridPropEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bIsOnCollision = false;
 }
 
 void APrimitiveProp::SetSize(const FVector& InSize)
@@ -115,6 +140,9 @@ void APrimitiveProp::SetNewSizeByRotation(const FVector& InSize)
 void APrimitiveProp::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GridInnerCollision->OnComponentBeginOverlap.AddDynamic(this, &APrimitiveProp::OnGridPropBeginOverlap);
+	GridInnerCollision->OnComponentEndOverlap.AddDynamic(this, &APrimitiveProp::OnGridPropEndOverlap);
 }
 
 // Called every frame
@@ -147,11 +175,15 @@ void APrimitiveProp::SetSelected()
 
 	GizmoPrimary->SetVisibility(true);
 	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	GizmoPrimary->SetRenderCustomDepth(true);
 	for (auto& Gizmo : GizmoArray)
 	{
 		Gizmo->SetVisibility(true);
 		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+		Gizmo->SetRenderCustomDepth(true);
 	}
+
+	this->SetCollision(false);
 }
 
 void APrimitiveProp::SetUnSelected()
@@ -164,12 +196,16 @@ void APrimitiveProp::SetUnSelected()
 	GizmoPrimary->SetVisibility(false);
 	GizmoPrimary->SetUnSelected();
 	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	GizmoPrimary->SetRenderCustomDepth(false);
 	for (auto& Gizmo : GizmoArray)
 	{
 		Gizmo->SetVisibility(false);
 		Gizmo->SetUnSelected();
 		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+		Gizmo->SetRenderCustomDepth(false);
 	}
+
+	this->SetCollision(true);
 }
 
 void APrimitiveProp::SetPrimitivePropCollision(bool bCond)

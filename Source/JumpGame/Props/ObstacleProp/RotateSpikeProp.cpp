@@ -70,6 +70,8 @@ void ARotateSpikeProp::ReverseSwingHammer_Implementation()
 
 inline void ARotateSpikeProp::SetCollision(bool bEnable)
 {
+	Super::SetCollision(bEnable);
+	
 	if (bEnable)
 	{
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
