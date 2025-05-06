@@ -122,4 +122,14 @@ public:
 
 	// 델리게이트 함수
 	void OnFindComplete(int32 Idx,FString Info);
+
+	// 카메라 전환 관련
+	UPROPERTY(editanywhere)
+	class APlayerController* PC;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	class ALobbyMainCamera* MainCamera;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	class ALobbySubCamera* SubCamera;
+	UFUNCTION()
+	void SetViewTarget();
 };

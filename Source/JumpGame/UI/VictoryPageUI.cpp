@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "VictoryPage.h"
+#include "VictoryPageUI.h"
 
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
@@ -9,14 +9,14 @@
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
-void UVictoryPage::NativeConstruct()
+void UVictoryPageUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	Btn_GoLobby->OnClicked.AddDynamic(this, &UVictoryPage::OnClickGoLobby);
+	Btn_GoLobby->OnClicked.AddDynamic(this, &UVictoryPageUI::OnClickGoLobby);
 }
 
-void UVictoryPage::OnClickGoLobby()
+void UVictoryPageUI::OnClickGoLobby()
 {
 	// 서버가 나가면 다같이 나가기
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
@@ -38,7 +38,7 @@ void UVictoryPage::OnClickGoLobby()
 	RemoveFromParent();
 }
 
-void UVictoryPage::SetVictoryPlayerName(FString PlayerName)
+void UVictoryPageUI::SetVictoryPlayerName(FString PlayerName)
 {
 	// WinnerPlayer 이름 업데이트
 	Text_PlayerName->SetText(FText::FromString(PlayerName));

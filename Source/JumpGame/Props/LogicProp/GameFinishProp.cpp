@@ -129,7 +129,7 @@ void AGameFinishProp::GameEnd()
 	}
 
 	// UI를 띄우자
-	VictoryPageUI = CreateWidget<UVictoryPage>(GetWorld(), VictoryPageUIClass);
+	VictoryPageUI = CreateWidget<UVictoryPageUI>(GetWorld(), VictoryPageUIClass);
 	if (VictoryPageUI)
 	{
 		VictoryPageUI->SetVictoryPlayerName(WinnerCharacter->GetName());
