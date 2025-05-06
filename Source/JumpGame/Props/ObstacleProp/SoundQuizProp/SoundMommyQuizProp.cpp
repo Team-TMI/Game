@@ -19,8 +19,6 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
-	
-	Super::SetSize(FVector());
 }
 
 // Called when the game starts or when spawned
@@ -51,6 +49,7 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep,
 	                        SweepResult);
 
+	FFastLogger::LogScreen(FColor::Red, TEXT("Overlapp!!!!!!!!!!000"));
 	// 시작하면 UI 띄우자
 	if (SoundQuizUI)
 	{
@@ -156,4 +155,5 @@ void ASoundMommyQuizProp::RemoveSoundQuizUI()
 		SoundQuizFail->RemoveFromParent();
 	}
 }
+
 
