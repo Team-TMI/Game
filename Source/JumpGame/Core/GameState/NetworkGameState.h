@@ -56,4 +56,12 @@ private:
 public:
 	
 #pragma endregion
+
+	UFUNCTION()
+	void TryConnectToServer();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Connection")
+	FTimerHandle ConnectionTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Connection")
+	float CheckInterval = 0.25f;
 };
