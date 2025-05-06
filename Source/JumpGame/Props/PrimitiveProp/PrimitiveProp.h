@@ -23,11 +23,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	bool IsOnCollision() const { return bIsOnCollision; }
+	
 	virtual void Tick(float DeltaTime) override;
 	// 액터가 선택되었을 때 호출되는 함수
 	// 내부 Mesh 컴포넌트의 색상 및 충돌 설정
 	UFUNCTION(Blueprintable, BlueprintCallable)
-	virtual void SetCollision(bool bEnable) {};
+	virtual void SetCollision(bool bEnable) {}
+
 	UFUNCTION()
 	virtual void MaterialChangeOnTick() {};
 

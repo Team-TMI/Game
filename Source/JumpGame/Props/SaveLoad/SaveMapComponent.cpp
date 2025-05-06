@@ -17,10 +17,16 @@ void USaveMapComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void USaveMapComponent::SaveMap(const FString& FileName)
+bool USaveMapComponent::SaveMap(const FString& FileName)
 {
+	CollisionPropTags.Empty();
 	GetAllPropsInfo(SaveDataArray.SaveDataArray);
-	SaveDataToFile(SaveDataArray, FileName);
+	if (CollisionPropTags.Num() != 0)
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("충돌중인 프롭이 있습니다! 저장 실패!!"));
+		return false;
+	}
+	return SaveDataToFile(SaveDataArray, FileName);
 }
 
 void USaveMapComponent::GetAllPropsInfo(TArray<FSaveData>& OutSaveDataArray)
@@ -31,21 +37,32 @@ void USaveMapComponent::GetAllPropsInfo(TArray<FSaveData>& OutSaveDataArray)
 	
 	for (AActor* Actor : AllActors)
 	{
-		if (APrimitiveProp* PrimitiveProp = Cast<APrimitiveProp>(Actor))
+		APrimitiveProp* PrimitiveProp = Cast<APrimitiveProp>(Actor);
+		if (PrimitiveProp->IsOnCollision())
 		{
-			FSaveData SaveData;
-
-			SaveData.Id = PrimitiveProp->GetPropDataComponent()->GetPropID();
-			SaveData.Position = PrimitiveProp->GetActorLocation();
-			SaveData.Rotation = PrimitiveProp->GetActorRotation();
-			SaveData.Size = PrimitiveProp->GetGridComp()->GetSize();
-			
-			OutSaveDataArray.Add(SaveData);
+			if (PrimitiveProp->Tags.Num() != 0)
+			{
+				CollisionPropTags.Add(PrimitiveProp->Tags.Last().ToString());
+			}
+			else
+			{
+				CollisionPropTags.Add(TEXT("NoTag"));
+			}
+			continue;
 		}
+		
+		FSaveData SaveData;
+
+		SaveData.Id = PrimitiveProp->GetPropDataComponent()->GetPropID();
+		SaveData.Position = PrimitiveProp->GetActorLocation();
+		SaveData.Rotation = PrimitiveProp->GetActorRotation();
+		SaveData.Size = PrimitiveProp->GetGridComp()->GetSize();
+		
+		OutSaveDataArray.Add(SaveData);
 	}
 }
 
-void USaveMapComponent::SaveDataToFile(const FSaveDataArray& InSaveDataArray, const FString& FileName)
+bool USaveMapComponent::SaveDataToFile(const FSaveDataArray& InSaveDataArray, const FString& FileName)
 {
 	// InSaveDataArray를 JSON으로 변환
 	FString JsonString;
@@ -74,4 +91,5 @@ void USaveMapComponent::SaveDataToFile(const FSaveDataArray& InSaveDataArray, co
 	{
 		FFastLogger::LogScreen(FColor::Red, TEXT("저장 실패했습니다. 경로: %s"), *FullPath);
 	}
+	return bSuccess;
 }
