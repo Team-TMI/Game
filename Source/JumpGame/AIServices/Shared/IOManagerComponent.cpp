@@ -162,7 +162,7 @@ void UIOManagerComponent::RetryConnectToPipe(TSharedPtr<FIPCHandler> IPCHandlerT
 		}
 		else
 		{
-			FFastLogger::LogScreen(FColor::Red, TEXT("Reconnecting to pipe..."));
+			// FFastLogger::LogScreen(FColor::Red, TEXT("Reconnecting to pipe..."));
 			StrongThis->RetryConnectToPipe(IPCHandlerToRetry);
 		}
 	}), RetryInterval, false);

@@ -62,15 +62,16 @@ void USaveMapComponent::SaveDataToFile(const FSaveDataArray& InSaveDataArray, co
 		PlatformFile.CreateDirectoryTree(*Directory);
 	}
 
+	FString FullPath = Directory + FileName;
 	// 저장
-	bool bSuccess = FFileHelper::SaveStringToFile(JsonString, *FileName);
+	bool bSuccess = FFileHelper::SaveStringToFile(JsonString, *FullPath);
 
 	if (bSuccess)
 	{
-		UE_LOG(LogTemp, Log, TEXT("성공적으로 저장했습니다! 경로: %s"), *FileName);
+		FFastLogger::LogScreen(FColor::Green, TEXT("성공적으로 저장했습니다! 경로: %s"), *FullPath);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("저장 실패했습니다. 경로: %s"), *FileName);
+		FFastLogger::LogScreen(FColor::Red, TEXT("저장 실패했습니다. 경로: %s"), *FullPath);
 	}
 }
