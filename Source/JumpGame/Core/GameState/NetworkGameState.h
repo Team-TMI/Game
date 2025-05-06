@@ -40,9 +40,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="IO")
 	class UIOManagerComponent* IOManagerComponent = nullptr;
-private:
+
+protected:
 	UPROPERTY()
 	class UConnectionVerifyComponent* ConnectionVerifyComponent = nullptr;
+
+private:
 	
 #pragma region NetworkClock
 public:

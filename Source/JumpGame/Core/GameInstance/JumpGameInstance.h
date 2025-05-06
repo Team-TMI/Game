@@ -77,6 +77,16 @@ public:
 	// 승리 판별 (bIsWin값 변경)
 	void SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin);
 
+private:
+	UPROPERTY()
+	int32 MaxPlayerCount = 0;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	int32 GetMaxPlayerCount() { return MaxPlayerCount; }
+	// 게임 시작 버튼을 누를때 설정해주자
+	void SetMaxPlayer(int32 MaxPlayer) { MaxPlayerCount = MaxPlayer; };
+	
 public:
 	void RunEyeTrackingScript();
 

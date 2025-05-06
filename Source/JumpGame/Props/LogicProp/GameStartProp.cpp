@@ -26,7 +26,7 @@ AGameStartProp::AGameStartProp()
 	MeshComp->SetRelativeScale3D(FVector(5.f,20.f,1.f));
 	CollisionComp->SetBoxExtent(FVector(250,1000,50));
 	
-	for (int32 i = 0; i <6; i++)
+	for (int32 i = 0; i < 6; i++)
 	{
 		FString Name = FString::Printf(TEXT("StartPos%i"),i);
 		USceneComponent* StartPoint = CreateDefaultSubobject<USceneComponent>(*Name);
@@ -54,17 +54,16 @@ void AGameStartProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-/*FTransform AGameStartProp::PlayerStartTransform(int32 PlayerIdx) const
+FTransform AGameStartProp::PlayerStartTransform()
 {
+	PlayerIdx %= StartPoints.Num();
+		
 	// 스타트 포인트 값을 반환
-	if (StartPoints.IsValidIndex(PlayerIdx))
-	{
-		return StartPoints[PlayerIdx]->GetComponentTransform();
-	}
-}*/
+	return StartPoints[PlayerIdx++]->GetComponentTransform();
+}
 
-FTransform AGameStartProp::SinglePlayerStart()
+/*FTransform AGameStartProp::SinglePlayerStart()
 {
 	// 스타트 포인트 값을 반환
 	return StartPoints[0]->GetComponentTransform();
-}
+}*/
