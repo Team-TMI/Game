@@ -14,11 +14,10 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Net/UnrealNetwork.h"
-
-
 // Sets default values
 AFrog::AFrog()
 {
@@ -146,7 +145,7 @@ AFrog::AFrog()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
-	
+
 	CameraCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("CameraCollision"));
 	CameraCollision->SetupAttachment(FollowCamera);
 	CameraCollision->SetBoxExtent(FVector(32.f, 32.f, 32.f));
@@ -158,12 +157,8 @@ AFrog::AFrog()
 	TrajectoryComponent = CreateDefaultSubobject<UCharacterTrajectoryComponent>(
 		TEXT("TrajectoryComponent"));
 	TrajectoryComponent->SetIsReplicated(true);
+
 	GetCharacterMovement()->SetIsReplicated(true);
-
-	// 초기값 설정
-	bIsSwimming = false;
-	CharacterState = ECharacterStateEnum::None;
-
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("FrogCollision"));
 	GetCapsuleComponent()->CanCharacterStepUpOn = ECB_Yes;
 
@@ -174,6 +169,13 @@ AFrog::AFrog()
 	SetNetUpdateFrequency(200.f);
 	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 	GetCharacterMovement()->bNetworkSkipProxyPredictionOnNetUpdate = true;
+
+	// 물 관련 상태
+	bIsSwimming = false;
+	CharacterWaterState = ECharacterStateEnum::None;
+	TimeSpentInWater = 0.f;
+	SurfaceStateForceTime = 5.f;
+	bWaterStateForcedByTime = false;
 }
 
 void AFrog::NotifyControllerChanged()
@@ -195,6 +197,13 @@ void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 로컬 플레이어만 카메라 오버랩 이벤트 바인딩
+	if (IsLocallyControlled() && CameraCollision != nullptr)
+	{
+		CameraCollision->OnComponentBeginOverlap.AddDynamic(this, &AFrog::OnCameraBeginOverlapWater);
+		CameraCollision->OnComponentEndOverlap.AddDynamic(this, &AFrog::OnCameraEndOverlapWater);
+	}
+
 	InitFrogState();
 }
 
@@ -203,7 +212,7 @@ void AFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
-	
+
 	// 공중에 있을 때는 회전 잘 안되게
 	if (GetCharacterMovement()->IsFalling())
 	{
@@ -216,23 +225,21 @@ void AFrog::Tick(float DeltaTime)
 
 	PrevVelocityZLength = GetVelocity().Z * -1;
 
+	// Pitch, Yaw 계산
 	if (HasAuthority())
 	{
-		// Pitch, Yaw 계산
 		// GetBaseAimRotation()는 서버 카메라의 회전값 사용하므로 클라와 서버의 카메라 방향이 다르면 문제가 생김
 		// --> 상대값으로 해야함 ( meshRotation - baseRotation )
 		const FRotator MeshRotation = GetMesh()->GetComponentRotation();
 		const FRotator AimRotation = GetBaseAimRotation();
 		// Pitch: 메시 기준 상대값 계산
 		Pitch = (AimRotation - MeshRotation).GetNormalized().Pitch;
-
 		// 상대 Yaw
 		const float CharacterYaw{static_cast<float>(GetActorRotation().Yaw)};
 		// 절대 Yaw
 		const float AimYaw{static_cast<float>(AimRotation.Yaw)};
 		// AimYaw - CharacterYaw
 		const float RelativeYaw{FMath::FindDeltaAngleDegrees(CharacterYaw, AimYaw)};
-
 		//카메라로 캐릭터 정면 볼 때 고려
 		if (RelativeYaw >= 90.f)
 		{
@@ -246,6 +253,11 @@ void AFrog::Tick(float DeltaTime)
 		{
 			Yaw = RelativeYaw;
 		}
+	}
+	// 서버에서만 물 관련 로직 처리
+	if (HasAuthority())
+	{
+		HandleInWaterLogic(DeltaTime);
 	}
 }
 
@@ -371,11 +383,10 @@ void AFrog::SetCrouchEnabled(bool bEnabled)
 
 	if (bCanCrouch)
 	{
-		SetJumpGaugeVisibility(true);
-	}
-	else
-	{
-		SetJumpGaugeVisibility(false);
+		if (JumpGaugeUIComponent != nullptr)
+		{
+			SetJumpGaugeVisibility(bCanCrouch);
+		}
 	}
 }
 
@@ -391,22 +402,30 @@ void AFrog::StopCrouch()
 
 void AFrog::MulticastRPC_StartJump_Implementation()
 {
-	// 수면 점프
-	if (CharacterState == ECharacterStateEnum::Surface)
+	if (CharacterWaterState == ECharacterStateEnum::Surface && bIsSwimming)
 	{
-		// 1초 동안 물에 충돌 없앰
-		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Jumping"));
-		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
-		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
-
-		FTimerHandle TimerHandle;
-		FTimerDelegate MovementModeDelegate{
-			FTimerDelegate::CreateLambda([this]() {
-				GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
-			})
-		};
-		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
-
+		// 서버에서만 충돌 해제 및 발사 실행
+		if (HasAuthority())
+		{
+			UCapsuleComponent* CapComp = GetCapsuleComponent();
+			if (CapComp)
+			{
+				// 1초 동안 물에 충돌 없앰
+				CapComp->SetCollisionProfileName(TEXT("Jumping"));
+			}
+			FVector LaunchVelocity = GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f;
+			ACharacter::LaunchCharacter(LaunchVelocity, true, true); // true, true는 현재 속도에 더함
+			// 일정 시간 후 충돌 복원 (서버에서만 타이머 설정)
+			FTimerHandle TempTimerHandle;
+			FTimerDelegate RestoreCollisionDelegate = FTimerDelegate::CreateLambda([this]() {
+				UCapsuleComponent* MyCapComp = GetCapsuleComponent();
+				if (MyCapComp)
+				{
+					MyCapComp->SetCollisionProfileName(TEXT("FrogCollision"));
+				}
+			});
+			GetWorldTimerManager().SetTimer(TempTimerHandle, RestoreCollisionDelegate, 1.f, false);
+		}
 		return;
 	}
 
@@ -517,6 +536,7 @@ void AFrog::InitFrogState()
 	{
 		// 다른 클라에서 삭제
 		JumpGaugeUIComponent->DestroyComponent();
+		JumpGaugeUIComponent = nullptr;
 	}
 }
 
@@ -537,6 +557,7 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 		};
 		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
 	}
+
 	ServerRPC_SetJumpAvailableBlock(Block);
 }
 
@@ -544,8 +565,6 @@ void AFrog::ResetSuperJumpRatio()
 {
 	SuperJumpRatio = 0.f;
 	OnSuperJumpRatioChanged.Broadcast(0.f);
-
-	bIsSuperJump = false;
 }
 
 void AFrog::StopMovementAndResetRotation()
@@ -582,7 +601,10 @@ void AFrog::CameraMovementMode()
 
 void AFrog::SetJumpGaugeVisibility(bool bVisibility)
 {
-	JumpGaugeUIComponent->SetVisibility(bVisibility);
+	if (JumpGaugeUIComponent != nullptr)
+	{
+		JumpGaugeUIComponent->SetVisibility(bVisibility);
+	}
 }
 
 void AFrog::OnRep_SuperJumpRatio()
@@ -599,7 +621,6 @@ void AFrog::ServerRPC_SetJumpAvailableBlock_Implementation(int32 Block)
 	float Height{Block * 100.f + 10.f};
 	float Value{FMath::Sqrt(Height * FMath::Abs(GetCharacterMovement()->GetGravityZ()) * 2)};
 	GetCharacterMovement()->JumpZVelocity = Value;
-
 	// 점프력 높게 설정하면 다시 원래대로 점프력 돌아오게
 	if (Block != 1)
 	{
@@ -620,10 +641,215 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, Pitch);
 	DOREPLIFETIME(AFrog, Yaw);
 	DOREPLIFETIME(AFrog, bIsCrouching);
-	DOREPLIFETIME(AFrog, bIsSwimming);
 	DOREPLIFETIME(AFrog, bIsSuperJump);
 	DOREPLIFETIME(AFrog, CrouchTime);
-	DOREPLIFETIME(AFrog, CharacterState);
+	DOREPLIFETIME(AFrog, TimeSpentInWater);
+	DOREPLIFETIME(AFrog, bWaterStateForcedByTime);
 	// COND_SkipOwner : 소유자 클라이언트는 업데이트 안해서 중복 실행 방지
 	DOREPLIFETIME_CONDITION(AFrog, SuperJumpRatio, COND_SkipOwner);
+	// 항상 복제
+	DOREPLIFETIME_CONDITION(AFrog, CharacterWaterState, COND_None);
+	DOREPLIFETIME_CONDITION(AFrog, bIsSwimming, COND_None);
+}
+
+void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, class ARisingWaterProp* WaterVolume)
+{
+	if (bIsSwimming == bNowInWater && CurrentWaterVolume == WaterVolume)
+	{
+		// 이미 같은 상태면 무시
+		return;
+	}
+	bIsSwimming = bNowInWater;
+	// 서버에서도 OnRep 함수 호출해서 로직 일관성 유지 또는 필요한 초기화 수행
+	OnRep_bIsSwimming();
+	if (bIsSwimming)
+	{
+		// 현재 상호작용 중인 물 저장
+		CurrentWaterVolume = WaterVolume;
+		TimeSpentInWater = 0.f;
+		bWaterStateForcedByTime = false;
+		ResetSuperJumpRatio();
+	}
+
+	else
+	{
+		// 물에서 벗어나면 null로 설정
+		CurrentWaterVolume = nullptr;
+		CharacterWaterState = ECharacterStateEnum::None;
+		OnRep_CharacterWaterState();
+		ResetSuperJumpRatio();
+	}
+}
+
+bool AFrog::ServerRPC_UpdateOverallWaterState_Validate(bool bNowInWater, class ARisingWaterProp* WaterVolume)
+{
+	return true;
+}
+
+void AFrog::ServerRPC_SetSpecificWaterState_Implementation(ECharacterStateEnum NewState)
+{
+	// 물 속에 있을 때만 변경
+	if (!bIsSwimming && NewState != ECharacterStateEnum::None)
+	{
+		return;
+	}
+
+	if (CharacterWaterState == NewState)
+	{
+		// 이미 같은 상태면 무시
+		return;
+	}
+
+	CharacterWaterState = NewState;
+	OnRep_CharacterWaterState();
+}
+
+bool AFrog::ServerRPC_SetSpecificWaterState_Validate(ECharacterStateEnum NewState)
+{
+	return true;
+}
+
+void AFrog::ServerRPC_TeleportToLocation_Implementation(FVector TargetLocation)
+{
+	SetActorLocation(TargetLocation);
+	// 텔레포트 후 상태 초기화
+	GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	GetCharacterMovement()->StopMovementImmediately();
+}
+
+
+bool AFrog::ServerRPC_TeleportToLocation_Validate(FVector TargetLocation)
+{
+	return true;
+}
+
+void AFrog::OnRep_CharacterWaterState()
+{
+	// 추후 개발 가능
+	// CharacterWaterState가 서버에서 변경되어 클라이언트로 복제 완료 시 호출
+	// 클라이언트에서 상태에 따른 시각적 효과, 애니메이션 변경 등을 처리
+}
+
+void AFrog::OnRep_bIsSwimming()
+{
+	if (IsLocallyControlled())
+	{
+		SetCrouchEnabled(!bIsSwimming);
+	}
+	if (!bIsSwimming)
+	{
+		if (CharacterWaterState != ECharacterStateEnum::None)
+		{
+			CharacterWaterState = ECharacterStateEnum::None;
+		}
+	}
+}
+
+void AFrog::HandleInWaterLogic(float DeltaTime)
+{
+	UCharacterMovementComponent* MoveComp{GetCharacterMovement()};
+	// 혹시 모르니 확인
+	if (!MoveComp)
+	{
+		return;
+	}
+	if (bIsSwimming)
+	{
+		MoveComp->SetMovementMode(MOVE_Flying);
+		SetCrouchEnabled(false);
+		// 일정 시간 물 속에 들어갔는데 Surface 상태로 아니면
+		if (!bWaterStateForcedByTime)
+		{
+			TimeSpentInWater += DeltaTime;
+			if (TimeSpentInWater >= SurfaceStateForceTime)
+			{
+				if (CharacterWaterState != ECharacterStateEnum::Surface)
+				{
+					ServerRPC_SetSpecificWaterState(ECharacterStateEnum::Surface);
+				}
+				// 한 번 강제 변경되었음을 표시
+				bWaterStateForcedByTime = true;
+			}
+		}
+		// CharacterWaterState에 따른 물리 효과 적용
+		switch (CharacterWaterState)
+		{
+		case ECharacterStateEnum::None:
+			MoveComp->GravityScale = 0.5f;
+			break;
+		case ECharacterStateEnum::Deep:
+			MoveComp->GravityScale = 0.f;
+			if (MoveComp->Velocity.Z < 150.f)
+			{
+				MoveComp->Velocity.Z = 150.f;
+			}
+		//AddMovementInput(FVector::UpVector, 1000.0f * DeltaTime);
+			break;
+		case ECharacterStateEnum::Shallow:
+			MoveComp->GravityScale = 0.f;
+			if (MoveComp->Velocity.Z < 75.f)
+			{
+				MoveComp->Velocity.Z = 75.f;
+			}
+		// AddMovementInput(FVector::UpVector, 300.0f * DeltaTime);
+			break;
+		case ECharacterStateEnum::Surface:
+			MoveComp->GravityScale = 0.1f;
+			float WaterSurfaceVelocityZ{0.f};
+		// 물이 상승중이라면
+			if (CurrentWaterVolume.IsValid() && CurrentWaterVolume->WaterState == EWaterStateEnum::Rise)
+			{
+				WaterSurfaceVelocityZ = CurrentWaterVolume->CurrentRisingSpeed;
+			}
+		// 캐릭터의 Z 속도가 물의 상승 속도보다 느리면, 물의 상승 속도에 맞춤
+			if (MoveComp->Velocity.Z < WaterSurfaceVelocityZ)
+			{
+				FVector CurrentVelocity{MoveComp->Velocity};
+				MoveComp->Velocity = FVector(CurrentVelocity.X, CurrentVelocity.Y, WaterSurfaceVelocityZ);
+			}
+			else
+			{
+				// 이미 물 상승 속도보다 빠르게 위로 움직이고 있거나, 물이 상승하지 않는 경우
+				MoveComp->Velocity.Z *= FMath::Pow(0.9f, DeltaTime * 60.f);
+			}
+			break;
+		}
+	}
+	else
+	{
+		MoveComp->GravityScale = 1.f;
+		if (MoveComp->IsFlying() || MoveComp->IsSwimming())
+		{
+			MoveComp->SetMovementMode(MOVE_Walking);
+		}
+		// 땅에서는 앉기 다시 활성화
+		SetCrouchEnabled(true);
+		// 물 밖에 나오면 초기화
+		TimeSpentInWater = 0.f;
+		bWaterStateForcedByTime = false;
+	}
+}
+
+void AFrog::OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                      const FHitResult& SweepResult)
+{
+	if (IsLocallyControlled() && WaterPostProcessComponent != nullptr && OtherActor && OtherActor->
+		ActorHasTag(TEXT("Water")))
+	{
+		WaterPostProcessComponent->bEnabled = true;
+	}
+}
+
+void AFrog::OnCameraEndOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (IsLocallyControlled() && WaterPostProcessComponent != nullptr && OtherActor && OtherActor->
+		ActorHasTag(TEXT("Water")))
+	{
+		// Todo :
+		// 여러 WaterVolume과 겹칠 수 있으므로, 마지막 WaterVolume에서 나올 때만 PostProcess를 꺼야 함
+		// 간단하게는 그냥 꺼도 되지만, 더 정확하게 하려면 오버랩 중인 WaterVolume 수를 세어야 함
+		WaterPostProcessComponent->bEnabled = false;
+	}
 }

@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Net/UnrealNetwork.h"
 
 ARisingWaterProp::ARisingWaterProp()
 {
@@ -22,7 +23,7 @@ ARisingWaterProp::ARisingWaterProp()
 
 	CollisionComp->SetBoxExtent(FVector(600.f, 600.f, 1300.f));
 	CollisionComp->SetCollisionProfileName(TEXT("Water"));
-	
+
 	DeepCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("DeepCollision"));
 	DeepCollision->SetupAttachment(RootComponent);
 	DeepCollision->SetBoxExtent(FVector(500.f, 500.f, 700.f));
@@ -50,18 +51,30 @@ ARisingWaterProp::ARisingWaterProp()
 	RespawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("RespawnPoint"));
 	RespawnPoint->SetupAttachment(RootComponent);
 	RespawnPoint->SetRelativeLocation(FVector(0, 0, 480.f));
+
+	bReplicates = true;
+	SetNetUpdateFrequency(100.f);
+	SetMinNetUpdateFrequency(33.f);
+	SetReplicatingMovement(true);
+
+	WaterState = EWaterStateEnum::None;
+	CurrentRisingSpeed = 30.f;
+}
+
+void ARisingWaterProp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARisingWaterProp, CurrentRisingSpeed);
+	DOREPLIFETIME(ARisingWaterProp, WaterState);
 }
 
 void ARisingWaterProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	Tags.Add(TEXT("Water"));
-
-	WaterState = EWaterStateEnum::Rise;
-
-	SetRisingSpeed(30.f);
-
+	
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginOverlap);
 	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &ARisingWaterProp::OnEndOverlap);
 
@@ -69,174 +82,112 @@ void ARisingWaterProp::BeginPlay()
 
 	DeadZoneCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginDeadZoneOverlap);
 
-	// Todo: 오버랩 됐을 때 하고, 끝나면 null 초기화
-	if (AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn()))
+	if (HasAuthority())
 	{
-		Frog = Character;
+		StartRising();
 	}
 }
 
 void ARisingWaterProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	switch (WaterState)
-	{
-	case EWaterStateEnum::None:
-		break;
-	case EWaterStateEnum::Rise:
-		RiseWater(DeltaTime);
-		break;
-	}
 
-	if (!Frog)
+	// 서버에서만 물 상승
+	if (HasAuthority())
 	{
-		return;
-	}
-
-	// 일정 시간이 흘렀는데 상태가 "None"인 경우, 강제로 "Surface"로 수정
-	if (!bIsChanged && Frog->bIsSwimming)
-	{
-		FlowTime += DeltaTime;
-		if (FlowTime > JumpTime && Frog->CharacterState == ECharacterStateEnum::None)
+		if (WaterState == EWaterStateEnum::Rise)
 		{
-			FlowTime = 0.f;
-			Frog->CharacterState = ECharacterStateEnum::Surface;
-			bIsChanged = true;
+			RiseWater(DeltaTime);
 		}
 	}
 	
-	UCharacterMovementComponent* MovementComponent{Frog->GetCharacterMovement()};
-	if (MovementComponent)
-	{
-		switch (Frog->CharacterState)
-		{
-		case ECharacterStateEnum::None:
-			// 물 밖 중력 1
-			MovementComponent->GravityScale = 1.f;
-			break;
-		case ECharacterStateEnum::Deep:
-			// 물 속 중력 0
-			MovementComponent->GravityScale = 0.f;
-		// 위쪽으로 강한 힘
-			Frog->AddMovementInput(FVector::UpVector, 1000.0f * DeltaTime);
-			break;
-		case ECharacterStateEnum::Shallow:
-			// 물 속 중력 0
-			MovementComponent->GravityScale = 0.f;
-		// 위쪽으로 약한 힘
-			Frog->AddMovementInput(FVector::UpVector, 300.0f * DeltaTime);
-			break;
-		case ECharacterStateEnum::Surface:
-			// 약한 중력 ( 둥둥 떠다니는 느낌 )
-			MovementComponent->GravityScale = 0.1f;
-		// Z축 속도를 천천히 줄여서 위아래 움직임 댐핑
-			MovementComponent->Velocity.Z *= 0.9f;
-			break;
-		}
-	}
+	// if (!Frog)
+	// {
+	// 	return;
+	// }
+	//
+	// // 일정 시간이 흘렀는데 상태가 "None"인 경우, 강제로 "Surface"로 수정
+	// if (!bIsChanged && Frog->bIsSwimming)
+	// {
+	// 	FlowTime += DeltaTime;
+	// 	if (FlowTime > JumpTime && Frog->CharacterState == ECharacterStateEnum::None)
+	// 	{
+	// 		FlowTime = 0.f;
+	// 		Frog->CharacterState = ECharacterStateEnum::Surface;
+	// 		bIsChanged = true;
+	// 	}
+	// }
+	//
+	// UCharacterMovementComponent* MovementComponent{Frog->GetCharacterMovement()};
+	// if (MovementComponent)
+	// {
+	// 	switch (Frog->CharacterState)
+	// 	{
+	// 	case ECharacterStateEnum::None:
+	// 		// 물 밖 중력 1
+	// 		MovementComponent->GravityScale = 1.f;
+	// 		break;
+	// 	case ECharacterStateEnum::Deep:
+	// 		// 물 속 중력 0
+	// 		MovementComponent->GravityScale = 0.f;
+	// 	// 위쪽으로 강한 힘
+	// 		Frog->AddMovementInput(FVector::UpVector, 1000.0f * DeltaTime);
+	// 		break;
+	// 	case ECharacterStateEnum::Shallow:
+	// 		// 물 속 중력 0
+	// 		MovementComponent->GravityScale = 0.f;
+	// 	// 위쪽으로 약한 힘
+	// 		Frog->AddMovementInput(FVector::UpVector, 300.0f * DeltaTime);
+	// 		break;
+	// 	case ECharacterStateEnum::Surface:
+	// 		// 약한 중력 ( 둥둥 떠다니는 느낌 )
+	// 		MovementComponent->GravityScale = 0.1f;
+	// 	// Z축 속도를 천천히 줄여서 위아래 움직임 댐핑
+	// 		MovementComponent->Velocity.Z *= 0.9f;
+	// 		break;
+	// 	}
+	// }
 }
 
 void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
 {
-	if (OtherComp->ComponentHasTag(TEXT("CameraCollision")) && Frog->IsLocallyControlled())
+	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
+	if (OverlappingFrog && OtherComp && OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
-		Frog->WaterPostProcessComponent->bEnabled = true;
-	}
-	
-	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")) && Frog->IsLocallyControlled())
-	{
-		Frog->ResetSuperJumpRatio();
-		Frog->bIsSwimming = true;
-		Frog->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		Frog->SetCrouchEnabled(false);
-		
-		// 안빠르면 가라앉지 않게
-		if (Frog->GetCharacterMovement()->Velocity.Length() < 1'000.f)
+		// 서버에서만 처리
+		if (HasAuthority())
 		{
-			Frog->CharacterState = ECharacterStateEnum::Surface;
+			OverlappingFrog->ServerRPC_UpdateOverallWaterState(true, this);
 		}
-
-		// 잠시 가라앉고 올라오게
-		FTimerDelegate MovementModeDelegate{
-			FTimerDelegate::CreateLambda([this]() {
-				ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
-				SurfaceCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
-			})
-		};
-		GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
 	}
-	
-	// if (OtherActor->ActorHasTag(TEXT("Frog")))
-	// {
-	// 	Frog->ResetSuperJumpRatio();
-	// 	Frog->bIsSwimming = true;
-	// 	Frog->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-	// 	Frog->SetCrouchEnabled(false);
-	// 	
-	// 	// 안빠르면 가라앉지 않게
-	// 	if (Frog->GetCharacterMovement()->Velocity.Length() < 1'000.f)
-	// 	{
-	// 		Frog->CharacterState = ECharacterStateEnum::Surface;
-	// 	}
-	//
-	// 	// 잠시 가라앉고 올라오게
-	// 	FTimerDelegate MovementModeDelegate{
-	// 		FTimerDelegate::CreateLambda([this]() {
-	// 			ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
-	// 			SurfaceCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
-	// 		})
-	// 	};
-	// 	GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
-	// }
 }
 
 void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherComp->ComponentHasTag(TEXT("CameraCollision")) && Frog->IsLocallyControlled())
+	AFrog* OverlappingFrog = Cast<AFrog>(OtherActor);
+	if (OverlappingFrog && OtherComp && OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
-		Frog->WaterPostProcessComponent->bEnabled = false;
+		if (HasAuthority())
+		{
+			OverlappingFrog->ServerRPC_UpdateOverallWaterState(false, this);
+		}
 	}
-	
-	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")) && Frog->IsLocallyControlled())
-	{
-		Frog->ResetSuperJumpRatio();
-		Frog->SetCrouchEnabled(true);
-		GetWorldTimerManager().ClearTimer(TimerHandle);
-		Frog->bIsSwimming = false;
-		Frog->CharacterState = ECharacterStateEnum::None;
-		Frog->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		bIsChanged = false;
-
-		ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
-		SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
-	}
-	
-	// if (OtherActor->ActorHasTag(TEXT("Frog")))
-	// {
-	// 	Frog->ResetSuperJumpRatio();
-	// 	Frog->SetCrouchEnabled(true);
-	// 	GetWorldTimerManager().ClearTimer(TimerHandle);
-	// 	Frog->bIsSwimming = false;
-	// 	Frog->CharacterState = ECharacterStateEnum::None;
-	// 	Frog->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	// 	bIsChanged = false;
-	//
-	// 	ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
-	// 	SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
-	// }
 }
 
 void ARisingWaterProp::OnBeginDeepOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                           const FHitResult& SweepResult)
 {
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	AFrog* OverlappingFrog = Cast<AFrog>(OtherActor);
+	if (OverlappingFrog && OtherComp && OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
-		Frog->CharacterState = ECharacterStateEnum::Deep;
+		if (HasAuthority())
+		{
+			OverlappingFrog->ServerRPC_SetSpecificWaterState(ECharacterStateEnum::Deep);
+		}
 	}
 }
 
@@ -244,9 +195,13 @@ void ARisingWaterProp::OnBeginShallowOverlap(UPrimitiveComponent* OverlappedComp
                                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                              const FHitResult& SweepResult)
 {
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	AFrog* OverlappingFrog = Cast<AFrog>(OtherActor);
+	if (OverlappingFrog && OtherComp && OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
-		Frog->CharacterState = ECharacterStateEnum::Shallow;
+		if (HasAuthority())
+		{
+			OverlappingFrog->ServerRPC_SetSpecificWaterState(ECharacterStateEnum::Shallow);
+		}
 	}
 }
 
@@ -254,9 +209,13 @@ void ARisingWaterProp::OnBeginSurfaceOverlap(UPrimitiveComponent* OverlappedComp
                                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                              const FHitResult& SweepResult)
 {
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	AFrog* OverlappingFrog = Cast<AFrog>(OtherActor);
+	if (OverlappingFrog && OtherComp && OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
-		Frog->CharacterState = ECharacterStateEnum::Surface;
+		if (HasAuthority())
+		{
+			OverlappingFrog->ServerRPC_SetSpecificWaterState(ECharacterStateEnum::Surface);
+		}
 	}
 }
 
@@ -264,53 +223,75 @@ void ARisingWaterProp::OnBeginDeadZoneOverlap(UPrimitiveComponent* OverlappedCom
                                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                               const FHitResult& SweepResult)
 {
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	AFrog* OverlappingFrog = Cast<AFrog>(OtherActor);
+	if (OverlappingFrog && OtherComp && OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
 	{
-		Frog->CharacterState = ECharacterStateEnum::Deep;
-		Frog->SetActorLocation(RespawnPoint->GetComponentLocation());
+		if (HasAuthority())
+		{
+			if (RespawnPoint)
+			{
+				OverlappingFrog->ServerRPC_TeleportToLocation(RespawnPoint->GetComponentLocation());
+			}
+			// 리스폰 후 상태
+			OverlappingFrog->ServerRPC_SetSpecificWaterState(ECharacterStateEnum::Deep);
+		}
 	}
 }
 
 void ARisingWaterProp::SetCollision(bool bEnable)
 {
 	Super::SetCollision(bEnable);
+	
+	// DeepCollision->SetCollisionEnabled(bEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	// ShallowCollision->SetCollisionEnabled(bEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	// SurfaceCollision->SetCollisionEnabled(bEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	// DeadZoneCollision->SetCollisionEnabled(bEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 }
 
 void ARisingWaterProp::RiseWater(float DeltaTime)
 {
-	float DeltaZ{DeltaTime * RisingSpeed};
-	
-	if (Frog)
-	{
-		Frog->SetActorLocation(FVector(Frog->GetActorLocation().X, Frog->GetActorLocation().Y,
-	                               Frog->GetActorLocation().Z + DeltaZ));
-	}
-	
-	SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y,
-	                         GetActorLocation().Z + DeltaZ));
+	const FVector CurrentLocation = GetActorLocation();
+	const FVector NewLocation = FVector(CurrentLocation.X, CurrentLocation.Y, CurrentLocation.Z + (CurrentRisingSpeed * DeltaTime));
+	SetActorLocation(NewLocation);
 }
 
 void ARisingWaterProp::StopRising(float Time)
 {
-	WaterState = EWaterStateEnum::None;
-
-	if (Time > 0.f)
+	// 서버만 실행
+	if (HasAuthority())
 	{
-		FTimerDelegate StopWaterDelegate{
-			FTimerDelegate::CreateLambda([this]() {
-				WaterState = EWaterStateEnum::Rise;
-			})
-		};
-		GetWorldTimerManager().SetTimer(StopTimerHandle, StopWaterDelegate, Time, false);
+		WaterState = EWaterStateEnum::None;
+		GetWorldTimerManager().ClearTimer(ResumeRisingTimerHandle);
+
+		if (Time > 0.f)
+		{
+			GetWorldTimerManager().SetTimer(ResumeRisingTimerHandle, this, &ARisingWaterProp::StartRising, Time, false);
+		}
 	}
 }
 
 void ARisingWaterProp::StartRising()
 {
-	WaterState = EWaterStateEnum::Rise;
+	if (HasAuthority())
+	{
+		WaterState = EWaterStateEnum::Rise;
+		GetWorldTimerManager().ClearTimer(ResumeRisingTimerHandle);
+	}
 }
 
 void ARisingWaterProp::SetRisingSpeed(float Speed)
 {
-	RisingSpeed = Speed;
+	// 서버에서만 속도 변경 ( CurrentRisingSpeed는 Replicated 속성이므로 클라이언트에 자동 전달됨 )
+	if (HasAuthority())
+	{
+		CurrentRisingSpeed = Speed;
+	}
+}
+
+void ARisingWaterProp::OnRep_WaterState()
+{
+	// 추후 추가 가능
+	
+	// WaterState가 서버에서 변경되어 클라이언트로 복제 완료 시 호출됨
+	// 클라이언트에서 물 상태 변경에 따른 시각적 효과 처리
 }
