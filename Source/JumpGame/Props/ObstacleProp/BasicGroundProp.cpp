@@ -4,6 +4,7 @@
 #include "BasicGroundProp.h"
 
 #include "Components/BoxComponent.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 
 
 // Sets default values
@@ -16,6 +17,8 @@ ABasicGroundProp::ABasicGroundProp()
 	
 	CollisionComp->SetCollisionProfileName(TEXT("Prop"));
 	MeshComp->SetCollisionProfileName(TEXT("Prop"));
+
+	PropDataComponent->SetPropID(TEXT("1000"));
 }
 
 // Called when the game starts or when spawned

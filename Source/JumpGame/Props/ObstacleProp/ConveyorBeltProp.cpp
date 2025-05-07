@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -30,6 +31,8 @@ AConveyorBeltProp::AConveyorBeltProp()
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
 	Super::SetSize(FVector(2, 1, 1));
+
+	PropDataComponent->SetPropID(TEXT("5003"));
 }
 
 void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

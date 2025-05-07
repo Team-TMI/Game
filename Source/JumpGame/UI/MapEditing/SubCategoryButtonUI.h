@@ -34,4 +34,7 @@ private:
 	EMajorCategoryType MajorCategory;
 	UPROPERTY()
 	ESubCategoryType SubCategory;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	class UDataTable* CategoryNameTable = nullptr;
 };

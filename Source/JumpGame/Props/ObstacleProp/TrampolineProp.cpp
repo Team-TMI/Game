@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 
@@ -17,6 +18,8 @@ ATrampolineProp::ATrampolineProp()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("Trampoline");
+
+	PropDataComponent->SetPropID(TEXT("5009"));
 }
 
 // Called when the game starts or when spawned
