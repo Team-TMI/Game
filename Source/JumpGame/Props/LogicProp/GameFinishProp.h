@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DefeatPlatform.h"
 #include "LogicProp.h"
+#include "VictoryPlatform.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/UI/VictoryPageUI.h"
 #include "GameFinishProp.generated.h"
@@ -23,6 +25,7 @@ protected:
 	                      const FHitResult& SweepResult);
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	// Called every frame
@@ -33,14 +36,28 @@ public:
 	class UJumpGameInstance* GI;
 	
 	// 첫번째 플레이어가 들어오면 10초후 게임 끝내자
+	UFUNCTION()
 	void GameEnd();
+	UFUNCTION(NetMulticast, reliable)
+	void MulticastRPC_GameEnd();
+	UFUNCTION(NetMulticast, reliable)
+	void MulticastRPC_ShowClearUI();
 
 	// 첫번째 플레이어 저장 (1등)
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	class AFrog* WinnerCharacter;
-
+	UPROPERTY()
+	AFrog* Character;
+	
 	// 1등 정해졌나요?
+	UPROPERTY()
 	bool bWinnerFound = false;
+
+	// 시상대
+	UPROPERTY(Replicated)
+	AVictoryPlatform* VictoryP;
+	UPROPERTY()
+	ADefeatPlatform* DefeatP;
 
 	// UI관련
 	UPROPERTY(EditAnywhere, blueprintReadWrite)
@@ -51,4 +68,5 @@ public:
 	TSubclassOf<class USoundQuizClear> SoundQuizClearUIClass;
 	UPROPERTY(EditAnywhere)
 	USoundQuizClear* SoundQuizClear;
+
 };

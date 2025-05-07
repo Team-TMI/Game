@@ -16,7 +16,7 @@ ARotateHammerProp::ARotateHammerProp()
 
 	CollisionComp->SetRelativeLocation(FVector(0, 150, 0));
 	// CollisionComp랑 충돌
-	CollisionComp->SetCollisionProfileName(TEXT("Prop"));
+	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 }
 
 // Called when the game starts or when spawned
@@ -24,8 +24,8 @@ void ARotateHammerProp::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	RotAxis = FRotator(0,0,1);
-	RotAngle = 50.f;
+	RotAxis = FRotator(0,0,-1);
+	RotAngle = 200.f;
 }
 
 // Called every frame
@@ -37,7 +37,7 @@ void ARotateHammerProp::Tick(float DeltaTime)
 void ARotateHammerProp::CalculateForce(AFrog* Character)
 {
 	FVector Direction = CollisionComp->GetUpVector();
-	float Force = 500;
+	float Force = 1000;
 	
 	Super::LaunchCharacter(Character, Direction, Force, true, true);
 }

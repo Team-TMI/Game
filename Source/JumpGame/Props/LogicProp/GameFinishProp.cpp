@@ -13,8 +13,10 @@
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
+#include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -46,21 +48,27 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (!OtherActor->ActorHasTag("Frog")) return;
 	// FFastLogger::LogConsole(TEXT("Overlap!!!: %s"), *OtherActor->GetName());
 	
-	AFrog* Character = Cast<AFrog>(OtherActor);
+	Character = Cast<AFrog>(OtherActor);
 	if (!bWinnerFound)
 	{
 		bWinnerFound = true;
 		
-		// 1등 캐릭터 저장
+		// 1등 캐릭터 저장 (서버에서)
 		WinnerCharacter = Character;
 
 		// 1등 캐릭터에게 Clear UI 띄우자
-		SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
-		if (SoundQuizClear)
+		if (WinnerCharacter->IsLocallyControlled())
 		{
-			SoundQuizClear->AddToViewport();
+			if (SoundQuizClear)
+			{
+				SoundQuizClear->AddToViewport();
+			}
+			WinnerCharacter->SetJumpGaugeVisibility(false);
 		}
-		WinnerCharacter->SetJumpGaugeVisibility(false);
+		else
+		{
+			MulticastRPC_ShowClearUI();
+		}
 		
 		// 10초 후에 게임을 끝내자
 		FTimerHandle EndTimerHandle;
@@ -74,8 +82,20 @@ void AGameFinishProp::BeginPlay()
 	Super::BeginPlay();
 	
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+	Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
+	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
+	
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGameFinishProp::OnMyBeginOverlap);
+}
+
+void AGameFinishProp::GetLifetimeReplicatedProps(
+	TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGameFinishProp, WinnerCharacter);
+	DOREPLIFETIME(AGameFinishProp, VictoryP);
 }
 
 // Called every frame
@@ -86,12 +106,24 @@ void AGameFinishProp::Tick(float DeltaTime)
 
 void AGameFinishProp::GameEnd()
 {
-	// UI 지우기
-	if (SoundQuizClear)
+	// 시상대 스폰 (박스 위치부터 위로)
+	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
+	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,10000);
+	VictoryP = GetWorld()->SpawnActor<AVictoryPlatform>(VictoryPos, FRotator::ZeroRotator);
+	DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
+
+	// 우승자 앞에 보게 정렬하기
+	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
+	// 플레이어 텔레포트
+	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
+	if (IsValid(Character) && Character != WinnerCharacter)
 	{
-		SoundQuizClear->RemoveFromParent();
+		Character->SetActorLocation(DefeatP->SpawnDefeatCharacter());
 	}
 	
+	// 게임 끝
+	MulticastRPC_GameEnd();
+
 	// 물 멈추자
 	ARisingWaterProp* RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 	if (RisingWaterProp)
@@ -99,33 +131,35 @@ void AGameFinishProp::GameEnd()
 		RisingWaterProp->StopRising();
 	}
 	
-	// 플레이어들 조작막기
-	AFrog* Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	Character->StopMovementAndResetRotation();
+	// TODO: 게임 종료 처리 - 게임 한판 진행 시간 멈추기 (게임모드?)
+}
+
+void AGameFinishProp::MulticastRPC_ShowClearUI_Implementation()
+{
+}
+
+
+void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
+{
+	// UI 있으면 지우기
+	if (SoundQuizClear)
+	{
+		SoundQuizClear->RemoveFromParent();
+	}
 	
+	// 플레이어들 조작막기
+	Character->StopMovementAndResetRotation();
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	PC->SetInputMode(FInputModeUIOnly());
 	PC->bShowMouseCursor = true;
+	
 	// 우승자 앞에 보게 정렬하기
 	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
-	
-	// 시상대 스폰 (박스 위치부터 위로)
-	FVector VictoryPos = MeshComp->GetComponentLocation() + FVector(0,0,20000);
-	FVector DefeatPos = MeshComp->GetComponentLocation() + FVector(0,0,30000);
-	AVictoryPlatform* VictoryP = GetWorld()->SpawnActor<AVictoryPlatform>(VictoryPos, FRotator::ZeroRotator);
-	ADefeatPlatform* DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
-	
-	// 플레이어 텔레포트
-	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
-	if (Character != WinnerCharacter)
-	{
-		SetActorLocation(DefeatP->SpawnDefeatCharacter());
-	}
 	
 	// 카메라 전환
 	if (PC)
 	{
-		PC->SetViewTargetWithBlend(VictoryP, 0.2f);
+		PC->SetViewTargetWithBlend(VictoryP, 0.5f);
 	}
 
 	// UI를 띄우자
@@ -135,7 +169,5 @@ void AGameFinishProp::GameEnd()
 		VictoryPageUI->SetVictoryPlayerName(WinnerCharacter->GetName());
 		VictoryPageUI->AddToViewport();
 	}
-
-	// TODO: 게임 종료 처리 - 게임 한판 진행 시간 멈추기 (게임모드?)
 }
 

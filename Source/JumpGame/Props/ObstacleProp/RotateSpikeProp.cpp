@@ -37,7 +37,7 @@ ARotateSpikeProp::ARotateSpikeProp()
 	// 메쉬랑 부딪힘 (CollisionComp랑은 충돌하지 않는다)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	Hammer->SetCollisionProfileName(TEXT("Prop"));
+	Hammer->SetCollisionProfileName(TEXT("OverlapProp"));
 	Spike->SetCollisionProfileName(TEXT("Prop"));
 }
 
