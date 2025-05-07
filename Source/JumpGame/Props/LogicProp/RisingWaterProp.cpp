@@ -141,12 +141,12 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
 {
-	if (OtherComp->ComponentHasTag(TEXT("CameraCollision")))
+	if (OtherComp->ComponentHasTag(TEXT("CameraCollision")) && Frog->IsLocallyControlled())
 	{
 		Frog->WaterPostProcessComponent->bEnabled = true;
 	}
 	
-	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
+	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")) && Frog->IsLocallyControlled())
 	{
 		Frog->ResetSuperJumpRatio();
 		Frog->bIsSwimming = true;
@@ -196,12 +196,12 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherComp->ComponentHasTag(TEXT("CameraCollision")))
+	if (OtherComp->ComponentHasTag(TEXT("CameraCollision")) && Frog->IsLocallyControlled())
 	{
 		Frog->WaterPostProcessComponent->bEnabled = false;
 	}
 	
-	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")))
+	if (OtherComp->ComponentHasTag(TEXT("FrogCapsule")) && Frog->IsLocallyControlled())
 	{
 		Frog->ResetSuperJumpRatio();
 		Frog->SetCrouchEnabled(true);

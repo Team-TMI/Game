@@ -146,7 +146,7 @@ AFrog::AFrog()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
-
+	
 	CameraCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("CameraCollision"));
 	CameraCollision->SetupAttachment(FollowCamera);
 	CameraCollision->SetBoxExtent(FVector(32.f, 32.f, 32.f));
@@ -354,7 +354,15 @@ void AFrog::StartSprint()
 
 void AFrog::StopSprint()
 {
-	ServerRPC_StopSprint();
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		ServerRPC_StopSprint();
+	}
 }
 
 void AFrog::SetCrouchEnabled(bool bEnabled)

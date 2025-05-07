@@ -60,6 +60,7 @@ public:
 	void ServerRPC_StartSprint();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StopSprint();
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void InitFrogState();
@@ -75,12 +76,12 @@ public:
 	void SetCrouchEnabled(bool bEnabled);
 	UFUNCTION()
 	void OnRep_SuperJumpRatio();
-	
+
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetJumpAvailableBlock(int32 Block);
 	// UFUNCTION(Server, Reliable)
 	// void ServerRPC_ResetSuperJumpRatio();
-	
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -121,7 +122,7 @@ public:
 	bool bCanMove{true};
 	bool bCanCrouch{true};
 	float PrevVelocityZLength{};
-	
+
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -141,7 +142,7 @@ public:
 	UMaterial* WaterPostProcessMaterial;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UPostProcessComponent* WaterPostProcessComponent;
-	
+
 	// Enum
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
@@ -150,5 +151,4 @@ public:
 	// 컨베이어 벨트
 	UPROPERTY()
 	bool IsOverlap = false;
-
 };
