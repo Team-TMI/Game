@@ -24,7 +24,6 @@ ABounceBollardProp::ABounceBollardProp()
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
-	MeshComp->SetRelativeLocation(FVector(0, 0, 0));
 
 	// 메쉬랑 부딪힘 (CollisionComp랑은 충돌하지 않는다)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);

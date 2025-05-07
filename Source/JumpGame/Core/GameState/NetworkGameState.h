@@ -40,9 +40,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="IO")
 	class UIOManagerComponent* IOManagerComponent = nullptr;
-private:
+
+protected:
 	UPROPERTY()
 	class UConnectionVerifyComponent* ConnectionVerifyComponent = nullptr;
+
+private:
 	
 #pragma region NetworkClock
 public:
@@ -56,4 +59,12 @@ private:
 public:
 	
 #pragma endregion
+
+	UFUNCTION()
+	void TryConnectToServer();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Connection")
+	FTimerHandle ConnectionTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Connection")
+	float CheckInterval = 0.25f;
 };

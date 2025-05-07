@@ -38,7 +38,7 @@ bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo,
 	// TODO : 실패에 대한 처리가 필요함
 	// 만약 연결이 실패했다면
 	if (Pipe == INVALID_HANDLE_VALUE) {
-		FFastLogger::LogConsole(TEXT("Failed to connect to pipe: %s"), *PipeName);
+		// FFastLogger::LogConsole(TEXT("Failed to connect to pipe: %s"), *PipeName);
 
 		return false;
 	}

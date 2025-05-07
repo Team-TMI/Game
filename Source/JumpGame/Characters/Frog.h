@@ -146,4 +146,9 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	ECharacterStateEnum CharacterState;
+
+	// 컨베이어 벨트
+	UPROPERTY()
+	bool IsOverlap = false;
+
 };

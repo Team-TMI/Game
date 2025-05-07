@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "VictoryPage.generated.h"
+#include "VictoryPageUI.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class JUMPGAME_API UVictoryPage : public UUserWidget
+class JUMPGAME_API UVictoryPageUI : public UUserWidget
 {
 	GENERATED_BODY()
 

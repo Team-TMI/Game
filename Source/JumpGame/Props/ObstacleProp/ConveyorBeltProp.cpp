@@ -18,9 +18,8 @@ AConveyorBeltProp::AConveyorBeltProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("ConveyorBelt");
 	
-	CollisionComp->SetBoxExtent(FVector(102.f, 51.f, 60.f));
+	CollisionComp->SetBoxExtent(FVector(100.f, 50.f, 70.f));
 	CollisionComp->SetRelativeLocation(FVector(0, 0, 0));
-	MeshComp->SetRelativeLocation(FVector(0, 0, -10));
 	MeshComp->SetRelativeScale3D(FVector(2, 1, 1));
 	
 	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
@@ -29,16 +28,19 @@ AConveyorBeltProp::AConveyorBeltProp()
 
 	// 컨베이어 벨트 콜리전과 overlap
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
+
+	Super::SetSize(FVector(2, 1, 1));
 }
 
 void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	Character = Cast<AFrog>(OtherActor);
-	if (Character && !OverlappingFrogs.Contains(Character))
+	AFrog* Frog = Cast<AFrog>(OtherActor);
+	if (Frog && !OverlappingFrogs.Contains(Frog))
 	{
-		OverlappingFrogs.Add(Character); // 중복 체크 후 추가
+		
+		OverlappingFrogs.Add(Frog);
 	}
 	
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
@@ -47,9 +49,11 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (Character)
+	AFrog* Frog = Cast<AFrog>(OtherActor);
+	if (Frog)
 	{
-		OverlappingFrogs.Remove(Character); // 정확히 그 개체만 제거
+	
+		OverlappingFrogs.Remove(Frog);
 	}
 	
 	Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
@@ -67,10 +71,8 @@ void AConveyorBeltProp::BeginPlay()
 void AConveyorBeltProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	// 서버에서만 실행
-	if (!HasAuthority()) return;
 
+	// 클라 서버 둘다 각자 실행
 	ConveyorMove();
 }
 
@@ -79,11 +81,13 @@ void AConveyorBeltProp::ConveyorMove()
 	// 유효한 Frog들만 처리
 	for (AFrog* Frog : OverlappingFrogs)
 	{
-		if (IsValid(Frog))
-		{
-			FVector DeltaPos = BeltSpeed * GetWorld()->DeltaTimeSeconds * BeltDir;
-			Frog->AddActorWorldOffset(DeltaPos);
-		}
+		if (!IsValid(Frog)) continue;
+		
+		FVector DeltaPos = BeltSpeed * GetWorld()->DeltaTimeSeconds * BeltDir;
+		
+		// TODO: 택1
+		Frog->AddActorWorldOffset(DeltaPos, true);
+		// Frog->SetActorLocation(Frog->GetActorLocation() + DeltaPos);		
 	}
 }
 

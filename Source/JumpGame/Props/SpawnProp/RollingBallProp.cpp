@@ -16,8 +16,8 @@ ARollingBallProp::ARollingBallProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	Tags.Add("RollingBall");
 	bReplicates = true;
+	Tags.Add("RollingBall");
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	SetRootComponent(MeshComp);
@@ -69,30 +69,22 @@ void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AAc
 		// FLog::Log(TEXT("바닥이랑 닿았다!"));
 	}
 	
-	ARisingWaterProp* Water = Cast<ARisingWaterProp>(OtherActor);
-	if (Water)
+	if (OtherActor->ActorHasTag("Water"))
 	{
 		// 물에 부딪히면 타이머 초기화
 		GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
 		ReturnSelf();
 		// FLog::Log(TEXT("물에 부딪힘, Clear Timer"));
 	}
-
-	/*
-	if (OtherActor->ActorHasTag("Water"))
-	{
-		// 물에 부딪히면 타이머 초기화
-		GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
-		ReturnSelf();
-		FLog::Log(TEXT("물에 부딪힘, Clear Timer"));
-	}
-	*/
 }
 
 // Called when the game starts or when spawned
 void ARollingBallProp::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 동작 동기화
+	SetReplicateMovement(true);
 
 	MeshComp->OnComponentHit.AddDynamic(this, &ARollingBallProp::OnMyRollingBallHit);
 }
@@ -109,9 +101,13 @@ void ARollingBallProp::ReturnSelf()
 {
 	// 소속 풀 없으면 함수 나가자
 	if (ObjectPool == nullptr) return;
-	// 오브젝트 풀에 스스로를 반환하고 비활성화
-	SetActive(false);
-	ObjectPool->ReturnObject(this);
+
+	if (HasAuthority())
+	{
+		// 오브젝트 풀에 스스로를 반환하고 비활성화
+		SetActive(false);
+		ObjectPool->ReturnObject(this);
+	}
 }
 
 void ARollingBallProp::SetActive(bool bIsActive)
@@ -144,8 +140,6 @@ void ARollingBallProp::SetActive(bool bIsActive)
 		ProjectileComp->Activate(true);
 		MeshComp->IgnoreActorWhenMoving(this, true);
 	}
-
-	// FFastLogger::LogConsole(TEXT("SetActive: %d"), bIsActive);
 }
 
 void ARollingBallProp::LaunchProjectile()

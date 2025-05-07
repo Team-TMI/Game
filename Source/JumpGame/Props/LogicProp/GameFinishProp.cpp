@@ -24,7 +24,8 @@ AGameFinishProp::AGameFinishProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("GameFinish");
 
-	CollisionComp->SetBoxExtent(FVector(60.f));
+	CollisionComp->SetBoxExtent(FVector(50,60,80));
+	CollisionComp->SetRelativeScale3D(FVector(3, 2, 1));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
 		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
 	if (TempMesh.Succeeded())
@@ -33,6 +34,8 @@ AGameFinishProp::AGameFinishProp()
 	}
 	
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
+
+	Super::SetSize(FVector(3,2,1));
 }
 
 void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -126,7 +129,7 @@ void AGameFinishProp::GameEnd()
 	}
 
 	// UI를 띄우자
-	VictoryPageUI = CreateWidget<UVictoryPage>(GetWorld(), VictoryPageUIClass);
+	VictoryPageUI = CreateWidget<UVictoryPageUI>(GetWorld(), VictoryPageUIClass);
 	if (VictoryPageUI)
 	{
 		VictoryPageUI->SetVictoryPlayerName(WinnerCharacter->GetName());

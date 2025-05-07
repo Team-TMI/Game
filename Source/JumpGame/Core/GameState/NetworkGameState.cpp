@@ -5,6 +5,7 @@
 
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
+#include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Core/PlayerController/NetworkPlayerController.h"
 #include "JumpGame/Core/PlayerState/NetworkPlayerState.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
@@ -21,13 +22,14 @@ ANetworkGameState::ANetworkGameState()
 	ConnectionVerifyComponent = CreateDefaultSubobject<UConnectionVerifyComponent>(TEXT("ConnectionVerifyComponent"));
 	ConnectionVerifyComponent->SetNetAddressable();
 	ConnectionVerifyComponent->SetIsReplicated(true);
-	
+
+	// 서버에서 호출됨
 	ConnectionVerifyComponent->OnClientAdded.AddDynamic(this, &ANetworkGameState::OnClientAdded);
 	ConnectionVerifyComponent->OnAllClientAdded.AddDynamic(this, &ANetworkGameState::OnAllClientAdded);
+	// 클라이언트에서 호출됨
 	ConnectionVerifyComponent->OnConnectionSucceeded.AddDynamic(this, &ANetworkGameState::OnConnectionSucceeded);
 	ConnectionVerifyComponent->OnConnectionBlocked.AddDynamic(this, &ANetworkGameState::OnConnectionBlocked);
-	ConnectionVerifyComponent->InitMaxPlayerCount(1);
-
+	
 	IOManagerComponent = CreateDefaultSubobject<UIOManagerComponent>(TEXT("IOManagerComponent"));
 
 	FFastLogger::LogConsole(TEXT("FQuizNotify Message : %llu"), sizeof(FQuizNotifyMessage));
@@ -59,10 +61,38 @@ double ANetworkGameState::GetServerWorldTimeSeconds() const
 	}
 }
 
+void ANetworkGameState::TryConnectToServer()
+{
+	bool bRetry = false;
+	ANetworkPlayerController* PlayerController = Cast<ANetworkPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (PlayerController == nullptr)
+	{
+		FFastLogger::LogConsole(TEXT("PlayerController is null"));
+		bRetry |= true;
+	}
+
+	ANetworkPlayerState* PlayerState = Cast<ANetworkPlayerState>(PlayerController->PlayerState);
+	if (PlayerState == nullptr)
+	{
+		FFastLogger::LogConsole(TEXT("PlayerState is null"));
+		bRetry |= true;
+	}
+
+	if (bRetry || !PlayerState->ConnectToServer())
+	{
+		// 재시도
+		GetWorld()->GetTimerManager().SetTimer(ConnectionTimer, this, &ANetworkGameState::TryConnectToServer,
+			CheckInterval, false);
+		return;
+	}
+}
+
 void ANetworkGameState::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GetWorld()->GetTimerManager().SetTimer(ConnectionTimer, this, &ANetworkGameState::TryConnectToServer,
+		CheckInterval, false);
 }
 
 void ANetworkGameState::VerifyConnection(const FString& NetID)
@@ -95,29 +125,36 @@ void ANetworkGameState::MulticastRPC_ConnectionSucceeded_Implementation(const FS
 	const FUniqueNetIdRepl& PlayerNetID = PlayerState->GetUniqueId();
 	FUniqueNetIdPtr PlayerNetIDPtr = PlayerNetID.GetUniqueNetId();
 	FString MyNetID = PlayerNetIDPtr->ToString();
+	FFastLogger::LogConsole(TEXT("My NetID : %s"), *MyNetID);
+	FFastLogger::LogConsole(TEXT("ConnectedNetID : %s"), *NetID);
 	if (NetID == MyNetID)
 	{
+		FFastLogger::LogConsole(TEXT("GameState Connection Succeeded : %s"), *NetID);
 		// 자신의 NetID와 같다면 연결이 성공한 것이다.
 		ConnectionVerifyComponent->SetClientVerify(true);
 		PlayerState->ServerRPC_ConnectionVerified(MyNetID);
 	}
 }
 
+// 클라이언트 한명이 연결에 성공했을 때 서버에서 호출되는 함수. NetID는 연결된 클라이언트의 NetID이다.
 void ANetworkGameState::OnClientAdded(const FString& NetID)
 {
 	FFastLogger::LogConsole(TEXT("GameState Client Added : %s"), *NetID);
 }
 
+// 모든 클라이언트가 연결되었을 때 서버에서 호출되는 함수.
 void ANetworkGameState::OnAllClientAdded()
 {
 	FFastLogger::LogConsole(TEXT("GameState All Client Added"));
 }
 
+// 서버와 성공적으로 연결이 되었을 때 클라이언트에서 호출되는 함수.
 void ANetworkGameState::OnConnectionSucceeded()
 {
 	FFastLogger::LogConsole(TEXT("GameState Connection Succeeded"));
 }
 
+// 연결이 끊길 때 호출되는 함수.
 void ANetworkGameState::OnConnectionBlocked()
 {
 	FFastLogger::LogConsole(TEXT("GameState Connection Blocked"));

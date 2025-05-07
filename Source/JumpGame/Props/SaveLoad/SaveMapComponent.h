@@ -19,17 +19,20 @@ public:
 	// Sets default values for this component's properties
 	USaveMapComponent();
 
-	void SaveMap(const FString& FileName);
+	bool SaveMap(const FString& FileName);
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	void GetAllPropsInfo(TArray<FSaveData>& OutSaveDataArray);
-	void SaveDataToFile(const FSaveDataArray& InSaveDataArray, const FString& FileName);
+	bool SaveDataToFile(const FSaveDataArray& InSaveDataArray, const FString& FileName);
 
 	UPROPERTY()
 	FSaveDataArray SaveDataArray;
 	UPROPERTY()
 	FString DefaultDirectory = SAVE_MAP_DEFAULT_DIRECTORY;
+
+	UPROPERTY()
+	TArray<FString> CollisionPropTags;
 };

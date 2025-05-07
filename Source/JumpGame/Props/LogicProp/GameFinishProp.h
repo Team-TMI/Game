@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "LogicProp.h"
 #include "JumpGame/Characters/Frog.h"
-#include "JumpGame/UI/VictoryPage.h"
+#include "JumpGame/UI/VictoryPageUI.h"
 #include "GameFinishProp.generated.h"
 
 UCLASS(Blueprintable)
@@ -44,9 +44,9 @@ public:
 
 	// UI관련
 	UPROPERTY(EditAnywhere, blueprintReadWrite)
-	TSubclassOf<class UVictoryPage> VictoryPageUIClass;
+	TSubclassOf<class UVictoryPageUI> VictoryPageUIClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UVictoryPage* VictoryPageUI;
+	UVictoryPageUI* VictoryPageUI;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class USoundQuizClear> SoundQuizClearUIClass;
 	UPROPERTY(EditAnywhere)

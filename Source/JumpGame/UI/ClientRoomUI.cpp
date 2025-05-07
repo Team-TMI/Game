@@ -14,6 +14,8 @@
 #include "Components/WidgetSwitcher.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "UICam/LobbyMainCamera.h"
+#include "UICam/LobbySubCamera.h"
 
 
 void UClientRoomUI::NativeOnInitialized()
@@ -23,6 +25,9 @@ void UClientRoomUI::NativeOnInitialized()
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+
+	PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	PC->SetViewTarget(MainCamera);
 
 	// WidgetSwitcher (0)
 	// 메인 화면 버튼 클릭
@@ -53,7 +58,8 @@ void UClientRoomUI::NativeOnInitialized()
 void UClientRoomUI::OnClickGoFindRoom()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(1);
-
+	SetViewTarget();
+	
 	// 세션 검색 화면 넘어갈때 자동으로 한번은 세션을 검색해주자
 	OnClickFind();
 }
@@ -66,6 +72,7 @@ void UClientRoomUI::OnClickGoCreateMap()
 void UClientRoomUI::OnClickGoFrogPass()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(2);
+	SetViewTarget();
 }
 
 void UClientRoomUI::OnClickGoSettings()
@@ -76,6 +83,7 @@ void UClientRoomUI::OnClickGoSettings()
 void UClientRoomUI::OnClickGoCredit()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(3);
+	SetViewTarget();
 }
 
 void UClientRoomUI::OnClickGoGameEnd()
@@ -152,6 +160,20 @@ void UClientRoomUI::OnFindComplete(int32 Idx, FString Info)
 		Scroll_RoomList->AddChild(Item);
 		// 만들어진 SessionItem의 Text 내용을 변경하고, idx 전달하자
 		Item->SetInfo(Idx, Info);
+	}
+}
+
+void UClientRoomUI::SetViewTarget()
+{
+	AActor* CurrentTarget = PC->GetViewTarget();
+
+	if (CurrentTarget == MainCamera)
+	{
+		PC->SetViewTargetWithBlend(SubCamera, 0.5f);
+	}
+	else
+	{
+		PC->SetViewTargetWithBlend(MainCamera, 0.5f);
 	}
 }
 
