@@ -27,7 +27,7 @@ AObstacleProp::AObstacleProp()
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
-	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 0));
+	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 50.f));
 	
 	Super::SetSize(FVector(1,1,1));
 }

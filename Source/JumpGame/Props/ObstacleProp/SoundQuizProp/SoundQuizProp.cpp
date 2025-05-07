@@ -100,14 +100,8 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	// 캐릭터 퀴즈 카메라로 전환
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
-		Frog = Cast<AFrog>(OtherActor);
-		if (Frog)
-		{
-			Frog->StopMovementAndResetRotation();
-			Frog->CameraMissionMode();
-			Frog->SetCrouchEnabled(false);
-			Frog->SetJumpGaugeVisibility(false);
-		}
+		// 모든 플레이어의 움직임 제한
+		MulticastRPC_PlayerStopMovement();
 	}
 	
 	// 물 멈추자
@@ -195,8 +189,6 @@ void ASoundQuizProp::SendSoundQuizMessage()
 	
 	while (true)
 	{
-		// FFastLogger::LogConsole(TEXT("TotalSize: %d"), TotalWavSize);
-
 		// 2. 쪼개서 여러 패킷으로 전송 (1024바이트 단위로)
 		// 현재 인덱스 기준으로 청크를 생성
 		// WAV 전체에서 1024만큼 데이터를 꺼내고, 마지막 청크는 1024보다 작을 수 있으니까 Min()으로 크기 조절
@@ -252,7 +244,6 @@ void ASoundQuizProp::SendSoundQuizMessage()
 void ASoundQuizProp::ReceiveSoundQuizMessage()
 {
 	FMessageUnion RespMessage;
-	// FFastLogger::LogConsole(TEXT("메세지 받을거야!"));
 	// AI가 보내준 메세지를 받자
 	if (!NetGS->IOManagerComponent->PopMessage(EMessageType::WaveResponse, RespMessage))
 	{
@@ -262,12 +253,14 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 내 메세지가 아니면 무시하자
 	if (RespMessage.Header.PlayerID != PlayerIdx) return;
 
+	/*
 	FFastLogger::LogConsole(TEXT("메세지 받았습니다@@@@@@@@"));
 	FDateTime Now = FDateTime::Now();
 	int32 Hour = Now.GetHour();
 	int32 Minute = Now.GetMinute();
 	int32 Second = Now.GetSecond();
 	UE_LOG(LogTemp, Warning, TEXT("ReceiveSoundQuizMessage 현재 시간: %02d:%02d:%02d"), Hour, Minute, Second);
+	*/
 
 	// 내가 만든 변수에 넣자
 	QuizID = RespMessage.WavResponseMessage.QuizID;
@@ -296,9 +289,7 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageStr: %s"), *MessageStr);
 
 	// 총 몇번 응답 했는지를 체크한다
-	// SendResponseIdx++;
-	MyResponseCount = ResponseCountPerPlayer.FindOrAdd(PlayerIdx);
-	MyResponseCount++;
+	SendResponseIdx++;
 
 	// 틱 비활성화
 	bIsMessageReceived = false;
@@ -326,7 +317,7 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 	// 메세지 전송
 	NetGS->IOManagerComponent->SendGameMessage(Msg);
 
-	// 캐릭터 카메라 다시 원래대로
+	// 캐릭터 카메라 다시 원래대로 (끝난 사람만)
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (Frog)
 	{
@@ -335,9 +326,17 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 		Frog->SetCrouchEnabled(true);
 		Frog->SetJumpGaugeVisibility(true);
 	}
-	
-	// 물 다시 차오르기
-	RisingWaterProp->StartRising();
+
+	if (HasAuthority())
+	{
+		FinishedPlayerCount++;
+		StartRisingWater();
+	}
+	else
+	{
+		// 서버 아니면, 서버한테 알려주기
+		ServerRPC_EndPlayerCount();
+	}
 
 	// 퀴즈 정보 초기화
 	ResetSoundQuiz();
@@ -353,8 +352,7 @@ void ASoundQuizProp::ResetSoundQuiz()
 	MessageSize = 0;
 	MessageStr = "";
 
-	//SendResponseIdx = 0;
-	MyResponseCount = 0;
+	SendResponseIdx = 0;
 	
 	CachedBinaryWav = { 0 };
 	CurrentSendIndex = 0;
@@ -402,6 +400,42 @@ void ASoundQuizProp::LoadWavFileBinary(const FString& FilePath, TArray<uint8>& B
     }
     // 로드 성공 시
     UE_LOG(LogTemp, Log, TEXT("Successfully loaded WAV file: %s"), *FilePath);
+}
+
+void ASoundQuizProp::MulticastRPC_PlayerStopMovement_Implementation()
+{
+	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (Frog)
+	{
+		Frog->StopMovementAndResetRotation();
+		Frog->CameraMissionMode();
+		Frog->SetCrouchEnabled(false);
+		Frog->SetJumpGaugeVisibility(false);
+	}
+}
+
+void ASoundQuizProp::ServerRPC_EndPlayerCount_Implementation()
+{
+	// 클라이언트는 퀴즈가 끝나면 이 함수를 호출한다
+	FinishedPlayerCount++;
+
+	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+	// TotalPlayerCount = GI->GetMaxPlayerCount();
+	TotalPlayerCount = GetWorld()->GetGameState()->PlayerArray.Num();
+
+	StartRisingWater();
+}
+
+void ASoundQuizProp::StartRisingWater()
+{
+	// 모든 플레이어가 완료 되었을때만, 물이 차오른다
+	if (FinishedPlayerCount >= TotalPlayerCount)
+	{
+		if (RisingWaterProp)
+		{
+			RisingWaterProp->StartRising();
+		}
+	}
 }
 
 void ASoundQuizProp::ClearAllTimer()
