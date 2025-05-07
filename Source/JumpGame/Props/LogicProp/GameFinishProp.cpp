@@ -47,7 +47,6 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if (!HasAuthority()) return;
 	if (!OtherActor->ActorHasTag("Frog")) return;
-	// FFastLogger::LogConsole(TEXT("Overlap!!!: %s"), *OtherActor->GetName());
 	
 	AFrog* Character = Cast<AFrog>(OtherActor);
 	if (!bWinnerFound)

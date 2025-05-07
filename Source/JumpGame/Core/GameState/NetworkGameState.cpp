@@ -22,6 +22,7 @@ ANetworkGameState::ANetworkGameState()
 	ConnectionVerifyComponent = CreateDefaultSubobject<UConnectionVerifyComponent>(TEXT("ConnectionVerifyComponent"));
 	ConnectionVerifyComponent->SetNetAddressable();
 	ConnectionVerifyComponent->SetIsReplicated(true);
+	ConnectionVerifyComponent->InitMaxPlayerCount(1);
 
 	// 서버에서 호출됨
 	ConnectionVerifyComponent->OnClientAdded.AddDynamic(this, &ANetworkGameState::OnClientAdded);

@@ -70,8 +70,8 @@ bool ULoadMapComponent::LoadFileToJsonString(const FString& FilePath, FString& J
 	// 파일에서 문자열 읽기
 	if (FFileHelper::LoadFileToString(JsonString, *FilePath))
 	{
-		UE_LOG(LogTemp, Log, TEXT("파일에서 JSON을 성공적으로 읽었습니다!"));
-		UE_LOG(LogTemp, Log, TEXT("JSON 문자열: %s"), *JsonString);
+		// UE_LOG(LogTemp, Log, TEXT("파일에서 JSON을 성공적으로 읽었습니다!"));
+		// UE_LOG(LogTemp, Log, TEXT("JSON 문자열: %s"), *JsonString);
 
 		// 이제 여기서 JsonString → FSaveDataArray 파싱도 가능함
 		return true;
@@ -84,10 +84,10 @@ bool ULoadMapComponent::ParseJsonStringToMap(const FString& JsonString)
 {
 	if (FJsonObjectConverter::JsonObjectStringToUStruct(JsonString, &SaveDataArray, 0, 0))
 	{
-		UE_LOG(LogTemp, Log, TEXT("JSON → 구조체 변환 성공"));
+		// UE_LOG(LogTemp, Log, TEXT("JSON → 구조체 변환 성공"));
 		return true;
 	}
-	UE_LOG(LogTemp, Error, TEXT("JSON → 구조체 변환 실패"));
+	// UE_LOG(LogTemp, Error, TEXT("JSON → 구조체 변환 실패"));
 	return false;
 }
 
