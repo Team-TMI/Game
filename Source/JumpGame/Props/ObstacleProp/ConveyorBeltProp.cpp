@@ -39,7 +39,6 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	AFrog* Frog = Cast<AFrog>(OtherActor);
 	if (Frog && !OverlappingFrogs.Contains(Frog))
 	{
-		
 		OverlappingFrogs.Add(Frog);
 	}
 	
@@ -52,7 +51,6 @@ void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent,
 	AFrog* Frog = Cast<AFrog>(OtherActor);
 	if (Frog)
 	{
-	
 		OverlappingFrogs.Remove(Frog);
 	}
 	

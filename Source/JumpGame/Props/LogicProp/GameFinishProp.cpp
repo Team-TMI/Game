@@ -44,31 +44,18 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	if (!HasAuthority()) return;
 	if (!OtherActor->ActorHasTag("Frog")) return;
-	// FFastLogger::LogConsole(TEXT("Overlap!!!: %s"), *OtherActor->GetName());
 	
 	Character = Cast<AFrog>(OtherActor);
 	if (!bWinnerFound)
 	{
 		bWinnerFound = true;
 		
-		// 1등 캐릭터 저장 (서버에서)
+		// 1등 캐릭터 저장
 		WinnerCharacter = Character;
 
 		// 1등 캐릭터에게 Clear UI 띄우자
-		if (WinnerCharacter->IsLocallyControlled())
-		{
-			if (SoundQuizClear)
-			{
-				SoundQuizClear->AddToViewport();
-			}
-			WinnerCharacter->SetJumpGaugeVisibility(false);
-		}
-		else
-		{
-			MulticastRPC_ShowClearUI();
-		}
+		MulticastRPC_ShowClearUI();
 		
 		// 10초 후에 게임을 끝내자
 		FTimerHandle EndTimerHandle;
@@ -136,8 +123,18 @@ void AGameFinishProp::GameEnd()
 
 void AGameFinishProp::MulticastRPC_ShowClearUI_Implementation()
 {
+	// 내 캐릭터가 위너인지 판단하자
+	AFrog* LocalCharacter = Cast<AFrog>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	
+	if (LocalCharacter == WinnerCharacter)
+	{
+		if (SoundQuizClear)
+		{
+			SoundQuizClear->AddToViewport();
+		}
+		LocalCharacter->SetJumpGaugeVisibility(false);
+	}
 }
-
 
 void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 {
@@ -148,20 +145,18 @@ void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 	}
 	
 	// 플레이어들 조작막기
-	Character->StopMovementAndResetRotation();
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	AFrog* LocalCharacter = Cast<AFrog>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	LocalCharacter->StopMovementAndResetRotation();
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	PC->SetInputMode(FInputModeUIOnly());
 	PC->bShowMouseCursor = true;
 	
 	// 우승자 앞에 보게 정렬하기
 	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
-	
-	// 카메라 전환
-	if (PC)
-	{
-		PC->SetViewTargetWithBlend(VictoryP, 0.5f);
-	}
 
+	// 카메라 정렬
+	PC->SetViewTargetWithBlend(VictoryP, 0.5f);
+	
 	// UI를 띄우자
 	VictoryPageUI = CreateWidget<UVictoryPageUI>(GetWorld(), VictoryPageUIClass);
 	if (VictoryPageUI)
