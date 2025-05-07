@@ -59,6 +59,9 @@ public:
 	void StartCrouch();
 	void StopCrouch();
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ExecuteWaterSurfaceJump(const FVector& LaunchVelocity);
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_StartJump();
 	UFUNCTION(NetMulticast, Reliable)

@@ -88,4 +88,6 @@ public:
 	
 public:
 	FTimerHandle ResumeRisingTimerHandle;
+	FTimerHandle TimerHandle;
+
 };

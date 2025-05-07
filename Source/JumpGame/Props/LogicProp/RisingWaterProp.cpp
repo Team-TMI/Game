@@ -159,6 +159,21 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 		// 서버에서만 처리
 		if (HasAuthority())
 		{
+			// 안빠르면 가라앉지 않게
+			if (OverlappingFrog->GetCharacterMovement()->Velocity.Length() < 1'000.f)
+			{
+				OverlappingFrog->CharacterWaterState = ECharacterStateEnum::Surface;
+			}
+
+			// 잠시 가라앉고 올라오게
+			FTimerDelegate MovementModeDelegate{
+				FTimerDelegate::CreateLambda([this]() {
+					ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
+					SurfaceCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
+				})
+			};
+			GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
+			
 			OverlappingFrog->ServerRPC_UpdateOverallWaterState(true, this);
 		}
 	}
@@ -172,6 +187,11 @@ void ARisingWaterProp::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	{
 		if (HasAuthority())
 		{
+			GetWorldTimerManager().ClearTimer(TimerHandle);
+			
+			ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
+			SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
+			
 			OverlappingFrog->ServerRPC_UpdateOverallWaterState(false, this);
 		}
 	}
