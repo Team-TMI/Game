@@ -120,4 +120,6 @@ protected:
 
 	UPROPERTY()
 	bool bIsOnCollision = false;
+	UPROPERTY()
+	int32 CollisionCount = 0;
 };

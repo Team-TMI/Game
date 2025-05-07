@@ -3,8 +3,10 @@
 
 #include "PropSlot.h"
 
+#include "PropDragVisual.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
+#include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -20,17 +22,18 @@ void UPropSlot::SetPropID(FName InPropID)
 	PropID = InPropID;
 }
 
-void UPropSlot::SetPropInfo(FPropStruct* PropInfo)
+void UPropSlot::SetPropInfo(UPropWrap* PropInfo)
 {
 	if (!PropInfo)
 	{
 		return;
 	}
-	PropID = PropInfo->PropID;
-	PropImage->SetBrushFromTexture(PropInfo->PropIcon);
-	PropClass = PropInfo->PropClass;
+	PropID = PropInfo->Data.PropID;
+	PropImage->SetBrushFromTexture(PropInfo->Data.PropIcon);
+	PropClass = PropInfo->Data.PropClass;
 	this->SetVisibility(ESlateVisibility::Visible);
 	// DragVisual을 세팅해줘야 함.
+	PropDragVisual->PropImage->SetBrushFromTexture(PropInfo->Data.PropIcon);
 }
 
 void UPropSlot::ClearInfo()
@@ -39,13 +42,14 @@ void UPropSlot::ClearInfo()
 	PropImage->SetBrushFromTexture(nullptr);
 	PropClass = nullptr;
 	this->SetVisibility(ESlateVisibility::Hidden);
+	PropDragVisual->PropImage->SetBrushFromTexture(nullptr);
 }
 
 void UPropSlot::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	
-	PropDragVisual = CreateWidget<UUserWidget>(GetWorld(), PropWidgetClass);
+	PropDragVisual = CreateWidget<UPropDragVisual>(GetWorld(), PropWidgetClass);
 }
 
 // 마우스가 눌렸음을 감지함.

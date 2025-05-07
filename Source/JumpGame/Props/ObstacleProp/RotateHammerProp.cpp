@@ -5,6 +5,7 @@
 
 #include "Components/BoxComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 
 
 // Sets default values
@@ -16,7 +17,10 @@ ARotateHammerProp::ARotateHammerProp()
 
 	CollisionComp->SetRelativeLocation(FVector(0, 150, 0));
 	// CollisionComp랑 충돌
-	CollisionComp->SetCollisionProfileName(TEXT("Prop"));
+	// CollisionComp->SetCollisionProfileName(TEXT("Prop"));
+	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
+
+	PropDataComponent->SetPropID(TEXT("5005"));
 }
 
 // Called when the game starts or when spawned
@@ -24,8 +28,8 @@ void ARotateHammerProp::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	RotAxis = FRotator(0,0,1);
-	RotAngle = 50.f;
+	RotAxis = FRotator(0,0,-1);
+	RotAngle = 200.f;
 }
 
 // Called every frame
@@ -36,8 +40,9 @@ void ARotateHammerProp::Tick(float DeltaTime)
 
 void ARotateHammerProp::CalculateForce(AFrog* Character)
 {
+	FFastLogger::LogScreen(FColor::Red, TEXT("Hit!"));
 	FVector Direction = CollisionComp->GetUpVector();
-	float Force = 500;
+	float Force = 2500;
 	
 	Super::LaunchCharacter(Character, Direction, Force, true, true);
 }

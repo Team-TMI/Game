@@ -10,7 +10,9 @@
 #define WIN32_LEAN_AND_MEAN
 #define NORESOURCE      // UpdateResource 함수 제거 (중요!)
 #define NOMINMAX
+#include "Windows/AllowWindowsPlatformTypes.h"
 #include <windows.h>
+#include "Windows/HideWindowsPlatformTypes.h"
 
 FIPCHandler::FIPCHandler()
 {

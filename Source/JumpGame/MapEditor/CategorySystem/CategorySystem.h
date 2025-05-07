@@ -7,8 +7,36 @@
 #include "Components/ActorComponent.h"
 #include "CategorySystem.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPropAdded, const FPropStruct&, Prop);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPropRemoved, const FPropStruct&, Prop);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPropAdded, const class UPropWrap*, Prop);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPropRemoved, const class UPropWrap*, Prop);
+
+USTRUCT()
+struct FPropIndexList
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TArray<class UPropWrap*> PropList;
+
+	FPropIndexList(const TArray<class UPropWrap*> InPropList = {})
+		: PropList(InPropList)
+	{
+	}
+};
+
+USTRUCT()
+struct FSubCache
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TMap<ESubCategoryType, FPropIndexList> SubCategoryMap;
+
+	FSubCache(const TMap<ESubCategoryType, FPropIndexList> InSubCategoryMap = {})
+		: SubCategoryMap(InSubCategoryMap)
+	{
+	}
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class JUMPGAME_API UCategorySystem : public UActorComponent
@@ -28,15 +56,17 @@ public:
 	const TArray<ESubCategoryType>& GetSubCategoriesByMajor(EMajorCategoryType Major);
 
 	// 조회 함수
-	const TArray<FPropStruct*>& GetPropsByMajor(EMajorCategoryType Major);
-	const TArray<FPropStruct*>& GetPropsBySub(EMajorCategoryType Major, ESubCategoryType Sub);
-	const FPropStruct* GetPropsByID(FName ID);
+	const TArray<class UPropWrap*>& GetPropsByMajor(EMajorCategoryType Major);
+	const TArray<class UPropWrap*>& GetPropsBySub(EMajorCategoryType Major, ESubCategoryType Sub);
+	const class UPropWrap* GetPropsByID(FName ID);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPropAdded OnPropAdded;
 	UPROPERTY(BlueprintAssignable)
 	FOnPropRemoved OnPropRemoved;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual ~UCategorySystem() override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -48,7 +78,7 @@ private:
 	UFUNCTION()
 	void ReIndex();
 	UFUNCTION()
-	void IndexProp(FPropStruct& InPropStruct);
+	void IndexProp(class UPropWrap* InPropWrap);
 	
 	const FMajorTableInfo* FindMajorTableInfoRow(const EMajorCategoryType InMajorCategoryType);
 	
@@ -58,6 +88,9 @@ private:
 	class UDataTable* MajorTableInfoTable = nullptr;
 
 	// 카테고리별로 Prop을 관리하기 위한 Map
-	TArray<FPropStruct> PropList;
-	TMap<EMajorCategoryType, TMap<ESubCategoryType, TArray<FPropStruct*>>> Index;
+	UPROPERTY()
+	TArray<class UPropWrap*> PropList;
+	UPROPERTY()
+	TMap<EMajorCategoryType, FSubCache> Index;
+	// TMap<EMajorCategoryType, TMap<ESubCategoryType, TArray<class UPropWrap*>>> Index;
 };

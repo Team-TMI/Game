@@ -34,9 +34,11 @@ enum class ESubCategoryType : uint8
 #pragma endregion
 	
 #pragma region ObstacleSubTags
-	Bouncing			UMETA(DisplayName = "Bouncing"),		// 바운스
-	Rotating			UMETA(DisplayName = "Rotating"),		// 회전
+	Bouncing			UMETA(DisplayName = "Bouncing"),	// 바운스
+	Rotating			UMETA(DisplayName = "Rotating"),	// 회전
 	Pad					UMETA(DisplayName = "Pad"),			// 패드
+	Firing				UMETA(DisplayName = "Firing"),		// 발사
+	AI					UMETA(DisplayName = "AI"),			// AI
 	ObstacleEtc			UMETA(DisplayName = "ObstacleEtc"),	// 장애물/기타
 	
 #pragma endregion
@@ -55,7 +57,7 @@ enum class ESubCategoryType : uint8
 	Fire			UMETA(DisplayName = "Fire"),			// 불
 	Flower			UMETA(DisplayName = "Flower"),			// 꽃, 잔디, 꽃, 덩쿨 등
 	Tree			UMETA(DisplayName = "Tree"),			// 나무
-	DecorationEtc	UMETA(DisplayName = "Etc"),				// 기타
+	DecorationEtc	UMETA(DisplayName = "DecorationEtc"),				// 기타
 	
 #pragma endregion
 

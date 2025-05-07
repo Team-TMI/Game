@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "JumpGame/MapEditor/CategorySystem/PropStruct.h"
+#include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "VerticalPropSlotUI.generated.h"
 
@@ -17,7 +18,7 @@ public:
 	UFUNCTION()
 	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* CachedDragDropOperation);
 	
-	void SetPropSlots(FPropStruct* Top, FPropStruct* Below = nullptr);
+	void SetPropSlots(class UPropWrap* Top, class UPropWrap* Below = nullptr);
 	void ClearInfo();
 
 private:

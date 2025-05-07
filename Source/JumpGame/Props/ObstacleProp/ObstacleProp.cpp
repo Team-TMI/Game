@@ -54,11 +54,23 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	FFastLogger::LogScreen(FColor::Red, TEXT("OVERLAPPPPPPPPPPP"));
 	if (!OtherActor->ActorHasTag("Frog")) return;
 	
 	if (bDebug)
 	{
 		FLog::Log("AObstacleProp::OnMyBeginOverlap");
+	}
+
+	AFrog* Character = Cast<AFrog>(OtherActor);
+	if (Character)
+	{
+		if (bDebug)
+		{
+			FLog::Log("AObstacleProp::OnMyOverlap");
+		}
+		
+		CalculateForce(Character);
 	}
 }
 
@@ -136,7 +148,7 @@ void AObstacleProp::ObstacleRotate()
 		float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
 		DeltaRot = RotAxis * RotSpeed;
 		// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
-		PivotScene->AddLocalRotation(DeltaRot);
+		PivotScene->AddLocalRotation(DeltaRot, true);
 	}
 }
 

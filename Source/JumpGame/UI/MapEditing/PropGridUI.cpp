@@ -44,18 +44,14 @@ void UPropGridUI::UpdatePropGrid(const EMajorCategoryType& MajorCategory, UCateg
 {
 	ClearPropGrid();
 
-	const TArray<FPropStruct*>& PropList = CategorySystem->GetPropsByMajor(MajorCategory);
+	FFastLogger::LogConsole(TEXT("UpdatePropGrid MajorCategory : %s"), *FCommonUtil::GetEnumDisplayName(MajorCategory).ToString());
+	
+	const TArray<UPropWrap*>& PropList = CategorySystem->GetPropsByMajor(MajorCategory);
 	
 	int32 SlotIndex = 0;
-	for (int32 i = 0; i < PropList.Num() && PropList.Num() >= 2; i += 2)
+	for (int32 i = 0; i < PropList.Num(); i += 2)
 	{
-		PropSlots[SlotIndex]->SetPropSlots(PropList[i], PropList[i + 1]);
-		GridScroll->AddChild(PropSlots[SlotIndex]);
-		SlotIndex++;
-	}
-	if (PropList.Num() % 2 == 1)
-	{
-		PropSlots[SlotIndex]->SetPropSlots(PropList.Last(), nullptr);
+		PropSlots[SlotIndex]->SetPropSlots(PropList[i], i + 1 < PropList.Num() ? PropList[i + 1] : nullptr);
 		GridScroll->AddChild(PropSlots[SlotIndex]);
 		SlotIndex++;
 	}
@@ -66,18 +62,12 @@ void UPropGridUI::UpdatePropGridBySub(const EMajorCategoryType& MajorCategory, E
 {
 	ClearPropGrid();
 
-	const TArray<FPropStruct*>& PropList = CategorySystem->GetPropsBySub(MajorCategory, SubCategory);
+	const TArray<UPropWrap*>& PropList = CategorySystem->GetPropsBySub(MajorCategory, SubCategory);
 
 	int32 SlotIndex = 0;
-	for (int32 i = 0; i < PropList.Num() && PropList.Num() >= 2 ; i += 2)
+	for (int32 i = 0; i < PropList.Num(); i += 2)
 	{
-		PropSlots[SlotIndex]->SetPropSlots(PropList[i], PropList[i + 1]);
-		GridScroll->AddChild(PropSlots[SlotIndex]);
-		SlotIndex++;
-	}
-	if (PropList.Num() % 2 == 1)
-	{
-		PropSlots[SlotIndex]->SetPropSlots(PropList.Last(), nullptr);
+		PropSlots[SlotIndex]->SetPropSlots(PropList[i], i + 1 < PropList.Num() ? PropList[i + 1] : nullptr);
 		GridScroll->AddChild(PropSlots[SlotIndex]);
 		SlotIndex++;
 	}

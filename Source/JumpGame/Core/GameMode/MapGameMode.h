@@ -14,12 +14,15 @@ class JUMPGAME_API AMapGameMode : public ANetworkGameMode
 {
 	GENERATED_BODY()
 
-protected:
-	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
-
-private:
-
 public:
 	AMapGameMode();
+	
+protected:
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 	virtual void BeginPlay() override;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapLoad", meta = (AllowPrivateAccess = "true"))
+	class ULoadMapComponent* LoadMapComponent = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapLoad", meta = (AllowPrivateAccess = "true"))
+	class USaveMapComponent* SaveMapComponent = nullptr;
 };

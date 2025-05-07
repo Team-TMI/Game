@@ -6,6 +6,7 @@
 #include "Components/Image.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "JumpGame/UI/Obstacle/EyeTrackingUI.h"
 #include "JumpGame/UI/Obstacle/FlyingObjectUI.h"
 #include "JumpGame/UI/Obstacle/TimeRemainUI.h"
@@ -41,6 +42,8 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 		MissionLocation->SetupAttachment(RootComponent);
 		MissionLocation->SetRelativeLocation(FVector(0, 0, 100.f));
 	}
+
+	PropDataComponent->SetPropID(TEXT("5004"));
 }
 
 void AObjectEyeHunterProp::BeginPlay()
