@@ -69,6 +69,9 @@ public:
 	uint32 MessageSize = 0;
 	UPROPERTY()
 	FString MessageStr = "";
+	// 퀴즈 전송할때마다 보내주자
+	UPROPERTY()
+	int32 PlayerIdx;
 
 	// 음성데이터를 몇번 주고 받으면 정답을 맞추지 못해도 게임을 종료
 	UPROPERTY()

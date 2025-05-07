@@ -6,16 +6,18 @@
 #include "EdGraphSchema_K2_Actions.h"
 #include "SoundMommyQuizProp.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "Misc/DateTime.h"
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/AIServices/Shared/Message.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "Runtime/Core/Public/Containers/StringConv.h"
 #include "Kismet/GameplayStatics.h"
 
 
-
+class UJumpGameInstance;
 // Sets default values
 ASoundQuizProp::ASoundQuizProp()
 {
@@ -124,10 +126,27 @@ void ASoundQuizProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 
 void ASoundQuizProp::SendStartSoundQuizNotify()
 {
-	// AI쪽에서 첫번째 문장을 준다면, 5초동안 녹음 후 전송
+	FString Key;
 	
+	// 플레이어의 고유한 네트워크 ID값 가져오기
+	APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	const FUniqueNetIdRepl& NetIdRepl = PC->GetPlayerState<APlayerState>()->GetUniqueId();
+	if (NetIdRepl.IsValid())
+	{
+		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+		// 문자열로 추출하자
+		Key = NetId->ToString();
+	}
+	
+	// 게임 인스턴스 가져오기
+	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+	TMap<FString, FPlayerInfo>& InfoMap = GI->GetPlayerInfo();
+	PlayerIdx = InfoMap[Key].PlayerID;
+	
+	// AI쪽에서 첫번째 문장을 준다면, 5초동안 녹음 후 전송
 	// 퀴즈 시작 메시지를 보내주자
 	FQuizNotifyMessage NotifyMessage;
+	NotifyMessage.Header.PlayerID = PlayerIdx;
 	NotifyMessage.Header.Type = EMessageType::QuizNotify;
 	NotifyMessage.QuizID = 1;
 	NotifyMessage.Start = 1; //시작
@@ -186,7 +205,8 @@ void ASoundQuizProp::SendSoundQuizMessage()
 		
 		// 첫번째 패킷이면 start=1, 마지막 패킷이면 fin=1
 		// 0으로 전체 초기화(패딩값넣기위해)
-		FMemory::Memzero(&ReqMessage, sizeof(ReqMessage)); 
+		FMemory::Memzero(&ReqMessage, sizeof(ReqMessage));
+		ReqMessage.Header.PlayerID = PlayerIdx;
 		ReqMessage.Header.Type = EMessageType::WaveRequest;
 		ReqMessage.QuizID = 1;
 		ReqMessage.Start = (CurrentSendIndex == 0) ? 1 : 0;
@@ -286,6 +306,7 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 {
 	// 퀴즈 끝 메시지를 보내주자
 	FQuizNotifyMessage EndMessage;
+	EndMessage.Header.PlayerID = PlayerIdx;
 	EndMessage.Header.Type = EMessageType::QuizNotify;
 	EndMessage.QuizID = 1;
 	EndMessage.Start = 0;

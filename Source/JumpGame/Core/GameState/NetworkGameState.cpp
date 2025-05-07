@@ -5,6 +5,7 @@
 
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
+#include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Core/PlayerController/NetworkPlayerController.h"
 #include "JumpGame/Core/PlayerState/NetworkPlayerState.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
@@ -28,9 +29,6 @@ ANetworkGameState::ANetworkGameState()
 	// 클라이언트에서 호출됨
 	ConnectionVerifyComponent->OnConnectionSucceeded.AddDynamic(this, &ANetworkGameState::OnConnectionSucceeded);
 	ConnectionVerifyComponent->OnConnectionBlocked.AddDynamic(this, &ANetworkGameState::OnConnectionBlocked);
-	// 최대 몇명의 플레이어가 플레이를 할지 설정하는 함수
-	// GI에서 정보를 들고와서 설정해준다.
-	ConnectionVerifyComponent->InitMaxPlayerCount(3);
 	
 	IOManagerComponent = CreateDefaultSubobject<UIOManagerComponent>(TEXT("IOManagerComponent"));
 
@@ -92,7 +90,7 @@ void ANetworkGameState::TryConnectToServer()
 void ANetworkGameState::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	GetWorld()->GetTimerManager().SetTimer(ConnectionTimer, this, &ANetworkGameState::TryConnectToServer,
 		CheckInterval, false);
 }

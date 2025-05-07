@@ -157,6 +157,8 @@ AFrog::AFrog()
 	// MotionMatching
 	TrajectoryComponent = CreateDefaultSubobject<UCharacterTrajectoryComponent>(
 		TEXT("TrajectoryComponent"));
+	TrajectoryComponent->SetIsReplicated(true);
+	GetCharacterMovement()->SetIsReplicated(true);
 
 	// 초기값 설정
 	bIsSwimming = false;
@@ -170,6 +172,8 @@ AFrog::AFrog()
 
 	// 동기화 좀 더 빨라지게
 	SetNetUpdateFrequency(200.f);
+	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
+	GetCharacterMovement()->bNetworkSkipProxyPredictionOnNetUpdate = true;
 }
 
 void AFrog::NotifyControllerChanged()
@@ -199,7 +203,7 @@ void AFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
-
+	
 	// 공중에 있을 때는 회전 잘 안되게
 	if (GetCharacterMovement()->IsFalling())
 	{
@@ -336,7 +340,16 @@ void AFrog::StopJump()
 
 void AFrog::StartSprint()
 {
-	ServerRPC_StartSprint();
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	}
+	else
+	{
+		// 클라 예측 실행
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+		ServerRPC_StartSprint();
+	}
 }
 
 void AFrog::StopSprint()

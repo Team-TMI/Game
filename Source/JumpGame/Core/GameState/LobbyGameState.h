@@ -18,6 +18,7 @@ class JUMPGAME_API ALobbyGameState : public ANetworkGameState
 public:
 	ALobbyGameState();
 	virtual void BeginPlay() override;
+	virtual void OnClientAdded(const FString& NetID) override;
 
 	UPROPERTY()
 	class UJumpGameInstance* GI;
@@ -31,4 +32,5 @@ public:
 	TSubclassOf<class UWaitRoomUI> WaitRoomUIClass;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UWaitRoomUI* WaitRoomUI;
+	
 };

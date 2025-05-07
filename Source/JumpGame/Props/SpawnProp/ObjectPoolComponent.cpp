@@ -79,8 +79,12 @@ void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject)
 	// FFastLogger::LogConsole(TEXT("알림을 보낸다: 다시 왔음!!"));
 	// 사용하고 나서 다시 풀에 넣자 
 	Pool.Push(ReturnObject);
-	// 알림을 보낸다: 다시 왔음!!
-	OnObjectReturn.Broadcast();
+
+	if (GetOwner()->HasAuthority())
+	{
+		// 알림을 보낸다: 다시 왔음!!
+		OnObjectReturn.Broadcast();
+	}
 }
 
 void UObjectPoolComponent::Initialize()

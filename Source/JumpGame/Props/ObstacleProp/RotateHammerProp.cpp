@@ -14,6 +14,7 @@ ARotateHammerProp::ARotateHammerProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("RotateHammer");
 
+	CollisionComp->SetRelativeLocation(FVector(0, 150, 0));
 	// CollisionComp랑 충돌
 	CollisionComp->SetCollisionProfileName(TEXT("Prop"));
 }

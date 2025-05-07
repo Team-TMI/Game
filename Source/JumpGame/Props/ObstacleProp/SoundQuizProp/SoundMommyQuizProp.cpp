@@ -49,6 +49,7 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep,
 	                        SweepResult);
 
+	FFastLogger::LogScreen(FColor::Red, TEXT("Overlapp!!!!!!!!!!000"));
 	// 시작하면 UI 띄우자
 	if (SoundQuizUI)
 	{
@@ -154,4 +155,5 @@ void ASoundMommyQuizProp::RemoveSoundQuizUI()
 		SoundQuizFail->RemoveFromParent();
 	}
 }
+
 

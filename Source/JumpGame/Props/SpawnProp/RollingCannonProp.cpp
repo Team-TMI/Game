@@ -13,6 +13,7 @@ ARollingCannonProp::ARollingCannonProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 	Tags.Add("Cannon");
 	
 	ObjectPool = CreateDefaultSubobject<UObjectPoolComponent>(TEXT("ObjectPool"));
@@ -24,9 +25,14 @@ ARollingCannonProp::ARollingCannonProp()
 
 void ARollingCannonProp::OnProjectileReturn()
 {
-	// 알림 받으면 다시 발사!
-	// FFastLogger::LogConsole(TEXT("알림받았다!! 다시 발사"));
-	FireRollingBall();
+	// 서버에서만 처리
+	// OnObjectReturned은 모든 클라이언트에서 호출되어, FireRollingBall() 중복될 수도 있음
+	if (HasAuthority())
+	{
+		// 알림 받으면 다시 발사!
+		// FFastLogger::LogConsole(TEXT("알림받았다!! 다시 발사"));
+		FireRollingBall();
+	}
 }
 
 // Called when the game starts or when spawned
@@ -35,10 +41,11 @@ void ARollingCannonProp::BeginPlay()
 	Super::BeginPlay();
 
 	MeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	FireRollingBall();
 
-	if (ObjectPool)
+	// 서버에서만
+	if (HasAuthority() && ObjectPool)
 	{
+		FireRollingBall();
 		ObjectPool->OnObjectReturn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
 	}
 }

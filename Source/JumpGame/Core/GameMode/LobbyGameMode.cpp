@@ -38,27 +38,5 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	// GI에 업데이트 (서버에 저장)
 	GI->AddPlayerInfo(Key, NewPlayerInfo);
 
-	// 업데이트 내용 멀티캐스트 (모든 사람이 알 수 있게)
-	ALobbyGameState* GS = Cast<ALobbyGameState>(GetWorld()->GetGameState());
-	if (GS)
-	{
-		FTimerHandle TimerHandle;
-		TWeakObjectPtr<ALobbyGameState> WeakGameState = GS;
-		TWeakObjectPtr<ALobbyGameMode> WeakThis = this;
-
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([WeakGameState, WeakThis, &NewPlayerInfo]()
-		{
-			TMap<FString, FPlayerInfo>& InfoMap = WeakThis->GI->GetPlayerInfo();
-			for (auto& it : InfoMap)
-			{
-				WeakGameState->MulticastRPC_UpdateWaitImage(it.Key, it.Value);
-			}
-		}),1.0f, false);
-	}
-	else
-	{
-		FFastLogger::LogConsole(TEXT("GameState is NULL"));
-	}
-
 	PlayerIdx++;
 }
