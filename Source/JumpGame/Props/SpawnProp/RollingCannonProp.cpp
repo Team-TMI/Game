@@ -22,6 +22,8 @@ ARollingCannonProp::ARollingCannonProp()
 	// 콜리전 없음
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
+	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
 	PropDataComponent->SetPropID(TEXT("5002"));
 }
 

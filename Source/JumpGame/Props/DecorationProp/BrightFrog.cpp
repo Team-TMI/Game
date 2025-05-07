@@ -28,6 +28,9 @@ ABrightFrog::ABrightFrog()
 void ABrightFrog::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UnSelectedObjectMaterial2 = MeshComp->CreateAndSetMaterialInstanceDynamic(1);
+	UnSelectedObjectMaterial3 = MeshComp->CreateAndSetMaterialInstanceDynamic(2);
 }
 
 void ABrightFrog::SetCollision(bool bEnable)
@@ -39,8 +42,8 @@ void ABrightFrog::SetCollision(bool bEnable)
 	{
 		// 추가 메쉬 설정
 		MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
-		MeshComp->SetMaterial(1, UnSelectedObjectMaterial);
-		MeshComp->SetMaterial(2, UnSelectedObjectMaterial);
+		MeshComp->SetMaterial(1, UnSelectedObjectMaterial2);
+		MeshComp->SetMaterial(2, UnSelectedObjectMaterial3);
 		MeshComp->SetRenderCustomDepth(false);
 	}
 	else
@@ -58,4 +61,36 @@ void ABrightFrog::SetCollision(bool bEnable)
 void ABrightFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	MaterialChangeOnTick();
+}
+
+void ABrightFrog::MaterialChangeOnTick()
+{
+	Super::MaterialChangeOnTick();
+
+	if (bSelected && bIsOnCollision)
+	{
+		MeshComp->SetMaterial(0, OnCollisionObjectMaterial);
+		MeshComp->SetMaterial(1, OnCollisionObjectMaterial);
+		MeshComp->SetMaterial(2, OnCollisionObjectMaterial);
+		return ;
+	}
+	if (bSelected)
+	{
+		MeshComp->SetMaterial(0, SelectedObjectMaterial);
+		MeshComp->SetMaterial(1, SelectedObjectMaterial);
+		MeshComp->SetMaterial(2, SelectedObjectMaterial);
+		return ;
+	}
+	if (bIsOnCollision)
+	{
+		MeshComp->SetMaterial(0, OnCollisionObjectMaterial);
+		MeshComp->SetMaterial(1, OnCollisionObjectMaterial);
+		MeshComp->SetMaterial(2, OnCollisionObjectMaterial);
+		return ;
+	}
+	MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
+	MeshComp->SetMaterial(1, UnSelectedObjectMaterial2);
+	MeshComp->SetMaterial(2, UnSelectedObjectMaterial3);
 }
