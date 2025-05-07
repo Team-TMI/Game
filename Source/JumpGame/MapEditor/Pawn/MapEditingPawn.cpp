@@ -292,3 +292,8 @@ void AMapEditingPawn::MoveUp(float Val)
 	if (FMath::IsNearlyZero(Val)) return;
 	AddMovementInput(FVector::UpVector, Val);
 }
+
+void AMapEditingPawn::SetActive(bool bInActive)
+{
+	bActive = bInActive;
+}
