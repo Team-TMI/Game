@@ -5,6 +5,7 @@
 #include "GizmoClickHandler.h"
 #include "PropSlotClickHandler.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
+#include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
@@ -49,6 +50,15 @@ bool UClickHandlerManager::HandleClick(AMapEditingPlayerController* PlayerContro
 
 void UClickHandlerManager::ResetControl()
 {
+	// 기존의 ControlledClickResponse를 초기화
+	if (UGizmoComponent* ControlledGizmo = ControlledClickResponse.TargetGizmo)
+	{
+		ControlledGizmo->SetUnSelected();
+	}
+	if (APrimitiveProp* ControlledProp = ControlledClickResponse.TargetProp)
+	{
+		ControlledProp->SetUnSelected();
+	}
 	ControlledClickResponse = FClickResponse();
 	OnControlledPropChanged.Broadcast();
 }

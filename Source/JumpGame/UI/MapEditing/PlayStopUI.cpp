@@ -5,6 +5,7 @@
 #include "Components/Image.h"
 #include "Editor/VREditor/Private/UI/VREditorFloatingCameraUI.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
 
 void UPlayStopUI::NativeOnInitialized()
@@ -54,6 +55,8 @@ void UPlayStopUI::ChangeToFrog()
 	if (!PC) return;
 
 	EditPawn = Cast<AMapEditingPawn>(PC->GetPawn());
+
+	EditPawn->GetClickHandlerManager()->ResetControl();
 
 	FVector CamLocation = PC->PlayerCameraManager->GetCameraLocation();
 	FRotator CamRotation = PC->PlayerCameraManager->GetCameraRotation();
