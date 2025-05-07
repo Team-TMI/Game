@@ -55,6 +55,7 @@ public:
 
 	// 몇 초 후에는 지우자
 	void RemoveSoundQuizUI();
-	FTimerHandle UIRemoveTimerHandle;
-
+	//FTimerHandle UIRemoveTimerHandle;
+	UPROPERTY()
+	TMap<int32, FTimerHandle> PlayerUIRemoveTimers;
 };

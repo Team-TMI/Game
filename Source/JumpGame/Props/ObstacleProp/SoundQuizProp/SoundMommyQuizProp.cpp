@@ -64,11 +64,10 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	SoundQuizUI->UpdateFromResponse(Similarity*100, MessageStr);
 
 	// 20번 넘으면 자동 게임 종료, 디버프를 받는다 (못맞춤)
-	if (SendResponseIdx >= 20)
+	if (MyResponseCount >= 20)
 	{
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
-		bIsQuizFail = true;
 		// 실패...
 		if (SoundQuizFail)
 		{
@@ -78,12 +77,15 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		// 퀴즈 끝났다고 알리자!
 		SendEndSoundQuizNotify();
 
-		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+		//GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+		FTimerHandle& MyTimerHandle = PlayerUIRemoveTimers.FindOrAdd(PlayerIdx);
+		GetWorld()->GetTimerManager().SetTimer(
+			MyTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 	}
 
 	// TODO: 정답과 일치할때로 변경해야함
 	// 20번 안에, Fin되는 경우 -> 유사도가 높을때
-	if (SendResponseIdx < 20)
+	if (MyResponseCount < 20)
 	{
 		if (bSuccess == 1 || Similarity*100 >= 90)
 		{
@@ -98,11 +100,12 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 			// 퀴즈 끝났다고 알리자!
 			SendEndSoundQuizNotify();
 			
-			GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+			//GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+			FTimerHandle& MyTimerHandle = PlayerUIRemoveTimers.FindOrAdd(PlayerIdx);
+			GetWorld()->GetTimerManager().SetTimer(
+				MyTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 		}
 	}
-
-	FFastLogger::LogConsole(TEXT("SendResponseIdx: %d"), SendResponseIdx);
 }
 
 void ASoundMommyQuizProp::SendSoundQuizMessage()

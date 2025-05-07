@@ -259,6 +259,9 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 		return;
 	}
 
+	// 내 메세지가 아니면 무시하자
+	if (RespMessage.Header.PlayerID != PlayerIdx) return;
+
 	FFastLogger::LogConsole(TEXT("메세지 받았습니다@@@@@@@@"));
 	FDateTime Now = FDateTime::Now();
 	int32 Hour = Now.GetHour();
@@ -293,7 +296,9 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	UE_LOG(LogTemp, Warning, TEXT("Receive MessageStr: %s"), *MessageStr);
 
 	// 총 몇번 응답 했는지를 체크한다
-	SendResponseIdx++;
+	// SendResponseIdx++;
+	MyResponseCount = ResponseCountPerPlayer.FindOrAdd(PlayerIdx);
+	MyResponseCount++;
 
 	// 틱 비활성화
 	bIsMessageReceived = false;
@@ -348,7 +353,8 @@ void ASoundQuizProp::ResetSoundQuiz()
 	MessageSize = 0;
 	MessageStr = "";
 
-	SendResponseIdx = 0;
+	//SendResponseIdx = 0;
+	MyResponseCount = 0;
 	
 	CachedBinaryWav = { 0 };
 	CurrentSendIndex = 0;
