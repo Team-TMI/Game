@@ -342,30 +342,21 @@ bool AFrog::CanJumpInternal_Implementation() const
 
 void AFrog::StartJump()
 {
-	// MulticastRPC_StartJump();
-
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
-		FVector LaunchVelocity = GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f;
+		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
 
-		// 소유 클라이언트에서 예측 실행
+		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
 		{
-			// 중요: LaunchCharacter는 CharacterMovementComponent가 이미 클라이언트 예측을 지원합니다.
-			// 소유 클라이언트에서 호출하면 로컬에서 즉시 발사하고, 서버에도 자동으로 요청을 보냅니다.
-			// 하지만, 이 특정 로직(물 위 점프)에 대한 서버와의 명확한 동기화를 위해 별도의 ServerRPC를 사용합니다.
-			// 여기서는 로컬 예측을 위해 즉시 실행합니다.
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
-
-			// 클라이언트에서 충돌을 예측적으로 변경할 수도 있지만, 
-			// 일반적으로 충돌은 서버가 제어하고 복제하는 것이 더 안정적입니다.
-			// 여기서는 서버 RPC에서 처리하도록 합니다.
 		}
 
-		// 서버에 실제 점프 실행 및 충돌 변경 요청
+		// 서버에 실제 점프 실행
 		ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
 	}
-	else if (GetCharacterMovement()->IsCrouching()) // 슈퍼 점프 로직
+	// 슈퍼 점프
+	else if (GetCharacterMovement()->IsCrouching())
 	{
 		if (bIsSuperJump)
 		{
@@ -376,21 +367,21 @@ void AFrog::StartJump()
 			SetJumpAvailableBlock(2);
 		}
 
-		StopCrouch(); // StopCrouch는 이미 멀티캐스트 RPC를 호출하므로 모든 클라이언트에서 실행됩니다.
+		StopCrouch();
 
 		if (CanJump())
 		{
-			Jump(); // ACharacter::Jump()는 클라이언트 예측 및 서버 호출을 내부적으로 처리합니다.
+			Jump();
 		}
 	}
-	else // 일반 점프
+	// 일반 점프
+	else
 	{
 		if (CanJump())
 		{
-			Jump(); // ACharacter::Jump()는 클라이언트 예측 및 서버 호출을 내부적으로 처리합니다.
+			Jump();
 		}
 	}
-	
 }
 
 void AFrog::StopJump()
@@ -447,95 +438,28 @@ void AFrog::StopCrouch()
 
 void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& LaunchVelocity)
 {
-	// 서버에서 상태 재확인 (선택적이지만 안전함)
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
-		UCapsuleComponent* CapComp = GetCapsuleComponent();
+		UCapsuleComponent* CapComp{GetCapsuleComponent()};
 		if (CapComp)
 		{
-			// 서버에서 충돌 프로필 변경 (권한 있는 변경)
 			CapComp->SetCollisionProfileName(TEXT("Jumping"));
 		}
 
-		// 서버에서 캐릭터 발사 (권한 있는 실행)
+		// 서버에서 캐릭터 발사
 		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
 
-		// 서버에서 타이머 설정하여 충돌 프로필 복원
+		// 1초 후 서버에서 충돌 프로필 되돌리기
 		FTimerHandle TempTimerHandle;
-		FTimerDelegate RestoreCollisionDelegate = FTimerDelegate::CreateLambda([this]() {
-			UCapsuleComponent* MyCapComp = GetCapsuleComponent();
+		FTimerDelegate RestoreCollisionDelegate{FTimerDelegate::CreateLambda([this]() {
+			UCapsuleComponent* MyCapComp{GetCapsuleComponent()};
 			if (MyCapComp)
 			{
 				MyCapComp->SetCollisionProfileName(TEXT("FrogCollision"));
 			}
-		});
+		})};
+		
 		GetWorldTimerManager().SetTimer(TempTimerHandle, RestoreCollisionDelegate, 1.f, false);
-	}
-}
-
-void AFrog::MulticastRPC_StartJump_Implementation()
-{
-	if (CharacterWaterState == ECharacterStateEnum::Surface)
-	{
-		// 서버에서만 충돌 해제 및 발사 실행
-		if (HasAuthority())
-		{
-			UCapsuleComponent* CapComp{GetCapsuleComponent()};
-			if (CapComp)
-			{
-				// 1초 동안 물에 충돌 없앰
-				CapComp->SetCollisionProfileName(TEXT("Jumping"));
-			}
-
-			FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
-			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
-
-			// 일정 시간 후 충돌 복원 (서버에서만 타이머 설정)
-			FTimerHandle TempTimerHandle;
-			FTimerDelegate RestoreCollisionDelegate{
-				FTimerDelegate::CreateLambda([this]() {
-					UCapsuleComponent* MyCapComp{GetCapsuleComponent()};
-					if (MyCapComp)
-					{
-						MyCapComp->SetCollisionProfileName(TEXT("FrogCollision"));
-					}
-				})
-			};
-
-			GetWorldTimerManager().SetTimer(TempTimerHandle, RestoreCollisionDelegate, 1.f, false);
-		}
-
-		return;
-	}
-
-	// 슈퍼 점프
-	if (GetCharacterMovement()->IsCrouching())
-	{
-		//FLog::Log("Time", CrouchTime);
-		if (bIsSuperJump)
-		{
-			//FLog::Log("SuperJump");
-			SetJumpAvailableBlock(3);
-		}
-		else if (SuperJumpRatio >= 0.5f)
-		{
-			//FLog::Log("LittleJump");
-			SetJumpAvailableBlock(2);
-		}
-
-		StopCrouch();
-
-		if (CanJump())
-		{
-			Jump();
-		}
-
-		return;
-	}
-
-	if (CanJump())
-	{
-		Jump();
 	}
 }
 

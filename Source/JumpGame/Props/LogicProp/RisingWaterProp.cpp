@@ -168,7 +168,11 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 			// 잠시 가라앉고 올라오게
 			FTimerDelegate MovementModeDelegate{
 				FTimerDelegate::CreateLambda([this]() {
+					// 기존 바인딩을 제거해서 중복을 방지 후, 새로 바인딩
+					ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
 					ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
+					
+					SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
 					SurfaceCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
 				})
 			};

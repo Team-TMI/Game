@@ -61,9 +61,6 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ExecuteWaterSurfaceJump(const FVector& LaunchVelocity);
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPC_StartJump();
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_StartCrouch();
 	UFUNCTION(NetMulticast, Reliable)
