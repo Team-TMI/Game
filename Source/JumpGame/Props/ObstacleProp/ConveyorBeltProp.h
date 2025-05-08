@@ -42,6 +42,8 @@ public:
 	// 여러 플레이어가 오버랩될 경우
 	UPROPERTY()
 	TSet<AFrog*> OverlappingFrogs;
+	UPROPERTY()
+	TSet<AFrog*> CopyOverlapFrogs;
 
 	// 이동
 	void ConveyorMove();

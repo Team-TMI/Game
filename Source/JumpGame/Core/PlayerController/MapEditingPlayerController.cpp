@@ -225,6 +225,7 @@ void AMapEditingPlayerController::OnPossess(APawn* InPawn)
 	AMapEditingPawn* MapEditingPawn = Cast<AMapEditingPawn>(InPawn);
 	if (MapEditingPawn)
 	{
+		MapEditingPawn->GetDragDropOperation()->OnDraggedWidget.RemoveDynamic(this, &AMapEditingPlayerController::OnMousePointUpdate);
 		MapEditingPawn->GetDragDropOperation()->OnDraggedWidget.AddDynamic(this, &AMapEditingPlayerController::OnMousePointUpdate);
 	}
 }

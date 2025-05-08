@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -30,6 +31,8 @@ AConveyorBeltProp::AConveyorBeltProp()
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
 	Super::SetSize(FVector(2, 1, 1));
+
+	PropDataComponent->SetPropID(TEXT("5003"));
 }
 
 void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -39,6 +42,7 @@ void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	AFrog* Frog = Cast<AFrog>(OtherActor);
 	if (Frog && !OverlappingFrogs.Contains(Frog))
 	{
+		
 		OverlappingFrogs.Add(Frog);
 	}
 	
@@ -51,6 +55,7 @@ void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent,
 	AFrog* Frog = Cast<AFrog>(OtherActor);
 	if (Frog)
 	{
+	
 		OverlappingFrogs.Remove(Frog);
 	}
 	
@@ -76,8 +81,10 @@ void AConveyorBeltProp::Tick(float DeltaTime)
 
 void AConveyorBeltProp::ConveyorMove()
 {
+	CopyOverlapFrogs = OverlappingFrogs;
+	int index = 0;
 	// 유효한 Frog들만 처리
-	for (AFrog* Frog : OverlappingFrogs)
+	for (AFrog* Frog : CopyOverlapFrogs)
 	{
 		if (!IsValid(Frog)) continue;
 		

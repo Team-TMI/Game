@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 
 // Todo : 경사 영향 받게
 
@@ -17,6 +18,8 @@ ASlipperyProp::ASlipperyProp()
 
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 10.f));
+
+	PropDataComponent->SetPropID(TEXT("5007"));
 }
 
 // Called when the game starts or when spawned

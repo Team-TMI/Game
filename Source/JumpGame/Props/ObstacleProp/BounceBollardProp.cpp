@@ -29,7 +29,7 @@ ABounceBollardProp::ABounceBollardProp()
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	MeshComp->SetCollisionProfileName(TEXT("Prop"));
 
-	PropDataComponent->SetPropID(TEXT("1003"));
+	PropDataComponent->SetPropID(TEXT("5001"));
 }
 
 void ABounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

@@ -5,6 +5,7 @@
 
 #include "ToolContextInterfaces.h"
 #include "Components/BoxComponent.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 
 
 // Sets default values
@@ -39,6 +40,8 @@ ARotateSpikeProp::ARotateSpikeProp()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	Hammer->SetCollisionProfileName(TEXT("OverlapProp"));
 	Spike->SetCollisionProfileName(TEXT("Prop"));
+
+	PropDataComponent->SetPropID(TEXT("5006"));
 }
 
 // Called when the game starts or when spawned

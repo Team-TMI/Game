@@ -147,7 +147,7 @@ void AObstacleProp::ObstacleRotate()
 		float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
 		DeltaRot = RotAxis * RotSpeed;
 		// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
-		PivotScene->AddLocalRotation(DeltaRot);
+		PivotScene->AddLocalRotation(DeltaRot, true);
 	}
 }
 

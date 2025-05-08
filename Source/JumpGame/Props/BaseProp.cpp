@@ -85,5 +85,10 @@ void ABaseProp::MaterialChangeOnTick()
 		MeshComp->SetMaterial(0, SelectedObjectMaterial);
 		return ;
 	}
+	if (bIsOnCollision)
+	{
+		MeshComp->SetMaterial(0, OnCollisionObjectMaterial);
+		return ;
+	}
 	MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
 }

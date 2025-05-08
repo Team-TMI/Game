@@ -12,6 +12,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -38,6 +39,8 @@ AGameFinishProp::AGameFinishProp()
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
 	Super::SetSize(FVector(3,2,1));
+
+	PropDataComponent->SetPropID(TEXT("9000"));
 }
 
 void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

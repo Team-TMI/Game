@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "JumpGame/MapEditor/CategorySystem/PropStruct.h"
+#include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 #include "JumpGame/Utils/CommonUtils.h"
 #include "PropSlot.generated.h"
 
@@ -17,7 +18,7 @@ public:
 	// SETTER(class UWidgetMapEditDragDropOperation*, DragDropOperation);
 	void InitWidget(class UWidgetMapEditDragDropOperation* InDragDropOperation);
 	void SetPropID(FName InPropID);
-	void SetPropInfo(FPropStruct* PropInfo);
+	void SetPropInfo(class UPropWrap* PropInfo);
 	void ClearInfo();
 
 	UPROPERTY(BlueprintAssignable, Category = "Prop")
@@ -38,7 +39,7 @@ protected:
 	TSubclassOf<class UUserWidget> PropWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
-	class UUserWidget* PropDragVisual = nullptr;
+	class UPropDragVisual* PropDragVisual = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
 	class UWidgetMapEditDragDropOperation* DragDropOperation = nullptr;
