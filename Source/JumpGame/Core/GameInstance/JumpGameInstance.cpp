@@ -291,6 +291,8 @@ void UJumpGameInstance::SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin)
 
 void UJumpGameInstance::RunEyeTrackingScript()
 {
+	FLog::Log("RunEyeTrackingScript");
+	
 	FString PythonPath = TEXT("C:\\Users\\user\\miniconda3\\envs\\myenv_311\\python.exe");
 	FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\main.py");
 	//FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\infinite_counter.py");

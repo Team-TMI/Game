@@ -4,6 +4,7 @@
 #include "FlyingObjectUI.h"
 
 #include "Components/Image.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 
 void UFlyingObjectUI::NativeConstruct()
@@ -18,6 +19,7 @@ void UFlyingObjectUI::InitializeParameters()
 	TargetLocationImage->SetRenderOpacity(1.f);
 	SuccessImage->SetRenderOpacity(0.f);
 	FailImage->SetRenderOpacity(0.f);
+	OverlapImage->SetRenderOpacity(0.f);
 	GaugeImage->SetRenderOpacity(1.f);
 	GaugeValue = 0.f;
 }
@@ -48,6 +50,7 @@ void UFlyingObjectUI::SuccessMission()
 	SuccessImage->SetRenderOpacity(1.f);
 	FailImage->SetRenderOpacity(0.f);
 	GaugeImage->SetRenderOpacity(0.f);
+	OverlapImage->SetRenderOpacity(0.f);
 }
 
 void UFlyingObjectUI::FailMission()
@@ -56,4 +59,23 @@ void UFlyingObjectUI::FailMission()
 	SuccessImage->SetRenderOpacity(0.f);
 	FailImage->SetRenderOpacity(1.f);
 	GaugeImage->SetRenderOpacity(0.f);
+	OverlapImage->SetRenderOpacity(0.f);
+}
+
+void UFlyingObjectUI::Overlapping()
+{
+	TargetLocationImage->SetRenderOpacity(0.f);
+	SuccessImage->SetRenderOpacity(0.f);
+	FailImage->SetRenderOpacity(0.f);
+	GaugeImage->SetRenderOpacity(1.f);
+	OverlapImage->SetRenderOpacity(1.f);
+}
+
+void UFlyingObjectUI::NotOverlapping()
+{
+	TargetLocationImage->SetRenderOpacity(1.f);
+	SuccessImage->SetRenderOpacity(0.f);
+	FailImage->SetRenderOpacity(0.f);
+	GaugeImage->SetRenderOpacity(1.f);
+	OverlapImage->SetRenderOpacity(0.f);
 }
