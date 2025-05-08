@@ -48,7 +48,8 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	const FHitResult& SweepResult)
 {
 	if (!OtherActor->ActorHasTag("Frog")) return;
-	
+	if (bIsActive == false) return;
+		
 	Character = Cast<AFrog>(OtherActor);
 	if (!bWinnerFound)
 	{

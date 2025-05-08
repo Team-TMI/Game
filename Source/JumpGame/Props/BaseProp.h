@@ -39,4 +39,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USceneComponent* PivotScene;
+
+public:
+	// 작동 정지
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bIsActive = true;
+
+	// 치트키
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bGodMode = false;
 };
