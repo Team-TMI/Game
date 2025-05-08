@@ -80,8 +80,7 @@ void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompo
                                             bool bFromSweep,
                                             const FHitResult& SweepResult)
 {
-	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep,
-	                        SweepResult);
+	//Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
@@ -97,19 +96,12 @@ void AObjectEyeHunterProp::StartMission()
 
 	StopCharacter();
 
-	if (!FlyingObjectUI)
+	if (FlyingObjectUI)
 	{
-		FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
+		FlyingObjectUI->InitializeParameters();
 	}
-
-	FlyingObjectUI->InitializeParameters();
-
-	if (!TimeRemainUI)
-	{
-		TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
-		TimeRemainUI->AddToViewport();
-	}
-	else
+	
+	if (TimeRemainUI)
 	{
 		TimeRemainUI->AddToViewport();
 	}
@@ -155,9 +147,9 @@ void AObjectEyeHunterProp::StartMission()
 
 	if (TrackingUI)
 	{
-		TrackingUI->AddToViewport();	
+		TrackingUI->AddToViewport();
 	}
-	
+
 	// 미션 시작
 	bIsStartHunt = true;
 
@@ -173,7 +165,7 @@ void AObjectEyeHunterProp::StartMission()
 	}
 
 	// 10초 후 미션 종료 ( 타이머 설정 )
-	TimeRemainUI->StartMissionTimer(100.f);
+	TimeRemainUI->StartMissionTimer(10.f);
 }
 
 void AObjectEyeHunterProp::StopCharacter()
@@ -201,7 +193,7 @@ void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedCompone
                                           AActor* OtherActor,
                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
+	//Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 
 	if (OtherActor->ActorHasTag(TEXT("Frog")))
 	{
@@ -265,7 +257,10 @@ void AObjectEyeHunterProp::Tick(float DeltaTime)
 		}
 	}
 
-	RecvEyeTrackingInfo();
+	if (!bIsDebug)
+	{
+		RecvEyeTrackingInfo();
+	}
 }
 
 void AObjectEyeHunterProp::RecvEyeTrackingInfo()
@@ -273,14 +268,13 @@ void AObjectEyeHunterProp::RecvEyeTrackingInfo()
 	Super::RecvEyeTrackingInfo();
 
 	// TODO : 받아오는 값으로 수정
-	//TrackLocation(static_cast<FVector2f>(ViewportSize), FVector2f(X, Y));
 	TrackLocation({2880, 1800}, FVector2f(X, Y));
-	//TrackLocation(FVector2f(Width, Height), FVector2f(X, Y));
+	//TrackLocation(FVector2f(Width, Height), FVector2f(X, Y))
 }
 
 void AObjectEyeHunterProp::FlyingObjectMovement(float DeltaTime)
 {
-	if (FlyingObjectUI)
+	if (FlyingObjectUI && bIsStartHunt)
 	{
 		if (!FlyingObjectUI->IsInViewport())
 		{
@@ -319,7 +313,7 @@ void AObjectEyeHunterProp::FlyingObjectMovement(float DeltaTime)
 		}
 
 		// 겹쳐있으면 Value 바꾸기
-		if (IsObjectAndEyeOverlap(ObjectScreenLocation, EyeScreenLocation))
+		if (IsObjectAndEyeOverlap(ObjectScreenLocation, EyeScreenLocation) && bIsStartHunt)
 		{
 			ChangeValue(true);
 		}
@@ -340,14 +334,9 @@ void AObjectEyeHunterProp::TrackLocation(FVector2f Resolution, FVector2f ScreenL
 	float ScreenX{static_cast<float>(NormalizedX * ViewportSize.X)};
 	float ScreenY{static_cast<float>(NormalizedY * ViewportSize.Y)};
 
-	FLog::Log("Loc", ScreenX, ScreenY);
-	// UI 인스턴스 없으면 생성
-	if (!TrackingUI)
-	{
-		TrackingUI = CreateWidget<UEyeTrackingUI>(GetWorld(), EyeTrackingUIClass);
-	}
-
-	if (TrackingUI)
+	//FLog::Log("Loc", ScreenX, ScreenY);
+	
+	if (TrackingUI && bIsStartHunt)
 	{
 		// 뷰포트에 없으면 추가
 		if (!TrackingUI->IsInViewport())
@@ -371,10 +360,12 @@ bool AObjectEyeHunterProp::IsObjectAndEyeOverlap(FVector2D ObjectLocation, FVect
 
 		if (Length <= 100.f)
 		{
+			FlyingObjectUI->Overlapping();
 			return true;
 		}
 	}
 
+	FlyingObjectUI->NotOverlapping();
 	return false;
 }
 
@@ -442,12 +433,22 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 void AObjectEyeHunterProp::ResetMission()
 {
 	ResumeCharacter();
-
+	
 	// 미션 끝
 	bIsStartHunt = false;
 
-	GetWorld()->GetTimerManager().ClearTimer(MovementTimerHandle);
+	TimeRemainUI->StopMissionTimer();
 
+	if (TrackingUI)
+	{
+		TrackingUI->RemoveFromParent();
+	}
+
+	if (TimeRemainUI)
+	{
+		TimeRemainUI->RemoveFromParent();
+	}
+	
 	FlowTime = 0.f;
 	SuccessRatio = 0.f;
 
@@ -462,16 +463,6 @@ void AObjectEyeHunterProp::ResetMission()
 
 	Frog = nullptr;
 
-	if (TrackingUI)
-	{
-		TrackingUI->RemoveFromParent();
-	}
-
-	if (TimeRemainUI)
-	{
-		TimeRemainUI->RemoveFromParent();
-	}
-	
 	GetWorldTimerManager().SetTimer(EndTimerHandle, FlyingObjectUI, &UFlyingObjectUI::VanishMission,
 	                                0.5f, false);
 }
@@ -501,13 +492,13 @@ void AObjectEyeHunterProp::UpdateObjectRotation(float DeltaTime)
 		if (Direction.SizeSquared() > 0.f)
 		{
 			// Radian 계산
-			float AngleRad = FMath::Atan2(Direction.Y, Direction.X);
+			float AngleRad{static_cast<float>(FMath::Atan2(Direction.Y, Direction.X))};
 			// Degree로 변환
-			float AngleDeg = FMath::RadiansToDegrees(AngleRad);
+			float AngleDeg{FMath::RadiansToDegrees(AngleRad)};
 
-			if (UFlyingObjectUI* FlyUIWidget = Cast<UFlyingObjectUI>(FlyingObjectUI))
+			if (UFlyingObjectUI* FlyUIWidget{Cast<UFlyingObjectUI>(FlyingObjectUI)})
 			{
-				if (UImage* TargetImage = FlyUIWidget->TargetLocationImage)
+				if (UImage* TargetImage{FlyUIWidget->TargetLocationImage})
 				{
 					// 이미지 회전
 					TargetImage->SetRenderTransformAngle(AngleDeg + 180.f);

@@ -59,6 +59,8 @@ void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount)
 	SessionSettings.bUseLobbiesIfAvailable = true;
 	// 친구 상태를 확인할 수 있는지 (게임중/로그아웃 등등 공개할건지) 여부
 	SessionSettings.bUsesPresence = true;
+	// 세션 실행중 들어오기 허용 여부
+	SessionSettings.bAllowJoinInProgress = true;
 	// 세션 검색을 허용할 지 여부
 	SessionSettings.bShouldAdvertise = true;
 	// 세션 최대 인원 설정
@@ -168,12 +170,22 @@ void UJumpGameInstance::OnJoinSessionComplete(FName SessionName,
 	// 만약에 참여 성공했다면
 	if (Result == EOnJoinSessionCompleteResult::Success)
 	{
-		// 서버가 만들어 놓은 세션 url얻어오자
+		UE_LOG(LogTemp, Error, TEXT("Join 성공! : %d"), (int32)Result);
 		FString url;
-		SessionInterface->GetResolvedConnectString(SessionName, url);
-		// 서버가 있는 맵으로 이동하자
-		APlayerController* pc = GetWorld()->GetFirstPlayerController();
-		pc->ClientTravel(url, TRAVEL_Absolute);
+		if (SessionInterface->GetResolvedConnectString(SessionName, url))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Resolved URL: %s"), *url);
+			APlayerController* pc = GetWorld()->GetFirstPlayerController();
+			pc->ClientTravel(url, TRAVEL_Absolute);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("GetResolvedConnectString 실패!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Join 실패! 이유: %d"), (int32)Result);
 	}
 }
 
@@ -279,6 +291,8 @@ void UJumpGameInstance::SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin)
 
 void UJumpGameInstance::RunEyeTrackingScript()
 {
+	FLog::Log("RunEyeTrackingScript");
+	
 	FString PythonPath = TEXT("C:\\Users\\user\\miniconda3\\envs\\myenv_311\\python.exe");
 	FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\main.py");
 	//FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\infinite_counter.py");

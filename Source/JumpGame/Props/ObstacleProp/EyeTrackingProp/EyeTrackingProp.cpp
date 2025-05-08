@@ -24,7 +24,6 @@ AEyeTrackingProp::AEyeTrackingProp()
 	}
 
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
-	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 30.f));
 }
 
 // Called when the game starts or when spawned
@@ -69,15 +68,15 @@ void AEyeTrackingProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Four))
-	{
-		RecvReadyEyeTracking();
-	}
-	
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Six))
-	{
-		SendEyeTrackingSettingStart();
-	}
+	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Four))
+	// {
+	// 	RecvReadyEyeTracking();
+	// }
+	//
+	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Six))
+	// {
+	// 	SendEyeTrackingSettingStart();
+	// }
 	
 	if (!bIsStartHunt)
 	{

@@ -27,7 +27,7 @@ AObstacleProp::AObstacleProp()
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
-	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 50.f));
+	CollisionComp->SetBoxExtent(FVector(55.f, 55.f, 55.f));
 	
 	Super::SetSize(FVector(1,1,1));
 }
@@ -37,6 +37,7 @@ void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
                             const FHitResult& Hit)
 {
 	if (!OtherActor->ActorHasTag("Frog")) return;
+	if (bIsActive == false) return;
 	
 	/*AFrog* Character = Cast<AFrog>(OtherActor);
 	if (Character)
@@ -55,13 +56,14 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	const FHitResult& SweepResult)
 {
 	if (!OtherActor->ActorHasTag("Frog")) return;
+	if (bIsActive == false) return;
 	
 	AFrog* Character = Cast<AFrog>(OtherActor);
 	if (Character)
 	{
 		if (bDebug)
 		{
-			FLog::Log("AObstacleProp::OnMyHit");
+			FLog::Log("AObstacleProp::OnMyBeginOverlap");
 		}
 		
 		CalculateForce(Character);
@@ -112,6 +114,8 @@ void AObstacleProp::Tick(float DeltaTime)
 void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float Force,
                                     bool bXYOverride, bool bZOverride)
 {
+	if (bIsActive == false) return;
+	
 	// 가상 함수: 기본 로직
 	// 서버라면
 	if (HasAuthority())
@@ -141,6 +145,8 @@ void AObstacleProp::CalculateForce(AFrog* Character)
 
 void AObstacleProp::ObstacleRotate()
 {
+	if (bIsActive == false) return;
+	
 	//서버라면
 	if (HasAuthority())
 	{
@@ -153,6 +159,8 @@ void AObstacleProp::ObstacleRotate()
 
 void AObstacleProp::OnRep_ObstacleRotate()
 {
+	if (bIsActive == false) return;
+	
 	// 클라이언트라면 이 함수가 실행
 	PivotScene->AddLocalRotation(DeltaRot);
 }
