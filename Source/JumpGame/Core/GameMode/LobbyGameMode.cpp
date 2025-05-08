@@ -4,14 +4,18 @@
 #include "LobbyGameMode.h"
 
 #include "GameFramework/PlayerState.h"
+#include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Core/GameState/LobbyGameState.h"
+#include "JumpGame/Core/PlayerController/LobbyPlayerController.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 ALobbyGameMode::ALobbyGameMode()
 {
 	// GamaeState, PlayerState 설정하기
 	GameStateClass = ALobbyGameState::StaticClass();
+	DefaultPawnClass = ALobbyFrog::StaticClass();
+	PlayerControllerClass = ALobbyPlayerController::StaticClass();
 }
 
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)

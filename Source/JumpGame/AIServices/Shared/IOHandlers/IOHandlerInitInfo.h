@@ -16,10 +16,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IO")
 	FString ServerProtocol = TEXT("");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IO")
-	FString PipeName = TEXT("");
+	FString ReadPipeName = TEXT("");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IO")
+	FString SendPipeName = TEXT("");
 
-	FIOHandlerInitInfo(const FString& InServerUrl = TEXT(""), const FString& InServerProtocol = TEXT(""), const FString& InPipeName = TEXT(""))
-		: ServerUrl(InServerUrl), ServerProtocol(InServerProtocol), PipeName(InPipeName)
+	FIOHandlerInitInfo(const FString& InServerUrl = TEXT(""), const FString& InServerProtocol = TEXT(""), const FString& InReadPipeName = TEXT(""), const FString& InSendPipeName = TEXT(""))
+		: ServerUrl(InServerUrl), ServerProtocol(InServerProtocol), ReadPipeName(InReadPipeName), SendPipeName(InSendPipeName)
 	{
 	}
 };
