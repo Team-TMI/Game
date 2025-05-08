@@ -391,6 +391,11 @@ void AFrog::StopJump()
 
 void AFrog::StartSprint()
 {
+	if (GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
+	
 	if (HasAuthority())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 600.f;
