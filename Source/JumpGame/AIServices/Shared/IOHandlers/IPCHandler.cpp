@@ -71,7 +71,7 @@ bool FIPCHandler::SendGameMessage(const FMessageUnion& Message)
 	}
 	if (BytesWritten != Message.Header.PayloadSize)
 	{
-		FFastLogger::LogConsole(TEXT("Failed to send message: %s"), *PipeName);
+		// FFastLogger::LogConsole(TEXT("Failed to send message: %s"), *PipeName);
 		return false;
 	}
 	return true;
@@ -93,7 +93,7 @@ bool FIPCHandler::ReceiveMessage()
 		{
 			return false;
 		}
-		FFastLogger::LogConsole(TEXT("Failed to read message: %s"), *PipeName);
+		// FFastLogger::LogConsole(TEXT("Failed to read message: %s"), *PipeName);
 	}
 	
 	// 1. 버퍼에 읽은 내용을 누적 저장 (문자열 아님!)
@@ -106,14 +106,14 @@ bool FIPCHandler::ReceiveMessage()
 	FMemory::Memcpy(CachedBuffer + CachedLength, Buffer, BytesRead);
 	CachedLength += BytesRead;
 
-	FFastLogger::LogConsole(TEXT("Cached Length : %d"), CachedLength);
+	// FFastLogger::LogConsole(TEXT("Cached Length : %d"), CachedLength);
 	// 2. 메시지 파싱
 	while (true)
 	{
 		FMessageUnion Message;
 		if (!ParseMessage(Message, BytesRead))
 		{
-			FFastLogger::LogConsole(TEXT("Failed to parse message: %s"), *PipeName);
+			// FFastLogger::LogConsole(TEXT("Failed to parse message: %s"), *PipeName);
 			break ;
 		}
 

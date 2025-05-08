@@ -102,6 +102,7 @@ void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompo
 
 void AObjectEyeHunterProp::StartMission()
 {
+	FLog::Log("StartMission");
 	Super::SendEyeTrackingStart();
 
 	StopCharacter();
@@ -115,7 +116,7 @@ void AObjectEyeHunterProp::StartMission()
 	{
 		TimeRemainUI->AddToViewport();
 		// 10초 후 미션 종료 ( 타이머 설정 )
-		TimeRemainUI->StartMissionTimer(10.f);
+		TimeRemainUI->StartMissionTimer(20.f);
 	}
 
 	if (GEngine && GEngine->GameViewport)
@@ -393,7 +394,7 @@ void AObjectEyeHunterProp::ChangeValue(bool bIsOverlap)
 {
 	if (bIsOverlap)
 	{
-		FlowTime = FMath::Clamp(FlowTime + (GetWorld()->GetDeltaSeconds()), 0.f, SuccessTime);
+		FlowTime = FMath::Clamp(FlowTime + (GetWorld()->GetDeltaSeconds() * 3), 0.f, SuccessTime);
 	}
 	else
 	{
@@ -425,8 +426,12 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		{
 			FVector Direction{Frog->GetActorForwardVector() + FVector::UpVector};
 			float Force{2'000};
-
-			Super::LaunchCharacter(Frog, Direction, Force);
+			if (Frog->IsLocallyControlled())
+			{
+				// 로컬 플레이어인 경우 클라에서 직접 Launch
+				Frog->LaunchCharacter(Direction.GetSafeNormal() * Force, true, true);
+				//Super::LaunchCharacter(Frog, Direction, Force);
+			}
 		}
 
 		FlyingObjectUI->SuccessMission();
@@ -441,7 +446,11 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 			FVector Direction{-1 * Frog->GetActorForwardVector() + FVector::UpVector};
 			float Force{300};
 
-			Super::LaunchCharacter(Frog, Direction, Force);
+			if (Frog->IsLocallyControlled())
+			{
+				Frog->LaunchCharacter(Direction.GetSafeNormal() * Force, true, true);
+			}
+			//Super::LaunchCharacter(Frog, Direction, Force);
 		}
 
 		FlyingObjectUI->FailMission();
