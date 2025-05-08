@@ -51,13 +51,13 @@ void UIOManagerComponent::BeginPlay()
 	if (!IPCReadHandler->Init(IOHandlerInitInfo, &MessageQueue))
 	{
 		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCReadHandler);
-		RetryConnectToPipe(SharedIPC);
+		RetryReadConnectToPipe(SharedIPC);
 	}
 
 	if (!IPCSendHandler->Init(IOHandlerInitInfo, &MessageQueue))
 	{
 		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCSendHandler);
-		RetryConnectToPipe(SharedIPC);
+		RetrySendConnectToPipe(SharedIPC);
 	}
 	
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
@@ -156,11 +156,11 @@ bool UIOManagerComponent::PopMessage(const EMessageType& MessageType, FMessageUn
 	return false;
 }
 
-void UIOManagerComponent::RetryConnectToPipe(TSharedPtr<FIPCHandler> IPCHandlerToRetry)
+void UIOManagerComponent::RetryReadConnectToPipe(TSharedPtr<FIPCHandler> IPCHandlerToRetry)
 {
 	TWeakObjectPtr<UIOManagerComponent> WeakThis = this;
 
-	GetWorld()->GetTimerManager().SetTimer(RetryTimer, FTimerDelegate::CreateLambda([WeakThis, IPCHandlerToRetry]()
+	GetWorld()->GetTimerManager().SetTimer(RetryReadTimer, FTimerDelegate::CreateLambda([WeakThis, IPCHandlerToRetry]()
 	{
 		if (!WeakThis.IsValid())
 			return;
@@ -168,12 +168,34 @@ void UIOManagerComponent::RetryConnectToPipe(TSharedPtr<FIPCHandler> IPCHandlerT
 		UIOManagerComponent* StrongThis = WeakThis.Get();
 		if (IPCHandlerToRetry->Init(StrongThis->IOHandlerInitInfo, &StrongThis->MessageQueue))
 		{
-			FFastLogger::LogScreen(FColor::Red, TEXT("Reconnected to pipe Succedded!! IPCHandler : %s"), *IPCHandlerToRetry->GetPipeName());
+			FFastLogger::LogConsole(TEXT("PIPE!!!!!!!!!!! Succedded!! IPCHandler : %s"), *IPCHandlerToRetry->GetPipeName());
 		}
 		else
 		{
-			// FFastLogger::LogScreen(FColor::Red, TEXT("Reconnecting to pipe..."));
-			StrongThis->RetryConnectToPipe(IPCHandlerToRetry);
+			FFastLogger::LogConsole(TEXT("Reconnecting to pipe... : %s"), *IPCHandlerToRetry->GetPipeName());
+			StrongThis->RetryReadConnectToPipe(IPCHandlerToRetry);
+		}
+	}), RetryInterval, false);
+}
+
+void UIOManagerComponent::RetrySendConnectToPipe(TSharedPtr<FIPCHandler> IPCHandlerToRetry)
+{
+	TWeakObjectPtr<UIOManagerComponent> WeakThis = this;
+
+	GetWorld()->GetTimerManager().SetTimer(RetrySendTimer, FTimerDelegate::CreateLambda([WeakThis, IPCHandlerToRetry]()
+	{
+		if (!WeakThis.IsValid())
+			return;
+
+		UIOManagerComponent* StrongThis = WeakThis.Get();
+		if (IPCHandlerToRetry->Init(StrongThis->IOHandlerInitInfo, &StrongThis->MessageQueue))
+		{
+			FFastLogger::LogConsole(TEXT("PIPE!!!!!!!!!!! Succedded!! IPCHandler : %s"), *IPCHandlerToRetry->GetPipeName());
+		}
+		else
+		{
+			FFastLogger::LogConsole(TEXT("Reconnecting to pipe... : %s"), *IPCHandlerToRetry->GetPipeName());
+			StrongThis->RetrySendConnectToPipe(IPCHandlerToRetry);
 		}
 	}), RetryInterval, false);
 }
