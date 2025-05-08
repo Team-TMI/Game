@@ -58,6 +58,9 @@ public:
 	void StopSprint();
 	void StartCrouch();
 	void StopCrouch();
+	void DebugMode();
+	void PropActive();
+	void PropCheat();
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ExecuteWaterSurfaceJump(const FVector& LaunchVelocity);
@@ -125,7 +128,13 @@ public:
 	class UInputAction* CrouchAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* SprintAction;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* PropActiveAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* PropCheatAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* DebugModeAction;
+	
 	// 일반 변수
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)

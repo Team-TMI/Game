@@ -81,6 +81,27 @@ AFrog::AFrog()
 		SprintAction = Frog_Sprint.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_DebugMode
+		(TEXT("/Game/Characters/Input/IA_DebugMode.IA_DebugMode"));
+	if (Frog_Sprint.Succeeded())
+	{
+		DebugModeAction = Frog_DebugMode.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_PropActive
+		(TEXT("/Game/Characters/Input/IA_PropActive.IA_PropActive"));
+	if (Frog_Sprint.Succeeded())
+	{
+		PropActiveAction = Frog_PropActive.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_PropCheat
+		(TEXT("/Game/Characters/Input/IA_PropCheat.IA_PropCheat"));
+	if (Frog_Sprint.Succeeded())
+	{
+		PropCheatAction = Frog_PropCheat.Object;
+	}
+
 	ConstructorHelpers::FClassFinder<UJumpGaugeUI> JumpGaugeUIWidget
 		(TEXT("/Game/UI/Character/WBP_JumpGauge.WBP_JumpGauge_C"));
 	if (JumpGaugeUIWidget.Succeeded())
@@ -214,7 +235,7 @@ void AFrog::Tick(float DeltaTime)
 	{
 		return;
 	}
-	
+
 	Super::Tick(DeltaTime);
 	//FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
 
@@ -289,10 +310,12 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this,
 		                                   &AFrog::StopSprint);
 
-		EnhancedInputComponent->
-			BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFrog::Move);
-		EnhancedInputComponent->
-			BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrog::Look);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFrog::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrog::Look);
+
+		EnhancedInputComponent->BindAction(PropActiveAction, ETriggerEvent::Started, this, &AFrog::PropActive);
+		EnhancedInputComponent->BindAction(PropCheatAction, ETriggerEvent::Started, this, &AFrog::PropCheat);
+		EnhancedInputComponent->BindAction(DebugModeAction, ETriggerEvent::Started, this, &AFrog::DebugMode);
 	}
 }
 
@@ -347,6 +370,11 @@ bool AFrog::CanJumpInternal_Implementation() const
 
 void AFrog::StartJump()
 {
+	if (!GetCanMove())
+	{
+		return;
+	}
+
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
@@ -396,11 +424,16 @@ void AFrog::StopJump()
 
 void AFrog::StartSprint()
 {
-	if (GetCharacterMovement()->IsFalling())
+	if (!GetCanMove())
 	{
 		return;
 	}
 	
+	if (GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
+
 	if (HasAuthority())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 600.f;
@@ -438,12 +471,32 @@ void AFrog::SetCrouchEnabled(bool bEnabled)
 
 void AFrog::StartCrouch()
 {
+	if (!GetCanMove())
+	{
+		return;
+	}
+	
 	MulticastRPC_StartCrouch();
 }
 
 void AFrog::StopCrouch()
 {
 	MulticastRPC_StopCrouch();
+}
+
+void AFrog::DebugMode()
+{
+	//
+}
+
+void AFrog::PropActive()
+{
+	//
+}
+
+void AFrog::PropCheat()
+{
+	//
 }
 
 void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& LaunchVelocity)
@@ -461,14 +514,16 @@ void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& Laun
 
 		// 1초 후 서버에서 충돌 프로필 되돌리기
 		FTimerHandle TempTimerHandle;
-		FTimerDelegate RestoreCollisionDelegate{FTimerDelegate::CreateLambda([this]() {
-			UCapsuleComponent* MyCapComp{GetCapsuleComponent()};
-			if (MyCapComp)
-			{
-				MyCapComp->SetCollisionProfileName(TEXT("FrogCollision"));
-			}
-		})};
-		
+		FTimerDelegate RestoreCollisionDelegate{
+			FTimerDelegate::CreateLambda([this]() {
+				UCapsuleComponent* MyCapComp{GetCapsuleComponent()};
+				if (MyCapComp)
+				{
+					MyCapComp->SetCollisionProfileName(TEXT("FrogCollision"));
+				}
+			})
+		};
+
 		GetWorldTimerManager().SetTimer(TempTimerHandle, RestoreCollisionDelegate, 1.f, false);
 	}
 }
@@ -769,11 +824,11 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 	{
 		return;
 	}
-	
+
 	if (bIsSwimming)
 	{
 		MoveComp->SetMovementMode(MOVE_Flying);
-		SetCrouchEnabled(false);
+		//SetCrouchEnabled(false);
 
 		// 일정 시간 물 속에 들어갔는데 Surface 상태가 아니면
 		if (!bWaterStateForcedByTime)
@@ -795,7 +850,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 		{
 		case ECharacterStateEnum::None:
 			MoveComp->GravityScale = 0.5f;
-			
+
 			break;
 		case ECharacterStateEnum::Deep:
 			MoveComp->GravityScale = 0.f;
@@ -803,7 +858,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 			{
 				MoveComp->Velocity.Z = 500.f;
 			}
-			
+
 			break;
 		case ECharacterStateEnum::Shallow:
 			MoveComp->GravityScale = 0.f;
@@ -811,7 +866,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 			{
 				MoveComp->Velocity.Z = 300.f;
 			}
-			
+
 			break;
 		case ECharacterStateEnum::Surface:
 			MoveComp->GravityScale = 0.1f;
@@ -845,7 +900,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 		}
 
 		// 땅에서는 앉기 다시 활성화
-		SetCrouchEnabled(true);
+		//SetCrouchEnabled(true);
 
 		// 물 밖에 나오면 초기화
 		TimeSpentInWater = 0.f;

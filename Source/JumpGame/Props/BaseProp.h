@@ -41,11 +41,17 @@ protected:
 	USceneComponent* PivotScene;
 
 public:
+	UFUNCTION(BlueprintCallable)
+	void SetPropActive(bool Value);
+	UFUNCTION(BlueprintCallable)
+	void SetPropCheatMode(bool Value);
+
+public:
 	// 작동 정지
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bIsActive = true;
 
 	// 치트키
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	bool bGodMode = false;
+	bool bCheatMode = false;
 };
