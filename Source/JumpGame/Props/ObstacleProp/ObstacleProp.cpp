@@ -27,7 +27,7 @@ AObstacleProp::AObstacleProp()
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
-	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 0));
+	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 50.f));
 	
 	Super::SetSize(FVector(1,1,1));
 }
@@ -35,6 +35,24 @@ AObstacleProp::AObstacleProp()
 void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                             UPrimitiveComponent* OtherComp, FVector NormalImpulse,
                             const FHitResult& Hit)
+{
+	if (!OtherActor->ActorHasTag("Frog")) return;
+	
+	/*AFrog* Character = Cast<AFrog>(OtherActor);
+	if (Character)
+	{
+		if (bDebug)
+		{
+			FLog::Log("AObstacleProp::OnMyHit");
+		}
+		
+		CalculateForce(Character);
+	}*/
+}
+
+void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	const FHitResult& SweepResult)
 {
 	if (!OtherActor->ActorHasTag("Frog")) return;
 	
@@ -48,29 +66,10 @@ void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 		
 		CalculateForce(Character);
 	}
-}
-
-void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	const FHitResult& SweepResult)
-{
-	FFastLogger::LogScreen(FColor::Red, TEXT("OVERLAPPPPPPPPPPP"));
-	if (!OtherActor->ActorHasTag("Frog")) return;
 	
 	if (bDebug)
 	{
 		FLog::Log("AObstacleProp::OnMyBeginOverlap");
-	}
-
-	AFrog* Character = Cast<AFrog>(OtherActor);
-	if (Character)
-	{
-		if (bDebug)
-		{
-			FLog::Log("AObstacleProp::OnMyOverlap");
-		}
-		
-		CalculateForce(Character);
 	}
 }
 

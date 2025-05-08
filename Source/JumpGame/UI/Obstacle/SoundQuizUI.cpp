@@ -30,11 +30,7 @@ void USoundQuizUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 void USoundQuizUI::OnClickVoiceSend()
 {
 	// (5초전에 보내고 싶을때)녹음을 끝내고 AI에게 녹음 파일을 보내자
-	if (VoiceRecorderComponent.IsValid())
-	{
-		VoiceRecorderComponent->StopRecording();
-		FFastLogger::LogConsole(TEXT("녹음끝@@@@@@@@@@@@@@@@@@@@@@@"));
-	}
+	// 아무 일도 일어나지 않는다
 }
 
 void USoundQuizUI::UpdateFromResponse(uint32 Similarity, FString MessageStr)

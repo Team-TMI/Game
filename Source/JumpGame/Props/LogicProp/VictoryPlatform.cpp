@@ -62,7 +62,9 @@ AVictoryPlatform::AVictoryPlatform()
 void AVictoryPlatform::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called every frame

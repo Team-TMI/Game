@@ -29,12 +29,11 @@ void ASoundMommyQuizProp::BeginPlay()
 {
 	Super::BeginPlay();
 	SoundQuizUI = CreateWidget<USoundQuizUI>(GetWorld(), SoundQuizUIClass);
-	// SoundQuizUI->VoiceRecorderComponent = VoiceRecorderComponent;
 	SoundQuizUI->SetVoiceRecorderComponent(VoiceRecorderComponent);
 	SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
 	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
-
 	TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
+	
 	// 미션 종료 시 실행할 함수 바인딩
 	TimeRemainUI->OnMissionTimerEnd.AddDynamic(this, &ASoundMommyQuizProp::StopRecord);
 }
@@ -51,7 +50,7 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 {
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep,
 	                        SweepResult);
-
+	
 	// 시작하면 UI 띄우자
 	if (SoundQuizUI)
 	{
@@ -61,16 +60,11 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 {
-	Super::ReceiveSoundQuizMessage();
-	
-	SoundQuizUI->UpdateFromResponse(Similarity*100, MessageStr);
-
 	// 20번 넘으면 자동 게임 종료, 디버프를 받는다 (못맞춤)
 	if (SendResponseIdx >= 20)
 	{
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
-		bIsQuizFail = true;
 		// 실패...
 		if (SoundQuizFail)
 		{
@@ -103,8 +97,9 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 			GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 		}
 	}
-
-	FFastLogger::LogConsole(TEXT("SendResponseIdx: %d"), SendResponseIdx);
+	
+	Super::ReceiveSoundQuizMessage();
+	SoundQuizUI->UpdateFromResponse(Similarity*100, MessageStr);
 }
 
 void ASoundMommyQuizProp::SendSoundQuizMessage()
@@ -139,7 +134,7 @@ void ASoundMommyQuizProp::StopRecord()
 {
 	Super::StopRecord();
 
-	//TimeRemainUI->RemoveFromParent();
+	TimeRemainUI->RemoveFromParent();
 	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Wait"));
 	// 버튼 다시 활성화
 	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(true);

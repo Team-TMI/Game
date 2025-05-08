@@ -13,6 +13,7 @@
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 #include "UICam/LobbyMainCamera.h"
 #include "UICam/LobbySubCamera.h"
@@ -26,6 +27,9 @@ void UClientRoomUI::NativeOnInitialized()
 
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 
+	MainCamera = Cast<ALobbyMainCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), ALobbyMainCamera::StaticClass()));
+	SubCamera = Cast<ALobbySubCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), ALobbySubCamera::StaticClass()));
+	
 	PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	PC->SetViewTarget(MainCamera);
 
@@ -165,19 +169,25 @@ void UClientRoomUI::OnFindComplete(int32 Idx, FString Info)
 
 void UClientRoomUI::SetViewTarget()
 {
+	FFastLogger::LogConsole(TEXT("SetViewTarget"));
+	
 	AActor* CurrentTarget = PC->GetViewTarget();
-
+	FFastLogger::LogConsole(TEXT("CurrentTarget: %p"), CurrentTarget);
+	
 	if (CurrentTarget == MainCamera)
 	{
 		PC->SetViewTargetWithBlend(SubCamera, 0.5f);
+		FFastLogger::LogConsole(TEXT("SubCamera: %p"), SubCamera);
 	}
 	else
 	{
 		PC->SetViewTargetWithBlend(MainCamera, 0.5f);
+		FFastLogger::LogConsole(TEXT("MainCamera: %p"), MainCamera);
 	}
 }
 
 void UClientRoomUI::OnClickBackFromFind()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(0);
+	SetViewTarget();
 }

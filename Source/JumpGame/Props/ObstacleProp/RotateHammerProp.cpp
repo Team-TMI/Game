@@ -40,9 +40,8 @@ void ARotateHammerProp::Tick(float DeltaTime)
 
 void ARotateHammerProp::CalculateForce(AFrog* Character)
 {
-	FFastLogger::LogScreen(FColor::Red, TEXT("Hit!"));
 	FVector Direction = CollisionComp->GetUpVector();
-	float Force = 2500;
+	float Force = 1000;
 	
 	Super::LaunchCharacter(Character, Direction, Force, true, true);
 }
