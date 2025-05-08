@@ -14,8 +14,8 @@ class JUMPGAME_API USelectRoomUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual void NativeConstruct() override;
-	
+	virtual void NativeOnInitialized() override;
+
 	// 맵 선택 창 관련
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoBackWait;
