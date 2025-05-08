@@ -16,4 +16,5 @@ class JUMPGAME_API AMapEditorMode : public ANetworkGameMode
 
 public:
 	AMapEditorMode();
+	
 };

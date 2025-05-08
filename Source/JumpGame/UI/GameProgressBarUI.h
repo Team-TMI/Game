@@ -39,8 +39,6 @@ public:
 	UPROPERTY()
 	class UJumpGameInstance* GI;
 	UPROPERTY()
-	class APlayerController* PC;
-	UPROPERTY()
 	class AFrog* Character;
 	UPROPERTY()
 	TMap<FString, FPlayerInfo> PlayerInfo;
@@ -84,4 +82,9 @@ public:
 	// 플레이어 목록 배열
 	UPROPERTY(editanywhere)
 	TArray<UPlayerMarkerWidget*> PlayerMarkers;
+
+
+	// 업데이트 됐나요?
+	UPROPERTY()
+	bool bIsInit = false;
 };
