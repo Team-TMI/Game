@@ -152,6 +152,10 @@ void UJumpGameInstance::JoinOtherSession(int32 SessionIdx)
 	results[SessionIdx].Session.SessionSettings.bUseLobbiesIfAvailable = true;
 	results[SessionIdx].Session.SessionSettings.bUsesPresence = true;
 
+	// 수업시간엔 안나왔지만 추가로 설정
+	results[SessionIdx].Session.SessionSettings.bAllowJoinInProgress = true;
+	results[SessionIdx].Session.SessionSettings.bShouldAdvertise = true;
+
 	results[SessionIdx].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
 
 	// 세션참여
