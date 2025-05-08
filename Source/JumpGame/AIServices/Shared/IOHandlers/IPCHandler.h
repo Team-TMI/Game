@@ -18,6 +18,9 @@ public:
 	virtual bool Init(const FIOHandlerInitInfo& InitInfo, std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr) override;
 	virtual bool SendGameMessage(const FMessageUnion& Message) override;
 	virtual bool ReceiveMessage() override;
+	virtual void SetReaderMode() override { bReader = true; bWriter = false; }
+	virtual void SetWriterMode() override { bReader = false; bWriter = true; };
+	FString GetPipeName() { return PipeName; }
 	
 	virtual ~FIPCHandler() override;
 
@@ -34,4 +37,7 @@ private:
 	size_t CachedLength = 0;
 	
 	void* Pipe = nullptr;
+
+	bool bReader = false;
+	bool bWriter = false;
 };

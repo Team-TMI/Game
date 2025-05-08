@@ -21,7 +21,7 @@ FIPCHandler::FIPCHandler()
 bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo, 
 	std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr)
 {
-	PipeName = PIPE_PREFIX + InitInfo.PipeName;
+	PipeName = bReader ? PIPE_PREFIX + InitInfo.ReadPipeName : PIPE_PREFIX + InitInfo.SendPipeName;
 	MessageQueue = InMessageQueuePtr;
 
 	const char* PipeNameA = TCHAR_TO_ANSI(*PipeName);
