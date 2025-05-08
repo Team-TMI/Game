@@ -23,6 +23,8 @@ public:
 	float GetGaugeValue();
 	void SuccessMission();
 	void FailMission();
+	void Overlapping();
+	void NotOverlapping();
 	// 애니메이션 재생하고 UI 지움
 	UFUNCTION(BlueprintImplementableEvent)
 	void VanishMission();
@@ -34,6 +36,8 @@ public:
 	class UImage* SuccessImage;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* FailImage;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UImage* OverlapImage;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* GaugeImage;
 
