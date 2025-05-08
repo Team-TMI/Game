@@ -43,5 +43,5 @@ void ANetworkPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	SetInputMode(FInputModeGameAndUI());
-	SetShowMouseCursor(false);
+	SetShowMouseCursor(true);
 }

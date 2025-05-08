@@ -3,17 +3,19 @@
 
 #include "InGameMode.h"
 
+#include "JumpGame/Core/PlayerController/InGamePlayerController.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
 
 AInGameMode::AInGameMode()
 {
+	PlayerControllerClass = AInGamePlayerController::StaticClass();
 }
 
 void AInGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	LoadMapComponent->LoadMap();
+	// LoadMapComponent->LoadMap();
 
 	// FString FileName =;
 	// LoadMapComponent->LoadMapWithString(FileName);
