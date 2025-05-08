@@ -3,6 +3,7 @@
 
 #include "MapGameState.h"
 
+#include "GameFramework/PlayerState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
 #include "JumpGame/UI/GameProgressBarUI.h"
@@ -19,6 +20,34 @@ void AMapGameState::BeginPlay()
 	ConnectionVerifyComponent->InitMaxPlayerCount(2);
 }
 
+void AMapGameState::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// 서버에서, 플레이어 위치를 저장하고 알려줄것!
+	if (HasAuthority())
+	{
+		TArray<float> NewPositions;
+
+		for (APlayerState* PS : PlayerArray)
+		{
+			AController* Controller = Cast<AController>(PS->GetOwner());
+			APawn* Pawn = Controller ? Controller->GetPawn() : nullptr;
+
+			if (Pawn)
+			{
+				NewPositions.Add(Pawn->GetActorLocation().Z);
+			}
+			else
+			{
+				NewPositions.Add(0.f);
+			}
+		}
+
+		MulticastRPC_UpdateAllPlayerZPos(NewPositions);
+	}
+}
+
 // 서버에서 호출되는 함수
 void AMapGameState::OnAllClientAdded()
 {
@@ -27,6 +56,12 @@ void AMapGameState::OnAllClientAdded()
 	// 클라이언트에게 알리자 (2초후)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMapGameState::MulticastRPC_AllClientAdded, 2, false);
+}
+
+void AMapGameState::MulticastRPC_UpdateAllPlayerZPos_Implementation(
+	const TArray<float>& NewPlayerZPos)
+{
+	AllPlayerZPos = NewPlayerZPos;
 }
 
 void AMapGameState::MulticastRPC_AllClientAdded_Implementation()

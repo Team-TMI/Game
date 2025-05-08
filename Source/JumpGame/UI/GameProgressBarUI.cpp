@@ -36,65 +36,37 @@ void UGameProgressBarUI::NativeOnInitialized()
 	GS->OnAllClientAddedDelegate.AddDynamic(this, &UGameProgressBarUI::InitUISetting);
 }
 
-void UGameProgressBarUI::GetLifetimeReplicatedProps(
-	TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UGameProgressBarUI, MaxPlayerID);
-}
-
 void UGameProgressBarUI::NativeTick(const FGeometry& MyGeometry, float DeltaSeconds)
 {
 	Super::NativeTick(MyGeometry, DeltaSeconds);
 
-	// 지속적으로 업데이트 하자
-	UpdateProgressBar();
+	if (bIsInit)
+	{
+		// 지속적으로 업데이트 하자
+		UpdateProgressBar();
+	}
 }
 
 void UGameProgressBarUI::InitUISetting()
 {
-	FFastLogger::LogScreen(FColor::Red, TEXT("InitUISetting!!!!!!"));
-	
-	/*const FUniqueNetIdRepl& NetIdRepl = Character->GetPlayerState<APlayerState>()->GetUniqueId();
-	if (NetIdRepl.IsValid())
-	{
-		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-		PlayerKey = NetId->ToString();
-	}
-	
-	for (auto& it : PlayerInfo)
-	{
-		if (it.Key == PlayerKey)
-		{
-			MyPlayerID = it.Value.PlayerID;
-		}
-	}*/
-	
-	// 최대 플레이어 수 설정은 한번만 (배열 크기 결정)
-	PlayerInfo = GI->GetPlayerInfo();
-	int32 MapMaxPlayer = 0;
-	for (auto& it : PlayerInfo)
-	{
-		MapMaxPlayer++;
-		FFastLogger::LogScreen(FColor::Red, TEXT("MapMaxPlayer: %i"), MapMaxPlayer);
-	}
-	this->MaxPlayerID = MapMaxPlayer;
+	FFastLogger::LogConsole(TEXT("InitUISetting!!!!!!"));
 	
 	CreatePlayerMarkers();
+	bIsInit = true;
 }
 
 void UGameProgressBarUI::UpdatePlayerPos()
 {
-	// 나를 포함한 모든 플레이어의 위치값 배열: TArray<float> PlayerPos
-	PlayerPos.SetNum(MaxPlayerID + 1);
-	PlayerPos.Init(0.f, MaxPlayerID + 1);
+	AMapGameState* GS = Cast<AMapGameState>(GetWorld()->GetGameState());
+	if (!GS) return;
+	
+	PlayerPos.SetNum(GS->PlayerArray.Num());
 	
 	// 그 중 1등 플레이어의 위치
 	WinnerPos = 0.f;
-	
-	// 각 플레이어 정보를 맵에서 가져와 PlayerID 순서대로 저장하고 싶음
-	for (FConstPlayerControllerIterator Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
+
+	int32 PlayerIndex = 0;
+	/*for (FConstPlayerControllerIterator Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
 	{
 		APlayerController* PC = Iter->Get();
 		if (PC)
@@ -113,32 +85,29 @@ void UGameProgressBarUI::UpdatePlayerPos()
 					WinnerPos = FMath::Max(WinnerPos, Position);
 				}
 			}
-			
 			PlayerIndex++;
 		}
-	}
+	}*/
 	
-	/*for (auto& it : PlayerInfo)
+	for (APlayerState* PlayerState : GS->PlayerArray)
 	{
-		// PlayerID를 배열 인덱스로 사용하자
-		int32 PlayerIndex = it.Value.PlayerID;
-        
-		// PlayerID가 유효한 범위인지 확인하고
-		if (PlayerPos.IsValidIndex(PlayerIndex))
+		// AController* Controller = PlayerState->GetOwner<AController>();
+		AFrog* Frog = Cast<AFrog>(PlayerState->GetPawn());
+		if (Frog)
 		{
-			PC = GetWorld()->GetFirstPlayerController();
-			Character = Cast<AFrog>(PC->GetPawn());
-			if (PC && Character)
+			if (PlayerPos.IsValidIndex(PlayerIndex))
 			{
+				FFastLogger::LogConsole(TEXT("UpdatePlayerPos: %d"),PlayerIndex);
 				// 플레이어 위치값(Z좌표임) 저장
-				float Position = Character->GetActorLocation().Z;
+				float Position = Frog->GetActorLocation().Z;
 				PlayerPos[PlayerIndex] = Position; // PlayerID에 해당하는 인덱스에 저장
-                
+            
 				// 1등 플레이어 위치 갱신
 				WinnerPos = FMath::Max(WinnerPos, Position);
 			}
 		}
-	}*/
+		PlayerIndex++;
+	}
 }
 
 void UGameProgressBarUI::UpdateProgressBar()
@@ -166,12 +135,16 @@ void UGameProgressBarUI::CreatePlayerMarkers()
 		}
 	}
 	PlayerMarkers.Empty();
-    
-	// 플레이어 마커 배열 크기 설정
-	PlayerMarkers.SetNum(MaxPlayerID + 1);
-    
+
+	AMapGameState* GS = Cast<AMapGameState>(GetWorld()->GetGameState());
+	if (!GS) return;
+	
+	PlayerMarkers.SetNum(GS->PlayerArray.Num());
+	FFastLogger::LogConsole(TEXT("GS->PlayerArray.Num(): %d"), GS->PlayerArray.Num());
+	
+	int32 PlayerIndex = 0;
 	// 각 플레이어에 대한 마커 생성
-	for (FConstPlayerControllerIterator Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
+	/*for (FConstPlayerControllerIterator Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
 	{
 		APlayerController* PC = Iter->Get();
 		if (PC)
@@ -184,14 +157,14 @@ void UGameProgressBarUI::CreatePlayerMarkers()
 				Overlay_Player->AddChild(NewMarker);
 				// 플레이어 ID와 정보 설정
 				NewMarker->SetPlayerID(PlayerIndex);
-            
+			
 				// 위젯 초기 위치 설정
 				FVector2D TopLeft = Overlay_Player->GetCachedGeometry().GetAbsolutePosition(); // 좌측 상단
 				FVector2D Size = Overlay_Player->GetCachedGeometry().GetLocalSize(); // 위젯 크기
 				FVector2D BottomRight = TopLeft + FVector2D(Size.X, Size.Y); // 우측 하단
 			
 				NewMarker->SetRenderTranslation(BottomRight);
-            
+			
 				// 로컬 플레이어 확인하여 색상 설정
 				if (PC->IsLocalController())
 				{
@@ -201,47 +174,57 @@ void UGameProgressBarUI::CreatePlayerMarkers()
 				{
 					NewMarker->SetColorAndOpacity(FColor::Yellow);
 				}
-            
+			
 				// PlayerID 인덱스에 마커 저장
 				PlayerMarkers[PlayerIndex] = NewMarker;
+
+				PlayerIndex++;
+			}
+		}
+	}*/
+
+	for (APlayerState* PlayerState : GS->PlayerArray)
+	{
+		// AController* Controller = PlayerState->GetOwner<AController>();
+		AFrog* Frog = Cast<AFrog>(PlayerState->GetPawn());
+		
+		if (Frog)
+		{
+			// 마커 위젯 생성
+			UPlayerMarkerWidget* NewMarker = CreateWidget<UPlayerMarkerWidget>(GetWorld(), PlayerMarkerFactory);
+			if (NewMarker)
+			{
+				FFastLogger::LogConsole(TEXT("CreatePlayerMarkers: %d"),PlayerIndex);
+				// 위젯을 프로그레스 바 컨테이너에 추가
+				Overlay_Player->AddChild(NewMarker);
+				// 플레이어 ID와 정보 설정
+				NewMarker->SetPlayerID(PlayerIndex);
+        
+				// 위젯 초기 위치 설정
+				FVector2D TopLeft = Overlay_Player->GetCachedGeometry().GetAbsolutePosition(); // 좌측 상단
+				FVector2D Size = Overlay_Player->GetCachedGeometry().GetLocalSize(); // 위젯 크기
+				FVector2D BottomRight = TopLeft + FVector2D(Size.X, Size.Y); // 우측 하단
+		
+				NewMarker->SetRenderTranslation(BottomRight);
+        
+				// 로컬 플레이어 확인하여 색상 설정
+				if (Frog->IsLocallyControlled())
+				{
+					NewMarker->SetColorAndOpacity(FColor::Green);
+				}
+				else
+				{
+					NewMarker->SetColorAndOpacity(FColor::Yellow);
+				}
+        
+				// PlayerID 인덱스에 마커 저장
+				PlayerMarkers[PlayerIndex] = NewMarker;
+				FFastLogger::LogConsole(TEXT("PlayerIndex: %d"), PlayerIndex);
+
+				PlayerIndex++;
 			}
 		}
 	}
-	
-	/*for (auto& it : PlayerInfo)
-	{
-		int32 PlayerIndex = it.Value.PlayerID;
-        
-		// 마커 위젯 생성
-		UPlayerMarkerWidget* NewMarker = CreateWidget<UPlayerMarkerWidget>(GetWorld(), PlayerMarkerFactory);
-		if (NewMarker)
-		{
-			// 위젯을 프로그레스 바 컨테이너에 추가
-			Overlay_Player->AddChild(NewMarker);
-			// 플레이어 ID와 정보 설정
-			NewMarker->SetPlayerID(PlayerIndex);
-            
-			// 위젯 초기 위치 설정
-			FVector2D TopLeft = Overlay_Player->GetCachedGeometry().GetAbsolutePosition(); // 좌측 상단
-			FVector2D Size = Overlay_Player->GetCachedGeometry().GetLocalSize(); // 위젯 크기
-			FVector2D BottomRight = TopLeft + FVector2D(Size.X, Size.Y); // 우측 하단
-			
-			NewMarker->SetRenderTranslation(BottomRight);
-            
-			// 로컬 플레이어 확인하여 색상 설정
-			if (PlayerIndex == MyPlayerID)
-			{
-				NewMarker->SetColorAndOpacity(FColor::Green);
-			}
-			else
-			{
-				NewMarker->SetColorAndOpacity(FColor::Yellow);
-			}
-            
-			// PlayerID 인덱스에 마커 저장
-			PlayerMarkers[PlayerIndex] = NewMarker;
-		}
-	}*/
 }
 
 void UGameProgressBarUI::UpdatePlayerMarkers()

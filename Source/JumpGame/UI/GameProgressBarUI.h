@@ -18,7 +18,6 @@ class JUMPGAME_API UGameProgressBarUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaSeconds) override;
 
 	// UI
@@ -44,15 +43,13 @@ public:
 	UPROPERTY()
 	TMap<FString, FPlayerInfo> PlayerInfo;
 	// 배열에 포함된 플레이어 수
-	UPROPERTY(Replicated)
+	UPROPERTY()
 	int32 MaxPlayerID = -1;
 	// 내 플레이어의 인덱스(ID)
 	UPROPERTY()
 	uint32 MyPlayerID = -1;
 	UPROPERTY()
 	FString PlayerKey;
-	UPROPERTY()
-	int32 PlayerIndex = 0;
 	
 	// 나를 포함한 모든 플레이어의 위치
 	UPROPERTY()
@@ -85,4 +82,9 @@ public:
 	// 플레이어 목록 배열
 	UPROPERTY(editanywhere)
 	TArray<UPlayerMarkerWidget*> PlayerMarkers;
+
+
+	// 업데이트 됐나요?
+	UPROPERTY()
+	bool bIsInit = false;
 };

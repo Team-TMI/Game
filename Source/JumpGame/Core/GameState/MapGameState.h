@@ -16,14 +16,18 @@ class JUMPGAME_API AMapGameState : public ANetworkGameState
 
 public:
 	virtual void BeginPlay() override;
-
+	virtual void Tick(float DeltaTime) override;
 	virtual void OnAllClientAdded() override;
-
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_AllClientAdded();
 
 	UPROPERTY()
 	FOnAllClientMapAdded OnAllClientAddedDelegate;
-private:
-	
+
+	// UI에 플레이어 위치를 동기화하자
+	UPROPERTY()
+	TArray<float> AllPlayerZPos;
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_UpdateAllPlayerZPos(const TArray<float>& NewPlayerZPos);
 };
