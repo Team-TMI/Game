@@ -81,13 +81,23 @@ void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompo
                                             const FHitResult& SweepResult)
 {
 	//Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	
+	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
+	if (OverlappingFrog)
 	{
-		Frog = Cast<AFrog>(OtherActor);
-
-		StartMission();
+		if (OverlappingFrog->IsLocallyControlled())
+		{
+			Frog = OverlappingFrog;
+			StartMission();
+		}
 	}
+	
+	// if (OtherActor->ActorHasTag(TEXT("Frog")))
+	// {
+	// 	Frog = Cast<AFrog>(OtherActor);
+	//
+	// 	StartMission();
+	// }
 }
 
 void AObjectEyeHunterProp::StartMission()
@@ -104,6 +114,8 @@ void AObjectEyeHunterProp::StartMission()
 	if (TimeRemainUI)
 	{
 		TimeRemainUI->AddToViewport();
+		// 10초 후 미션 종료 ( 타이머 설정 )
+		TimeRemainUI->StartMissionTimer(10.f);
 	}
 
 	if (GEngine && GEngine->GameViewport)
@@ -163,14 +175,11 @@ void AObjectEyeHunterProp::StartMission()
 		ControlPoint1 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.0f);
 		ControlPoint2 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.0f);
 	}
-
-	// 10초 후 미션 종료 ( 타이머 설정 )
-	TimeRemainUI->StartMissionTimer(10.f);
 }
 
 void AObjectEyeHunterProp::StopCharacter()
 {
-	if (Frog)
+	if (Frog && Frog->IsLocallyControlled())
 	{
 		Frog->SetActorLocation(MissionLocation->GetComponentLocation());
 		Frog->CameraMissionMode();
@@ -181,7 +190,7 @@ void AObjectEyeHunterProp::StopCharacter()
 
 void AObjectEyeHunterProp::ResumeCharacter()
 {
-	if (Frog)
+	if (Frog && Frog->IsLocallyControlled())
 	{
 		Frog->ResumeMovement();
 		Frog->CameraMovementMode();
@@ -195,13 +204,24 @@ void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedCompone
 {
 	//Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
+	if (OverlappingFrog && OverlappingFrog->IsLocallyControlled())
 	{
 		if (bIsStartHunt)
 		{
 			EndMission(false);
 		}
+		
+		Frog = nullptr;
 	}
+	
+	// if (OtherActor->ActorHasTag(TEXT("Frog")))
+	// {
+	// 	if (bIsStartHunt)
+	// 	{
+	// 		EndMission(false);
+	// 	}
+	// }
 }
 
 void AObjectEyeHunterProp::Tick(float DeltaTime)
