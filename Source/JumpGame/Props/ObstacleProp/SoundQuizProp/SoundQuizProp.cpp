@@ -71,7 +71,7 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	}*/
 
 	// 치트키
-	if (bGodMode)
+	if (bCheatMode)
 	{
 		if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
 		{

@@ -71,6 +71,16 @@ void ABaseProp::Tick(float DeltaTime)
 	MaterialChangeOnTick();
 }
 
+void ABaseProp::SetPropActive(bool Value)
+{
+	bIsActive = Value;
+}
+
+void ABaseProp::SetPropCheatMode(bool Value)
+{
+	bCheatMode = Value;
+}
+
 void ABaseProp::MaterialChangeOnTick()
 {
 	Super::MaterialChangeOnTick();
