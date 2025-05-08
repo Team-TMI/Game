@@ -9,6 +9,7 @@
 #include "Components/ProgressBar.h"
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/Core/GameState/MapGameState.h"
 #include "JumpGame/Props/LogicProp/GameFinishProp.h"
 #include "JumpGame/Props/LogicProp/GameStartProp.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
@@ -30,11 +31,10 @@ void UGameProgressBarUI::NativeOnInitialized()
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	PC = GetWorld()->GetFirstPlayerController();
 	Character = Cast<AFrog>(PC->GetPawn());
-
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UGameProgressBarUI::InitUISetting, 10, false);
+	
 	// 모든 플레이어들의 값이 업데이트 되었다면 이 함수를 실행해야함
-	// InitUISetting();
+	AMapGameState* GS = Cast<AMapGameState>(GetWorld()->GetGameState());
+	GS->OnAllClientAddedDelegate.AddDynamic(this, &UGameProgressBarUI::InitUISetting);
 }
 
 void UGameProgressBarUI::NativeTick(const FGeometry& MyGeometry, float DeltaSeconds)

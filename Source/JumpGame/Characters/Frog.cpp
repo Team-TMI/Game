@@ -210,6 +210,11 @@ void AFrog::BeginPlay()
 // Called every frame
 void AFrog::Tick(float DeltaTime)
 {
+	if (bIsLobbyFrog)
+	{
+		return;
+	}
+	
 	Super::Tick(DeltaTime);
 	//FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
 

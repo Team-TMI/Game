@@ -81,6 +81,7 @@ public:
 	bool GetCanMove() const;
 	void CameraMissionMode();
 	void CameraMovementMode();
+	UFUNCTION(BlueprintCallable)
 	void SetJumpGaugeVisibility(bool bVisibility);
 	void SetCrouchEnabled(bool bEnabled);
 	UFUNCTION()
@@ -157,6 +158,9 @@ public:
 	// 현재 오버랩 중인 물 볼륨
 	UPROPERTY()
 	TWeakObjectPtr<class ARisingWaterProp> CurrentWaterVolume;
+	// 로비 캐릭터인지
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bIsLobbyFrog{false};
 	
 	// 델리게이트
 public:

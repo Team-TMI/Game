@@ -64,16 +64,21 @@ void ASoundQuizProp::Tick(float DeltaTime)
 		// 7번 누르면 퀴즈 메세지 받아오기
 		ReceiveSoundQuizMessage();
 	}
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
-	{
-		// 8번 누르면 퀴즈 끝 메세지 전송
-		SendEndSoundQuizNotify();
-	}
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
+		if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
 	{
 		// 9번 누르면 퀴즈 음성 파일 메세지 전송
 		SendSoundQuizMessage();
 	}*/
+
+	// 치트키
+	if (bGodMode)
+	{
+		if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
+		{
+			// 8번 누르면 퀴즈 끝 메세지 전송
+			SendEndSoundQuizNotify();
+		}
+	}
 
 	if (bIsMessageReceived)
 	{
@@ -90,6 +95,7 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	                        SweepResult);
 
 	if (!OtherActor->ActorHasTag("Frog")) return;
+	if (bIsActive == false) return;
 		
 	// GameState 캐스팅
 	NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
@@ -130,12 +136,16 @@ void ASoundQuizProp::SendStartSoundQuizNotify()
 		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
 		// 문자열로 추출하자
 		Key = NetId->ToString();
+		
+		// 게임 인스턴스 가져오기
+		UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+		TMap<FString, FPlayerInfo>& InfoMap = GI->GetPlayerInfo();
+		PlayerIdx = InfoMap[Key].PlayerID;
 	}
-	
-	// 게임 인스턴스 가져오기
-	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
-	TMap<FString, FPlayerInfo>& InfoMap = GI->GetPlayerInfo();
-	PlayerIdx = InfoMap[Key].PlayerID;
+	else
+	{
+		PlayerIdx = 0;
+	}
 	
 	// AI쪽에서 첫번째 문장을 준다면, 5초동안 녹음 후 전송
 	// 퀴즈 시작 메시지를 보내주자
