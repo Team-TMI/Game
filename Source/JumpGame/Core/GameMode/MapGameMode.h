@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "NetworkGameMode.h"
+#include "JumpGame/Core/GameState/TypeInfo/GameInfo.h"
 #include "MapGameMode.generated.h"
 
 /**
@@ -20,9 +21,23 @@ public:
 protected:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 	virtual void BeginPlay() override;
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapLoad", meta = (AllowPrivateAccess = "true"))
 	class ULoadMapComponent* LoadMapComponent = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapLoad", meta = (AllowPrivateAccess = "true"))
 	class USaveMapComponent* SaveMapComponent = nullptr;
+
+public:
+	UPROPERTY()
+	int32 PlayerIdx = 0;
+	
+	UPROPERTY()
+	class UJumpGameInstance* GI;
+
+	// 플레이어 정보 저장
+	UPROPERTY()
+	FString Key;
+	UPROPERTY()
+	TMap<FString, FPlayerInfo> PlayersMap;
 };

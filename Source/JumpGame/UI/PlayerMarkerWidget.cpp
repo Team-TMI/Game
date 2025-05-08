@@ -6,4 +6,5 @@
 void UPlayerMarkerWidget::SetPlayerID(int32 ID)
 {
 	PlayerID = ID;
+
 }

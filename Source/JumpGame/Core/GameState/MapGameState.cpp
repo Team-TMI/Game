@@ -6,6 +6,7 @@
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
 #include "JumpGame/UI/GameProgressBarUI.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 void AMapGameState::BeginPlay()
 {
@@ -13,8 +14,9 @@ void AMapGameState::BeginPlay()
 	
 	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	// 최대 몇명의 플레이어가 플레이를 할지 설정하는 함수 (GI에서 정보를 들고와서 설정해준다)
-	int32 MaxPlayer = GI->GetMaxPlayerCount();
-	ConnectionVerifyComponent->InitMaxPlayerCount(MaxPlayer);
+	// int32 MaxPlayer = GI->GetMaxPlayerCount();
+	// ConnectionVerifyComponent->InitMaxPlayerCount(MaxPlayer);
+	ConnectionVerifyComponent->InitMaxPlayerCount(2);
 }
 
 // 서버에서 호출되는 함수
@@ -30,5 +32,6 @@ void AMapGameState::OnAllClientAdded()
 void AMapGameState::MulticastRPC_AllClientAdded_Implementation()
 {
 	// 브로드캐스트 하자
+	FFastLogger::LogScreen(FColor::Blue, TEXT("모든 클라이언트 들어옴 알림!!"));
 	OnAllClientAddedDelegate.Broadcast();
 }
