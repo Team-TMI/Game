@@ -244,8 +244,8 @@ void AMapEditingPawn::HandleMouseMove(const FInputActionValue& InputActionValue)
 void AMapEditingPawn::HandleDelete(const FInputActionValue& InputActionValue)
 {
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
-	DeleteHandlerManager->HandleDelete(ControlledInfo);
 	ClickHandlerManager->ResetControl();
+	DeleteHandlerManager->HandleDelete(ControlledInfo);
 }
 
 void AMapEditingPawn::HandleRotate(const FInputActionValue& InputActionValue)
@@ -291,4 +291,9 @@ void AMapEditingPawn::MoveUp(float Val)
 {
 	if (FMath::IsNearlyZero(Val)) return;
 	AddMovementInput(FVector::UpVector, Val);
+}
+
+void AMapEditingPawn::SetActive(bool bInActive)
+{
+	bActive = bInActive;
 }

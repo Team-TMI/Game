@@ -22,13 +22,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	void SetActive(bool bInActive);;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	GETTER(class UClickHandlerManager*, ClickHandlerManager);
+	GETTER(class UClickHandlerManager*, ClickHandlerManager)
 	GETTER(class UWidgetMapEditDragDropOperation*, DragDropOperation);
 	GETTER(class URotateHandlerManager*, RotateHandlerManager);
 
@@ -109,4 +110,6 @@ private:
 	UPROPERTY(Category = Pawn, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UWidgetMapEditDragDropOperation* DragDropOperation = nullptr;
 
+	UPROPERTY()
+	bool bActive = true;
 };

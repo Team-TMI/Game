@@ -1,6 +1,7 @@
 #include "VerticalPropSlotUI.h"
 
 #include "PropSlot.h"
+#include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 
 void UVerticalPropSlotUI::NativeOnInitialized()
 {
@@ -17,7 +18,7 @@ void UVerticalPropSlotUI::InitWidget(UClickHandlerManager* ClickHandlerManager,
 	PropBelow->OnPropSlotClicked.AddDynamic(ClickHandlerManager, &UClickHandlerManager::OnPropSlotClicked);
 }
 
-void UVerticalPropSlotUI::SetPropSlots(FPropStruct* Top, FPropStruct* Below)
+void UVerticalPropSlotUI::SetPropSlots(UPropWrap* Top, UPropWrap* Below)
 {
 	PropTop->SetPropInfo(Top);
 	PropBelow->SetPropInfo(Below);

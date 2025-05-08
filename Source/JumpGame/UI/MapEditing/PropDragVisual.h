@@ -13,4 +13,8 @@ UCLASS()
 class JUMPGAME_API UPropDragVisual : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UImage* PropImage;
 };

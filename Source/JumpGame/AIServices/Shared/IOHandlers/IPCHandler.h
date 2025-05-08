@@ -24,14 +24,14 @@ public:
 private:
 	bool ParseMessage(FMessageUnion& Message, DWORD BytesRead);
 	
-	FString PipeName;
+	FString PipeName = TEXT("");
 
 	int32 BufferSize = BUFFER_SIZE;
-	char Buffer[BUFFER_SIZE];
+	char Buffer[BUFFER_SIZE] = { 0 };
 
 	size_t MaxCacheSize = BUFFER_SIZE * 10;
-	uint8 CachedBuffer[BUFFER_SIZE * 10];
+	uint8 CachedBuffer[BUFFER_SIZE * 10] = { 0 };
 	size_t CachedLength = 0;
 	
-	void* Pipe;
+	void* Pipe = nullptr;
 };

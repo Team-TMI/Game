@@ -6,16 +6,19 @@
 #include "GameFramework/PlayerStart.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Props/LogicProp/GameStartProp.h"
+#include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
+#include "JumpGame/Props/SaveLoad/SaveMapComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AMapGameMode::AMapGameMode()
 {
+	LoadMapComponent = CreateDefaultSubobject<ULoadMapComponent>(TEXT("LoadMapComponent"));
+	SaveMapComponent = CreateDefaultSubobject<USaveMapComponent>(TEXT("SaveMapComponent"));
 }
 
 void AMapGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 AActor* AMapGameMode::ChoosePlayerStart_Implementation(AController* Player)

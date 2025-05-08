@@ -63,10 +63,10 @@ APrimitiveProp::APrimitiveProp()
 	}
 
 	PropDataComponent = CreateDefaultSubobject<UPropDataComponent>(TEXT("PropDataComponent"));
+	// PropDataComponent->SetPropID(TEXT("1002"));
 	
 	SetSize(DefaultSize);
 
-	PropDataComponent->SetPropID(TEXT("1002"));
 
 	// RotateWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("RotateWidgetComponent"));
 	// RotateWidgetComponent->SetupAttachment(RootComponent);
@@ -88,13 +88,19 @@ APrimitiveProp::APrimitiveProp()
 void APrimitiveProp::OnGridPropBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	CollisionCount++;
 	bIsOnCollision = true;
 }
 
 void APrimitiveProp::OnGridPropEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	bIsOnCollision = false;
+	CollisionCount--;
+	if (CollisionCount <= 0)
+	{
+		CollisionCount = 0;
+		bIsOnCollision = false;
+	}
 }
 
 void APrimitiveProp::SetSize(const FVector& InSize)
@@ -143,6 +149,12 @@ void APrimitiveProp::BeginPlay()
 
 	GridInnerCollision->OnComponentBeginOverlap.AddDynamic(this, &APrimitiveProp::OnGridPropBeginOverlap);
 	GridInnerCollision->OnComponentEndOverlap.AddDynamic(this, &APrimitiveProp::OnGridPropEndOverlap);
+
+	if (GetWorld()->GetMapName().Contains(TEXT("MapEditorLevel")))
+	{
+		GridOuterCollision->SetHiddenInGame(false);
+		GridOuterCollision->SetVisibility(true);
+	}
 }
 
 // Called every frame

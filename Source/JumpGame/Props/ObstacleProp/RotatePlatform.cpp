@@ -4,6 +4,7 @@
 #include "RotatePlatform.h"
 
 #include "Components/BoxComponent.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 
 
 // Sets default values
@@ -23,6 +24,8 @@ ARotatePlatform::ARotatePlatform()
 	CollisionComp->SetBoxExtent(FVector(250,250,50));
 
 	Super::SetSize(FVector(5,5,1));
+	
+	PropDataComponent->SetPropID(TEXT("9001"));
 }
 
 // Called when the game starts or when spawned

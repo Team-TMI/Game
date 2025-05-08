@@ -5,6 +5,7 @@
 
 #include "RollingBallProp.h"
 #include "Components/BoxComponent.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 
@@ -21,6 +22,9 @@ ARollingCannonProp::ARollingCannonProp()
 	// 콜리전 없음
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
+	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
+	PropDataComponent->SetPropID(TEXT("5002"));
 }
 
 void ARollingCannonProp::OnProjectileReturn()
@@ -47,6 +51,26 @@ void ARollingCannonProp::BeginPlay()
 	{
 		FireRollingBall();
 		ObjectPool->OnObjectReturn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
+	}
+}
+
+void ARollingCannonProp::SetCollision(bool bEnable)
+{
+	Super::SetCollision(bEnable);
+
+	// 장애물에 추가 메쉬가 있는 경우에 override
+	if (bEnable)
+	{
+		// 추가 메쉬 설정
+		MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
+		MeshComp->SetRenderCustomDepth(false);
+	}
+	else
+	{
+		// 추가 메쉬 설정
+		// TODO: Material 불투명하게 바꿔주기
+		MeshComp->SetMaterial(0, SelectedObjectMaterial);
+		MeshComp->SetRenderCustomDepth(true);
 	}
 }
 

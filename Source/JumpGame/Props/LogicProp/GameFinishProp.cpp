@@ -12,6 +12,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/Props/Components/PropDataComponent.h"
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
@@ -36,6 +37,8 @@ AGameFinishProp::AGameFinishProp()
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
 	Super::SetSize(FVector(3,2,1));
+
+	PropDataComponent->SetPropID(TEXT("9000"));
 }
 
 void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -44,7 +47,6 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if (!HasAuthority()) return;
 	if (!OtherActor->ActorHasTag("Frog")) return;
-	// FFastLogger::LogConsole(TEXT("Overlap!!!: %s"), *OtherActor->GetName());
 	
 	AFrog* Character = Cast<AFrog>(OtherActor);
 	if (!bWinnerFound)
