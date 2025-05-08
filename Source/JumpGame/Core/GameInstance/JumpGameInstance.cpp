@@ -71,6 +71,10 @@ void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount)
 	FName EncodedName = FName(DisplayName);
 	SessionSettings.Set(FName(TEXT("DP_NAME")), DisplayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
+	// 대기방 경로 설정
+	FString WaitRoomPath = TEXT("/Game/Maps/WaitRoomLevel");
+	SessionSettings.Set(FName(TEXT("LEVEL_NAME")), WaitRoomPath, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+
 	// 세션 이름 저장
 	CurrentSessionName = EncodedName;
 
@@ -159,6 +163,7 @@ void UJumpGameInstance::JoinOtherSession(int32 SessionIdx)
 	results[SessionIdx].Session.SessionSettings.bShouldAdvertise = true;
 
 	results[SessionIdx].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
+	results[SessionIdx].Session.SessionSettings.Get(FName(TEXT("LEVEL_NAME")), LevelPath);
 
 	// 세션참여
 	SessionInterface->JoinSession(0, FName(displayName), results[SessionIdx]);
@@ -174,8 +179,15 @@ void UJumpGameInstance::OnJoinSessionComplete(FName SessionName,
 		FString url;
 		SessionInterface->GetResolvedConnectString(SessionName, url);
 		// 서버가 있는 맵으로 이동하자
+		FFastLogger::LogConsole(TEXT("UJumpGameInstance::OnJoinSessionComplete, url: %s"), *url);
+		FFastLogger::LogConsole(TEXT("UJumpGameInstance::OnJoinSessionComplete, LevelPath: %s"), *LevelPath);
+
+		// 위의 둘을 합쳐서
+		// 해당 경로로 이동하자
+		FString urlPath = url + LevelPath;
+		
 		APlayerController* pc = GetWorld()->GetFirstPlayerController();
-		pc->ClientTravel(url, TRAVEL_Absolute);
+		pc->ClientTravel(urlPath, TRAVEL_Absolute);
 	}
 }
 

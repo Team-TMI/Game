@@ -92,4 +92,7 @@ public:
 
 	// 눈 추적 파이썬 코드 실행 시킬 지 여부
 	bool bIsRunEyeScript{false};
+
+	UPROPERTY()
+	FString LevelPath;
 };
