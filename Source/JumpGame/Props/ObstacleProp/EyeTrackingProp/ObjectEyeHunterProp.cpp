@@ -399,7 +399,7 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 	if (bIsSuccess)
 	{
 		// 미션 성공 : 발사 !
-		//FLog::Log("Success");
+		FLog::Log("Success");
 
 		if (Frog)
 		{
@@ -414,7 +414,7 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 	else
 	{
 		// 미션 실패 및 비정상 종료
-		// FLog::Log("Failure");
+		FLog::Log("Failure");
 
 		if (Frog)
 		{

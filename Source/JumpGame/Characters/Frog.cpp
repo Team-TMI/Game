@@ -370,6 +370,11 @@ bool AFrog::CanJumpInternal_Implementation() const
 
 void AFrog::StartJump()
 {
+	if (!GetCanMove())
+	{
+		return;
+	}
+
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
@@ -419,6 +424,11 @@ void AFrog::StopJump()
 
 void AFrog::StartSprint()
 {
+	if (!GetCanMove())
+	{
+		return;
+	}
+	
 	if (GetCharacterMovement()->IsFalling())
 	{
 		return;
@@ -461,6 +471,11 @@ void AFrog::SetCrouchEnabled(bool bEnabled)
 
 void AFrog::StartCrouch()
 {
+	if (!GetCanMove())
+	{
+		return;
+	}
+	
 	MulticastRPC_StartCrouch();
 }
 
@@ -813,7 +828,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 	if (bIsSwimming)
 	{
 		MoveComp->SetMovementMode(MOVE_Flying);
-		SetCrouchEnabled(false);
+		//SetCrouchEnabled(false);
 
 		// 일정 시간 물 속에 들어갔는데 Surface 상태가 아니면
 		if (!bWaterStateForcedByTime)
@@ -885,7 +900,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 		}
 
 		// 땅에서는 앉기 다시 활성화
-		SetCrouchEnabled(true);
+		//SetCrouchEnabled(true);
 
 		// 물 밖에 나오면 초기화
 		TimeSpentInWater = 0.f;
