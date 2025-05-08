@@ -24,6 +24,7 @@ class JUMPGAME_API ARisingWaterProp : public ALogicProp
 public:
 	ARisingWaterProp();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
@@ -52,9 +53,7 @@ public:
 							   int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	virtual void SetCollision(bool bEnable) override;
-
 	
-
 public:
 	UFUNCTION()
 	void RiseWater(float DeltaTime);
@@ -78,18 +77,17 @@ public:
 	class USceneComponent* RespawnPoint;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_WaterState)
 	EWaterStateEnum WaterState;
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class AFrog* Frog;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Water State")
+	float CurrentRisingSpeed;
 
+	UFUNCTION()
+	void OnRep_WaterState();
+	
 public:
+	FTimerHandle ResumeRisingTimerHandle;
 	FTimerHandle TimerHandle;
-	FTimerHandle StopTimerHandle;
-	float FlowTime{};
-	float JumpTime{2.f};
-	bool bIsChanged{false};
-	float RisingSpeed{50.f};
+
 };

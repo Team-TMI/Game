@@ -38,6 +38,15 @@ public:
 	virtual void NotifyControllerChanged() override;
 	virtual bool CanJumpInternal_Implementation() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	// 카메라 물 오버랩 감지 후 포스트프로세스
+	UFUNCTION()
+	void OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	                               const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnCameraEndOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:
 	// Input
@@ -50,8 +59,8 @@ public:
 	void StartCrouch();
 	void StopCrouch();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPC_StartJump();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ExecuteWaterSurfaceJump(const FVector& LaunchVelocity);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_StartCrouch();
 	UFUNCTION(NetMulticast, Reliable)
@@ -60,6 +69,7 @@ public:
 	void ServerRPC_StartSprint();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StopSprint();
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void InitFrogState();
@@ -80,7 +90,23 @@ public:
 	void ServerRPC_SetJumpAvailableBlock(int32 Block);
 	// UFUNCTION(Server, Reliable)
 	// void ServerRPC_ResetSuperJumpRatio();
-	
+public:
+	// 물에 들어갔는지, 나왔는지 업데이트
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPC_UpdateOverallWaterState(bool bNowInWater, class ARisingWaterProp* WaterVolume);
+	// 물 속 특정 존 상태 (Deep, Shallow, Surface) 변경
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPC_SetSpecificWaterState(ECharacterStateEnum NewState);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPC_TeleportToLocation(FVector TargetLocation);
+	UFUNCTION()
+	void OnRep_CharacterWaterState();
+	UFUNCTION()
+	void OnRep_bIsSwimming();
+
+	// 물 속에서의 물리 및 상태
+	void HandleInWaterLogic(float DeltaTime);
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -107,7 +133,7 @@ public:
 	float Yaw;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool bIsCrouching;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_bIsSwimming)
 	bool bIsSwimming;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	float CrouchTime{};
@@ -121,13 +147,23 @@ public:
 	bool bCanMove{true};
 	bool bCanCrouch{true};
 	float PrevVelocityZLength{};
+	// 물 관련
+	UPROPERTY(Replicated)
+	float TimeSpentInWater;
+	UPROPERTY(EditDefaultsOnly)
+	float SurfaceStateForceTime;
+	UPROPERTY(Replicated)
+	bool bWaterStateForcedByTime;
+	// 현재 오버랩 중인 물 볼륨
+	UPROPERTY()
+	TWeakObjectPtr<class ARisingWaterProp> CurrentWaterVolume;
 	
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnSuperJumpRatioChanged OnSuperJumpRatioChanged;
-
-	// 컴포넌트 
+	
+	// 컴포넌트
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBoxComponent* CameraCollision;
@@ -144,11 +180,6 @@ public:
 	
 	// Enum
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
-	ECharacterStateEnum CharacterState;
-
-	// 컨베이어 벨트
-	UPROPERTY()
-	bool IsOverlap = false;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CharacterWaterState)
+	ECharacterStateEnum CharacterWaterState;
 };
