@@ -55,6 +55,8 @@ void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount)
 	UE_LOG(LogTemp, Warning, TEXT("서브시스템 이름: %s"), *subsystemName.ToString())
 	SessionSettings.bIsLANMatch = subsystemName.IsEqual(FName(TEXT("NULL")));
 
+	// 중간에 JoinSession을 할 수 있는지 여부
+	SessionSettings.bAllowJoinInProgress = true;
 	// 로비 사용할지 여부
 	SessionSettings.bUseLobbiesIfAvailable = true;
 	// 친구 상태를 확인할 수 있는지 (게임중/로그아웃 등등 공개할건지) 여부
