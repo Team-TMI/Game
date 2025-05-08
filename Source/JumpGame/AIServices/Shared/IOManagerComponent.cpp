@@ -26,7 +26,10 @@ void UIOManagerComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	// IOHandler 초기화
-	TSharedPtr<IIOHandlerInterface> IPCHandler = MakeShared<FIPCHandler>();
+	TSharedPtr<IIOHandlerInterface> IPCReadHandler = MakeShared<FIPCHandler>();
+	IPCReadHandler->SetReaderMode();
+	TSharedPtr<IIOHandlerInterface> IPCSendHandler = MakeShared<FIPCHandler>();
+	IPCSendHandler->SetWriterMode();
 	TSharedPtr<IIOHandlerInterface> SocketHandler = MakeShared<FSocketHandler>();
 	
 	RegisterIOHandler(EMessageType::Ping, SocketHandler);
@@ -35,9 +38,9 @@ void UIOManagerComponent::BeginPlay()
 	RegisterIOHandler(EMessageType::WaveRequest, SocketHandler);
 	RegisterIOHandler(EMessageType::WaveResponse, SocketHandler);
 	
-	RegisterIOHandler(EMessageType::EyeTrackingNotifyMessage, IPCHandler);
-	RegisterIOHandler(EMessageType::EyeTrackingResponseMessage, IPCHandler);
-	RegisterIOHandler(EMessageType::EyeTrackingRequestMessage, IPCHandler);
+	RegisterIOHandler(EMessageType::EyeTrackingNotifyMessage, IPCSendHandler);
+	RegisterIOHandler(EMessageType::EyeTrackingResponseMessage, IPCReadHandler);
+	RegisterIOHandler(EMessageType::EyeTrackingRequestMessage, IPCReadHandler);
 	
 	// queue 초기화
 	for (auto& Handler : IOHandlers)
@@ -45,11 +48,18 @@ void UIOManagerComponent::BeginPlay()
 		MessageQueue[Handler.Key] = std::queue<FMessageUnion>();
 	}
 
-	if (!IPCHandler->Init(IOHandlerInitInfo, &MessageQueue))
+	if (!IPCReadHandler->Init(IOHandlerInitInfo, &MessageQueue))
 	{
-		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCHandler);
+		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCReadHandler);
 		RetryConnectToPipe(SharedIPC);
 	}
+
+	if (!IPCSendHandler->Init(IOHandlerInitInfo, &MessageQueue))
+	{
+		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCSendHandler);
+		RetryConnectToPipe(SharedIPC);
+	}
+	
 	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue);
 	
 	// for (int32 i = 0; i < 5; i++)
@@ -158,7 +168,7 @@ void UIOManagerComponent::RetryConnectToPipe(TSharedPtr<FIPCHandler> IPCHandlerT
 		UIOManagerComponent* StrongThis = WeakThis.Get();
 		if (IPCHandlerToRetry->Init(StrongThis->IOHandlerInitInfo, &StrongThis->MessageQueue))
 		{
-			FFastLogger::LogScreen(FColor::Red, TEXT("Reconnected to pipe Succedded!!"));
+			FFastLogger::LogScreen(FColor::Red, TEXT("Reconnected to pipe Succedded!! IPCHandler : %s"), *IPCHandlerToRetry->GetPipeName());
 		}
 		else
 		{
