@@ -37,6 +37,16 @@ void UWaitRoomUI::OnClickGameStart()
 	PC = GetWorld()->GetFirstPlayerController();
 	if (PC->HasAuthority())
 	{
+		int32 CurrentPlayer = 0;
+		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		{
+			PC = Iterator->Get();
+			if (PC)
+			{
+				CurrentPlayer++;
+			}
+		}
+		GI->SetMaxPlayer(CurrentPlayer);
 		// TODO: 선택한 게임레벨로 이동하게하자
 		GetWorld()->ServerTravel(TEXT("/Game/Maps/InGameLevel?listen"));
 		UE_LOG(LogTemp, Warning, TEXT("게임시작"));
