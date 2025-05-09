@@ -9,6 +9,11 @@
 #include "JumpGame/UI/GameProgressBarUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 
+AMapGameState::AMapGameState()
+{
+	
+}
+
 void AMapGameState::BeginPlay()
 {
 	Super::BeginPlay();
@@ -17,6 +22,12 @@ void AMapGameState::BeginPlay()
 	// 최대 몇명의 플레이어가 플레이를 할지 설정하는 함수 (GI에서 정보를 들고와서 설정해준다)
 	int32 MaxPlayer = GI->GetMaxPlayerCount();
 	ConnectionVerifyComponent->InitMaxPlayerCount(MaxPlayer);
+
+	ProgressBarUI = CreateWidget<UGameProgressBarUI>(GetWorld(), UGameProgressBarUIClass);
+	if (ProgressBarUI)
+	{
+		ProgressBarUI->AddToViewport();
+	}
 }
 
 void AMapGameState::Tick(float DeltaTime)

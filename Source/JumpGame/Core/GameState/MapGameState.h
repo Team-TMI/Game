@@ -15,6 +15,7 @@ class JUMPGAME_API AMapGameState : public ANetworkGameState
 	GENERATED_BODY()
 
 public:
+	AMapGameState();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnAllClientAdded() override;
@@ -30,4 +31,10 @@ public:
 	TArray<float> AllPlayerZPos;
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_UpdateAllPlayerZPos(const TArray<float>& NewPlayerZPos);
+
+	// 프로그레스바 UI
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UGameProgressBarUI> UGameProgressBarUIClass;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	class UGameProgressBarUI* ProgressBarUI;
 };
