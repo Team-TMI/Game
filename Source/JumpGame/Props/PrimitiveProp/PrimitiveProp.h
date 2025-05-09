@@ -55,6 +55,7 @@ public:
 	GETTER(class UPropDataComponent*, PropDataComponent);
 
 	bool IsClickable() const { return bCanClick; }
+	bool IsCollisionEnabled() const { return bEnableCollision; }
 
 protected:
 	UFUNCTION()
@@ -127,4 +128,6 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClickHandling", meta = (AllowPrivateAccess = "true"))
 	bool bCanClick = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionEnable", meta = (AllowPrivateAccess = "true"))
+	bool bEnableCollision = true;
 };

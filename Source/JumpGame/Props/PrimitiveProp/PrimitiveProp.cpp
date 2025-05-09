@@ -88,6 +88,11 @@ APrimitiveProp::APrimitiveProp()
 void APrimitiveProp::OnGridPropBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	APrimitiveProp* OtherProp = Cast<APrimitiveProp>(OtherActor);
+	if (!(this->IsCollisionEnabled() && OtherProp && OtherProp->IsCollisionEnabled()))
+	{
+		return;
+	}
 	CollisionCount++;
 	bIsOnCollision = true;
 }
@@ -95,6 +100,11 @@ void APrimitiveProp::OnGridPropBeginOverlap(UPrimitiveComponent* OverlappedCompo
 void APrimitiveProp::OnGridPropEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	APrimitiveProp* OtherProp = Cast<APrimitiveProp>(OtherActor);
+	if (!(this->IsCollisionEnabled() && OtherProp && OtherProp->IsCollisionEnabled()))
+	{
+		return;
+	}
 	CollisionCount--;
 	if (CollisionCount <= 0)
 	{
