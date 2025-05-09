@@ -90,13 +90,8 @@ void UWaitRoomUI::UpdateWaitPlayer()
 	}
 }
 
-void UWaitRoomUI::HideMapSelect_Implementation()
-{
-	FFastLogger::LogConsole(TEXT("OnClickSelectMapOnClickSelectMapOnClickSelectMap"));
-}
-
 void UWaitRoomUI::ShowMapSelect_Implementation()
 {
-	FFastLogger::LogConsole(TEXT("OShowMapSelect_Implementation"));
+	
 }
 

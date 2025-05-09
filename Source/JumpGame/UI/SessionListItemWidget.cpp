@@ -27,3 +27,14 @@ void USessionListItemWidget::SetInfo(int32 Idx, FString Info)
 	// 방 정보 받기 (업데이트)
 	Text_RoomInfo->SetText(FText::FromString(Info));
 }
+
+void USessionListItemWidget::SetRoomInfo(const FRoomData& Data)
+{
+	// 현재 몇번째 방인지?
+	RoomIdx = Data.RoomID;
+	// 방 정보 받기 (업데이트)
+	Text_RoomInfo->SetText(FText::FromString(Data.RoomName));
+	Text_MapName->SetText(FText::FromString(Data.MapName));
+	Text_PlayerCount->SetText(FText::AsNumber(Data.PlayerCount));
+	Text_MaxPlayer->SetText(FText::AsNumber(Data.MaxPlayer));
+}

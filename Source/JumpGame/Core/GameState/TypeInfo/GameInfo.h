@@ -39,6 +39,7 @@ public:
 	{}
 };
 
+
 USTRUCT(BlueprintType)
 struct FMapInfo
 {
@@ -60,5 +61,40 @@ public:
 		: MapID(-1)
 		, Thumbnail(nullptr)
 		, LoadingWidget(nullptr)
+	{}
+};
+
+
+USTRUCT(BlueprintType)
+struct FRoomData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite)
+	FString RoomName;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 PlayerCount;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 MaxPlayer;
+
+	UPROPERTY(BlueprintReadWrite)
+	FString MapName;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 RoomID;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsSecret;
+
+	FRoomData()
+		: RoomName(TEXT(""))
+		, PlayerCount(0)
+		, MaxPlayer(4)
+		, MapName(TEXT(""))
+		, RoomID(-1)
+		, bIsSecret(false)
 	{}
 };
