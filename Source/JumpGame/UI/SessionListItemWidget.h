@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "JumpGame/Core/GameState/TypeInfo/GameInfo.h"
 #include "SessionListItemWidget.generated.h"
 
 /*
@@ -22,10 +23,19 @@ public:
 	class UButton* Btn_Join;
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_RoomInfo;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_PlayerCount;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_MaxPlayer;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_MapName;
 
 	int32 RoomIdx;
 	
 	UFUNCTION()
 	void OnClickJoin();
+	UFUNCTION()
 	void SetInfo(int32 Idx, FString Info);
+	UFUNCTION()
+	void SetRoomInfo(const FRoomData& Data);
 };

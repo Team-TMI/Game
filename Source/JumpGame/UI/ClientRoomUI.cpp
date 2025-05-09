@@ -186,3 +186,13 @@ void UClientRoomUI::OnClickBackFromFind()
 	WidgetSwitcher->SetActiveWidgetIndex(0);
 	SetViewTarget();
 }
+
+void UClientRoomUI::UpadateRoomList(const TArray<FRoomData>& RoomDataArray)
+{
+	
+}
+
+void UClientRoomUI::InitRoomListPool()
+{
+	
+}

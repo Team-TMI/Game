@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "JumpGame/Core/GameState/TypeInfo/GameInfo.h"
 #include "ClientRoomUI.generated.h"
 
 /*
@@ -15,6 +16,7 @@ WidgetSwitcher 구조
 1) FindRoom: 메인화면에서 방 목록보기를 누르면 이동하는 화면
 -> FindRoom에서 팝업으로 방을 생성한다
  */
+
 UCLASS()
 class JUMPGAME_API UClientRoomUI : public UUserWidget
 {
@@ -113,6 +115,23 @@ public:
 	// 세션 목록
 	UPROPERTY(editanywhere)
 	TSubclassOf<class USessionListItemWidget> SessionItemFactory;
+	UPROPERTY(editanywhere)
+	TSubclassOf<class USessionListItemDouble> SessionItemDoubleFactory;
+	
+	// 오브젝트 풀
+	UPROPERTY(editanywhere)
+	TArray<USessionListItemWidget*> RoomListPool;
+	UPROPERTY(editanywhere)
+	TArray<USessionListItemDouble*> RoomDoubleWidgets;
+	
+	// 최대 방 개수
+	UPROPERTY(editanywhere)
+	int32 MaxRoomCount = 50; 
+
+	UFUNCTION()
+	void UpadateRoomList(const TArray<FRoomData>& RoomDataArray);
+	UFUNCTION()
+	void InitRoomListPool();
 	
 	// 함수
 	UFUNCTION()

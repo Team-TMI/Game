@@ -78,8 +78,6 @@ public:
 	// 맵 선택 창 애니메이션 재생
 	UFUNCTION(BlueprintNativeEvent)
 	void ShowMapSelect();
-	UFUNCTION(BlueprintNativeEvent)
-	void HideMapSelect();
 
 	// 카메라 전환 관련
 	UPROPERTY(editanywhere)
