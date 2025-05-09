@@ -54,6 +54,8 @@ public:
 	GETTER(class UGridComponent*, GridComp);
 	GETTER(class UPropDataComponent*, PropDataComponent);
 
+	bool IsClickable() const { return bCanClick; }
+
 protected:
 	UFUNCTION()
 	void SetGizmoLocation(class UGizmoComponent* Gizmo, const FVector& Direction, const FVector& InBoxSize);
@@ -122,4 +124,7 @@ protected:
 	bool bIsOnCollision = false;
 	UPROPERTY()
 	int32 CollisionCount = 0;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClickHandling", meta = (AllowPrivateAccess = "true"))
+	bool bCanClick = true;
 };

@@ -42,7 +42,8 @@ bool FActorClickHandler::HandleClick(FClickResponse& ClickResponse, class AMapEd
 		}
 
 		// 새로운 액터가 선택되었다면 Selected 처리
-		if (APrimitiveProp* Actor = Cast<APrimitiveProp>(HitResult.GetActor()))
+		APrimitiveProp* Actor = Cast<APrimitiveProp>(HitResult.GetActor());
+		if (Actor && Actor->IsClickable())
 		{
 			Actor->SetSelected();
 			ClickResponse.TargetProp = Actor;

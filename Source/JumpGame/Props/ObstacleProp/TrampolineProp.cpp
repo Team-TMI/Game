@@ -19,6 +19,7 @@ ATrampolineProp::ATrampolineProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("Trampoline");
 
+	CollisionComp->SetCollisionProfileName("OverlapProp");
 	PropDataComponent->SetPropID(TEXT("5009"));
 }
 
@@ -28,7 +29,7 @@ void ATrampolineProp::BeginPlay()
 	Super::BeginPlay();
 
 	// 콜리전 설정 (Block)
-	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	// CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 }
 
 // Called every frame
@@ -40,11 +41,11 @@ void ATrampolineProp::Tick(float DeltaTime)
 
 void ATrampolineProp::CalculateForce(AFrog* Character)
 {
-
+	FFastLogger::LogScreen(FColor::Red, TEXT("Trampoline"));
 	//FVector CharacterDir = Character->GetVelocity().GetSafeNormal();
 	//FVector Direction = CharacterDir + FVector::UpVector;
 	
-	FVector Direction{GetActorUpVector()};
+	FVector Direction{CollisionComp->GetUpVector()};
 	
 	float Force;
 	if (temp)
@@ -57,11 +58,13 @@ void ATrampolineProp::CalculateForce(AFrog* Character)
 	}
 	
 	Force *= 1.2;
+
+	FFastLogger::LogScreen(FColor::Emerald, TEXT("Force: %.1f"), Force);
 	
 	if (bDebug)
 	{
 		FLog::Log("Z Speed", Character->PrevVelocityZLength);
 	}
 	
-	Super::LaunchCharacter(Character, Direction, Force);
+	Super::LaunchCharacter(Character, Direction, Force, false, true);
 }
