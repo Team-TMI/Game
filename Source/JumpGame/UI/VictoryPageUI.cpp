@@ -27,7 +27,7 @@ void UVictoryPageUI::OnClickGoLobby()
 	}
 	else
 	{
-		GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"));
 		FLog::Log("Server Leaving Game, 로비로 이동");
 	}
 
