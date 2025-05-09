@@ -123,13 +123,16 @@ public:
 	TArray<USessionListItemWidget*> RoomListPool;
 	UPROPERTY(editanywhere)
 	TArray<USessionListItemDouble*> RoomDoubleWidgets;
+
+	UPROPERTY(editanywhere)
+	TArray<FRoomData> AllFoundRooms;
 	
 	// 최대 방 개수
 	UPROPERTY(editanywhere)
 	int32 MaxRoomCount = 50; 
 
 	UFUNCTION()
-	void UpadateRoomList(const TArray<FRoomData>& RoomDataArray);
+	void UpdateRoomList(const TArray<FRoomData>& RoomDataArray);
 	UFUNCTION()
 	void InitRoomListPool();
 	
@@ -140,7 +143,7 @@ public:
 	void OnClickBack();
 
 	// 델리게이트 함수
-	void OnFindComplete(int32 Idx,FString Info);
+	void OnFindComplete(const FRoomData& Data);
 
 	// 카메라 전환 관련
 	UPROPERTY(editanywhere)

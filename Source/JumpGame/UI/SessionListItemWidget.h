@@ -29,13 +29,16 @@ public:
 	class UTextBlock* Text_MaxPlayer;
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_MapName;
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Img_Secret;
 
+	UPROPERTY()
 	int32 RoomIdx;
 	
 	UFUNCTION()
 	void OnClickJoin();
-	UFUNCTION()
-	void SetInfo(int32 Idx, FString Info);
+	/*UFUNCTION()
+	void SetInfo(int32 Idx, FString Info);*/
 	UFUNCTION()
 	void SetRoomInfo(const FRoomData& Data);
 };

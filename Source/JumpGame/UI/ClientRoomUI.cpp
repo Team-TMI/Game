@@ -4,6 +4,7 @@
 #include "ClientRoomUI.h"
 
 #include "SessionListItemWidget.h"
+#include "SessionListItemDouble.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CheckBox.h"
@@ -56,6 +57,9 @@ void UClientRoomUI::NativeOnInitialized()
 	Btn_Find->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickFind);
 	Btn_BackFromFind->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickBackFromFind);
 	GI->OnFindComplete.BindUObject(this, &UClientRoomUI::OnFindComplete);
+
+	// 초기화
+	InitRoomListPool();
 }
 
 
@@ -110,8 +114,10 @@ void UClientRoomUI::CreateSession()
 	
 	// 인원 수
 	int32 PlayerCnt = Slider_PlayerCnt->GetValue();
+	FString Password = Edit_Password->GetText().ToString();
+	
 	// 생성
-	GI->CreateMySession(RoomName, PlayerCnt);
+	GI->CreateMySession(RoomName, PlayerCnt, Password);
 }
 
 void UClientRoomUI::OnClickCheckBox(bool bIsChecked)
@@ -128,7 +134,9 @@ void UClientRoomUI::OnValueChanged(float Value)
 void UClientRoomUI::OnClickFind()
 {
 	// 스크롤 룸리스트의 자식들 다 지우자 (초기화, 중복 방지)
-	Scroll_RoomList->ClearChildren();
+	AllFoundRooms.Empty();
+	UpdateRoomList(AllFoundRooms);
+	
 	// 그 다음에 검색을 시작
 	GI->FindOtherSession();
 
@@ -145,25 +153,22 @@ void UClientRoomUI::OnClickBack()
 	CanvasCreateRoom->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void UClientRoomUI::OnFindComplete(int32 Idx, FString Info)
+void UClientRoomUI::OnFindComplete(const FRoomData& Data)
 {
 	// 만약에 idx가 -1이면
-	if (Idx==-1)
+	if (Data.RoomID == -1)
 	{
 		// 검색 버튼 내용 다시 find로
 		Text_BtnFind->SetText(FText::FromString("FIND"));
 		// 검색 버튼을 활성화
 		Btn_Find->SetIsEnabled(true);
+
+		UpdateRoomList(AllFoundRooms);
 	}
 	// 그렇지 않으면
 	else
 	{
-		// SessionItem을 하나 만들자
-		USessionListItemWidget* Item = CreateWidget<USessionListItemWidget>(GetWorld(), SessionItemFactory);
-		// 만들어진 SessionItem을 Scroll_RoomList에 자식으로!
-		Scroll_RoomList->AddChild(Item);
-		// 만들어진 SessionItem의 Text 내용을 변경하고, idx 전달하자
-		Item->SetInfo(Idx, Info);
+		AllFoundRooms.Add(Data);
 	}
 }
 
@@ -187,12 +192,69 @@ void UClientRoomUI::OnClickBackFromFind()
 	SetViewTarget();
 }
 
-void UClientRoomUI::UpadateRoomList(const TArray<FRoomData>& RoomDataArray)
-{
-	
-}
-
 void UClientRoomUI::InitRoomListPool()
 {
-	
+	Scroll_RoomList->ClearChildren();
+	RoomListPool.Empty();
+	RoomDoubleWidgets.Empty();
+
+	for (int32 i = 0; i < MaxRoomCount; i += 2)
+	{
+		// RoomDoubleWidget을 생성하자
+		USessionListItemDouble* DoubleWidget = CreateWidget<USessionListItemDouble>(GetWorld(), SessionItemDoubleFactory);
+
+		USessionListItemWidget* Left = CreateWidget<USessionListItemWidget>(GetWorld(), SessionItemFactory);
+		USessionListItemWidget* Right = CreateWidget<USessionListItemWidget>(GetWorld(), SessionItemFactory);
+
+		DoubleWidget->Init(Left, Right);
+
+		// 배열에 저장
+		RoomListPool.Add(Left);
+		RoomListPool.Add(Right);
+		RoomDoubleWidgets.Add(DoubleWidget);
+
+		// scroll box에 추가
+		Scroll_RoomList->AddChild(DoubleWidget);
+	}
+}
+
+void UClientRoomUI::UpdateRoomList(const TArray<FRoomData>& RoomDataArray)
+{
+	const int32 NumRooms = RoomDataArray.Num();
+	const int32 NumRowsToShow = FMath::DivideAndRoundUp(NumRooms, 2);
+
+	// 전체 줄을 순회하면서 Visible/Collapsed 처리
+	for (int32 Row = 0; Row < RoomDoubleWidgets.Num(); ++Row)
+	{
+		USessionListItemDouble* RowWidget = RoomDoubleWidgets[Row];
+		const int32 LeftIdx = Row * 2;
+		const int32 RightIdx = Row * 2 + 1;
+
+		if (Row < NumRowsToShow)
+		{
+			// 왼쪽 방
+			if (RoomListPool.IsValidIndex(LeftIdx) && RoomDataArray.IsValidIndex(LeftIdx))
+			{
+				RoomListPool[LeftIdx]->SetRoomInfo(RoomDataArray[LeftIdx]);
+				RoomListPool[LeftIdx]->SetVisibility(ESlateVisibility::Visible);
+			}
+
+			// 오른쪽 방
+			if (RoomListPool.IsValidIndex(RightIdx) && RoomDataArray.IsValidIndex(RightIdx))
+			{
+				RoomListPool[RightIdx]->SetRoomInfo(RoomDataArray[RightIdx]);
+				RoomListPool[RightIdx]->SetVisibility(ESlateVisibility::Visible);
+			}
+			else if (RoomListPool.IsValidIndex(RightIdx))
+			{
+				RoomListPool[RightIdx]->SetVisibility(ESlateVisibility::Collapsed);
+			}
+
+			RowWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			RowWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
 }

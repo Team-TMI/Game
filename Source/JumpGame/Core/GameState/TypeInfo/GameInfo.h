@@ -87,7 +87,7 @@ public:
 	int32 RoomID;
 
 	UPROPERTY(BlueprintReadWrite)
-	bool bIsSecret;
+	bool bIsLocked;
 
 	FRoomData()
 		: RoomName(TEXT(""))
@@ -95,6 +95,6 @@ public:
 		, MaxPlayer(4)
 		, MapName(TEXT(""))
 		, RoomID(-1)
-		, bIsSecret(false)
+		, bIsLocked(false)
 	{}
 };

@@ -46,7 +46,7 @@ void UJumpGameInstance::Init()
 	}
 }
 
-void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount)
+void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount, const FString& Password)
 {
 	// 세션을 만들기 위한 옵션을 설정
 	FOnlineSessionSettings SessionSettings;
@@ -65,14 +65,18 @@ void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount)
 	SessionSettings.bShouldAdvertise = true;
 	// 세션 최대 인원 설정
 	SessionSettings.NumPublicConnections = PlayerCount;
+	
 	// 커스텀 정보 (세션이름)
 	// base64로 인코딩
 	DisplayName = StringBase64Encode(DisplayName);
 	FName EncodedName = FName(DisplayName);
 	SessionSettings.Set(FName(TEXT("DP_NAME")), DisplayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-
 	// 세션 이름 저장
 	CurrentSessionName = EncodedName;
+
+	// 잠금 여부
+	bool bIsLocked = !Password.IsEmpty();
+	SessionSettings.Set(FName(TEXT("IS_LOCKED")), bIsLocked ? 1 : 0, EOnlineDataAdvertisementType::ViaOnlineService);
 
 	// 세션 생성
 	SessionInterface->CreateSession(0, FName(DisplayName), SessionSettings);
@@ -121,15 +125,46 @@ void UJumpGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 		auto results = SessionSearch->SearchResults;
 		for (int32 i = 0; i < results.Num(); i++)
 		{
+			FRoomData Room;
+
+			// 룸 인덱스
+			Room.RoomID = i;
+			// 룸 이름
 			FString displayName;
-			results[i].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName);
+			if (results[i].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), displayName))
+			{
+				Room.RoomName = StringBase64Decode(displayName);
+			}
+			// 인원수
+			int32 MaxPlayers = results[i].Session.SessionSettings.NumPublicConnections;
+			int32 OpenSlots = results[i].Session.NumOpenPublicConnections;
 
-			// base64 Decode
-			displayName = StringBase64Decode(displayName);
+			int32 CurrentPlayers = MaxPlayers - OpenSlots;
 
-			UE_LOG(LogTemp, Warning, TEXT("세션 - %d, 이름: %s"), i, *displayName);
+			if (CurrentPlayers <= 0)
+			{
+				CurrentPlayers = 1;
+			}
 
-			OnFindComplete.ExecuteIfBound(i, displayName);
+			Room.PlayerCount = CurrentPlayers;
+			Room.MaxPlayer = MaxPlayers;
+			
+			UE_LOG(LogTemp, Warning, TEXT("Open: %d / Max: %d"), OpenSlots, MaxPlayers);
+			
+			// 맵 이름도 세션 설정에 있다면 가져오기
+			FString MapName;
+			if (results[i].Session.SessionSettings.Get(FName(TEXT("MAP_NAME")), MapName))
+			{
+				Room.MapName = MapName;
+			}
+			else
+			{
+				Room.MapName = TEXT("Unknown");
+			}
+
+			UE_LOG(LogTemp, Warning, TEXT("세션 - %d, 이름: %s (%d/%d)"), i, *Room.RoomName, CurrentPlayers, MaxPlayers);
+
+			OnFindComplete.ExecuteIfBound(Room);
 		}
 	}
 	else
@@ -137,8 +172,10 @@ void UJumpGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 		UE_LOG(LogTemp, Warning, TEXT("세션 검색 실패"));
 	}
 
-	// 검색 끝났다는 걸 알리자
-	OnFindComplete.ExecuteIfBound(-1, FString());
+	// 검색 끝났다는 알림
+	FRoomData EndFlag;
+	EndFlag.RoomID = -1;
+	OnFindComplete.ExecuteIfBound(EndFlag);
 }
 
 void UJumpGameInstance::JoinOtherSession(int32 SessionIdx)

@@ -10,7 +10,9 @@
 #include "JumpGameInstance.generated.h"
 
 // 세션 검색 완료시 호출되는 함수를 등록하는 델리게이트
-DECLARE_DELEGATE_TwoParams(FFindComplete, int32, FString);
+// DECLARE_DELEGATE_TwoParams(FFindComplete, int32, FString);
+
+DECLARE_DELEGATE_OneParam(FFindComplete, const FRoomData&);
 
 /**
  * 
@@ -28,7 +30,7 @@ public:
 	
 	// 세션 생성 관련
 	UFUNCTION(BlueprintCallable)
-	void CreateMySession(FString DisplayName, int32 PlayerCount);
+	void CreateMySession(FString DisplayName, int32 PlayerCount, const FString& Password);
 	UFUNCTION(BlueprintCallable)
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 
@@ -91,5 +93,5 @@ public:
 	void RunEyeTrackingScript();
 
 	// 눈 추적 파이썬 코드 실행 시킬 지 여부
-	bool bIsRunEyeScript{true};
+	bool bIsRunEyeScript{false};
 };
