@@ -15,7 +15,7 @@ ABasicGroundProp::ABasicGroundProp()
 	Tags.Add("Ground");
 	Tags.Add("BasicGround");
 	
-	CollisionComp->SetCollisionProfileName(TEXT("Prop"));
+	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 	MeshComp->SetCollisionProfileName(TEXT("Prop"));
 
 	PropDataComponent->SetPropID(TEXT("1000"));
