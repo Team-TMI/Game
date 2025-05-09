@@ -183,10 +183,14 @@ void AObjectEyeHunterProp::StopCharacter()
 {
 	if (Frog && Frog->IsLocallyControlled())
 	{
-		Frog->SetActorLocation(MissionLocation->GetComponentLocation());
-		Frog->CameraMissionMode();
-		Frog->StopMovementAndResetRotation();
-		Frog->SetCrouchEnabled(false);
+		 Frog->CameraMissionMode();
+		 Frog->StopMovementAndResetRotation();
+		 Frog->SetCrouchEnabled(false);
+		
+		Frog->ServerRPC_PrepareMission(MissionLocation->GetComponentLocation());
+
+		// FLog::Log("ClientLoc", GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+		// FLog::Log("ClientRoc", GetActorRotation().Yaw, GetActorRotation().Pitch);
 	}
 }
 
@@ -197,6 +201,8 @@ void AObjectEyeHunterProp::ResumeCharacter()
 		Frog->ResumeMovement();
 		Frog->CameraMovementMode();
 		Frog->SetCrouchEnabled(true);
+
+		Frog->ServerRPC_FinishMission();
 	}
 }
 

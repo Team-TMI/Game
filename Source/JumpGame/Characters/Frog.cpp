@@ -641,6 +641,9 @@ void AFrog::StopMovementAndResetRotation()
 	SetActorRotation(FRotator::ZeroRotator);
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
+
+	// FLog::Log("ServerLoc", GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+	// FLog::Log("ServerRoc", GetActorRotation().Yaw, GetActorRotation().Pitch);
 }
 
 void AFrog::ResumeMovement()
@@ -665,6 +668,39 @@ void AFrog::CameraMovementMode()
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->SetRelativeLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
 	CameraBoom->TargetArmLength = 400.f;
+}
+
+void AFrog::ServerRPC_PrepareMission_Implementation(FVector Loc)
+{
+	if (HasAuthority())
+	{
+		SetActorLocation(Loc);
+		StopMovementAndResetRotation();
+		SetCrouchEnabled(false);
+		
+		MulticastRPC_SetMissionCamera();
+	}
+}
+
+void AFrog::MulticastRPC_SetMissionCamera_Implementation()
+{
+	CameraMissionMode();
+}
+
+void AFrog::ServerRPC_FinishMission_Implementation()
+{
+	if (HasAuthority())
+	{
+		ResumeMovement();
+		SetCrouchEnabled(true);
+
+		MulticastRPC_SetMovementCamera();
+	}
+}
+
+void AFrog::MulticastRPC_SetMovementCamera_Implementation()
+{
+	CameraMovementMode();
 }
 
 void AFrog::SetJumpGaugeVisibility(bool bVisibility)
@@ -713,6 +749,8 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, CrouchTime);
 	DOREPLIFETIME(AFrog, TimeSpentInWater);
 	DOREPLIFETIME(AFrog, bWaterStateForcedByTime);
+	DOREPLIFETIME(AFrog, bCanMove);
+	DOREPLIFETIME(AFrog, bCanCrouch);
 	// COND_SkipOwner : 소유자 클라이언트는 업데이트 안해서 중복 실행 방지
 	DOREPLIFETIME_CONDITION(AFrog, SuperJumpRatio, COND_SkipOwner);
 	// 항상 복제
