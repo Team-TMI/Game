@@ -30,6 +30,8 @@ AObstacleProp::AObstacleProp()
 	CollisionComp->SetBoxExtent(FVector(55.f, 55.f, 55.f));
 	
 	Super::SetSize(FVector(1,1,1));
+
+	bReplicates = true;
 }
 
 void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -125,7 +127,7 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 	}
 	else
 	{
-		ServerRPC_LaunchCharacter(Character, Direction, bXYOverride, bZOverride);
+		ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
 	}
 }
 

@@ -426,12 +426,8 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		{
 			FVector Direction{Frog->GetActorForwardVector() + FVector::UpVector};
 			float Force{2'000};
-			if (Frog->IsLocallyControlled())
-			{
-				// 로컬 플레이어인 경우 클라에서 직접 Launch
-				Frog->LaunchCharacter(Direction.GetSafeNormal() * Force, true, true);
-				//Super::LaunchCharacter(Frog, Direction, Force);
-			}
+
+			Super::LaunchCharacter(Frog, Direction, Force);
 		}
 
 		FlyingObjectUI->SuccessMission();
@@ -445,12 +441,8 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		{
 			FVector Direction{-1 * Frog->GetActorForwardVector() + FVector::UpVector};
 			float Force{300};
-
-			if (Frog->IsLocallyControlled())
-			{
-				Frog->LaunchCharacter(Direction.GetSafeNormal() * Force, true, true);
-			}
-			//Super::LaunchCharacter(Frog, Direction, Force);
+			
+			Super::LaunchCharacter(Frog, Direction, Force);
 		}
 
 		FlyingObjectUI->FailMission();
