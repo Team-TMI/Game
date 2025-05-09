@@ -110,7 +110,19 @@ public:
 
 	// 물 속에서의 물리 및 상태
 	void HandleInWaterLogic(float DeltaTime);
-
+	
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_CallLaunchCharacter(const FVector& Dir, float Force, bool bXY, bool bZ);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_PrepareMission(FVector Loc);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetMissionCamera();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_FinishMission();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetMovementCamera();
+	
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -154,7 +166,9 @@ public:
 	float SuperJumpValue{1.6f};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool bIsSuperJump{false};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool bCanMove{true};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool bCanCrouch{true};
 	float PrevVelocityZLength{};
 	// 물 관련
