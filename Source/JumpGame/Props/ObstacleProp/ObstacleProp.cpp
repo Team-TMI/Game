@@ -125,17 +125,18 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 		LaunchVelocity = Direction.GetSafeNormal() * Force;
 		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 	}
-	else
-	{
-		ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
-	}
+	// else
+	// {
+	// 	ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
+	// }
 }
 
-void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction,
-	float Force, bool bXYOverride, bool bZOverride)
-{
-	LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
-}
+// void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction,
+// 	float Force, bool bXYOverride, bool bZOverride)
+// {
+// 	FLog::Log("AObstacleProp::ServerRPC_LaunchCharacter");
+// 	LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
+// }
 
 void AObstacleProp::CalculateForce(AFrog* Character)
 {

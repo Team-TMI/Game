@@ -908,6 +908,16 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 	}
 }
 
+void AFrog::ServerRPC_CallLaunchCharacter_Implementation(const FVector& Dir, float Force, bool bXY, bool bZ)
+{
+	FVector LaunchVelocity{Dir.GetSafeNormal() * Force};
+	
+	if (HasAuthority())
+	{
+		LaunchCharacter(LaunchVelocity, bXY, bZ);
+	}
+}
+
 void AFrog::OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)

@@ -110,6 +110,8 @@ public:
 
 	// 물 속에서의 물리 및 상태
 	void HandleInWaterLogic(float DeltaTime);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_CallLaunchCharacter(const FVector& Dir, float Force, bool bXY, bool bZ);
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)

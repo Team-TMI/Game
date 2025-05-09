@@ -22,7 +22,8 @@ AEyeTrackingProp::AEyeTrackingProp()
 	{
 		SettingEyeTrackingUIClass = SettingEyeTrackingUIWidget.Class;
 	}
-
+	
+	CollisionComp->SetBoxExtent(FVector(47.f, 47.f, 55.f));
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 }
 

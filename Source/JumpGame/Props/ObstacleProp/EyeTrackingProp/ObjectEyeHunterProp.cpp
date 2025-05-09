@@ -44,6 +44,8 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 	}
 
 	PropDataComponent->SetPropID(TEXT("5004"));
+
+	bReplicates = true;
 }
 
 void AObjectEyeHunterProp::BeginPlay()
@@ -72,7 +74,6 @@ void AObjectEyeHunterProp::InitializeMission()
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 	}
 }
-
 
 void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
                                             AActor* OtherActor,
@@ -425,9 +426,10 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		if (Frog)
 		{
 			FVector Direction{Frog->GetActorForwardVector() + FVector::UpVector};
-			float Force{2'000};
+			float Force{2'000.f};
 
-			Super::LaunchCharacter(Frog, Direction, Force);
+			Frog->ServerRPC_CallLaunchCharacter(Direction, Force, false, false);
+			//Super::LaunchCharacter(Frog, Direction, Force);
 		}
 
 		FlyingObjectUI->SuccessMission();
@@ -441,8 +443,9 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		{
 			FVector Direction{-1 * Frog->GetActorForwardVector() + FVector::UpVector};
 			float Force{300};
-			
-			Super::LaunchCharacter(Frog, Direction, Force);
+
+			Frog->ServerRPC_CallLaunchCharacter(Direction, Force, false, false);
+			//Super::LaunchCharacter(Frog, Direction, Force);
 		}
 
 		FlyingObjectUI->FailMission();
