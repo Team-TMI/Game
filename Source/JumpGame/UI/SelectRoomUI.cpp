@@ -6,9 +6,9 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 
-void USelectRoomUI::NativeConstruct()
+void USelectRoomUI::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 
 	Btn_GoBackWait->OnClicked.AddDynamic(this, &USelectRoomUI::OnClickGoBackWait);
 	Btn_SelectComplete->OnClicked.AddDynamic(this, &USelectRoomUI::OnClickSelectComplete);
@@ -21,7 +21,8 @@ void USelectRoomUI::NativeConstruct()
 void USelectRoomUI::OnClickGoBackWait()
 {
 	// 맵 선택 취소
-	RemoveFromParent();
+	// RemoveFromParent();
+	
 }
 
 void USelectRoomUI::OnClickSelectComplete()

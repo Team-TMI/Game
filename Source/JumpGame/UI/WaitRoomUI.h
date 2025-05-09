@@ -17,7 +17,7 @@ class JUMPGAME_API UWaitRoomUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 
 	UPROPERTY()
 	class UJumpGameInstance* GI;
@@ -41,6 +41,8 @@ public:
 	// 팝업으로 띄울 UI
 	UPROPERTY(editanywhere)
 	TSubclassOf<class USelectRoomUI> SelectRoomFactory;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	USelectRoomUI* SelectRoomUI;
 
 	// 유저가 들어오면 업데이트 될 이미지 배열
 	UPROPERTY(meta = (BindWidget))
@@ -55,10 +57,6 @@ public:
 	class UImage* Image_user5;
 	UPROPERTY(meta = (BindWidget))
 	class UImage* Image_user6;
-	UPROPERTY(meta = (BindWidget))
-	class UImage* Image_user7;
-	UPROPERTY(meta = (BindWidget))
-	class UImage* Image_user8;
 
 	// 이름 배열
 	UPROPERTY(meta = (BindWidget))
@@ -73,11 +71,19 @@ public:
 	class UTextBlock* Text_Player5;
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_Player6;
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* Text_Player7;
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* Text_Player8;
 
 	// 이미지 업데이트 함수
 	void UpdateWaitPlayer();
+
+	// 맵 선택 창 애니메이션 재생
+	UFUNCTION(BlueprintNativeEvent)
+	void ShowMapSelect();
+	UFUNCTION(BlueprintNativeEvent)
+	void HideMapSelect();
+
+	// 카메라 전환 관련
+	UPROPERTY(editanywhere)
+	class APlayerController* PC;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	class ALobbySubCamera* SubCamera;
 };

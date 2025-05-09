@@ -8,24 +8,33 @@
 #include "Components/TextBlock.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
+#include "UICam/LobbySubCamera.h"
 
 class UTextBlock;
 
-void UWaitRoomUI::NativeConstruct()
+void UWaitRoomUI::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+
+	SubCamera = Cast<ALobbySubCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), ALobbySubCamera::StaticClass()));
+	
+	PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	PC->SetViewTarget(SubCamera);
 	
 	Btn_GameStart->OnClicked.AddDynamic(this, &UWaitRoomUI::OnClickGameStart);
 	Btn_SelectMap->OnClicked.AddDynamic(this, &UWaitRoomUI::OnClickSelectMap);
 	Btn_BackFromLobby->OnClicked.AddDynamic(this, &UWaitRoomUI::OnClickBackFromLobby);
+
+	SelectRoomUI = CreateWidget<USelectRoomUI>(GetWorld(), SelectRoomFactory);
 }
 
 void UWaitRoomUI::OnClickGameStart()
 {
 	// 서버만 게임을 시작할 수 있다
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	PC = GetWorld()->GetFirstPlayerController();
 	if (PC->HasAuthority())
 	{
 		// TODO: 선택한 게임레벨로 이동하게하자
@@ -37,12 +46,13 @@ void UWaitRoomUI::OnClickGameStart()
 void UWaitRoomUI::OnClickSelectMap()
 {
 	// 서버만 맵을 고를 수 있다
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	PC = GetWorld()->GetFirstPlayerController();
 	if (PC->HasAuthority())
 	{
 		// 맵선택 UI가 뜨게 하자
-		USelectRoomUI* SelectRoomUI = CreateWidget<USelectRoomUI>(GetWorld(), SelectRoomFactory);
 		SelectRoomUI->AddToViewport();
+		ShowMapSelect();
+		FFastLogger::LogConsole(TEXT("OnClickSelectMapOnClickSelectMapOnClickSelectMap"));
 	}
 }
 
@@ -57,9 +67,9 @@ void UWaitRoomUI::UpdateWaitPlayer()
 	if (!GI) return;
 
 	// 이미지 배열
-	TArray<UImage*> UpdateImgs = { Image_user1, Image_user2, Image_user3, Image_user4, Image_user5, Image_user6, Image_user7, Image_user8 };
+	TArray<UImage*> UpdateImgs = { Image_user1, Image_user2, Image_user3, Image_user4, Image_user5, Image_user6};
 	// 플레이어 이름 배열
-	TArray<UTextBlock*> UpdateNames = { Text_Player1, Text_Player2, Text_Player3, Text_Player4, Text_Player5, Text_Player6, Text_Player7, Text_Player8 };
+	TArray<UTextBlock*> UpdateNames = { Text_Player1, Text_Player2, Text_Player3, Text_Player4, Text_Player5, Text_Player6};
 	
 	TMap<FString, FPlayerInfo> PlayerInfo = GI->GetPlayerInfo();
 	FString Key;
@@ -79,3 +89,14 @@ void UWaitRoomUI::UpdateWaitPlayer()
 		}
 	}
 }
+
+void UWaitRoomUI::HideMapSelect_Implementation()
+{
+	FFastLogger::LogConsole(TEXT("OnClickSelectMapOnClickSelectMapOnClickSelectMap"));
+}
+
+void UWaitRoomUI::ShowMapSelect_Implementation()
+{
+	FFastLogger::LogConsole(TEXT("OShowMapSelect_Implementation"));
+}
+

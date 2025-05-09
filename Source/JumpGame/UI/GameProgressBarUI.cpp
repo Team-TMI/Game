@@ -66,29 +66,6 @@ void UGameProgressBarUI::UpdatePlayerPos()
 	WinnerPos = 0.f;
 
 	int32 PlayerIndex = 0;
-	/*for (FConstPlayerControllerIterator Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
-	{
-		APlayerController* PC = Iter->Get();
-		if (PC)
-		{
-			// PlayerID가 유효한 범위인지 확인하고
-			if (PlayerPos.IsValidIndex(PlayerIndex))
-			{
-				Character = Cast<AFrog>(PC->GetPawn());
-				if (PC && Character)
-				{
-					// 플레이어 위치값(Z좌표임) 저장
-					float Position = Character->GetActorLocation().Z;
-					PlayerPos[PlayerIndex] = Position; // PlayerID에 해당하는 인덱스에 저장
-                
-					// 1등 플레이어 위치 갱신
-					WinnerPos = FMath::Max(WinnerPos, Position);
-				}
-			}
-			PlayerIndex++;
-		}
-	}*/
-	
 	for (APlayerState* PlayerState : GS->PlayerArray)
 	{
 		// AController* Controller = PlayerState->GetOwner<AController>();
@@ -143,46 +120,6 @@ void UGameProgressBarUI::CreatePlayerMarkers()
 	FFastLogger::LogConsole(TEXT("GS->PlayerArray.Num(): %d"), GS->PlayerArray.Num());
 	
 	int32 PlayerIndex = 0;
-	// 각 플레이어에 대한 마커 생성
-	/*for (FConstPlayerControllerIterator Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
-	{
-		APlayerController* PC = Iter->Get();
-		if (PC)
-		{
-			// 마커 위젯 생성
-			UPlayerMarkerWidget* NewMarker = CreateWidget<UPlayerMarkerWidget>(GetWorld(), PlayerMarkerFactory);
-			if (NewMarker)
-			{
-				// 위젯을 프로그레스 바 컨테이너에 추가
-				Overlay_Player->AddChild(NewMarker);
-				// 플레이어 ID와 정보 설정
-				NewMarker->SetPlayerID(PlayerIndex);
-			
-				// 위젯 초기 위치 설정
-				FVector2D TopLeft = Overlay_Player->GetCachedGeometry().GetAbsolutePosition(); // 좌측 상단
-				FVector2D Size = Overlay_Player->GetCachedGeometry().GetLocalSize(); // 위젯 크기
-				FVector2D BottomRight = TopLeft + FVector2D(Size.X, Size.Y); // 우측 하단
-			
-				NewMarker->SetRenderTranslation(BottomRight);
-			
-				// 로컬 플레이어 확인하여 색상 설정
-				if (PC->IsLocalController())
-				{
-					NewMarker->SetColorAndOpacity(FColor::Green);
-				}
-				else
-				{
-					NewMarker->SetColorAndOpacity(FColor::Yellow);
-				}
-			
-				// PlayerID 인덱스에 마커 저장
-				PlayerMarkers[PlayerIndex] = NewMarker;
-
-				PlayerIndex++;
-			}
-		}
-	}*/
-
 	for (APlayerState* PlayerState : GS->PlayerArray)
 	{
 		// AController* Controller = PlayerState->GetOwner<AController>();
