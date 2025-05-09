@@ -172,7 +172,7 @@ void UIOManagerComponent::RetryReadConnectToPipe(TSharedPtr<FIPCHandler> IPCHand
 		}
 		else
 		{
-			FFastLogger::LogConsole(TEXT("Reconnecting to pipe... : %s"), *IPCHandlerToRetry->GetPipeName());
+			//FFastLogger::LogConsole(TEXT("Reconnecting to pipe... : %s"), *IPCHandlerToRetry->GetPipeName());
 			StrongThis->RetryReadConnectToPipe(IPCHandlerToRetry);
 		}
 	}), RetryInterval, false);
@@ -194,7 +194,7 @@ void UIOManagerComponent::RetrySendConnectToPipe(TSharedPtr<FIPCHandler> IPCHand
 		}
 		else
 		{
-			FFastLogger::LogConsole(TEXT("Reconnecting to pipe... : %s"), *IPCHandlerToRetry->GetPipeName());
+			//FFastLogger::LogConsole(TEXT("Reconnecting to pipe... : %s"), *IPCHandlerToRetry->GetPipeName());
 			StrongThis->RetrySendConnectToPipe(IPCHandlerToRetry);
 		}
 	}), RetryInterval, false);

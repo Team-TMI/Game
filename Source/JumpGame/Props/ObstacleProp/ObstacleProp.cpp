@@ -30,6 +30,8 @@ AObstacleProp::AObstacleProp()
 	CollisionComp->SetBoxExtent(FVector(55.f, 55.f, 55.f));
 	
 	Super::SetSize(FVector(1,1,1));
+
+	bReplicates = true;
 }
 
 void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -123,17 +125,18 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 		LaunchVelocity = Direction.GetSafeNormal() * Force;
 		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 	}
-	else
-	{
-		ServerRPC_LaunchCharacter(Character, Direction, bXYOverride, bZOverride);
-	}
+	// else
+	// {
+	// 	ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
+	// }
 }
 
-void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction,
-	float Force, bool bXYOverride, bool bZOverride)
-{
-	LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
-}
+// void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction,
+// 	float Force, bool bXYOverride, bool bZOverride)
+// {
+// 	FLog::Log("AObstacleProp::ServerRPC_LaunchCharacter");
+// 	LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
+// }
 
 void AObstacleProp::CalculateForce(AFrog* Character)
 {

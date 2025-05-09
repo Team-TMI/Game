@@ -44,6 +44,8 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 	}
 
 	PropDataComponent->SetPropID(TEXT("5004"));
+
+	bReplicates = true;
 }
 
 void AObjectEyeHunterProp::BeginPlay()
@@ -73,7 +75,6 @@ void AObjectEyeHunterProp::InitializeMission()
 	}
 }
 
-
 void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
                                             AActor* OtherActor,
                                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
@@ -81,17 +82,28 @@ void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompo
                                             const FHitResult& SweepResult)
 {
 	//Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	
+	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
+	if (OverlappingFrog)
 	{
-		Frog = Cast<AFrog>(OtherActor);
-
-		StartMission();
+		if (OverlappingFrog->IsLocallyControlled())
+		{
+			Frog = OverlappingFrog;
+			StartMission();
+		}
 	}
+	
+	// if (OtherActor->ActorHasTag(TEXT("Frog")))
+	// {
+	// 	Frog = Cast<AFrog>(OtherActor);
+	//
+	// 	StartMission();
+	// }
 }
 
 void AObjectEyeHunterProp::StartMission()
 {
+	FLog::Log("StartMission");
 	Super::SendEyeTrackingStart();
 
 	StopCharacter();
@@ -104,6 +116,8 @@ void AObjectEyeHunterProp::StartMission()
 	if (TimeRemainUI)
 	{
 		TimeRemainUI->AddToViewport();
+		// 10초 후 미션 종료 ( 타이머 설정 )
+		TimeRemainUI->StartMissionTimer(20.f);
 	}
 
 	if (GEngine && GEngine->GameViewport)
@@ -163,29 +177,32 @@ void AObjectEyeHunterProp::StartMission()
 		ControlPoint1 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.0f);
 		ControlPoint2 = GenerateRandomControlPoint(StartPosition, TargetPosition, 300.0f);
 	}
-
-	// 10초 후 미션 종료 ( 타이머 설정 )
-	TimeRemainUI->StartMissionTimer(10.f);
 }
 
 void AObjectEyeHunterProp::StopCharacter()
 {
-	if (Frog)
+	if (Frog && Frog->IsLocallyControlled())
 	{
-		Frog->SetActorLocation(MissionLocation->GetComponentLocation());
-		Frog->CameraMissionMode();
-		Frog->StopMovementAndResetRotation();
-		Frog->SetCrouchEnabled(false);
+		 Frog->CameraMissionMode();
+		 Frog->StopMovementAndResetRotation();
+		 Frog->SetCrouchEnabled(false);
+		
+		Frog->ServerRPC_PrepareMission(MissionLocation->GetComponentLocation());
+
+		// FLog::Log("ClientLoc", GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+		// FLog::Log("ClientRoc", GetActorRotation().Yaw, GetActorRotation().Pitch);
 	}
 }
 
 void AObjectEyeHunterProp::ResumeCharacter()
 {
-	if (Frog)
+	if (Frog && Frog->IsLocallyControlled())
 	{
 		Frog->ResumeMovement();
 		Frog->CameraMovementMode();
 		Frog->SetCrouchEnabled(true);
+
+		Frog->ServerRPC_FinishMission();
 	}
 }
 
@@ -195,13 +212,24 @@ void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedCompone
 {
 	//Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
+	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
+	if (OverlappingFrog && OverlappingFrog->IsLocallyControlled())
 	{
 		if (bIsStartHunt)
 		{
 			EndMission(false);
 		}
+		
+		Frog = nullptr;
 	}
+	
+	// if (OtherActor->ActorHasTag(TEXT("Frog")))
+	// {
+	// 	if (bIsStartHunt)
+	// 	{
+	// 		EndMission(false);
+	// 	}
+	// }
 }
 
 void AObjectEyeHunterProp::Tick(float DeltaTime)
@@ -373,7 +401,7 @@ void AObjectEyeHunterProp::ChangeValue(bool bIsOverlap)
 {
 	if (bIsOverlap)
 	{
-		FlowTime = FMath::Clamp(FlowTime + (GetWorld()->GetDeltaSeconds()), 0.f, SuccessTime);
+		FlowTime = FMath::Clamp(FlowTime + (GetWorld()->GetDeltaSeconds() * 3), 0.f, SuccessTime);
 	}
 	else
 	{
@@ -404,9 +432,10 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		if (Frog)
 		{
 			FVector Direction{Frog->GetActorForwardVector() + FVector::UpVector};
-			float Force{2'000};
+			float Force{2'000.f};
 
-			Super::LaunchCharacter(Frog, Direction, Force);
+			Frog->ServerRPC_CallLaunchCharacter(Direction, Force, false, false);
+			//Super::LaunchCharacter(Frog, Direction, Force);
 		}
 
 		FlyingObjectUI->SuccessMission();
@@ -421,7 +450,8 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 			FVector Direction{-1 * Frog->GetActorForwardVector() + FVector::UpVector};
 			float Force{300};
 
-			Super::LaunchCharacter(Frog, Direction, Force);
+			Frog->ServerRPC_CallLaunchCharacter(Direction, Force, false, false);
+			//Super::LaunchCharacter(Frog, Direction, Force);
 		}
 
 		FlyingObjectUI->FailMission();
