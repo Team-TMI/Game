@@ -27,6 +27,7 @@ void AMapGameState::BeginPlay()
 	if (ProgressBarUI)
 	{
 		ProgressBarUI->AddToViewport();
+		FFastLogger::LogConsole(TEXT("UI 생성완료@@@@@@@@@@@@@@@@@@@@@@@@@"));
 	}
 }
 
