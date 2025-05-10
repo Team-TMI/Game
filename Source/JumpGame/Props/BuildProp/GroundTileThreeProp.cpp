@@ -11,7 +11,7 @@ AGroundTileThreeProp::AGroundTileThreeProp()
 	PrimaryActorTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset
-	(TEXT("/Game/Fab/LowPolySeparate/ground_02.ground_02"));
+	(TEXT("/Game/Fab/LowPolySeparate/ground_02_tile.ground_02_tile"));
 	if (MeshAsset.Succeeded())
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
