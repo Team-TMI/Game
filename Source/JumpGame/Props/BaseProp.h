@@ -24,6 +24,10 @@ protected:
 	virtual void SetCollision(bool bEnable) override;
 
 	virtual void MaterialChangeOnTick() override;
+	
+	virtual void ChangeAllMaterialsToUnSelect() override;
+	virtual void ChangeAllMaterialsToSelect() override;
+	virtual void ChangeAllMaterialsToOnCollision() override;
 
 public:
 	// Called every frame
