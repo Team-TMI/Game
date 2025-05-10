@@ -21,6 +21,14 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 	PrimaryActorTick.bCanEverTick = true;
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset
+	(TEXT("/Game/Fab/SoundMommy/SM_Radio.SM_Radio"));
+	if (MeshAsset.Succeeded())
+	{
+		MeshComp->SetStaticMesh(MeshAsset.Object);
+	}
+
+	PropDataComponent->SetPropID(TEXT("2003"));
 }
 
 // Called when the game starts or when spawned

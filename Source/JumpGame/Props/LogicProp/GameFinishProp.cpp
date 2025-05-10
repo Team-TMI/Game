@@ -27,10 +27,8 @@ AGameFinishProp::AGameFinishProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("GameFinish");
 
-	CollisionComp->SetBoxExtent(FVector(50,60,80));
-	CollisionComp->SetRelativeScale3D(FVector(3, 2, 1));
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
-		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh
+	(TEXT("/Game/Fab/LowPolySeparate/checkpoint.checkpoint"));
 	if (TempMesh.Succeeded())
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
@@ -38,8 +36,9 @@ AGameFinishProp::AGameFinishProp()
 	
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
-	Super::SetSize(FVector(3,2,1));
+	Super::SetSize(FVector(1,1,2));
 
+	PropDataComponent->SetPropID(TEXT("3002"));
 }
 
 void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
