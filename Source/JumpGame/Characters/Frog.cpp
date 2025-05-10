@@ -205,8 +205,8 @@ void AFrog::NotifyControllerChanged()
 
 	if (APlayerController* PlayerController{Cast<APlayerController>(Controller)})
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<
-			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem{ULocalPlayer::GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())})
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
@@ -292,8 +292,8 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(
-		PlayerInputComponent))
+	if (UEnhancedInputComponent* EnhancedInputComponent{Cast<UEnhancedInputComponent>(
+		PlayerInputComponent)})
 	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this,
 		                                   &AFrog::StartJump);
