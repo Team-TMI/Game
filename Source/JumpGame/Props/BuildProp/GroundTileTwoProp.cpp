@@ -3,6 +3,8 @@
 
 #include "GroundTileTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AGroundTileTwoProp::AGroundTileTwoProp()
@@ -18,6 +20,8 @@ AGroundTileTwoProp::AGroundTileTwoProp()
 	}
 
 	SetSize(FVector(2, 2, 1));
+
+	PropDataComponent->SetPropID(TEXT("1018"));
 }
 
 // Called when the game starts or when spawned

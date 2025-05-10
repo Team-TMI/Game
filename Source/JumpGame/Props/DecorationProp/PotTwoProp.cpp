@@ -3,6 +3,8 @@
 
 #include "PotTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APotTwoProp::APotTwoProp()
@@ -16,6 +18,8 @@ APotTwoProp::APotTwoProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+	
+	PropDataComponent->SetPropID(TEXT("4031"));
 }
 
 // Called when the game starts or when spawned

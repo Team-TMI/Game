@@ -3,6 +3,8 @@
 
 #include "PathOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APathOneProp::APathOneProp()
@@ -18,6 +20,8 @@ APathOneProp::APathOneProp()
 	}
 
 	SetSize(FVector(4, 4, 1));
+
+	PropDataComponent->SetPropID(TEXT("4021"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "BushFourProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ABushFourProp::ABushFourProp()
@@ -16,6 +18,8 @@ ABushFourProp::ABushFourProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("1007"));
 }
 
 // Called when the game starts or when spawned

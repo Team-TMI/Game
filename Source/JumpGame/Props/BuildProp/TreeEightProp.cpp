@@ -3,6 +3,8 @@
 
 #include "TreeEightProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ATreeEightProp::ATreeEightProp()
@@ -18,6 +20,8 @@ ATreeEightProp::ATreeEightProp()
 	}
 
 	SetSize(FVector(2, 2, 6));
+
+	PropDataComponent->SetPropID(TEXT("1039"));
 }
 
 // Called when the game starts or when spawned

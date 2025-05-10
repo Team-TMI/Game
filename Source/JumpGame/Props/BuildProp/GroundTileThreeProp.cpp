@@ -3,6 +3,8 @@
 
 #include "GroundTileThreeProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AGroundTileThreeProp::AGroundTileThreeProp()
@@ -18,6 +20,8 @@ AGroundTileThreeProp::AGroundTileThreeProp()
 	}
 
 	SetSize(FVector(3, 3, 2));
+
+	PropDataComponent->SetPropID(TEXT("1019"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "FruitAppleProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AFruitAppleProp::AFruitAppleProp()
@@ -16,6 +18,8 @@ AFruitAppleProp::AFruitAppleProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4016"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "CactusTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ACactusTwoProp::ACactusTwoProp()
@@ -18,6 +20,8 @@ ACactusTwoProp::ACactusTwoProp()
 	}
 
 	SetSize(FVector(1, 1, 2));
+
+	PropDataComponent->SetPropID(TEXT("1010"));
 }
 
 // Called when the game starts or when spawned

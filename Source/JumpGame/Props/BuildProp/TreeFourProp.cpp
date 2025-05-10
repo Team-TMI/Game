@@ -3,6 +3,8 @@
 
 #include "TreeFourProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ATreeFourProp::ATreeFourProp()
@@ -18,6 +20,8 @@ ATreeFourProp::ATreeFourProp()
 	}
 
 	SetSize(FVector(2, 2, 4));
+
+	PropDataComponent->SetPropID(TEXT("1035"));
 }
 
 // Called when the game starts or when spawned

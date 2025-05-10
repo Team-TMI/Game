@@ -3,6 +3,8 @@
 
 #include "LotusLeafTrampolineProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ALotusLeafTrampolineProp::ALotusLeafTrampolineProp()
@@ -18,6 +20,8 @@ ALotusLeafTrampolineProp::ALotusLeafTrampolineProp()
 	}
 
 	SetSize(FVector(2, 2, 2));
+
+	PropDataComponent->SetPropID(TEXT("2002"));
 }
 
 // Called when the game starts or when spawned

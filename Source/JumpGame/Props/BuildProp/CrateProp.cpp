@@ -3,6 +3,8 @@
 
 #include "CrateProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ACrateProp::ACrateProp()
@@ -16,6 +18,8 @@ ACrateProp::ACrateProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("1011"));
 }
 
 // Called when the game starts or when spawned

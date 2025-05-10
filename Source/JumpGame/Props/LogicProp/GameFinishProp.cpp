@@ -40,7 +40,6 @@ AGameFinishProp::AGameFinishProp()
 
 	Super::SetSize(FVector(3,2,1));
 
-	PropDataComponent->SetPropID(TEXT("9000"));
 }
 
 void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

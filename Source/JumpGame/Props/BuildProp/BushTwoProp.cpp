@@ -3,6 +3,8 @@
 
 #include "BushTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ABushTwoProp::ABushTwoProp()
@@ -18,6 +20,8 @@ ABushTwoProp::ABushTwoProp()
 	}
 
 	SetSize(FVector(2, 2, 2));
+
+	PropDataComponent->SetPropID(TEXT("1005"));
 }
 
 // Called when the game starts or when spawned

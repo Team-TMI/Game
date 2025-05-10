@@ -3,6 +3,8 @@
 
 #include "CheckPointProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ACheckPointProp::ACheckPointProp()
@@ -16,6 +18,8 @@ ACheckPointProp::ACheckPointProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4003"));
 }
 
 // Called when the game starts or when spawned

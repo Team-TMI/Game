@@ -3,6 +3,8 @@
 
 #include "StarProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AStarProp::AStarProp()
@@ -16,6 +18,8 @@ AStarProp::AStarProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4036"));
 }
 
 // Called when the game starts or when spawned

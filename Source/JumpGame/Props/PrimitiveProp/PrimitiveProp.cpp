@@ -63,7 +63,6 @@ APrimitiveProp::APrimitiveProp()
 	}
 
 	PropDataComponent = CreateDefaultSubobject<UPropDataComponent>(TEXT("PropDataComponent"));
-	// PropDataComponent->SetPropID(TEXT("1002"));
 	
 	SetSize(DefaultSize);
 

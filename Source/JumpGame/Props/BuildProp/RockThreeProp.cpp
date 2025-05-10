@@ -3,6 +3,8 @@
 
 #include "RockThreeProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ARockThreeProp::ARockThreeProp()
@@ -18,6 +20,8 @@ ARockThreeProp::ARockThreeProp()
 	}
 
 	SetSize(FVector(3, 3, 3));
+
+	PropDataComponent->SetPropID(TEXT("1030"));
 }
 
 // Called when the game starts or when spawned

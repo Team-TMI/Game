@@ -3,6 +3,8 @@
 
 #include "FenceOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AFenceOneProp::AFenceOneProp()
@@ -18,6 +20,8 @@ AFenceOneProp::AFenceOneProp()
 	}
 
 	SetSize(FVector(2, 2, 1));
+
+	PropDataComponent->SetPropID(TEXT("1012"));
 }
 
 // Called when the game starts or when spawned

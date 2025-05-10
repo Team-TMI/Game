@@ -3,6 +3,8 @@
 
 #include "PathTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APathTwoProp::APathTwoProp()
@@ -16,6 +18,8 @@ APathTwoProp::APathTwoProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4022"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "GroundTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AGroundTwoProp::AGroundTwoProp()
@@ -18,6 +20,8 @@ AGroundTwoProp::AGroundTwoProp()
 	}
 
 	SetSize(FVector(2, 2, 1));
+
+	PropDataComponent->SetPropID(TEXT("1015"));
 }
 
 // Called when the game starts or when spawned

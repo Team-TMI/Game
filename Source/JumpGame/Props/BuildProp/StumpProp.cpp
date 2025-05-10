@@ -3,6 +3,8 @@
 
 #include "StumpProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AStumpProp::AStumpProp()
@@ -16,6 +18,8 @@ AStumpProp::AStumpProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("1031"));
 }
 
 // Called when the game starts or when spawned

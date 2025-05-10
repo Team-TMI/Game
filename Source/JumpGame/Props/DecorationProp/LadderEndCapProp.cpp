@@ -3,6 +3,8 @@
 
 #include "LadderEndCapProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ALadderEndCapProp::ALadderEndCapProp()
@@ -16,6 +18,8 @@ ALadderEndCapProp::ALadderEndCapProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4020"));
 }
 
 // Called when the game starts or when spawned

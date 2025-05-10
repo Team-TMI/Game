@@ -3,6 +3,8 @@
 
 #include "SignCautionProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ASignCautionProp::ASignCautionProp()
@@ -16,6 +18,8 @@ ASignCautionProp::ASignCautionProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4032"));
 }
 
 // Called when the game starts or when spawned

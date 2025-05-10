@@ -3,6 +3,8 @@
 
 #include "CoinProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ACoinProp::ACoinProp()
@@ -16,6 +18,8 @@ ACoinProp::ACoinProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4004"));
 }
 
 // Called when the game starts or when spawned

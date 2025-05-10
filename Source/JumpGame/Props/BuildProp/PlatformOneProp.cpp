@@ -3,6 +3,8 @@
 
 #include "PlatformOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APlatformOneProp::APlatformOneProp()
@@ -18,6 +20,8 @@ APlatformOneProp::APlatformOneProp()
 	}
 
 	SetSize(FVector(2, 2, 1));
+
+	PropDataComponent->SetPropID(TEXT("1026"));
 }
 
 // Called when the game starts or when spawned

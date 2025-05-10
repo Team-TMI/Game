@@ -3,6 +3,8 @@
 
 #include "CarrotBounceBollardProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ACarrotBounceBollardProp::ACarrotBounceBollardProp()
@@ -18,6 +20,8 @@ ACarrotBounceBollardProp::ACarrotBounceBollardProp()
 	}
 
 	SetSize(FVector(1, 1, 2));
+
+	PropDataComponent->SetPropID(TEXT("2001"));
 }
 
 // Called when the game starts or when spawned

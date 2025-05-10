@@ -43,7 +43,6 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 		MissionLocation->SetRelativeLocation(FVector(0, 0, 100.f));
 	}
 
-	PropDataComponent->SetPropID(TEXT("5004"));
 
 	bReplicates = true;
 }

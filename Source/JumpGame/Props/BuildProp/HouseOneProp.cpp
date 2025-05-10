@@ -3,6 +3,8 @@
 
 #include "HouseOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AHouseOneProp::AHouseOneProp()
@@ -16,6 +18,8 @@ AHouseOneProp::AHouseOneProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("1020"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "LadderTileProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ALadderTileProp::ALadderTileProp()
@@ -18,6 +20,8 @@ ALadderTileProp::ALadderTileProp()
 	}
 	
 	SetSize(FVector(1, 1, 2));
+
+	PropDataComponent->SetPropID(TEXT("1024"));
 }
 
 // Called when the game starts or when spawned

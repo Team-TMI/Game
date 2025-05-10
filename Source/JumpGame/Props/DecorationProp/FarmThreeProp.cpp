@@ -3,6 +3,8 @@
 
 #include "FarmThreeProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AFarmThreeProp::AFarmThreeProp()
@@ -16,6 +18,8 @@ AFarmThreeProp::AFarmThreeProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4008"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "GrassTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AGrassTwoProp::AGrassTwoProp()
@@ -16,6 +18,8 @@ AGrassTwoProp::AGrassTwoProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+	
+	PropDataComponent->SetPropID(TEXT("4018"));
 }
 
 // Called when the game starts or when spawned

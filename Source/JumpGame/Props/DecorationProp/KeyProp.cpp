@@ -3,6 +3,8 @@
 
 #include "KeyProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AKeyProp::AKeyProp()
@@ -16,6 +18,8 @@ AKeyProp::AKeyProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4019"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "BarrelProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ABarrelProp::ABarrelProp()
@@ -16,6 +18,8 @@ ABarrelProp::ABarrelProp()
     {
 		MeshComp->SetStaticMesh(MeshAsset.Object);
     }
+
+	PropDataComponent->SetPropID(TEXT("1001"));
 }
 
 // Called when the game starts or when spawned

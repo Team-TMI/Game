@@ -3,6 +3,8 @@
 
 #include "RockTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ARockTwoProp::ARockTwoProp()
@@ -18,6 +20,8 @@ ARockTwoProp::ARockTwoProp()
 	}
 
 	SetSize(FVector(4, 4, 2));
+
+	PropDataComponent->SetPropID(TEXT("1029"));
 }
 
 // Called when the game starts or when spawned

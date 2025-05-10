@@ -3,6 +3,8 @@
 
 #include "TreeTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ATreeTwoProp::ATreeTwoProp()
@@ -18,6 +20,8 @@ ATreeTwoProp::ATreeTwoProp()
 	}
 	
 	SetSize(FVector(2, 2, 4));
+
+	PropDataComponent->SetPropID(TEXT("1033"));
 }
 
 // Called when the game starts or when spawned

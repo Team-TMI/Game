@@ -3,6 +3,8 @@
 
 #include "DoorProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ADoorProp::ADoorProp()
@@ -18,6 +20,8 @@ ADoorProp::ADoorProp()
 	}
 
 	SetSize(FVector(1, 2, 2));
+
+	PropDataComponent->SetPropID(TEXT("4005"));
 }
 
 // Called when the game starts or when spawned

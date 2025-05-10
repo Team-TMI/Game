@@ -3,6 +3,8 @@
 
 #include "LogPileProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ALogPileProp::ALogPileProp()
@@ -19,6 +21,8 @@ ALogPileProp::ALogPileProp()
 
 	
 	SetSize(FVector(2, 2, 1));
+
+	PropDataComponent->SetPropID(TEXT("1025"));
 }
 
 // Called when the game starts or when spawned

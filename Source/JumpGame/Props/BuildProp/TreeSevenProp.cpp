@@ -3,6 +3,8 @@
 
 #include "TreeSevenProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ATreeSevenProp::ATreeSevenProp()
@@ -18,6 +20,8 @@ ATreeSevenProp::ATreeSevenProp()
 	}
 
 	SetSize(FVector(2, 2, 5));
+
+	PropDataComponent->SetPropID(TEXT("1038"));
 }
 
 // Called when the game starts or when spawned

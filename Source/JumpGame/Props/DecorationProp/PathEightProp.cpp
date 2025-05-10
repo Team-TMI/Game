@@ -3,6 +3,8 @@
 
 #include "PathEightProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APathEightProp::APathEightProp()
@@ -18,6 +20,8 @@ APathEightProp::APathEightProp()
 	}
 
 	SetSize(FVector(6, 2, 1));
+
+	PropDataComponent->SetPropID(TEXT("4028"));
 }
 
 // Called when the game starts or when spawned

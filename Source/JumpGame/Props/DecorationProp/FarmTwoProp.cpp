@@ -3,6 +3,8 @@
 
 #include "FarmTwoProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AFarmTwoProp::AFarmTwoProp()
@@ -18,6 +20,8 @@ AFarmTwoProp::AFarmTwoProp()
 	}
 
 	SetSize(FVector(3, 4, 1));
+
+	PropDataComponent->SetPropID(TEXT("4007"));
 }
 
 // Called when the game starts or when spawned

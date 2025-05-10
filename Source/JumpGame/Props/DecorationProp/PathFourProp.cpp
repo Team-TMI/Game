@@ -3,6 +3,8 @@
 
 #include "PathFourProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APathFourProp::APathFourProp()
@@ -18,6 +20,8 @@ APathFourProp::APathFourProp()
 	}
 
 	SetSize(FVector(2, 2, 1));
+
+	PropDataComponent->SetPropID(TEXT("4024"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "BushFiveProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ABushFiveProp::ABushFiveProp()
@@ -17,7 +19,9 @@ ABushFiveProp::ABushFiveProp()
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
 
-	SetSize(FVector(1, 1, 2));;
+	SetSize(FVector(1, 1, 2));
+
+	PropDataComponent->SetPropID(TEXT("1008"));
 }
 
 // Called when the game starts or when spawned

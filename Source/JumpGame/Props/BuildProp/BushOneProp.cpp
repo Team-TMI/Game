@@ -3,6 +3,8 @@
 
 #include "BushOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ABushOneProp::ABushOneProp()
@@ -18,6 +20,8 @@ ABushOneProp::ABushOneProp()
 	}
 
 	SetSize(FVector(2, 2, 2));
+
+	PropDataComponent->SetPropID(TEXT("1004"));
 }
 
 // Called when the game starts or when spawned

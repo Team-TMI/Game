@@ -3,6 +3,8 @@
 
 #include "CarrotProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ACarrotProp::ACarrotProp()
@@ -16,6 +18,8 @@ ACarrotProp::ACarrotProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+	
+	PropDataComponent->SetPropID(TEXT("4002"));
 }
 
 // Called when the game starts or when spawned

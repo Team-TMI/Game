@@ -3,6 +3,8 @@
 
 #include "SignDirectionLeftProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ASignDirectionLeftProp::ASignDirectionLeftProp()
@@ -16,6 +18,8 @@ ASignDirectionLeftProp::ASignDirectionLeftProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+	
+	PropDataComponent->SetPropID(TEXT("4033"));
 }
 
 // Called when the game starts or when spawned

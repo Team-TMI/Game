@@ -3,6 +3,8 @@
 
 #include "FlowerOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AFlowerOneProp::AFlowerOneProp()
@@ -16,6 +18,8 @@ AFlowerOneProp::AFlowerOneProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4010"));
 }
 
 // Called when the game starts or when spawned

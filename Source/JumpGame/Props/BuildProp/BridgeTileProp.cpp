@@ -3,6 +3,8 @@
 
 #include "BridgeTileProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ABridgeTileProp::ABridgeTileProp()
@@ -18,6 +20,8 @@ ABridgeTileProp::ABridgeTileProp()
 	}
 
 	SetSize(FVector(1, 2, 1));
+
+	PropDataComponent->SetPropID(TEXT("1003"));
 }
 
 // Called when the game starts or when spawned

@@ -24,7 +24,6 @@ ARollingCannonProp::ARollingCannonProp()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
 	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
-	PropDataComponent->SetPropID(TEXT("5002"));
 }
 
 void ARollingCannonProp::OnProjectileReturn()

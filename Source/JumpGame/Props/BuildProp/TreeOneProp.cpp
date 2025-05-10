@@ -3,6 +3,8 @@
 
 #include "TreeOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ATreeOneProp::ATreeOneProp()
@@ -18,6 +20,8 @@ ATreeOneProp::ATreeOneProp()
 	}
 
 	SetSize(FVector(4, 2, 4));
+
+	PropDataComponent->SetPropID(TEXT("1032"));
 }
 
 // Called when the game starts or when spawned

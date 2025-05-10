@@ -21,7 +21,7 @@ ABrightFrog::ABrightFrog()
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
 
-	PropDataComponent->SetPropID(TEXT("7000"));
+	PropDataComponent->SetPropID(TEXT("4001"));
 }
 
 // Called when the game starts or when spawned

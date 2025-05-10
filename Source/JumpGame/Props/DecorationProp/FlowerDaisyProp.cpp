@@ -3,6 +3,8 @@
 
 #include "FlowerDaisyProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AFlowerDaisyProp::AFlowerDaisyProp()
@@ -16,6 +18,8 @@ AFlowerDaisyProp::AFlowerDaisyProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4009"));
 }
 
 // Called when the game starts or when spawned

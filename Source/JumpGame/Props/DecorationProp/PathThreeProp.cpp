@@ -3,6 +3,8 @@
 
 #include "PathThreeProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APathThreeProp::APathThreeProp()
@@ -18,6 +20,8 @@ APathThreeProp::APathThreeProp()
 	}
 
 	SetSize(FVector(4, 6, 1));
+
+	PropDataComponent->SetPropID(TEXT("4023"));
 }
 
 // Called when the game starts or when spawned

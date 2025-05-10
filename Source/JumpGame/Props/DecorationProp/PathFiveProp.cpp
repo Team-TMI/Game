@@ -3,6 +3,8 @@
 
 #include "PathFiveProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APathFiveProp::APathFiveProp()
@@ -18,6 +20,8 @@ APathFiveProp::APathFiveProp()
 	}
 	
 	SetSize(FVector(6, 4, 1));
+
+	PropDataComponent->SetPropID(TEXT("4025"));
 }
 
 // Called when the game starts or when spawned

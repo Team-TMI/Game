@@ -3,6 +3,8 @@
 
 #include "PathSevenProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APathSevenProp::APathSevenProp()
@@ -18,6 +20,8 @@ APathSevenProp::APathSevenProp()
 	}
 
 	SetSize(FVector(5, 2, 1));
+	
+	PropDataComponent->SetPropID(TEXT("4027"));
 }
 
 // Called when the game starts or when spawned

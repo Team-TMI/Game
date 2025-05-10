@@ -3,6 +3,8 @@
 
 #include "GroundTileOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AGroundTileOneProp::AGroundTileOneProp()
@@ -16,6 +18,8 @@ AGroundTileOneProp::AGroundTileOneProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("1017"));
 }
 
 // Called when the game starts or when spawned

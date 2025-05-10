@@ -3,6 +3,8 @@
 
 #include "SpikeProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ASpikeProp::ASpikeProp()
@@ -16,6 +18,8 @@ ASpikeProp::ASpikeProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("4035"));
 }
 
 // Called when the game starts or when spawned

@@ -3,6 +3,8 @@
 
 #include "BushThreeProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ABushThreeProp::ABushThreeProp()
@@ -18,6 +20,8 @@ ABushThreeProp::ABushThreeProp()
 	}
 
 	SetSize(FVector(2, 2, 2));
+
+	PropDataComponent->SetPropID(TEXT("1006"));
 }
 
 // Called when the game starts or when spawned

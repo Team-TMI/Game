@@ -3,6 +3,8 @@
 
 #include "PathNineProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 APathNineProp::APathNineProp()
@@ -16,6 +18,8 @@ APathNineProp::APathNineProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+	
+	PropDataComponent->SetPropID(TEXT("4029"));
 }
 
 // Called when the game starts or when spawned

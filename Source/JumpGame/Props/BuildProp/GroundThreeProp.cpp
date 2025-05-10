@@ -3,6 +3,8 @@
 
 #include "GroundThreeProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 AGroundThreeProp::AGroundThreeProp()
@@ -18,6 +20,8 @@ AGroundThreeProp::AGroundThreeProp()
 	}
 
 	SetSize(FVector(3, 3, 2));
+
+	PropDataComponent->SetPropID(TEXT("1016"));
 }
 
 // Called when the game starts or when spawned

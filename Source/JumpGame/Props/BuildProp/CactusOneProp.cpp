@@ -3,6 +3,8 @@
 
 #include "CactusOneProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ACactusOneProp::ACactusOneProp()
@@ -16,6 +18,8 @@ ACactusOneProp::ACactusOneProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	PropDataComponent->SetPropID(TEXT("1009"));
 }
 
 // Called when the game starts or when spawned

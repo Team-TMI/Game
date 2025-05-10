@@ -21,7 +21,6 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 	PrimaryActorTick.bCanEverTick = true;
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
-	PropDataComponent->SetPropID(TEXT("5008"));
 }
 
 // Called when the game starts or when spawned

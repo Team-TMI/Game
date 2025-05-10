@@ -3,6 +3,8 @@
 
 #include "BridgeStartProp.h"
 
+#include "JumpGame/Props/Components/PropDataComponent.h"
+
 
 // Sets default values
 ABridgeStartProp::ABridgeStartProp()
@@ -18,6 +20,8 @@ ABridgeStartProp::ABridgeStartProp()
 	}
 
 	SetSize(FVector(1, 2, 2));;
+
+	PropDataComponent->SetPropID(TEXT("1002"));
 }
 
 // Called when the game starts or when spawned
