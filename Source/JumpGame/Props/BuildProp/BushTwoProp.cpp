@@ -16,6 +16,8 @@ ABushTwoProp::ABushTwoProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(2, 2, 2));
 }
 
 // Called when the game starts or when spawned

@@ -16,6 +16,8 @@ ARockThreeProp::ARockThreeProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(3, 3, 3));
 }
 
 // Called when the game starts or when spawned

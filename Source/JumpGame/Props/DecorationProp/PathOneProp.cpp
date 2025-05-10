@@ -16,6 +16,8 @@ APathOneProp::APathOneProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(4, 4, 1));
 }
 
 // Called when the game starts or when spawned

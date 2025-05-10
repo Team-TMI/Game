@@ -90,7 +90,7 @@ protected:
 	class UBoxComponent* GridInnerCollision;
 
 	// 1 * 1 * 1 size
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Collision")
 	FVector DefaultSize = FVector(1.0f, 1.0f, 1.0f);
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
 	FVector DefaultCollisionExtentOffset = FVector(1, 1, 1);

@@ -16,6 +16,8 @@ ALadderTileProp::ALadderTileProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+	
+	SetSize(FVector(1, 1, 2));
 }
 
 // Called when the game starts or when spawned

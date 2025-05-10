@@ -16,6 +16,8 @@ AFenceOneProp::AFenceOneProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(2, 2, 1));
 }
 
 // Called when the game starts or when spawned

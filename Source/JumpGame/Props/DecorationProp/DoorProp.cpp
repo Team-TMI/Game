@@ -16,6 +16,8 @@ ADoorProp::ADoorProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(1, 2, 2));
 }
 
 // Called when the game starts or when spawned

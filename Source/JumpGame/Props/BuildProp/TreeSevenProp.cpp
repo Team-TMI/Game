@@ -16,6 +16,8 @@ ATreeSevenProp::ATreeSevenProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(2, 2, 5));
 }
 
 // Called when the game starts or when spawned

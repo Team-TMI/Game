@@ -16,6 +16,8 @@ ARockTwoProp::ARockTwoProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(4, 4, 2));
 }
 
 // Called when the game starts or when spawned

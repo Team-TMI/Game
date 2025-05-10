@@ -16,6 +16,8 @@ ATreeFourProp::ATreeFourProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(2, 2, 4));
 }
 
 // Called when the game starts or when spawned

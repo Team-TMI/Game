@@ -16,6 +16,8 @@ ATreeOneProp::ATreeOneProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(4, 2, 4));
 }
 
 // Called when the game starts or when spawned

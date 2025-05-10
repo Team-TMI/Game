@@ -16,6 +16,8 @@ AFarmOneProp::AFarmOneProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(3, 6, 1));
 }
 
 // Called when the game starts or when spawned

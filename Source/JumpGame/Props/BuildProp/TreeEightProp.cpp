@@ -16,6 +16,8 @@ ATreeEightProp::ATreeEightProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	SetSize(FVector(2, 2, 6));
 }
 
 // Called when the game starts or when spawned
