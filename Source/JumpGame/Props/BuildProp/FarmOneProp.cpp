@@ -21,7 +21,7 @@ AFarmOneProp::AFarmOneProp()
 
 	SetSize(FVector(3, 6, 1));
 
-	PropDataComponent->SetPropID(TEXT("4006"));
+	PropDataComponent->SetPropID(TEXT("1042"));
 }
 
 // Called when the game starts or when spawned

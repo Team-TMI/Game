@@ -21,7 +21,7 @@ AFarmTwoProp::AFarmTwoProp()
 
 	SetSize(FVector(3, 4, 1));
 
-	PropDataComponent->SetPropID(TEXT("4007"));
+	PropDataComponent->SetPropID(TEXT("1043"));
 }
 
 // Called when the game starts or when spawned

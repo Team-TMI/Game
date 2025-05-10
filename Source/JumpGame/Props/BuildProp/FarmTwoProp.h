@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DecorationProp.h"
+#include "BuildProp.h"
 #include "FarmTwoProp.generated.h"
 
 UCLASS()
-class JUMPGAME_API AFarmTwoProp : public ADecorationProp
+class JUMPGAME_API AFarmTwoProp : public ABuildProp
 {
 	GENERATED_BODY()
 

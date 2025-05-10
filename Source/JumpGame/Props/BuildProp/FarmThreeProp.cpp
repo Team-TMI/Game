@@ -19,7 +19,7 @@ AFarmThreeProp::AFarmThreeProp()
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
 
-	PropDataComponent->SetPropID(TEXT("4008"));
+	PropDataComponent->SetPropID(TEXT("1044"));
 }
 
 // Called when the game starts or when spawned
