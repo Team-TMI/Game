@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DecalActor.h"
+#include "DecorationProp.h"
 #include "FarmOneProp.generated.h"
 
 UCLASS()
-class JUMPGAME_API AFarmOneProp : public ADecalActor
+class JUMPGAME_API AFarmOneProp : public ADecorationProp
 {
 	GENERATED_BODY()
 
