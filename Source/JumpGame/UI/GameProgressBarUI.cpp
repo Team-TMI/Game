@@ -74,7 +74,7 @@ void UGameProgressBarUI::UpdatePlayerPos()
 		{
 			if (PlayerPos.IsValidIndex(PlayerIndex))
 			{
-				FFastLogger::LogConsole(TEXT("UpdatePlayerPos: %d"),PlayerIndex);
+				// FFastLogger::LogConsole(TEXT("UpdatePlayerPos: %d"),PlayerIndex);
 				// 플레이어 위치값(Z좌표임) 저장
 				float Position = Frog->GetActorLocation().Z;
 				PlayerPos[PlayerIndex] = Position; // PlayerID에 해당하는 인덱스에 저장

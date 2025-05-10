@@ -17,6 +17,7 @@ bool UIOManagerComponent::SendGameMessage(const FMessageUnion& Message)
 		return false;
 	}
 
+	FFastLogger::LogConsole(TEXT("UIOManagerComponent::SendGameMessage"));
 	IOHandlers[MessageType]->SendGameMessage(Message);
 	return true;
 }
@@ -24,6 +25,12 @@ bool UIOManagerComponent::SendGameMessage(const FMessageUnion& Message)
 void UIOManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// TODO: 방어코드 재설정
+	if (!GetWorld()->GetMapName().Contains(TEXT("InGameLevel")))
+	{
+		return ;
+	}
 	
 	// IOHandler 초기화
 	TSharedPtr<IIOHandlerInterface> IPCReadHandler = MakeShared<FIPCHandler>();
