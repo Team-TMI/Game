@@ -6,6 +6,8 @@
 #include "NetworkPlayerController.h"
 #include "LobbyPlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNextChatTriggered);
+
 /**
  * 
  */
@@ -13,8 +15,27 @@ UCLASS()
 class JUMPGAME_API ALobbyPlayerController : public ANetworkPlayerController
 {
 	GENERATED_BODY()
-
+	
 public:
+	ALobbyPlayerController();
+	
+public:
+	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UInputAction* NextChatAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UInputMappingContext* LobbyMappingContext;
+
+	// NextChatAction 시 호출될 함수
+	void NextChat();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNextChatTriggered OnNextChatTriggered;
+public:
+	
 	/*
 	 * Return : 0 : 실패, 1 : 성공
 	 * OutPitch : Pitch 비율 값
