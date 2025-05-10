@@ -67,8 +67,7 @@ void UClientRoomUI::NativeOnInitialized()
 	}
 }
 
-
-inline void UClientRoomUI::SetVisibleMain()
+void UClientRoomUI::SetVisibleMain()
 {
 	bIsVisible = CanvasMain->GetVisibility();
 	if (bIsVisible == ESlateVisibility::Hidden)
