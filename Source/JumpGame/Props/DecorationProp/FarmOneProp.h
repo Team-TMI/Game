@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BuildProp.h"
-#include "DoorProp.generated.h"
+#include "Engine/DecalActor.h"
+#include "FarmOneProp.generated.h"
 
 UCLASS()
-class JUMPGAME_API ADoorProp : public ABuildProp
+class JUMPGAME_API AFarmOneProp : public ADecalActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ADoorProp();
+	AFarmOneProp();
 
 protected:
 	// Called when the game starts or when spawned

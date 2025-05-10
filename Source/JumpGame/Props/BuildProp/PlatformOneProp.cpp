@@ -9,6 +9,13 @@ APlatformOneProp::APlatformOneProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset
+	(TEXT("/Game/Fab/LowPolySeparate/platform_01.platform_01"));
+	if (MeshAsset.Succeeded())
+	{
+		MeshComp->SetStaticMesh(MeshAsset.Object);
+	}
 }
 
 // Called when the game starts or when spawned

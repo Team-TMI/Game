@@ -9,6 +9,13 @@ ALotusLeafTrampolineProp::ALotusLeafTrampolineProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset
+	(TEXT("/Game/Fab/Trampoline/Green_Leaf_Curve_0509064638_texture.Green_Leaf_Curve_0509064638_texture"));
+	if (MeshAsset.Succeeded())
+	{
+		MeshComp->SetStaticMesh(MeshAsset.Object);
+	}
 }
 
 // Called when the game starts or when spawned
