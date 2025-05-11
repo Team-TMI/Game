@@ -17,9 +17,7 @@
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 #include "StoryMenuUI.h"
-#include "Camera/CameraComponent.h"
 #include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
-#include "UICam/LobbyMainCamera.h"
 
 
 void UClientRoomUI::NativeOnInitialized()
@@ -109,7 +107,6 @@ void UClientRoomUI::OnClickGoSettings()
 void UClientRoomUI::OnClickGoCredit()
 {
 	CanvasMain->SetVisibility(ESlateVisibility::Hidden);
-	WidgetSwitcher->SetActiveWidgetIndex(3);
 	CameraComp->SetViewTarget();
 }
 
@@ -161,7 +158,7 @@ void UClientRoomUI::OnClickFind()
 
 	// 찾는 도중엔 버튼을 비활성화
 	// 검색 버튼 문구 바꿔주고
-	Text_BtnFind->SetText(FText::FromString("Searching..."));
+	Text_BtnFind->SetText(FText::FromString(TEXT("검색 중...")));
 	// 검색 버튼을 비활성화
 	Btn_Find->SetIsEnabled(false);
 }
@@ -178,7 +175,7 @@ void UClientRoomUI::OnFindComplete(const FRoomData& Data)
 	if (Data.RoomID == -1)
 	{
 		// 검색 버튼 내용 다시 find로
-		Text_BtnFind->SetText(FText::FromString("FIND"));
+		Text_BtnFind->SetText(FText::FromString(TEXT("새로고침")));
 		// 검색 버튼을 활성화
 		Btn_Find->SetIsEnabled(true);
 
