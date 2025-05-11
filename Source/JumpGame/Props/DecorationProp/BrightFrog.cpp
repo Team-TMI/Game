@@ -39,6 +39,4 @@ void ABrightFrog::SetCollision(bool bEnable)
 void ABrightFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	MaterialChangeOnTick();
 }
