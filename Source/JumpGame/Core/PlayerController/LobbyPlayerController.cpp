@@ -7,6 +7,7 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -64,7 +65,8 @@ int32 ALobbyPlayerController::GetPitchYawRatio(float& OutPitch, float& OutYaw)
 	FTransform CameraTransform = ViewTarget->GetTransform();
 
 	// Player의 좌표를 가져온다. (월드)
-	FVector PlayerLocation = GetPawn()->GetActorLocation() + FVector(0, 0, 25);
+	ALobbyFrog* Frog = Cast<ALobbyFrog>(UGameplayStatics::GetActorOfClass(GetWorld(),ALobbyFrog::StaticClass()));
+	FVector PlayerLocation = Frog->GetActorLocation() + FVector(0, 0, 25);
 
 	// Player의 좌표를 카메라의 로컬 좌표계로 변환한다.
 	FVector InLocallyPosition = CameraTransform.InverseTransformPosition(PlayerLocation);

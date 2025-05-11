@@ -15,7 +15,7 @@ void UStoryMenuUI::NativeOnInitialized()
 
 	Btn_Back->OnClicked.AddDynamic(this, &UStoryMenuUI::OnClickBtn_Back);
 	
-	ALobbyFrog* Frog = Cast<ALobbyFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	ALobbyFrog* Frog = Cast<ALobbyFrog>(UGameplayStatics::GetActorOfClass(GetWorld(),ALobbyFrog::StaticClass()));
 	CameraComp = Cast<ULobbyCameraComp>(Frog->CameraComp);
 }
 
