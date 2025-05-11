@@ -13,10 +13,15 @@ ADecorationProp::ADecorationProp()
 	PrimaryActorTick.bCanEverTick = true;
 
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	CollisionComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	MeshComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
+	
 	// 그리드 충돌 허용
 	bEnableCollision = false;
+
+	
 }
 
 // Called when the game starts or when spawned
