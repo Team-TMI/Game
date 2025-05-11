@@ -17,11 +17,30 @@ class JUMPGAME_API UStoryUI : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	//virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-	
+
+public:
+	template <typename TStoryUI>
+	static TStoryUI* CreateAndShowStory(APlayerController* OwningPlayer,
+	                                    TSubclassOf<TStoryUI> WidgetClass)
+	{
+		if (OwningPlayer && WidgetClass)
+		{
+			TStoryUI* Instance{CreateWidget<TStoryUI>(OwningPlayer, WidgetClass)};
+			if (Instance)
+			{
+				Instance->AddToViewport();
+
+				return Instance;
+			}
+		}
+
+		return nullptr;
+	}
+
 	UFUNCTION()
 	void OnNextChatTriggered();
 	// 스토리 초기화
-	void InitializeStory();
+	virtual void InitializeStory();
 	// 이름 및 대화 내용 업데이트
 	void UpdateSpeakerAndText(const FText& FullStoryLine);
 	// 초기 대사 표시 함수
@@ -29,10 +48,12 @@ public:
 	// 대사 애니메이션
 	void ChatAppearAnimation();
 	void CheckNextSpeaker(const FText& FullStoryLine);
-	
+
+	void StoryEnd();
+
 	UPROPERTY(BlueprintReadWrite)
 	class ALobbyPlayerController* LobbyController;
-	
+
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* MomImage;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -45,10 +66,12 @@ public:
 	class UTextBlock* TextBlock_Mom;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* TextBlock_Baby;
-
+	
 	// 애니메이션
 	UPROPERTY(BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
 	class UWidgetAnimation* ChatAppear;
+	UPROPERTY(BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
+	class UWidgetAnimation* TextAppear;
 
 	// 스토리 담을 배열
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

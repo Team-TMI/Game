@@ -10,6 +10,7 @@ class ULobbyCameraComp;
 /**
  * 
  */
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClickBackToLobby);
 
 UCLASS()
@@ -18,6 +19,8 @@ class JUMPGAME_API UStoryMenuUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UStoryMenuUI(const class FObjectInitializer &ObjectInitializer);
+	
 	virtual void NativeOnInitialized() override;
 	
 	UPROPERTY(meta = (BindWidget))
@@ -35,8 +38,10 @@ public:
 
 	UFUNCTION()
 	void OnClickMainStory();
+	// 연잎밥
 	UFUNCTION()
 	void OnClickEp1();
+	// 달빛연못
 	UFUNCTION()
 	void OnClickEp2();
 
@@ -45,4 +50,10 @@ public:
 	ULobbyCameraComp* CameraComp;
 
 	FOnClickBackToLobby OnClickBackToLobby;
+
+	// 스토리 UI들
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ULotusLeafRiceUI> LotusLeafRiceUIClass;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UMoonPondUI> MoonPondUIClass;
 };
