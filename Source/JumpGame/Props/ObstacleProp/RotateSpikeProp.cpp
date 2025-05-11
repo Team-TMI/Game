@@ -41,7 +41,6 @@ ARotateSpikeProp::ARotateSpikeProp()
 	Hammer->SetCollisionProfileName(TEXT("OverlapProp"));
 	Spike->SetCollisionProfileName(TEXT("Prop"));
 
-	PropDataComponent->SetPropID(TEXT("5006"));
 }
 
 // Called when the game starts or when spawned

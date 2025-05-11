@@ -18,7 +18,6 @@ ABasicGroundProp::ABasicGroundProp()
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 	MeshComp->SetCollisionProfileName(TEXT("Prop"));
 
-	PropDataComponent->SetPropID(TEXT("1000"));
 }
 
 // Called when the game starts or when spawned

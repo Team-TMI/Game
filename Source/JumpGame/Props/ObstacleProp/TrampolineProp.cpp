@@ -20,7 +20,6 @@ ATrampolineProp::ATrampolineProp()
 	Tags.Add("Trampoline");
 
 	CollisionComp->SetCollisionProfileName("OverlapProp");
-	PropDataComponent->SetPropID(TEXT("5009"));
 }
 
 // Called when the game starts or when spawned

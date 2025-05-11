@@ -13,8 +13,8 @@
 ALobbyGameMode::ALobbyGameMode()
 {
 	// GamaeState, PlayerState 설정하기
+	DefaultPawnClass = nullptr;
 	GameStateClass = ALobbyGameState::StaticClass();
-	DefaultPawnClass = ALobbyFrog::StaticClass();
 	PlayerControllerClass = ALobbyPlayerController::StaticClass();
 }
 
