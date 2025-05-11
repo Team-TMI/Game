@@ -209,4 +209,9 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CharacterWaterState)
 	ECharacterStateEnum CharacterWaterState;
+
+	// 사운드
+public:
+	UPROPERTY(EditAnywhere)
+	class USoundBase* JumpSound;
 };

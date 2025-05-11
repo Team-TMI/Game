@@ -16,6 +16,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
+#include "Kismet/GameplayStatics.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Net/UnrealNetwork.h"
 // Sets default values
@@ -100,6 +101,13 @@ AFrog::AFrog()
 	if (Frog_Sprint.Succeeded())
 	{
 		PropCheatAction = Frog_PropCheat.Object;
+	}
+	
+	ConstructorHelpers::FObjectFinder<USoundBase> JumpSoundObject
+	(TEXT("/Game/Sounds/Ques/Jump_Cue.Jump_Cue"));
+	if (JumpSoundObject.Succeeded())
+	{
+		JumpSound = JumpSoundObject.Object;
 	}
 
 	ConstructorHelpers::FClassFinder<UJumpGaugeUI> JumpGaugeUIWidget
@@ -374,7 +382,7 @@ void AFrog::StartJump()
 	{
 		return;
 	}
-
+	
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
@@ -383,6 +391,7 @@ void AFrog::StartJump()
 		if (IsLocallyControlled())
 		{
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
 
 		// 서버에 실제 점프 실행
@@ -405,6 +414,7 @@ void AFrog::StartJump()
 		if (CanJump())
 		{
 			Jump();
+			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
 	}
 	// 일반 점프
@@ -413,6 +423,7 @@ void AFrog::StartJump()
 		if (CanJump())
 		{
 			Jump();
+			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
 	}
 }

@@ -13,4 +13,7 @@ UCLASS()
 class JUMPGAME_API ULotusLeafRiceUI : public UStoryUI
 {
 	GENERATED_BODY()
+
+public:
+	virtual void InitializeStory() override;
 };
