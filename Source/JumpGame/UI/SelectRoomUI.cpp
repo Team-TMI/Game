@@ -5,6 +5,10 @@
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
+#include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/Core/GameState/LobbyGameState.h"
+#include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 void USelectRoomUI::NativeOnInitialized()
 {
@@ -16,6 +20,7 @@ void USelectRoomUI::NativeOnInitialized()
 	Btn_AllMap->OnClicked.AddDynamic(this, &USelectRoomUI::OnClickAllMap);
 	Btn_OriginMap->OnClicked.AddDynamic(this, &USelectRoomUI::OnClickOriginMap);
 	Btn_CustomMap->OnClicked.AddDynamic(this, &USelectRoomUI::OnClickCustomMap);
+	Btn_PickFile->OnClicked.AddDynamic(this, &USelectRoomUI::OnPickCustomMap);
 }
 
 void USelectRoomUI::OnClickGoBackWait()
@@ -45,4 +50,29 @@ void USelectRoomUI::OnClickOriginMap()
 void USelectRoomUI::OnClickCustomMap()
 {
 	WidgetSwitcher_SR->SetActiveWidgetIndex(2);
+}
+
+void USelectRoomUI::OnPickCustomMap()
+{
+	FFastLogger::LogScreen(FColor::Red, TEXT("OnPickCustomMap"));
+	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+	if (!GI)
+	{
+		return ;
+	}
+	FFastLogger::LogScreen(FColor::Red, TEXT("OnPickCustomMap!"));
+	GI->ClearMapFilePath();
+	ALobbyGameState* GameState = Cast<ALobbyGameState>(GetWorld()->GetGameState());
+	if (!GameState)
+	{
+		return ;
+	}
+	FFastLogger::LogScreen(FColor::Red, TEXT("OnPickCustomMap!!!!"));
+	FString FileName;
+	if (!GameState->LoadMapComponent->PickFile(FileName))
+	{
+		return ;
+	} 
+	FFastLogger::LogScreen(FColor::Red, TEXT("OnPickCustomMap!!!33333!"));
+	GI->SetMapFilePath(FileName);
 }

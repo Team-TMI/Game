@@ -3,6 +3,7 @@
 
 #include "InGameMode.h"
 
+#include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Core/PlayerController/InGamePlayerController.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
 
@@ -17,6 +18,11 @@ void AInGameMode::BeginPlay()
 
 	// LoadMapComponent->LoadMap();
 
-	// FString FileName =;
-	// LoadMapComponent->LoadMapWithString(FileName);
+	UJumpGameInstance* JumpGameInstance = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+	if (!JumpGameInstance)
+	{
+		return;
+	}
+	FString FileName = JumpGameInstance->GetMapFilePath();
+	LoadMapComponent->LoadMapWithString(FileName);
 }

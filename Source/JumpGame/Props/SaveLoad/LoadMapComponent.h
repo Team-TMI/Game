@@ -19,6 +19,8 @@ public:
 	void LoadMap();
 	UFUNCTION()
 	void LoadMapWithString(const FString& FileName);
+	UFUNCTION()
+	bool PickFile(FString& OutFileName);
 
 	UFUNCTION()
 	void OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames);
