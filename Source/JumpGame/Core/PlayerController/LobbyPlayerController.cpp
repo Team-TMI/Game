@@ -3,14 +3,63 @@
 
 #include "LobbyPlayerController.h"
 
+#include "InputAction.h"
+#include "InputMappingContext.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
+
+ALobbyPlayerController::ALobbyPlayerController()
+{
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionFinder(
+		TEXT("/Game/Characters/Input/LobbyInput/IA_NextChat.IA_NextChat"));
+	if (InputActionFinder.Succeeded())
+	{
+		NextChatAction = InputActionFinder.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputContextFinder(
+		TEXT("/Game/Characters/Input/LobbyInput/IMC_Lobby.IMC_Lobby"));
+	if (InputContextFinder.Succeeded())
+	{
+		LobbyMappingContext = InputContextFinder.Object;
+	}
+}
+
+void ALobbyPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())})
+	{
+		Subsystem->AddMappingContext(LobbyMappingContext, 0);
+	}
+}
+
+void ALobbyPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (UEnhancedInputComponent* EnhancedInputComponent{Cast<UEnhancedInputComponent>(InputComponent)})
+	{
+		if (NextChatAction)
+		{
+			EnhancedInputComponent->BindAction(NextChatAction, ETriggerEvent::Started, this, &ALobbyPlayerController::NextChat);
+		}
+	}
+}
+
+void ALobbyPlayerController::NextChat()
+{
+	OnNextChatTriggered.Broadcast();
+}
 
 int32 ALobbyPlayerController::GetPitchYawRatio(float& OutPitch, float& OutYaw)
 {
 	// 현재 Viewtarget 중인 카메라를 가져온다.
 	AActor* ViewTarget = GetViewTarget();
-	
+
 	// 카메라의 트랜스폼을 구한다.
 	FTransform CameraTransform = ViewTarget->GetTransform();
 
@@ -45,7 +94,7 @@ int32 ALobbyPlayerController::GetPitchYawRatio(float& OutPitch, float& OutYaw)
 	// 두 개의 좌표로 Pitch와 Yaw의 비율을 구한다.
 	OutPitch = GetPitchRatio(InLocallyPosition, InLocallyMousePosition);
 	OutYaw = GetYawRatio(InLocallyPosition, InLocallyMousePosition);
-	
+
 	return 1;
 }
 
@@ -107,7 +156,7 @@ void ALobbyPlayerController::CalculateMinMax(const FVector& InLocallyPosition)
 		FFastLogger::LogScreen(FColor::Red, TEXT("Deproject Top Left World ScreenToWorld failed"));
 		return;
 	}
-	
+
 	FVector BottomRightWorld;
 	FVector BottomRightWorldDirection;
 	if (!UGameplayStatics::DeprojectScreenToWorld(this, BottomRight, BottomRightWorld, BottomRightWorldDirection))
