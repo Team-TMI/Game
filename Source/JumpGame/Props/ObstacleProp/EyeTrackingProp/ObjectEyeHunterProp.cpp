@@ -143,7 +143,7 @@ void AObjectEyeHunterProp::StartMission()
 
 	CurrentTargetIndex = 0;
 	BezierAlpha = 0.f;
-	ObjectSpeed = 0.5f;
+	ObjectSpeed = 0.3f;
 
 	if (FlyingObjectUI)
 	{
@@ -385,7 +385,7 @@ bool AObjectEyeHunterProp::IsObjectAndEyeOverlap(FVector2D ObjectLocation, FVect
 			static_cast<float>(FMath::Abs(FVector2D::Distance(EyeLocation, ObjectLocation)))
 		};
 
-		if (Length <= 100.f)
+		if (Length <= 110.f)
 		{
 			FlyingObjectUI->Overlapping();
 			return true;
@@ -400,7 +400,7 @@ void AObjectEyeHunterProp::ChangeValue(bool bIsOverlap)
 {
 	if (bIsOverlap)
 	{
-		FlowTime = FMath::Clamp(FlowTime + (GetWorld()->GetDeltaSeconds() * 3), 0.f, SuccessTime);
+		FlowTime = FMath::Clamp(FlowTime + (GetWorld()->GetDeltaSeconds() * 2), 0.f, SuccessTime);
 	}
 	else
 	{

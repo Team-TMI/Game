@@ -6,6 +6,8 @@
 #include "JumpGame/Characters/Frog.h"
 #include "LobbyFrog.generated.h"
 
+class ULobbyCameraComp;
+
 UCLASS()
 class JUMPGAME_API ALobbyFrog : public AFrog
 {
@@ -32,4 +34,8 @@ public:
 	FVector2D PlusPitchMinMax = FVector2D(0.f, 50.f);
 	FVector2D MinusPitchMinMax = FVector2D(0.f, 70.f);
 	FVector2D MinMax = FVector2D(0.f, 70.f);
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	ULobbyCameraComp* CameraComp;
 };

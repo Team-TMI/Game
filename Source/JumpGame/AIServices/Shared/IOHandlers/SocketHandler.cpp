@@ -65,7 +65,7 @@ bool FSocketHandler::SendGameMessage(const FMessageUnion& Message)
 		return false;
 	}
 
-	FFastLogger::LogScreen(FColor::Red, TEXT("Message Send : Size : %d"), Message.Header.PayloadSize);
+	// FFastLogger::LogScreen(FColor::Red, TEXT("Message Send : Size : %d"), Message.Header.PayloadSize);
 	
 	Socket->Send(Message.RawData, Message.Header.PayloadSize, true);
 	return true;

@@ -19,21 +19,37 @@ void UVictoryPageUI::NativeConstruct()
 void UVictoryPageUI::OnClickGoLobby()
 {
 	// 서버가 나가면 다같이 나가기
+	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+
+	if (!GI || !PC) return;
+	
 	if (!PC->HasAuthority())
 	{
-		// 혼자나가면 연결끊기
+		// 클라이언트는 이동 후 세션 나가기
 		PC->ClientTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"), TRAVEL_Absolute);
+		
+		GI->LeaveSession(true);
 	}
 	else
 	{
-		GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"));
+		// 클라이언트들 먼저 이동시킴
+		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+		{
+			APlayerController* OtherPC = Cast<APlayerController>(*It);
+			if (OtherPC && !OtherPC->IsLocalController())
+			{
+				OtherPC->ClientTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"), TRAVEL_Absolute);
+			}
+		}
+
+		// 서버도 세션 제거하고 이동
+		GI->LeaveSession(true);
+
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?listen"));
 		FLog::Log("Server Leaving Game, 로비로 이동");
 	}
-
-	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
-	GI->LeaveSession(true);
-
+	
 	// 이동하면 나는 지우자
 	RemoveFromParent();
 }

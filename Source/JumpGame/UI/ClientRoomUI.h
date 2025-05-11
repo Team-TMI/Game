@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "JumpGame/Core/GameState/TypeInfo/GameInfo.h"
+#include "UICam/LobbyCameraComp.h"
 #include "ClientRoomUI.generated.h"
 
 /*
@@ -36,11 +37,13 @@ public:
 	// WidgetSwitcher (0)
 	// 메인 관련
 	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* CanvasMain;
+	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoFind;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoCreateMap;
 	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_GoFrogPass;
+	class UButton* Btn_GoStoryMenu;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoSettings;
 	UPROPERTY(meta = (BindWidget))
@@ -54,7 +57,7 @@ public:
 	UFUNCTION()
 	void OnClickGoCreateMap();
 	UFUNCTION()
-	void OnClickGoFrogPass();
+	void OnClickGoStoryMenu();
 	UFUNCTION()
 	void OnClickGoSettings();
 	UFUNCTION()
@@ -123,10 +126,9 @@ public:
 	TArray<USessionListItemWidget*> RoomListPool;
 	UPROPERTY(editanywhere)
 	TArray<USessionListItemDouble*> RoomDoubleWidgets;
-
+	// 찾아진 방 정보 저장
 	UPROPERTY(editanywhere)
 	TArray<FRoomData> AllFoundRooms;
-	
 	// 최대 방 개수
 	UPROPERTY(editanywhere)
 	int32 MaxRoomCount = 50; 
@@ -136,7 +138,7 @@ public:
 	UFUNCTION()
 	void InitRoomListPool();
 	
-	// 함수
+	// 버튼 클릭 함수
 	UFUNCTION()
 	void OnClickFind();
 	UFUNCTION()
@@ -145,13 +147,21 @@ public:
 	// 델리게이트 함수
 	void OnFindComplete(const FRoomData& Data);
 
-	// 카메라 전환 관련
-	UPROPERTY(editanywhere)
-	class APlayerController* PC;
+	// 카메라 전환하기
+	UPROPERTY()
+	ULobbyCameraComp* CameraComp;
+
+public:
+	// 스토리 UI 띄우기
 	UPROPERTY(editanywhere, BlueprintReadWrite)
-	class ALobbyMainCamera* MainCamera;
+	TSubclassOf<class UStoryMenuUI> StoryMenuUIClass;
 	UPROPERTY(editanywhere, BlueprintReadWrite)
-	class ALobbySubCamera* SubCamera;
+	UStoryMenuUI* StoryMenuUI;
+
+	// 보이니?
+	UPROPERTY()
+	ESlateVisibility bIsVisible;
 	UFUNCTION()
-	void SetViewTarget();
+	void SetVisibleMain();
 };
+
