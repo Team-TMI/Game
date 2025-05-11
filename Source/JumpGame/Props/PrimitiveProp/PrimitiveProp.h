@@ -31,9 +31,6 @@ public:
 	UFUNCTION(Blueprintable, BlueprintCallable)
 	virtual void SetCollision(bool bEnable) {}
 
-	UFUNCTION()
-	virtual void MaterialChangeOnTick() {};
-
 	UFUNCTION(BlueprintCallable)
 	void SetSize(const FVector& InSize);
 	UFUNCTION(BlueprintCallable)
@@ -63,6 +60,13 @@ protected:
 	UFUNCTION()
 	void SetGizmoRotation(class UGizmoComponent* Gizmo, const FVector& Direction);
 	
+	UFUNCTION()
+	virtual void MaterialChangeOnTick() {};
+	UFUNCTION()
+	virtual void ChangeAllMaterialsToUnSelect() {};
+	virtual void ChangeAllMaterialsToSelect() {};
+	virtual void ChangeAllMaterialsToOnCollision() {};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")
 	class UGridComponent* GridComp;
 
@@ -90,7 +94,7 @@ protected:
 	class UBoxComponent* GridInnerCollision;
 
 	// 1 * 1 * 1 size
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Collision")
 	FVector DefaultSize = FVector(1.0f, 1.0f, 1.0f);
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
 	FVector DefaultCollisionExtentOffset = FVector(1, 1, 1);
@@ -117,7 +121,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
 	class UMaterialInstance* SelectedObjectMaterial = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
-	class UMaterialInstanceDynamic* UnSelectedObjectMaterial = nullptr;
+	TArray<class UMaterialInstanceDynamic*> UnSelectedObjectMaterials;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
 	class UMaterialInstance* OnCollisionObjectMaterial = nullptr;
 

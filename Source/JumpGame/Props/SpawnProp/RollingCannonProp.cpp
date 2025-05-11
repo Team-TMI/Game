@@ -24,7 +24,6 @@ ARollingCannonProp::ARollingCannonProp()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
 	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
-	PropDataComponent->SetPropID(TEXT("5002"));
 }
 
 void ARollingCannonProp::OnProjectileReturn()
@@ -57,21 +56,6 @@ void ARollingCannonProp::BeginPlay()
 void ARollingCannonProp::SetCollision(bool bEnable)
 {
 	Super::SetCollision(bEnable);
-
-	// 장애물에 추가 메쉬가 있는 경우에 override
-	if (bEnable)
-	{
-		// 추가 메쉬 설정
-		MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
-		MeshComp->SetRenderCustomDepth(false);
-	}
-	else
-	{
-		// 추가 메쉬 설정
-		// TODO: Material 불투명하게 바꿔주기
-		MeshComp->SetMaterial(0, SelectedObjectMaterial);
-		MeshComp->SetRenderCustomDepth(true);
-	}
 }
 
 // Called every frame

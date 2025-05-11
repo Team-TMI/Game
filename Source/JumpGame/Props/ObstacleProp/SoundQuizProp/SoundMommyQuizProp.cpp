@@ -21,7 +21,14 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 	PrimaryActorTick.bCanEverTick = true;
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
-	PropDataComponent->SetPropID(TEXT("5008"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset
+	(TEXT("/Game/Fab/SoundMommy/SM_Radio.SM_Radio"));
+	if (MeshAsset.Succeeded())
+	{
+		MeshComp->SetStaticMesh(MeshAsset.Object);
+	}
+
+	PropDataComponent->SetPropID(TEXT("2003"));
 }
 
 // Called when the game starts or when spawned
@@ -75,13 +82,14 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		SendEndSoundQuizNotify();
 
 		GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+		return;
 	}
 
 	// TODO: 정답과 일치할때로 변경해야함
 	// 20번 안에, Fin되는 경우 -> 유사도가 높을때
 	if (SendResponseIdx < 20)
 	{
-		if (bSuccess == 1 || Similarity*100 >= 90)
+		if (bSuccess == 1 || Similarity*100 >= 89)
 		{
 			// UI 지우자
 			SoundQuizUI->RemoveFromParent();
@@ -95,6 +103,7 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 			SendEndSoundQuizNotify();
 			
 			GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
+			return;
 		}
 	}
 	
@@ -125,7 +134,7 @@ void ASoundMommyQuizProp::StartRecord()
 	TimeRemainUI->StartMissionTimer(3.0f);
 
 	// 버튼 이름 바꾸고
-	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Recording..."));
+	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString(TEXT("대답 녹음중!")));
 	// 버튼 비활성화
 	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(false);
 }
@@ -135,7 +144,7 @@ void ASoundMommyQuizProp::StopRecord()
 	Super::StopRecord();
 
 	TimeRemainUI->RemoveFromParent();
-	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString("Wait"));
+	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString(TEXT("엄마 말 듣는중...")));
 	// 버튼 다시 활성화
 	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(true);
 }

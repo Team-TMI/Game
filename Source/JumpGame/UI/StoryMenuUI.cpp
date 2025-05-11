@@ -39,7 +39,7 @@ void UStoryMenuUI::NativeOnInitialized()
 	Btn_Ep1->OnClicked.AddDynamic(this, &UStoryMenuUI::OnClickEp1);
 	Btn_Ep2->OnClicked.AddDynamic(this, &UStoryMenuUI::OnClickEp2);
 
-	ALobbyFrog* Frog = Cast<ALobbyFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	ALobbyFrog* Frog = Cast<ALobbyFrog>(UGameplayStatics::GetActorOfClass(GetWorld(),ALobbyFrog::StaticClass()));
 	CameraComp = Cast<ULobbyCameraComp>(Frog->CameraComp);
 }
 
@@ -52,7 +52,9 @@ void UStoryMenuUI::OnClickBtn_Back()
 }
 
 void UStoryMenuUI::OnClickMainStory()
-{}
+{
+	//
+}
 
 void UStoryMenuUI::OnClickEp1()
 {

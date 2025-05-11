@@ -35,7 +35,7 @@ private:
 	UPROPERTY()
 	TArray<class UVerticalPropSlotUI*> PropSlots;
 	UPROPERTY()
-	int32 PropStack = 50;
+	int32 PropStack = 70;
 	// 왜 VerticalPropSlotUI로 안되는거임?
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
 	TSubclassOf<class UUserWidget> VerticalPropSlotUIClass;

@@ -6,6 +6,7 @@
 #include "JumpGame/Core/GameState/MapEditorState.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
 #include "JumpGame/Props/SaveLoad/SaveMapComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 void UMapMenuUI::NativeOnInitialized()
 {
@@ -40,5 +41,11 @@ void UMapMenuUI::OnSaveConfirmClicked()
 		MapEditorState->GetSaveMapComponent()->SaveMap(FileName);
 	}
 	SavePopup->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UMapMenuUI::OnBackButtonClicked()
+{
+	// 로비로 이동하자
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("/Game/Maps/ClientRoomLevel"));
 }
 

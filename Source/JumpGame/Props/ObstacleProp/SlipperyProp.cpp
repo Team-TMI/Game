@@ -19,7 +19,6 @@ ASlipperyProp::ASlipperyProp()
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 	CollisionComp->SetBoxExtent(FVector(49.f, 49.f, 10.f));
 
-	PropDataComponent->SetPropID(TEXT("5007"));
 }
 
 // Called when the game starts or when spawned

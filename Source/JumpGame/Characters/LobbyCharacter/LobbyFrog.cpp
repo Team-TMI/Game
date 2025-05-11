@@ -10,6 +10,9 @@
 // Sets default values
 ALobbyFrog::ALobbyFrog()
 {
+	bReplicates = false;
+	Super::SetReplicateMovement(false);
+	
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -28,11 +31,7 @@ void ALobbyFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ALobbyPlayerController* PC = Cast<ALobbyPlayerController>(Controller);
-	if (!PC)
-	{
-		
-	}
+	SetJumpGaugeVisibility(false);
 }
 
 // Called every frame
@@ -40,7 +39,7 @@ void ALobbyFrog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ALobbyPlayerController* PC = Cast<ALobbyPlayerController>(Controller);
+	ALobbyPlayerController* PC = Cast<ALobbyPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (!PC)
 	{
 		return ;

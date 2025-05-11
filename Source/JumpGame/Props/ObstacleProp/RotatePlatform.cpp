@@ -25,7 +25,6 @@ ARotatePlatform::ARotatePlatform()
 
 	Super::SetSize(FVector(5,5,1));
 	
-	PropDataComponent->SetPropID(TEXT("9001"));
 }
 
 // Called when the game starts or when spawned

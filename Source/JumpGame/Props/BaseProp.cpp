@@ -35,7 +35,15 @@ void ABaseProp::BeginPlay()
 	// 동작 동기화
 	SetReplicateMovement(true);
 
-	UnSelectedObjectMaterial = MeshComp->CreateAndSetMaterialInstanceDynamic(0);
+	// UnSelectedObjectMaterial = MeshComp->CreateAndSetMaterialInstanceDynamic(0);
+	for (int32 i = 0; i < MeshComp->GetNumMaterials(); i++)
+	{
+		UMaterialInstanceDynamic* DynamicMaterial = MeshComp->CreateAndSetMaterialInstanceDynamic(i);
+		if (DynamicMaterial)
+		{
+			UnSelectedObjectMaterials.Add(DynamicMaterial);
+		}
+	}
 }
 
 void ABaseProp::SetCollision(bool bEnable)
@@ -48,7 +56,7 @@ void ABaseProp::SetCollision(bool bEnable)
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		// 추가 메쉬 설정
-		MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
+		ChangeAllMaterialsToUnSelect();
 		MeshComp->SetRenderCustomDepth(false);
 	}
 	else
@@ -57,7 +65,7 @@ void ABaseProp::SetCollision(bool bEnable)
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		// 추가 메쉬 설정
 		// TODO: Material 불투명하게 바꿔주기
-		MeshComp->SetMaterial(0, SelectedObjectMaterial);
+		ChangeAllMaterialsToSelect();
 		MeshComp->SetRenderCustomDepth(true);
 	}
 }
@@ -87,18 +95,54 @@ void ABaseProp::MaterialChangeOnTick()
 	
 	if (bSelected && bIsOnCollision)
 	{
-		MeshComp->SetMaterial(0, OnCollisionObjectMaterial);
+		ChangeAllMaterialsToOnCollision();
 		return ;
 	}
 	if (bSelected)
 	{
-		MeshComp->SetMaterial(0, SelectedObjectMaterial);
+		ChangeAllMaterialsToSelect();
 		return ;
 	}
 	if (bIsOnCollision)
 	{
-		MeshComp->SetMaterial(0, OnCollisionObjectMaterial);
+		ChangeAllMaterialsToOnCollision();
 		return ;
 	}
-	MeshComp->SetMaterial(0, UnSelectedObjectMaterial);
+	ChangeAllMaterialsToUnSelect();
+}
+
+void ABaseProp::ChangeAllMaterialsToUnSelect()
+{
+	Super::ChangeAllMaterialsToUnSelect();
+
+	for (int32 i = 0; i < MeshComp->GetNumMaterials(); i++)
+	{
+		if (UnSelectedObjectMaterials.IsValidIndex(i))
+		{
+			MeshComp->SetMaterial(i, UnSelectedObjectMaterials[i]);
+		}
+	}
+	MeshComp->SetForceDisableNanite(false);
+}
+
+void ABaseProp::ChangeAllMaterialsToSelect()
+{
+	Super::ChangeAllMaterialsToSelect();
+
+	MeshComp->SetForceDisableNanite(true);
+	for (int32 i = 0; i < MeshComp->GetNumMaterials(); i++)
+	{
+		MeshComp->SetMaterial(i, SelectedObjectMaterial);
+	}
+}
+
+void ABaseProp::ChangeAllMaterialsToOnCollision()
+{
+	Super::ChangeAllMaterialsToOnCollision();
+
+	MeshComp->SetForceDisableNanite(true);
+	for (int32 i = 0; i < MeshComp->GetNumMaterials(); i++)
+	{
+		MeshComp->SetMaterial(i, OnCollisionObjectMaterial);
+	}
 }
