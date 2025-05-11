@@ -27,7 +27,7 @@ void UClientRoomUI::NativeOnInitialized()
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
-	ALobbyFrog* Frog = Cast<ALobbyFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	ALobbyFrog* Frog = Cast<ALobbyFrog>(UGameplayStatics::GetActorOfClass(GetWorld(),ALobbyFrog::StaticClass()));
 	CameraComp = Cast<ULobbyCameraComp>(Frog->CameraComp);
 
 	// WidgetSwitcher (0)
