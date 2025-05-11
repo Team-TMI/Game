@@ -79,6 +79,10 @@ public:
 	// 승리 판별 (bIsWin값 변경)
 	void SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin);
 
+	void SetMapFilePath(const FString& Path) { MapFilePath = Path; }
+	FString GetMapFilePath() { return MapFilePath; }
+	void ClearMapFilePath() { MapFilePath = FString(); }
+
 private:
 	UPROPERTY()
 	int32 MaxPlayerCount = 0;
@@ -94,4 +98,8 @@ public:
 
 	// 눈 추적 파이썬 코드 실행 시킬 지 여부
 	bool bIsRunEyeScript{false};
+
+private:
+	UPROPERTY()
+	FString MapFilePath;
 };

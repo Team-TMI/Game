@@ -15,6 +15,8 @@ USaveMapComponent::USaveMapComponent()
 void USaveMapComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	DefaultDirectory = FPaths::ProjectDir() + TEXT("SaveMap/");
 }
 
 bool USaveMapComponent::SaveMap(const FString& FileName)
