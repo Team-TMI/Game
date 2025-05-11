@@ -32,5 +32,6 @@ public:
 	TSubclassOf<class UWaitRoomUI> WaitRoomUIClass;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UWaitRoomUI* WaitRoomUI;
-	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	class ULoadMapComponent* LoadMapComponent;
 };

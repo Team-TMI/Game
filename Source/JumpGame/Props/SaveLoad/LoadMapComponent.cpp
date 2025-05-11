@@ -64,6 +64,19 @@ void ULoadMapComponent::LoadMapWithString(const FString& FileName)
 	BuildMapFromSaveData();
 }
 
+bool ULoadMapComponent::PickFile(FString& OutFileName)
+{
+	TArray<FString> OutFileNames;
+	OpenFileDialog(FString(TEXT("Open File Dialog")), FString(TEXT("C:/")), FString(TEXT("All Files (*.*)|*.*")), OutFileNames);
+	if (OutFileNames.IsValidIndex(0))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("%s"), *OutFileNames[0]);
+		OutFileName = OutFileNames[0];
+		return true;
+	}
+	return false;
+}
+
 
 bool ULoadMapComponent::LoadFileToJsonString(const FString& FilePath, FString& JsonString)
 {

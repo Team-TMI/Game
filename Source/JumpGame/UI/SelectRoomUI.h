@@ -29,6 +29,8 @@ public:
 	class UButton* Btn_OriginMap;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_CustomMap;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_PickFile;
 
 	// 버튼 클릭시 실행 함수
 	UFUNCTION()
@@ -41,6 +43,8 @@ public:
 	void OnClickOriginMap();
 	UFUNCTION()
 	void OnClickCustomMap();
+	UFUNCTION()
+	void OnPickCustomMap();
 	
 	// 맵 리스트 관련
 	UPROPERTY(meta = (BindWidget))
