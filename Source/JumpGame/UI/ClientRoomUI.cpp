@@ -16,8 +16,8 @@
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
-#include "UICam/LobbyMainCamera.h"
-#include "UICam/LobbySubCamera.h"
+#include "StoryMenuUI.h"
+#include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
 
 
 void UClientRoomUI::NativeOnInitialized()
@@ -27,18 +27,14 @@ void UClientRoomUI::NativeOnInitialized()
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
-
-	MainCamera = Cast<ALobbyMainCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), ALobbyMainCamera::StaticClass()));
-	SubCamera = Cast<ALobbySubCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), ALobbySubCamera::StaticClass()));
-	
-	PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	PC->SetViewTarget(MainCamera);
+	ALobbyFrog* Frog = Cast<ALobbyFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	CameraComp = Cast<ULobbyCameraComp>(Frog->CameraComp);
 
 	// WidgetSwitcher (0)
 	// 메인 화면 버튼 클릭
 	Btn_GoFind->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoFindRoom);
 	Btn_GoCreateMap->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoCreateMap);
-	Btn_GoFrogPass->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoFrogPass);
+	Btn_GoStoryMenu->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoStoryMenu);
 	Btn_GoSettings->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoSettings);
 	Btn_GoCredit->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoCredit);
 	Btn_GoGameEnd->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoGameEnd);
@@ -60,13 +56,29 @@ void UClientRoomUI::NativeOnInitialized()
 
 	// 초기화
 	InitRoomListPool();
+
+	// UI 만들기
+	StoryMenuUI = CreateWidget<UStoryMenuUI>(GetWorld(), StoryMenuUIClass);
+	if (StoryMenuUI)
+	{
+		StoryMenuUI->OnClickBackToLobby.AddDynamic(this, &UClientRoomUI::SetVisibleMain);
+	}
 }
 
+void UClientRoomUI::SetVisibleMain()
+{
+	bIsVisible = CanvasMain->GetVisibility();
+	if (bIsVisible == ESlateVisibility::Hidden)
+	{
+		CanvasMain->SetVisibility(ESlateVisibility::Visible);
+	}
+}
 
 void UClientRoomUI::OnClickGoFindRoom()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(1);
-	SetViewTarget();
+	CameraComp->SetViewTarget();
+	CanvasMain->SetVisibility(ESlateVisibility::Hidden);
 	
 	// 세션 검색 화면 넘어갈때 자동으로 한번은 세션을 검색해주자
 	OnClickFind();
@@ -77,10 +89,14 @@ void UClientRoomUI::OnClickGoCreateMap()
 	UGameplayStatics::OpenLevel(GetWorld(),TEXT("MapEditorLevel"));
 }
 
-void UClientRoomUI::OnClickGoFrogPass()
+void UClientRoomUI::OnClickGoStoryMenu()
 {
-	WidgetSwitcher->SetActiveWidgetIndex(2);
-	SetViewTarget();
+	CameraComp->SetViewTarget();
+	CanvasMain->SetVisibility(ESlateVisibility::Hidden);
+	if (StoryMenuUI)
+	{
+		StoryMenuUI->AddToViewport();
+	}
 }
 
 void UClientRoomUI::OnClickGoSettings()
@@ -90,8 +106,8 @@ void UClientRoomUI::OnClickGoSettings()
 
 void UClientRoomUI::OnClickGoCredit()
 {
-	WidgetSwitcher->SetActiveWidgetIndex(3);
-	SetViewTarget();
+	CanvasMain->SetVisibility(ESlateVisibility::Hidden);
+	CameraComp->SetViewTarget();
 }
 
 void UClientRoomUI::OnClickGoGameEnd()
@@ -142,14 +158,14 @@ void UClientRoomUI::OnClickFind()
 
 	// 찾는 도중엔 버튼을 비활성화
 	// 검색 버튼 문구 바꿔주고
-	Text_BtnFind->SetText(FText::FromString("Searching..."));
+	Text_BtnFind->SetText(FText::FromString(TEXT("검색 중...")));
 	// 검색 버튼을 비활성화
 	Btn_Find->SetIsEnabled(false);
 }
 
 void UClientRoomUI::OnClickBack()
 {
-	// UI를 팝업으로 띄우자
+	// 팝업UI 없애기
 	CanvasCreateRoom->SetVisibility(ESlateVisibility::Hidden);
 }
 
@@ -159,7 +175,7 @@ void UClientRoomUI::OnFindComplete(const FRoomData& Data)
 	if (Data.RoomID == -1)
 	{
 		// 검색 버튼 내용 다시 find로
-		Text_BtnFind->SetText(FText::FromString("FIND"));
+		Text_BtnFind->SetText(FText::FromString(TEXT("새로고침")));
 		// 검색 버튼을 활성화
 		Btn_Find->SetIsEnabled(true);
 
@@ -172,24 +188,11 @@ void UClientRoomUI::OnFindComplete(const FRoomData& Data)
 	}
 }
 
-void UClientRoomUI::SetViewTarget()
-{
-	AActor* CurrentTarget = PC->GetViewTarget();
-	
-	if (CurrentTarget == MainCamera)
-	{
-		PC->SetViewTargetWithBlend(SubCamera, 0.5f);
-	}
-	else
-	{
-		PC->SetViewTargetWithBlend(MainCamera, 0.5f);
-	}
-}
-
 void UClientRoomUI::OnClickBackFromFind()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(0);
-	SetViewTarget();
+	CameraComp->SetViewTarget();
+	CanvasMain->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UClientRoomUI::InitRoomListPool()

@@ -4,6 +4,7 @@
 #include "LobbyFrog.h"
 
 #include "JumpGame/Core/PlayerController/LobbyPlayerController.h"
+#include "JumpGame/UI/UICam/LobbyCameraComp.h"
 
 
 // Sets default values
@@ -18,6 +19,8 @@ ALobbyFrog::ALobbyFrog()
 	{
 		GetMesh()->SetAnimInstanceClass(FrogABP.Class);
 	}
+
+	CameraComp = CreateDefaultSubobject<ULobbyCameraComp>(TEXT("CameraComp"));
 }
 
 // Called when the game starts or when spawned
