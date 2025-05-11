@@ -72,6 +72,10 @@ public:
 	class UWidgetAnimation* ChatAppear;
 	UPROPERTY(BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
 	class UWidgetAnimation* TextAppear;
+	UPROPERTY(BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
+	class UWidgetAnimation* MomTalk;
+	UPROPERTY(BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
+	class UWidgetAnimation* BabyTalk;
 
 	// 스토리 담을 배열
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

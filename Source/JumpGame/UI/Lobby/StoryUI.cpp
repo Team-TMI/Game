@@ -93,13 +93,13 @@ void UStoryUI::UpdateSpeakerAndText(const FText& FullStoryLine)
 
 	if (NewSpeakerName.Contains(TEXT("엄마")))
 	{
-		TextBlock_Mom->SetText(FText::FromString(TEXT("엄마")));
 		TextBlock_Mom->SetVisibility(ESlateVisibility::Visible);
+		PlayAnimation(MomTalk, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
 	}
 	else if (NewSpeakerName.Contains(TEXT("깨구락")))
 	{
-		TextBlock_Baby->SetText(FText::FromString(TEXT("깨구락")));
 		TextBlock_Baby->SetVisibility(ESlateVisibility::Visible);
+		PlayAnimation(BabyTalk, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
 	}
 	// "나레이션"의 경우 TextBlock을 사용하지 않음 
 
