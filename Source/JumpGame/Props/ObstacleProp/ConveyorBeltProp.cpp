@@ -32,6 +32,7 @@ AConveyorBeltProp::AConveyorBeltProp()
 
 	Super::SetSize(FVector(2, 1, 1));
 
+	PropDataComponent->SetPropID(TEXT("2005"));
 }
 
 void AConveyorBeltProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

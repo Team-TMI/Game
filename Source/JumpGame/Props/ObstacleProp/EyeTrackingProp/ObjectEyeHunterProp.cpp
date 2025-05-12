@@ -48,6 +48,8 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 	MeshComp->SetRelativeLocation(FVector(0, 0, -100.f));
 
 	bReplicates = true;
+
+	PropDataComponent->SetPropID(TEXT("2006"));
 }
 
 void AObjectEyeHunterProp::BeginPlay()
