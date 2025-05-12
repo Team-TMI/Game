@@ -28,6 +28,10 @@ void AMapGameState::BeginPlay()
 	{
 		ProgressBarUI->AddToViewport();
 	}
+
+	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+
 }
 
 void AMapGameState::Tick(float DeltaTime)
