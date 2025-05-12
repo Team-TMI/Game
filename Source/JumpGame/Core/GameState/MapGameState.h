@@ -37,4 +37,8 @@ public:
 	TSubclassOf<class UGameProgressBarUI> UGameProgressBarUIClass;
 	UPROPERTY(editanywhere, BlueprintReadWrite)
 	class UGameProgressBarUI* ProgressBarUI;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_RemoveProgressBarUI();
+	
 };

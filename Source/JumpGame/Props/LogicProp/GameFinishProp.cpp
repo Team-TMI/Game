@@ -12,7 +12,9 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/Core/GameState/MapGameState.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
+#include "JumpGame/UI/GameProgressBarUI.h"
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -112,6 +114,10 @@ void AGameFinishProp::GameEnd()
 	
 	// 게임 끝
 	MulticastRPC_GameEnd();
+
+	// 그리고 진행도 UI 지우자
+	AMapGameState* GS = Cast<AMapGameState>(GetWorld()->GetGameState());
+	GS->MulticastRPC_RemoveProgressBarUI();
 
 	// 물 멈추자
 	ARisingWaterProp* RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
