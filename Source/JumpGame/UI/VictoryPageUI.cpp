@@ -14,9 +14,7 @@ void UVictoryPageUI::NativeConstruct()
 	Super::NativeConstruct();
 
 	Btn_GoLobby->OnClicked.AddDynamic(this, &UVictoryPageUI::OnClickGoLobby);
-	
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
-	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+
 }
 
 void UVictoryPageUI::OnClickGoLobby()

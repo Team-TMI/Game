@@ -14,10 +14,7 @@ void USoundQuizUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	
-	Btn_VoiceSend->OnClicked.AddDynamic(this, &USoundQuizUI::OnClickVoiceSend);
-	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameAndUI());
-	
+	Btn_VoiceSend->OnClicked.AddDynamic(this, &USoundQuizUI::OnClickVoiceSend);	
 }
 
 void USoundQuizUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
