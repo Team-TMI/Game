@@ -3,6 +3,7 @@
 
 #include "ObjectEyeHunterProp.h"
 
+#include "Components/BoxComponent.h"
 #include "Components/Image.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
@@ -43,6 +44,8 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 		MissionLocation->SetRelativeLocation(FVector(0, 0, 100.f));
 	}
 
+	CollisionComp->SetRelativeLocation(FVector(0, 0, 100.f));
+	MeshComp->SetRelativeLocation(FVector(0, 0, -100.f));
 
 	bReplicates = true;
 }
