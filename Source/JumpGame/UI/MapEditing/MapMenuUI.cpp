@@ -16,6 +16,8 @@ void UMapMenuUI::NativeOnInitialized()
 	LoadButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnLoadButtonClicked);
 	SavePopup->SetVisibility(ESlateVisibility::Hidden);
 	SaveConfirm->OnClicked.AddDynamic(this, &UMapMenuUI::OnSaveConfirmClicked);
+
+	BackButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnBackButtonClicked);
 }
 
 void UMapMenuUI::OnSaveButtonClicked()

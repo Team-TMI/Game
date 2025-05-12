@@ -66,8 +66,6 @@ void AConveyorBeltProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent,
 void AConveyorBeltProp::BeginPlay()
 {
 	Super::BeginPlay();
-
-	BeltDir = Arrow->GetForwardVector().GetSafeNormal();
 }
 
 // Called every frame
@@ -76,6 +74,7 @@ void AConveyorBeltProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 클라 서버 둘다 각자 실행
+	BeltDir = Arrow->GetForwardVector().GetSafeNormal();
 	ConveyorMove();
 }
 
