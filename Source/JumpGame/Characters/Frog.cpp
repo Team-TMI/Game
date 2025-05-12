@@ -972,7 +972,7 @@ void AFrog::OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, 
                                       const FHitResult& SweepResult)
 {
 	if (IsLocallyControlled() && WaterPostProcessComponent != nullptr && OtherActor && OtherActor->
-		ActorHasTag(TEXT("Water")))
+		ActorHasTag(TEXT("Water")) && OtherComp && OtherComp->ComponentHasTag(TEXT("CameraWater")))
 	{
 		WaterPostProcessComponent->bEnabled = true;
 	}
@@ -982,11 +982,8 @@ void AFrog::OnCameraEndOverlapWater(UPrimitiveComponent* OverlappedComponent, AA
                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (IsLocallyControlled() && WaterPostProcessComponent != nullptr && OtherActor && OtherActor->
-		ActorHasTag(TEXT("Water")))
+		ActorHasTag(TEXT("Water")) && OtherComp && OtherComp->ComponentHasTag(TEXT("CameraWater")))
 	{
-		// Todo :
-		// 여러 WaterVolume과 겹칠 수 있으므로, 마지막 WaterVolume에서 나올 때만 PostProcess를 꺼야 함
-		// 간단하게는 그냥 꺼도 되지만, 더 정확하게 하려면 오버랩 중인 WaterVolume 수를 세어야 함
 		WaterPostProcessComponent->bEnabled = false;
 	}
 }

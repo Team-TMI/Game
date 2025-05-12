@@ -23,6 +23,7 @@ ARisingWaterProp::ARisingWaterProp()
 
 	CollisionComp->SetBoxExtent(FVector(600.f, 600.f, 1300.f));
 	CollisionComp->SetCollisionProfileName(TEXT("Water"));
+	CollisionComp->ComponentTags.Add(TEXT("CameraWater"));
 
 	DeepCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("DeepCollision"));
 	DeepCollision->SetupAttachment(RootComponent);
