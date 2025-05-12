@@ -27,7 +27,6 @@ void AMapGameState::BeginPlay()
 	if (ProgressBarUI)
 	{
 		ProgressBarUI->AddToViewport();
-		FFastLogger::LogConsole(TEXT("UI 생성완료@@@@@@@@@@@@@@@@@@@@@@@@@"));
 	}
 }
 
@@ -67,6 +66,15 @@ void AMapGameState::OnAllClientAdded()
 	// 클라이언트에게 알리자 (2초후)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMapGameState::MulticastRPC_AllClientAdded, 2, false);
+}
+
+void AMapGameState::MulticastRPC_RemoveProgressBarUI_Implementation()
+{
+	if (ProgressBarUI)
+	{
+		ProgressBarUI->RemoveFromParent();
+		ProgressBarUI = nullptr;
+	}
 }
 
 void AMapGameState::MulticastRPC_UpdateAllPlayerZPos_Implementation(
