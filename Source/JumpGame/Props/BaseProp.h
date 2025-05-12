@@ -58,4 +58,8 @@ public:
 	// 치트키
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bCheatMode = false;
+
+	// 인게임일 때
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bInGame = false;
 };

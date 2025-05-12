@@ -44,6 +44,8 @@ void ABaseProp::BeginPlay()
 			UnSelectedObjectMaterials.Add(DynamicMaterial);
 		}
 	}
+
+	bInGame = GetWorld()->GetMapName().Contains(TEXT("InGameLevel"));
 }
 
 void ABaseProp::SetCollision(bool bEnable)
@@ -76,7 +78,10 @@ void ABaseProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	MaterialChangeOnTick();
+	if (!bInGame)
+	{
+		MaterialChangeOnTick();
+	}
 }
 
 void ABaseProp::SetPropActive(bool Value)
@@ -92,7 +97,7 @@ void ABaseProp::SetPropCheatMode(bool Value)
 void ABaseProp::MaterialChangeOnTick()
 {
 	Super::MaterialChangeOnTick();
-	
+
 	if (bSelected && bIsOnCollision)
 	{
 		ChangeAllMaterialsToOnCollision();
