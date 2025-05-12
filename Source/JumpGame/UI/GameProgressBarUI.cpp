@@ -22,11 +22,9 @@ void UGameProgressBarUI::NativeOnInitialized()
 	
 	// 프로그레스 바에서 표시할 마커 위치값
 	AGameStartProp* StartProp = Cast<AGameStartProp>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameStartProp::StaticClass()));
-	AGameFinishProp* FinishProp = Cast<AGameFinishProp>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameFinishProp::StaticClass()));
 	ARisingWaterProp* WaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 
 	StartPropZ = StartProp->GetActorLocation().Z;
-	FinPropZ = FinishProp->GetActorLocation().Z;
 	WaterPropZ = WaterProp->SurfaceCollision->GetComponentLocation().Z;
 
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
@@ -40,6 +38,9 @@ void UGameProgressBarUI::NativeTick(const FGeometry& MyGeometry, float DeltaSeco
 {
 	Super::NativeTick(MyGeometry, DeltaSeconds);
 
+	AGameFinishProp* FinishProp = Cast<AGameFinishProp>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameFinishProp::StaticClass()));
+	if (!FinishProp) return;
+	FinPropZ = FinishProp->GetActorLocation().Z;
 	if (bIsInit)
 	{
 		// 지속적으로 업데이트 하자

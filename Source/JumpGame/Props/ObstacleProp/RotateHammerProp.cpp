@@ -20,6 +20,7 @@ ARotateHammerProp::ARotateHammerProp()
 	// CollisionComp->SetCollisionProfileName(TEXT("Prop"));
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 
+	PropDataComponent->SetPropID(TEXT("2007"));
 }
 
 // Called when the game starts or when spawned

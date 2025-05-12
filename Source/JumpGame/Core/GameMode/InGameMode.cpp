@@ -19,8 +19,8 @@ void AInGameMode::BeginPlay()
 
 	// LoadMapComponent->LoadMap();
 
-	FString GameName = TEXT("ProtoGameMap");
-	SaveMapComponent->SaveMap(GameName);
+	// FString GameName = TEXT("ProtoGameMap");
+	// SaveMapComponent->SaveMap(GameName);
 
 	UJumpGameInstance* JumpGameInstance = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	if (!JumpGameInstance)
