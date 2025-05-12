@@ -54,25 +54,26 @@ void USelectRoomUI::OnClickCustomMap()
 
 void USelectRoomUI::OnPickCustomMap()
 {
-	FFastLogger::LogScreen(FColor::Red, TEXT("OnPickCustomMap"));
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC->HasAuthority())
+	{
+		return ;
+	}
 	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	if (!GI)
 	{
 		return ;
 	}
-	FFastLogger::LogScreen(FColor::Red, TEXT("OnPickCustomMap!"));
 	GI->ClearMapFilePath();
 	ALobbyGameState* GameState = Cast<ALobbyGameState>(GetWorld()->GetGameState());
 	if (!GameState)
 	{
 		return ;
 	}
-	FFastLogger::LogScreen(FColor::Red, TEXT("OnPickCustomMap!!!!"));
 	FString FileName;
 	if (!GameState->LoadMapComponent->PickFile(FileName))
 	{
 		return ;
 	} 
-	FFastLogger::LogScreen(FColor::Red, TEXT("OnPickCustomMap!!!33333!"));
 	GI->SetMapFilePath(FileName);
 }
