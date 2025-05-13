@@ -207,6 +207,16 @@ const UPropWrap* UCategorySystem::GetPropsByID(FName ID)
 	return Found && *Found ? *Found : nullptr;
 }
 
+const class UPropWrap* UCategorySystem::GetPropsByName(FName Name)
+{
+	UPropWrap** Found = PropList.FindByPredicate([Name](const UPropWrap* It)
+	{
+		// 포함하고 있으면 true
+		return It && It->Data.PropName.ToString().Contains(Name.ToString(), ESearchCase::IgnoreCase);
+	});
+	return Found && *Found ? *Found : nullptr;
+}
+
 const TArray<EMajorCategoryType>& UCategorySystem::GetMajorCategories()
 {
 	static TArray<EMajorCategoryType> MajorCategories;
