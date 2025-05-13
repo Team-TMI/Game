@@ -164,6 +164,40 @@ const TArray<UPropWrap*>& UCategorySystem::GetPropsBySub(EMajorCategoryType Majo
 	return FoundSub ? FoundSub->PropList : EmptyArray;
 }
 
+const TArray<class UPropWrap*>& UCategorySystem::GetPropsBySubs(const TArray<ESubCategoryType>& Subs)
+{
+	static const TArray<UPropWrap*> EmptyArray;
+	TSet<UPropWrap*> Seen;
+	Seen.Reserve(128);
+
+	TArray<class UPropWrap*> FoundLists;
+	FoundLists.Reserve(128);
+
+	// 대 분류를 먼저 돌면서 Sub에 대한 정보를 가져옴 그리고 FoundLists에 넣어줌
+	for (auto& Major : Index)
+	{
+		for (auto& Sub : Subs)
+		{
+			FPropIndexList* Found = Major.Value.SubCategoryMap.Find(Sub);
+			if (Found)
+			{
+				FoundLists.Append(Found->PropList);
+			}
+		}
+	}
+	// 중복된 PropWrap을 제거
+	for (auto& Prop : FoundLists)
+	{
+		if (!Seen.Contains(Prop))
+		{
+			Seen.Add(Prop);
+		}
+	}
+	FoundLists.Reset();
+	FoundLists.Append(Seen.Array());
+	return FoundLists;
+}
+
 const UPropWrap* UCategorySystem::GetPropsByID(FName ID)
 {
 	UPropWrap** Found = PropList.FindByPredicate([ID](const UPropWrap* It)

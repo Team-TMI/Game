@@ -58,6 +58,7 @@ public:
 	// 조회 함수
 	const TArray<class UPropWrap*>& GetPropsByMajor(EMajorCategoryType Major);
 	const TArray<class UPropWrap*>& GetPropsBySub(EMajorCategoryType Major, ESubCategoryType Sub);
+	const TArray<class UPropWrap*>& GetPropsBySubs(const TArray<ESubCategoryType>& Subs);
 	const class UPropWrap* GetPropsByID(FName ID);
 
 	UPROPERTY(BlueprintAssignable)
