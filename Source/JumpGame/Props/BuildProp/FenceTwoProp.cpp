@@ -19,7 +19,7 @@ AFenceTwoProp::AFenceTwoProp()
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
 
-	SetSize(FVector(1, 2, 1));
+	SetSize(FVector(1, 3, 1));
 
 	PropDataComponent->SetPropID(TEXT("1013"));
 }

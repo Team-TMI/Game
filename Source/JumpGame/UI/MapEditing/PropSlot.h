@@ -34,6 +34,10 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
 	FName PropID = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop", meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UTextBlock* PropText;
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
 	TSubclassOf<class UUserWidget> PropWidgetClass;

@@ -6,6 +6,7 @@
 #include "PropDragVisual.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
 #include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
@@ -31,6 +32,7 @@ void UPropSlot::SetPropInfo(UPropWrap* PropInfo)
 	PropID = PropInfo->Data.PropID;
 	PropImage->SetBrushFromTexture(PropInfo->Data.PropIcon);
 	PropClass = PropInfo->Data.PropClass;
+	PropText->SetText(PropInfo->Data.PropName);
 	this->SetVisibility(ESlateVisibility::Visible);
 	// DragVisual을 세팅해줘야 함.
 	PropDragVisual->PropImage->SetBrushFromTexture(PropInfo->Data.PropIcon);
@@ -41,6 +43,7 @@ void UPropSlot::ClearInfo()
 	PropID = NAME_None;
 	PropImage->SetBrushFromTexture(nullptr);
 	PropClass = nullptr;
+	PropText->SetText(FText::GetEmpty());
 	this->SetVisibility(ESlateVisibility::Hidden);
 	PropDragVisual->PropImage->SetBrushFromTexture(nullptr);
 }
