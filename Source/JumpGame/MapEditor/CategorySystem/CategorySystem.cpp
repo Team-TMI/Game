@@ -170,7 +170,8 @@ const TArray<class UPropWrap*>& UCategorySystem::GetPropsBySubs(const TArray<ESu
 	TSet<UPropWrap*> Seen;
 	Seen.Reserve(128);
 
-	TArray<class UPropWrap*> FoundLists;
+	static TArray<class UPropWrap*> FoundLists;
+	FoundLists.Reset();
 	FoundLists.Reserve(128);
 
 	// 대 분류를 먼저 돌면서 Sub에 대한 정보를 가져옴 그리고 FoundLists에 넣어줌
