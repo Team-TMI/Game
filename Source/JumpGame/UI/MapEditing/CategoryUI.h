@@ -49,4 +49,8 @@ private:
 	void OnSubCategoryButtonClicked(const EMajorCategoryType& MajorCategory, const ESubCategoryType& SubCategory);
 	UFUNCTION()
 	void OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+	UFUNCTION()
+	void OnPropSlotClicked(const FName& PropID);
+
+	FString DefaultSearchText = TEXT("검색 할 내용을 입력하세요");
 };

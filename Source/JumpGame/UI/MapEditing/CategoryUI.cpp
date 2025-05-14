@@ -74,8 +74,8 @@ void UCategoryUI::NativeOnInitialized()
 
 	OnMajorCategoryButtonClicked(SelectedMajorCategory->GetMajorCategoryType(), true);
 	
-	FText Text = FText::FromString(TEXT("검색 할 내용을 입력하세요"));
-	SearchText->SetText(Text);
+	FText Text = FText::FromString(DefaultSearchText);
+	SearchText->SetHintText(Text);
 
 	SearchText->OnTextCommitted.AddDynamic(this, &UCategoryUI::OnSearchTextCommitted);
 }
@@ -156,5 +156,11 @@ void UCategoryUI::OnSearchTextCommitted(const FText& Text, ETextCommit::Type Com
 	if (InputText == TEXT(""))
 	{
 		GridUI->UpdatePropGrid(SelectedMajorCategory->GetMajorCategoryType(), CategorySystem);
+		FText DefaultText = FText::FromString(DefaultSearchText);
+		SearchText->SetHintText(DefaultText);
 	}
+}
+
+void UCategoryUI::OnPropSlotClicked(const FName& PropID)
+{
 }
