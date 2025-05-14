@@ -58,7 +58,7 @@ public:
 	static void Log(const FString& Message = TEXT("LOG!"))
 	{
 		if (GEngine) {
-			// GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, Message);
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, Message);
 		}
 	}
 	
@@ -74,7 +74,7 @@ public:
 						                                                TEXT("%s"), *FString::SanitizeFloat(args))...
 				                                                }, TEXT(", "))
 			                                  });
-			// GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, Message);
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, Message);
 		}
 	}
 };
