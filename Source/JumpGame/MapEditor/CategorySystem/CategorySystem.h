@@ -60,7 +60,7 @@ public:
 	const TArray<class UPropWrap*>& GetPropsBySub(EMajorCategoryType Major, ESubCategoryType Sub);
 	const TArray<class UPropWrap*>& GetPropsBySubs(const TArray<ESubCategoryType>& Subs);
 	const class UPropWrap* GetPropsByID(FName ID);
-	const class UPropWrap* GetPropsByName(FName Name);
+	const TArray<class UPropWrap*>& GetPropsByName(FName Name);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPropAdded OnPropAdded;

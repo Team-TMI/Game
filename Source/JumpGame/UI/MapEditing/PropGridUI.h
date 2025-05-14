@@ -21,6 +21,8 @@ public:
 	UFUNCTION()
 	void UpdatePropGridBySub(const EMajorCategoryType& MajorCategory, ESubCategoryType SubCategory, class UCategorySystem* CategorySystem);
 	UFUNCTION()
+	void UpdatePropGridBySearch(const FString& String, class UCategorySystem* CategorySystem);
+	UFUNCTION()
 	void ClearPropGrid();
 
 private:

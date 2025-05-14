@@ -25,6 +25,8 @@ private:
 	class UScrollBox* SubCategories;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UScrollBox* MajorCategories;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UEditableText* SearchText;
 
 	UPROPERTY()
 	class UMajorCategoryButtonUI* SelectedMajorCategory = nullptr;
@@ -45,4 +47,6 @@ private:
 	void OnMajorCategoryButtonClicked(const EMajorCategoryType& MajorCategory, bool bAbsolute = false);
 	UFUNCTION()
 	void OnSubCategoryButtonClicked(const EMajorCategoryType& MajorCategory, const ESubCategoryType& SubCategory);
+	UFUNCTION()
+	void OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 };

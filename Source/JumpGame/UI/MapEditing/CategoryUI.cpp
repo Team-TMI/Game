@@ -6,6 +6,7 @@
 #include "MajorCategoryButtonUI.h"
 #include "PropGridUI.h"
 #include "SubCategoryButtonUI.h"
+#include "Components/EditableText.h"
 #include "Components/ScrollBox.h"
 #include "JumpGame/Core/GameState/MapEditorState.h"
 #include "JumpGame/MapEditor/CategorySystem/CategorySystem.h"
@@ -16,7 +17,7 @@ class ANetworkGameState;
 void UCategoryUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
+	
 	ClearMajorCategoryButtons();
 	ClearSubCategoryButtons();
 	
@@ -72,6 +73,11 @@ void UCategoryUI::NativeOnInitialized()
 	}
 
 	OnMajorCategoryButtonClicked(SelectedMajorCategory->GetMajorCategoryType(), true);
+	
+	FText Text = FText::FromString(TEXT("검색 할 내용을 입력하세요"));
+	SearchText->SetText(Text);
+
+	SearchText->OnTextCommitted.AddDynamic(this, &UCategoryUI::OnSearchTextCommitted);
 }
 
 void UCategoryUI::InitWidget(class UClickHandlerManager* ClickHandlerManager,
@@ -136,4 +142,19 @@ void UCategoryUI::OnSubCategoryButtonClicked(const EMajorCategoryType& MajorCate
 {
     // SubCategory 버튼을 클릭했을 때, PropGridUI를 업데이트한다.
     GridUI->UpdatePropGridBySub(MajorCategory, SubCategory, CategorySystem);
+}
+
+void UCategoryUI::OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	if (CommitMethod == ETextCommit::OnEnter)
+	{
+		FString InputText = Text.ToString();
+		GridUI->UpdatePropGridBySearch(InputText, CategorySystem);
+		return ;
+	}
+	FString InputText = Text.ToString();
+	if (InputText == TEXT(""))
+	{
+		GridUI->UpdatePropGrid(SelectedMajorCategory->GetMajorCategoryType(), CategorySystem);
+	}
 }

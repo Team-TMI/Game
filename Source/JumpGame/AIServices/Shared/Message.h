@@ -13,6 +13,8 @@ enum class EMessageType : uint8
 	EyeTrackingNotifyMessage = 6,
 	EyeTrackingRequestMessage = 7,
 	EyeTrackingResponseMessage = 8,
+	HttpMultipartRequest = 9,
+	HttpMultipartResponse = 10,
 	ParsedWaveResponse = 100,
 };
 
@@ -120,6 +122,7 @@ struct FEyeTrackingResponseMessage {
 	uint8 State; // 100 : 정상성, 200 : 클라 에러, 300 : 서버 에러
 };
 
+
 #pragma pack(pop)
 
 union FMessageUnion
@@ -133,5 +136,51 @@ union FMessageUnion
 	FEyeTrackingNotifyMessage EyeTrackingNotifyMessage;
 	FEyeTrackingRequestMessage EyeTrackingRequestMessage;
 	FEyeTrackingResponseMessage EyeTrackingResponseMessage;
+
 	uint8 RawData[1460];
+};
+
+struct FHttpMultipartField
+{
+	FString FieldName;           // 필드 이름
+	FString FileName;            // 파일 이름 (예: image.png)
+	FString ContentType;         // MIME 타입 (예: image/png)
+	TArray<uint8> Data;          // 바이너리 데이터
+};
+
+struct FHttpMultipartRequest
+{
+	// 요청 메타 정보
+	FString ServerURL;           // 서버 주소
+	FString RequestPath;         // API 경로
+	TMap<FString, FString> AdditionalHeaders; // 추가적인 헤더 정보
+
+	// 실제 보낼 Multipart 필드들 (파일, 텍스트 등 포함 가능)
+	TArray<FHttpMultipartField> MultipartFields;
+
+	// Optional: 쿼리 스트링 또는 기타 요청 파라미터
+	TMap<FString, FString> QueryParams;
+};
+
+struct FHttpMultipartResponse
+{
+	// 응답 메타 정보
+	int32 ResponseCode;          // HTTP 응답 코드
+	
+	// 실제 응답 데이터
+	TArray<uint8> ResponseData;  // 바이너리 데이터 (예: 이미지, 파일 등)
+	FString ResponseText;         // 텍스트 응답 (예: JSON, HTML 등)
+};
+
+#include "Misc/TVariant.h"
+
+using FHttpMessageVariant = TVariant<
+	FHttpMultipartRequest,
+	FHttpMultipartResponse
+>;
+
+struct FHttpMessageWrapper 
+{
+	FMessageHeader Header;
+	FHttpMessageVariant HttpMessage;
 };

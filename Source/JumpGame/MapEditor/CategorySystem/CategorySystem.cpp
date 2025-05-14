@@ -208,14 +208,21 @@ const UPropWrap* UCategorySystem::GetPropsByID(FName ID)
 	return Found && *Found ? *Found : nullptr;
 }
 
-const class UPropWrap* UCategorySystem::GetPropsByName(FName Name)
+const TArray<class UPropWrap*>& UCategorySystem::GetPropsByName(FName Name)
 {
-	UPropWrap** Found = PropList.FindByPredicate([Name](const UPropWrap* It)
+	static TArray<class UPropWrap*> FoundLists;
+	FoundLists.Reset();
+	FoundLists.Reserve(128);
+	
+	for (auto& Prop : PropList)
 	{
-		// 포함하고 있으면 true
-		return It && It->Data.PropName.ToString().Contains(Name.ToString(), ESearchCase::IgnoreCase);
-	});
-	return Found && *Found ? *Found : nullptr;
+		if (Prop && Prop->Data.PropName.ToString().Contains(Name.ToString(), ESearchCase::IgnoreCase))
+		{
+			FoundLists.Add(Prop);
+		}
+	}
+	
+	return FoundLists;
 }
 
 const TArray<EMajorCategoryType>& UCategorySystem::GetMajorCategories()
