@@ -33,7 +33,6 @@ void ARollingCannonProp::OnProjectileReturn()
 	if (HasAuthority())
 	{
 		// 알림 받으면 다시 발사!
-		// FFastLogger::LogConsole(TEXT("알림받았다!! 다시 발사"));
 		FireRollingBall();
 	}
 }
@@ -49,7 +48,7 @@ void ARollingCannonProp::BeginPlay()
 	if (HasAuthority() && ObjectPool)
 	{
 		FireRollingBall();
-		ObjectPool->OnObjectReturn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
+		// ObjectPool->OnObjectReturn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
 	}
 }
 
@@ -71,12 +70,13 @@ void ARollingCannonProp::FireRollingBall()
 	ARollingBallProp* Projectile = ObjectPool->GetRollingBallProp();
 	if (Projectile)
 	{
-		// FFastLogger::LogConsole(TEXT("Projectile!!!!!!"));
 		Projectile->SetActorLocation(GetActorLocation());
 		Projectile->SetActorRotation(GetActorRotation());
 		Projectile->SetActive(true);
 		Projectile->LaunchProjectile();
-		Projectile->bIsHitGround = false;
+
+		FTimerHandle FireTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ARollingCannonProp::FireRollingBall, 4.0f, false);
 	}
 }
 

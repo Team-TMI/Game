@@ -19,15 +19,11 @@ ARotateSpikeProp::ARotateSpikeProp()
 	
 	Hammer = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hammer"));
 	Hammer->SetupAttachment(MeshComp);
-	Hammer->SetRelativeLocation(FVector(0, 160, 0));
+	Hammer->SetRelativeLocation(FVector(0, 180, -40));
 	
-	CollisionComp->SetBoxExtent(FVector(60.f));
-	CollisionComp->SetRelativeLocation(FVector::ZeroVector);
+	CollisionComp->SetBoxExtent(FVector(116,40,42));
+	CollisionComp->SetRelativeLocation(FVector(-3,-6,40));
 	CollisionComp->SetupAttachment(Hammer);
-	
-	// TODO: 가시 추가
-	Spike = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Spike"));
-	Spike->SetupAttachment(PivotScene);
 	
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TempCylinder(TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleCylinder.SM_ObstacleCylinder'"));
 	if (TempCylinder.Succeeded())
@@ -37,9 +33,8 @@ ARotateSpikeProp::ARotateSpikeProp()
 
 	// 메쉬랑 부딪힘 (CollisionComp랑은 충돌하지 않는다)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	Hammer->SetCollisionProfileName(TEXT("OverlapProp"));
-	Spike->SetCollisionProfileName(TEXT("Prop"));
+	MeshComp->SetCollisionProfileName(TEXT("Prop"));
+	Hammer->SetCollisionProfileName(TEXT("Prop"));
 
 }
 

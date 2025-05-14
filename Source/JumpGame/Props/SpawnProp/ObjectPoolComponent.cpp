@@ -74,17 +74,17 @@ void UObjectPoolComponent::Expand()
 	PoolSize += ExpandSize;
 }
 
-void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject)
+void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject, bool bIsNaturalReturn)
 {
 	// FFastLogger::LogConsole(TEXT("알림을 보낸다: 다시 왔음!!"));
 	// 사용하고 나서 다시 풀에 넣자 
 	Pool.Push(ReturnObject);
 
-	if (GetOwner()->HasAuthority())
+	/*if (GetOwner()->HasAuthority())
 	{
 		// 알림을 보낸다: 다시 왔음!!
 		OnObjectReturn.Broadcast();
-	}
+	}*/
 }
 
 void UObjectPoolComponent::Initialize()

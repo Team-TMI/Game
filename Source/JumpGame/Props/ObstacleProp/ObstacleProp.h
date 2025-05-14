@@ -64,5 +64,9 @@ public:
 	// 클라이언트에서
 	UFUNCTION()
 	void OnRep_ObstacleRotate();
+
+	// 이펙트, 사운드 등
+	UFUNCTION(NetMulticast, reliable)
+	void MulticastRPC_PlayEffect(FVector Location);
 };
 

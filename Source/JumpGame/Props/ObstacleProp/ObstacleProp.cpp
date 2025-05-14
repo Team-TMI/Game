@@ -75,6 +75,11 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	{
 		FLog::Log("AObstacleProp::OnMyBeginOverlap");
 	}
+
+	/*if (HasAuthority())
+	{
+		MulticastRPC_PlayEffect(OtherActor->GetActorLocation());
+	}*/
 }
 
 void AObstacleProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -166,4 +171,11 @@ void AObstacleProp::OnRep_ObstacleRotate()
 	
 	// 클라이언트라면 이 함수가 실행
 	PivotScene->AddLocalRotation(DeltaRot);
+}
+
+void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
+{
+	// 클라이언트 전부에서 호출됨 (서버 포함)
+	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location);
+	// UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location);
 }

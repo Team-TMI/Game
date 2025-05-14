@@ -5,10 +5,8 @@
 
 #include "ObjectPoolComponent.h"
 #include "Components/ArrowComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
-#include "JumpGame/Props/LogicProp/RisingWaterProp.h"
+#include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
-#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -23,58 +21,72 @@ ARollingBallProp::ARollingBallProp()
 	SetRootComponent(MeshComp);
 	PivotScene = CreateDefaultSubobject<USceneComponent>(TEXT("PivotScene"));
 	PivotScene->SetupAttachment(RootComponent);
-
-	ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
-	ProjectileComp->SetUpdatedComponent(RootComponent);
+	
 	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Dir"));
 	Arrow->SetupAttachment(RootComponent);
 
+	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
+	BoxComp->SetupAttachment(RootComponent);
+	BoxComp->SetRelativeLocation(FVector(-30, 0, 0));
+	BoxComp->SetBoxExtent(FVector(35));
+
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSphere(
-		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleSphere.SM_ObstacleSphere'"));
+		TEXT("/Script/Engine.StaticMesh'/Game/Fab/RollingBall/SM_Acorn.SM_Acorn'"));
 	if (TempSphere.Succeeded())
 	{
 		MeshComp->SetStaticMesh(TempSphere.Object);
 	}
-	MeshComp->SetRelativeScale3D(FVector(3.f));
-	MeshComp->SetCollisionProfileName(TEXT("RollingBall"));
-
-	// 속도 설정
-	ProjectileComp->InitialSpeed = 1000.f;
-	ProjectileComp->MaxSpeed = 1000.f;
-	ProjectileComp->SetIsReplicated(true);
+	MeshComp->SetRelativeScale3D(FVector(1.f));
+	MeshComp->SetCollisionProfileName(TEXT("OverlapProp"));
 }
 
 void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                                           UPrimitiveComponent* OtherComp, FVector NormalImpulse,
                                           const FHitResult& Hit)
 {
-	if (OtherActor->ActorHasTag("Frog")) return;
+	/*FVector HitLocation = Hit.Location;
+	FLog::Log("OnMyRollingBallHit");
 	
-	// FFastLogger::LogConsole(TEXT("Hit!!!: %s"), *OtherActor->GetName());
-	HitNormal = Hit.ImpactNormal;
-	// NOTE: 구체가 Hit되었을 때, Hit.Normal 과 Hit.ImpactNormal에 대한 차이 
-	/*
-	Normal:
-	구체 트레이스 테스트의 경우, 법선 벡터는 "충돌 지점에서 구체의 중심을 향해 안쪽으로 향하는" 벡터입니다. 즉, 충돌 지점에서 구체의 중심으로 들어가는 방향입니다.
-	ImpactNormal:
-	구체가 평면에 부딪힐 때, 법선 벡터는 "평면으로부터 바깥쪽으로 향하는" 벡터입니다. 즉, 충돌 표면에서 구체 방향으로 나가는 방향입니다.
-	*/
-	
-	// TODO: 어떤 물체랑 부딪혔는지 분기처리 (장애물이면 bounce, 땅이면 구르기 등)
-	if (OtherActor->ActorHasTag("Ground"))
+	AFrog* Frog = Cast<AFrog>(OtherActor);
+	if (Frog)
 	{
-		bIsHitGround = true;
-		ProjectileComp->StopMovementImmediately();
-		ProjectileComp->Deactivate();
-		// FLog::Log(TEXT("바닥이랑 닿았다!"));
+		FVector LaunchVelocity = LaunchDir.GetSafeNormal() * 100;
+		Frog->LaunchCharacter(LaunchVelocity, false, false);
+		FLog::Log("OnMyRollingBallHit Frog");
 	}
+
+	// 타이머 초기화
+	GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
+	ReturnSelf();
 	
-	if (OtherActor->ActorHasTag("Water"))
+	if (HasAuthority())
 	{
-		// 물에 부딪히면 타이머 초기화
-		GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
-		ReturnSelf();
-		// FLog::Log(TEXT("물에 부딪힘, Clear Timer"));
+		MulticastRPC_PlayEffect(HitLocation);
+	}*/
+}
+
+void ARollingBallProp::OnMyRollingBallOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	FVector HitLocation = SweepResult.Location;
+	FLog::Log("OnMyRollingBallOverlap");
+	
+	AFrog* Frog = Cast<AFrog>(OtherActor);
+	if (Frog)
+	{
+		FVector LaunchVelocity = LaunchDir.GetSafeNormal() * 500;
+		Frog->LaunchCharacter(LaunchVelocity, true, true);
+		FLog::Log("OnMyRollingBallOverlap Frog");
+	}
+
+	// 타이머 초기화
+	// GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
+	ReturnSelf(false);
+	
+	if (HasAuthority())
+	{
+		MulticastRPC_PlayEffect(HitLocation);
 	}
 }
 
@@ -86,7 +98,8 @@ void ARollingBallProp::BeginPlay()
 	// 동작 동기화
 	SetReplicateMovement(true);
 
-	MeshComp->OnComponentHit.AddDynamic(this, &ARollingBallProp::OnMyRollingBallHit);
+	// MeshComp->OnComponentHit.AddDynamic(this, &ARollingBallProp::OnMyRollingBallHit);
+	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &ARollingBallProp::OnMyRollingBallOverlap);
 }
 
 // Called every frame
@@ -97,7 +110,7 @@ void ARollingBallProp::Tick(float DeltaTime)
 	RollingBall();
 }
 
-void ARollingBallProp::ReturnSelf()
+void ARollingBallProp::ReturnSelf(bool bIsNaturalReturn)
 {
 	// 소속 풀 없으면 함수 나가자
 	if (ObjectPool == nullptr) return;
@@ -106,7 +119,7 @@ void ARollingBallProp::ReturnSelf()
 	{
 		// 오브젝트 풀에 스스로를 반환하고 비활성화
 		SetActive(false);
-		ObjectPool->ReturnObject(this);
+		ObjectPool->ReturnObject(this, true);
 	}
 }
 
@@ -124,58 +137,53 @@ void ARollingBallProp::SetActive(bool bIsActive)
 	{
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
-
-	if (bIsActive)
-	{
-		ProjectileComp->StopMovementImmediately();
-		ProjectileComp->bSweepCollision = true;
-		ProjectileComp->bRotationFollowsVelocity = true;
-		ProjectileComp->bShouldBounce = false;
-		ProjectileComp->bIsHomingProjectile = false;
-		ProjectileComp->ProjectileGravityScale = 1;
-		ProjectileComp->InitialSpeed = 1000.f;
-		ProjectileComp->Velocity = FVector(1, 0, 0) * ProjectileComp->InitialSpeed;
-		// NOTE: SetUpdatedComponent를 하지 않으면 재소환 이후 projectile movement가 실행되지않음
-		ProjectileComp->SetUpdatedComponent(RootComponent);
-		ProjectileComp->Activate(true);
-		MeshComp->IgnoreActorWhenMoving(this, true);
-	}
 }
 
 void ARollingBallProp::LaunchProjectile()
 {
 	LaunchDir = Arrow->GetForwardVector();
-	ProjectileComp->Velocity = LaunchDir * ProjectileComp->InitialSpeed;
 
 	// 발사 후 다시 복귀하는 타이밍
 	// 바닥에 닿지않으면, 4초후에 복귀하자
-	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, this, &ARollingBallProp::ReturnSelf,
-	                                       4.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, FTimerDelegate::CreateLambda([this]()
+	{
+		this->ReturnSelf(true);
+	}), 4.0f, false);
+
+	if (HasAuthority())
+	{
+		// 있던 자리에서 터지기
+		MulticastRPC_PlayEffect(GetActorLocation());
+	}
 }
 
 void ARollingBallProp::RollingBall()
 {
-	if (bIsHitGround)
-	{
-		FVector MeshPos = GetActorLocation();
-		FVector NewPos;
+	FVector MeshPos = GetActorLocation();
+	
+	float DeltaTime = GetWorld()->GetDeltaSeconds();
+	FVector Movement = LaunchDir * (RollingSpeed * DeltaTime);
+	
+	SetActorLocation(MeshPos + Movement, true);
 
-		// TODO: 탱크방식으로 바꾸는게 나을 듯함 (근데 Linetrace 고정해놔야함 (mesh만 구르게)
-		// NOTE: 평지에서도, 경사면에서도 작동하는 법
-		// HitNormal을 Actor의 새로운 UpVector로 바꾼다 (회전값 생성)
-		FRotator NewRot = UKismetMathLibrary::MakeRotFromZY(HitNormal, GetActorRightVector());
-		// 새 회전값 적용
-		SetActorRotation(NewRot);
+	// 회전하기
+	float Distance = Movement.Size();
+	// 반지름이 작아질수록 회전 속도가 빨라짐
+	float Radius = 50.0f; 
+	float RotationDegrees = FMath::RadiansToDegrees(Distance / Radius);
+	
+	FVector RotationAxis = FVector::CrossProduct(LaunchDir.GetSafeNormal(), FVector::UpVector);
+	FQuat DeltaQuat = FQuat(RotationAxis, FMath::DegreesToRadians(RotationDegrees));
+	DrawDebugCoordinateSystem(GetWorld(), GetActorLocation(), GetActorRotation(), 100.f, false, -1.f, 0, 2.f);
 
-		// 이걸 기준으로 액터의 앞 방향을 구해서 적용
-		GroundDir = GetActorForwardVector();
-		NewPos = MeshPos + GroundDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
-		// 해결: true를 붙여야만 Hit다시감지
-		SetActorLocation(NewPos, true);
-		
-		/* 기존 방식은: 경사면에서만 사용가능
-		GroundDir = FVector::CrossProduct(HitNormal, FVector::CrossProduct(GravityDir, HitNormal));
-		NewPos = MeshPos + GroundDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
-		MeshComp->SetRelativeLocation(NewPos);*/
-	}
+	// 회전 적용
+	MeshComp->AddLocalRotation(DeltaQuat, false, nullptr, ETeleportType::None);
 }
+
+void ARollingBallProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
+{
+	// 클라이언트 전부에서 호출됨 (서버 포함)
+	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location);
+	// UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location);
+}
+
