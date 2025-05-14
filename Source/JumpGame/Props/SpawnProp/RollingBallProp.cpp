@@ -119,7 +119,7 @@ void ARollingBallProp::ReturnSelf()
 	{
 		// 오브젝트 풀에 스스로를 반환하고 비활성화
 		SetActive(false);
-		ObjectPool->ReturnObject();
+		ObjectPool->ReturnObject(this);
 	}
 }
 
