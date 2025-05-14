@@ -82,7 +82,7 @@ void ARollingBallProp::OnMyRollingBallOverlap(UPrimitiveComponent* OverlappedCom
 
 	// 타이머 초기화
 	// GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
-	ReturnSelf(false);
+	ReturnSelf();
 	
 	if (HasAuthority())
 	{
@@ -110,7 +110,7 @@ void ARollingBallProp::Tick(float DeltaTime)
 	RollingBall();
 }
 
-void ARollingBallProp::ReturnSelf(bool bIsNaturalReturn)
+void ARollingBallProp::ReturnSelf()
 {
 	// 소속 풀 없으면 함수 나가자
 	if (ObjectPool == nullptr) return;
@@ -119,7 +119,7 @@ void ARollingBallProp::ReturnSelf(bool bIsNaturalReturn)
 	{
 		// 오브젝트 풀에 스스로를 반환하고 비활성화
 		SetActive(false);
-		ObjectPool->ReturnObject(this, true);
+		ObjectPool->ReturnObject();
 	}
 }
 
@@ -147,7 +147,7 @@ void ARollingBallProp::LaunchProjectile()
 	// 바닥에 닿지않으면, 4초후에 복귀하자
 	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, FTimerDelegate::CreateLambda([this]()
 	{
-		this->ReturnSelf(true);
+		this->ReturnSelf();
 	}), 4.0f, false);
 
 	if (HasAuthority())

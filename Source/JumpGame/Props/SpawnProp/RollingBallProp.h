@@ -35,7 +35,7 @@ public:
 	// 오브젝트 풀링으로 관리될 오브젝트
 	// 오브젝트 풀의 레퍼런스 초기화를 위한 함수 (어디소속인지)
 	FORCEINLINE void SetObjectPool(class UObjectPoolComponent* InObjectPool) { ObjectPool = InObjectPool; }
-	void ReturnSelf(bool bIsNaturalReturn);
+	void ReturnSelf();
 	void SetActive(bool bIsActive);
 	FORCEINLINE bool IsActive() { return bActive; }
 	

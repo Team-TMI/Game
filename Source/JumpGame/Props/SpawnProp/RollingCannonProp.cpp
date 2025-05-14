@@ -75,6 +75,7 @@ void ARollingCannonProp::FireRollingBall()
 		Projectile->SetActive(true);
 		Projectile->LaunchProjectile();
 
+		// 여기서 타이머 설정
 		FTimerHandle FireTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ARollingCannonProp::FireRollingBall, 4.0f, false);
 	}
