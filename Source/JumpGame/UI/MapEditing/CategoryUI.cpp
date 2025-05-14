@@ -7,10 +7,12 @@
 #include "PropGridUI.h"
 #include "SubCategoryButtonUI.h"
 #include "Components/EditableText.h"
+#include "Components/Image.h"
 #include "Components/ScrollBox.h"
 #include "JumpGame/Core/GameState/MapEditorState.h"
 #include "JumpGame/MapEditor/CategorySystem/CategorySystem.h"
 #include "JumpGame/MapEditor/CategorySystem/ECategoryType.h"
+#include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 
 class ANetworkGameState;
 
@@ -78,12 +80,20 @@ void UCategoryUI::NativeOnInitialized()
 	SearchText->SetHintText(Text);
 
 	SearchText->OnTextCommitted.AddDynamic(this, &UCategoryUI::OnSearchTextCommitted);
+	SearchText->OnTextChanged.AddDynamic(this, &UCategoryUI::OnSearchTextChanged);
+}
+
+void UCategoryUI::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
 }
 
 void UCategoryUI::InitWidget(class UClickHandlerManager* ClickHandlerManager,
-	class UWidgetMapEditDragDropOperation* DragDropOperation)
+                             class UWidgetMapEditDragDropOperation* DragDropOperation)
 {
-	GridUI->InitWidget(ClickHandlerManager, DragDropOperation);
+	GridUI->InitWidget(ClickHandlerManager, DragDropOperation, this);
 }
 
 void UCategoryUI::OnMajorCategoryButtonClicked(const EMajorCategoryType& MajorCategory, bool bAbsolute)
@@ -146,14 +156,14 @@ void UCategoryUI::OnSubCategoryButtonClicked(const EMajorCategoryType& MajorCate
 
 void UCategoryUI::OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)
 {
+	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
 	if (CommitMethod == ETextCommit::OnEnter)
 	{
 		FString InputText = Text.ToString();
 		GridUI->UpdatePropGridBySearch(InputText, CategorySystem);
-		return ;
 	}
 	FString InputText = Text.ToString();
-	if (InputText == TEXT(""))
+	if (InputText == TEXT("") || InputText == DefaultSearchText)
 	{
 		GridUI->UpdatePropGrid(SelectedMajorCategory->GetMajorCategoryType(), CategorySystem);
 		FText DefaultText = FText::FromString(DefaultSearchText);
@@ -161,6 +171,36 @@ void UCategoryUI::OnSearchTextCommitted(const FText& Text, ETextCommit::Type Com
 	}
 }
 
-void UCategoryUI::OnPropSlotClicked(const FName& PropID)
+void UCategoryUI::OnPropSlotClicked(FName PropID, UClass* InPropClass)
 {
+	const UPropWrap* Prop = CategorySystem->GetPropsByID(PropID);
+	if (!Prop)
+	{
+		return;
+	}
+	PropOverviewImage->SetBrushFromTexture(Prop->Data.PropIcon);
+}
+
+void UCategoryUI::OnSearchTextChanged(const FText& Text)
+{
+	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
+	TWeakObjectPtr<UUserWidget> WeakThis = this;
+	GetWorld()->GetTimerManager().SetTimer(SearchTimerHandle, FTimerDelegate::CreateLambda([WeakThis, Text]()
+	{
+		if (!WeakThis.IsValid())
+		{
+			return;
+		}
+		UCategoryUI* CategoryUI = Cast<UCategoryUI>(WeakThis.Get());
+
+		FString InputText = Text.ToString();
+		if (InputText == TEXT(""))
+		{
+			CategoryUI->GridUI->UpdatePropGrid(CategoryUI->SelectedMajorCategory->GetMajorCategoryType(), CategoryUI->CategorySystem);
+		}
+		else
+		{
+			CategoryUI->GridUI->UpdatePropGridBySearch(InputText, CategoryUI->CategorySystem);
+		}
+	}), SearchDelay, false);
 }

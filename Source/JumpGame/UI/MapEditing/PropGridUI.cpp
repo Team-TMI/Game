@@ -19,14 +19,14 @@ void UPropGridUI::NativeOnInitialized()
 }
 
 void UPropGridUI::InitWidget(class UClickHandlerManager* ClickHandlerManager,
-	class UWidgetMapEditDragDropOperation* DragDropOperation)
+	class UWidgetMapEditDragDropOperation* DragDropOperation, UCategoryUI* CategoryUI)
 {
 	CachedClickHandlerManager = ClickHandlerManager;
 	CachedDragDropOperation = DragDropOperation;
 
 	for (auto& PropSlot : PropSlots)
 	{
-		PropSlot->InitWidget(CachedClickHandlerManager, CachedDragDropOperation);
+		PropSlot->InitWidget(CachedClickHandlerManager, CachedDragDropOperation, CategoryUI);
 	}
 }
 

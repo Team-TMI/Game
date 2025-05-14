@@ -12,9 +12,12 @@ class JUMPGAME_API UCategoryUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* DragDropOperation);
 
+	UFUNCTION()
+	void OnPropSlotClicked(FName PropID, class UClass* InPropClass);
 private:
 	void ClearSubCategoryButtons();
 	void ClearMajorCategoryButtons();
@@ -27,6 +30,8 @@ private:
 	class UScrollBox* MajorCategories;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UEditableText* SearchText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UImage* PropOverviewImage;
 
 	UPROPERTY()
 	class UMajorCategoryButtonUI* SelectedMajorCategory = nullptr;
@@ -50,7 +55,10 @@ private:
 	UFUNCTION()
 	void OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 	UFUNCTION()
-	void OnPropSlotClicked(const FName& PropID);
+	void OnSearchTextChanged(const FText& Text);
 
 	FString DefaultSearchText = TEXT("검색 할 내용을 입력하세요");
+
+	FTimerHandle SearchTimerHandle;
+	float SearchDelay = 0.5f;
 };
