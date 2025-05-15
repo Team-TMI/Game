@@ -34,11 +34,29 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_Happy;
 
+	// 버튼 하이라이팅
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Image_Emotion0;
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Image_Emotion1;
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Image_Emotion2;
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Image_Emotion3;
+
+	// 이미지 배열
+	UPROPERTY()
+	TArray<class UImage*> EmotionImages;
+
 	// 버튼 눌렀을 때 실행할 함수
 	UFUNCTION()
 	void OnClickHello();
 	UFUNCTION()
 	void OnClickHappy();
+
+	// 버튼 하이라이팅
+	UFUNCTION()
+	void UpdateEmotionHighlight();
 	
 	// 버튼 인덱스 선택 관련
 	FOnEmotionSelected OnEmotionSelected;

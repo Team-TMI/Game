@@ -6,6 +6,7 @@
 #include "SMyBlueprint.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 void UEmotionUI::NativeOnInitialized()
@@ -14,6 +15,8 @@ void UEmotionUI::NativeOnInitialized()
 
 	Btn_Hello->OnClicked.AddDynamic(this, &UEmotionUI::OnClickHello);
 	Btn_Happy->OnClicked.AddDynamic(this, &UEmotionUI::OnClickHappy);
+
+	EmotionImages = { Image_Emotion0, Image_Emotion1, Image_Emotion2, Image_Emotion3 };
 }
 
 void UEmotionUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -36,11 +39,30 @@ void UEmotionUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 void UEmotionUI::OnClickHello()
 {
 	FFastLogger::LogScreen(FColor::Red, TEXT("Hello 클릭"));
+	PlayShowAnim(false);
 }
 
 void UEmotionUI::OnClickHappy()
 {
 	FFastLogger::LogScreen(FColor::Red, TEXT("Happy 클릭"));
+	PlayShowAnim(false);
+}
+
+void UEmotionUI::UpdateEmotionHighlight()
+{
+	for (int32 i = 0; i < EmotionImages.Num(); i++)
+	{
+		if (!EmotionImages[i]) continue;
+
+		if (i == CurrentEmotionIndex)
+		{
+			EmotionImages[i]->SetRenderOpacity(0.5f);
+		}
+		else
+		{
+			EmotionImages[i]->SetRenderOpacity(0.f);
+		}
+	}
 }
 
 void UEmotionUI::PlayShowAnim(bool bIsForward)
@@ -84,6 +106,8 @@ void UEmotionUI::UpdateEmotionSelect(const FVector2D& MousePos, const FVector2D&
 	float EmotionAngle = 360 / EmotionCount;
 	CurrentEmotionIndex = (FMath::FloorToInt(AngleDeg / EmotionAngle) + 2) % EmotionCount;
 	UE_LOG(LogTemp, Warning, TEXT("AngleDeg: %f | Index: %d"), AngleDeg, CurrentEmotionIndex);
+
+	UpdateEmotionHighlight();
 }
 
 void UEmotionUI::ConfirmEmotionSelection()
