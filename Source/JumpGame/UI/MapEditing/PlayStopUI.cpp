@@ -3,7 +3,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
-#include "Editor/VREditor/Private/UI/VREditorFloatingCameraUI.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"

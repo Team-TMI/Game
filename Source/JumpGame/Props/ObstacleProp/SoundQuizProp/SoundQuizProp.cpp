@@ -1,10 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "SoundQuizProp.h"
 
-#include "EdGraphSchema_K2_Actions.h"
-#include "SoundMommyQuizProp.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "Misc/DateTime.h"
