@@ -3,7 +3,7 @@
 
 #include "JumpGaugeUI.h"
 
-#include "Components/RadialSlider.h"
+#include "Components/ProgressBar.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
 
@@ -17,9 +17,6 @@ void UJumpGaugeUI::NativeOnInitialized()
 	{
 		Frog->OnSuperJumpRatioChanged.AddDynamic(this, &UJumpGaugeUI::OnSuperJumpRatioChanged);
 	}
-
-	JumpGaugeSlider->IsFocusable = false;
-	JumpGaugeSlider->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
 void UJumpGaugeUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -30,18 +27,18 @@ void UJumpGaugeUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UJumpGaugeUI::OnSuperJumpRatioChanged(float NewRatio)
 {
-	JumpGaugeSlider->SetValue(NewRatio);
+	JumpGaugeSlider->SetPercent(NewRatio);
 
 	if (NewRatio >= 1.f)
 	{
-		JumpGaugeSlider->SetSliderProgressColor(FColor::Red);
+		JumpGaugeSlider->SetFillColorAndOpacity(FLinearColor::Red);
 	}
 	else if (NewRatio >= 0.5f)
 	{
-		JumpGaugeSlider->SetSliderProgressColor(FColor::Yellow);
+		JumpGaugeSlider->SetFillColorAndOpacity(FLinearColor::Yellow);
 	}
 	else
 	{
-		JumpGaugeSlider->SetSliderProgressColor(FColor::Green);
+		JumpGaugeSlider->SetFillColorAndOpacity(FLinearColor::Green);
 	}
 }
