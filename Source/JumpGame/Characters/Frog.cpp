@@ -1467,7 +1467,8 @@ void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
 
 void AFrog::OnEmotionMontageEnd(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Montage != SaveCurrentMontage) return; // 다른 몽타주가 끝난 것이라면 무시
+	// 다른 몽타주가 끝난 것이라면 무시
+	if (Montage != SaveCurrentMontage) return; 
 	
 	EmotionState = EEmotionState::None;
 	ChangeEyeMaterial(0);
