@@ -72,7 +72,8 @@ void ATestFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
 {
 	// 선택된 감정 처리
 	ShowEmotionUI(false);
-	ServerPlayEmotion(EmotionIndex);
+	PlayEmotion(EmotionIndex);
+	
 	FFastLogger::LogScreen(FColor::Red, TEXT("선택인덱스: %d"), EmotionIndex);
 }
 
@@ -99,7 +100,7 @@ void ATestFrog::ShowEmotionUI(bool bIsShow)
 		EmotionUI->PlayShowAnim(false);
 
 		PC->SetShowMouseCursor(false);
-		PC->SetInputMode(FInputModeGameAndUI());
+		PC->SetInputMode(FInputModeGameOnly());
 	}
 }
 
@@ -115,38 +116,58 @@ void ATestFrog::CancelEmotion()
 	
 	// TODO: 이동할때 취소되는지 확인 필요
 	// InputAxis MoveForward, InputAxis MoveRight 등에 직접 CancelEmotion 호출?
-	// 그냥 input 들어오면 바꾸기?
 }
 
 void ATestFrog::PlayEmotion(int32 EmotionIndex)
 {
-	// 카메라 제어 막기?
-	
-	/*switch (EmotionIndex)
+	// 로컬 플레이어인 경우에만 서버에 요청을 보냄
+	ATestFrog* MyCharacter = Cast<ATestFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (MyCharacter)
 	{
-	case 1:
+		// 서버에 요청할 때 어떤 캐릭터가 요청했는지 명확히 전달
+		ServerRPC_PlayEmotion(MyCharacter, EmotionIndex);
+	}
+	
+	// TODO: 카메라 제어 막기?
+}
+
+
+void ATestFrog::ServerRPC_PlayEmotion_Implementation(ATestFrog* Character, int32 EmotionIndex)
+{
+	// 유효한 캐릭터인지 확인
+	if (Character && Character->GetController() == this->GetController())
+	{
+		// 특정 캐릭터에서만 감정표현 실행
+		Character->MulticastRPC_PlayEmotion(EmotionIndex);
+	}
+}
+
+void ATestFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
+{
+	switch (EmotionIndex)
+	{
+	case 0:
 		CurrentEmotionMontage = GreetingMontage;
 		break;
-	case 2:
+	case 1:
 		CurrentEmotionMontage = AngryMontage;
 		break;
-	case 3:
+	case 2:
 		CurrentEmotionMontage = SadMontage;
+		break;
+	case 3:
+		CurrentEmotionMontage = MerongMontage;
 		break;
 	default:
 		return;
 	}
 
-	PlayAnimMontage(CurrentEmotionMontage);
-	EmotionState = EEmotionState::PlayingEmotion;*/
-}
-
-void ATestFrog::ServerPlayEmotion_Implementation(int32 EmotionIndex)
-{
-	MulticastPlayEmotion(EmotionIndex);
-}
-
-void ATestFrog::MulticastPlayEmotion_Implementation(int32 EmotionIndex)
-{
-	PlayEmotion(EmotionIndex);
+	if (CurrentEmotionMontage)
+	{
+		float Duration = PlayAnimMontage(CurrentEmotionMontage);
+		if (Duration > 0.f)
+		{
+			EmotionState = EEmotionState::PlayingEmotion;
+		}
+	}
 }

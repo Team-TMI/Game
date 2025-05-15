@@ -51,16 +51,24 @@ public:
 	UFUNCTION()
 	void PlayEmotion(int32 EmotionIndex);
 
-	// 동기화 (서버로 요청->처리)
+	// 동기화 (클라이언트는 서버로 요청->처리)
 	UFUNCTION(Server, Reliable)
-	void ServerPlayEmotion(int32 EmotionIndex);
-	
+	void ServerRPC_PlayEmotion(ATestFrog* Character, int32 EmotionIndex);
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastPlayEmotion(int32 EmotionIndex);
+	void MulticastRPC_PlayEmotion(int32 EmotionIndex);
 
 	// 재생할 몽타주
 	UPROPERTY()
 	UAnimMontage* CurrentEmotionMontage = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* GreetingMontage;
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* AngryMontage;
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* SadMontage;
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* MerongMontage;
 
 	// 감정표현 UI
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
