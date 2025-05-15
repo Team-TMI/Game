@@ -3,7 +3,6 @@
 
 #include "EmotionUI.h"
 
-#include "SMyBlueprint.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Button.h"
 #include "Components/Image.h"

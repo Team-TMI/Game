@@ -1,6 +1,5 @@
 #include "SaveMapComponent.h"
 
-#include "IContentBrowserSingleton.h"
 #include "JsonObjectConverter.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
