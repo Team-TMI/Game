@@ -19,4 +19,10 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+public:
+	UPROPERTY()
+	TArray<int32> AvailableSkinIndices;
 };

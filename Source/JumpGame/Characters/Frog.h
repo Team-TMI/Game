@@ -140,7 +140,12 @@ public:
 	
 	// 혓바닥
 	void SetTongueLength(float Value);
-	
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetSkin(int32 NewIndex);
+	UFUNCTION()
+	void OnRep_SkinIndex();
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -212,6 +217,11 @@ public:
 	bool bIsTongueGrow{false};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CanTongAttack)
 	bool bCanTongAttack{true};
+	// 스킨
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UTexture2D*> SkinTextures;
+	UPROPERTY(ReplicatedUsing=OnRep_SkinIndex)
+	int32 SkinIndex{};
 
 	// 델리게이트
 public:

@@ -262,7 +262,7 @@ void AFrog::NotifyControllerChanged()
 void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if (WaterPostProcessComponent && WaterPostProcessMaterial)
 	{
 		WaterPostProcessDynamicMaterial = UMaterialInstanceDynamic::Create(
@@ -928,6 +928,8 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, TongueLengthRatio);
 	DOREPLIFETIME(AFrog, bIsTongueGrow);
 	DOREPLIFETIME(AFrog, bCanTongAttack);
+	
+	DOREPLIFETIME(AFrog, SkinIndex);
 }
 
 void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, class ARisingWaterProp* WaterVolume)
@@ -1252,5 +1254,23 @@ void AFrog::CalculateWaterCameraOverlapRatio(float dt)
 			   TEXT("Water_Height"), 
 			   WaterHeightValue
 		   );
+	}
+}
+
+void AFrog::ServerRPC_SetSkin_Implementation(int32 NewIndex)
+{
+	SkinIndex = NewIndex;
+	OnRep_SkinIndex();
+}
+
+void AFrog::OnRep_SkinIndex()
+{
+	if (GetMesh())
+	{
+		UMaterialInstanceDynamic* DynMat{GetMesh()->CreateAndSetMaterialInstanceDynamic(0)};
+		if (DynMat && SkinTextures.IsValidIndex(SkinIndex))
+		{
+			DynMat->SetTextureParameterValue("Skin", SkinTextures[SkinIndex]);
+		}
 	}
 }
