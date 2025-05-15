@@ -36,24 +36,40 @@ public:
 
 	EEmotionState EmotionState = EEmotionState::None;
 
+	// 감정표현 관련
+	UPROPERTY()
+	bool bIsBind = false;
+	
 	UFUNCTION()
 	void OnPressCKey();
 	UFUNCTION()
-	void OnPressEmotionKey(int32 EmotionIndex);
+	void OnReleasedCKey();
 	UFUNCTION()
-	void ShowEmotionUI(bool bIsShow);
+	void OnSelectionEmotionIndex(int32 EmotionIndex);
 	UFUNCTION()
-	void CancleEmotion();
+	void CancelEmotion();
 	UFUNCTION()
-	void PlayAnimation(int32 EmotionIndex);
+	void PlayEmotion(int32 EmotionIndex);
 
-	// UI
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class UEmotionUI> EmotionUIClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UEmotionUI* EmotionUI;
+	// 동기화 (서버로 요청->처리)
+	UFUNCTION(Server, Reliable)
+	void ServerPlayEmotion(int32 EmotionIndex);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayEmotion(int32 EmotionIndex);
 
 	// 재생할 몽타주
 	UPROPERTY()
 	UAnimMontage* CurrentEmotionMontage = nullptr;
+
+	// 감정표현 UI
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UEmotionUI> EmotionUIClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UEmotionUI* EmotionUI;
+	
+	UFUNCTION()
+	void ShowEmotionUI(bool bIsShow);
 };
+
+

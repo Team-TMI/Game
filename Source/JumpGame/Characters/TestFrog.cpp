@@ -5,6 +5,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "JumpGame/UI/Character/EmotionUI.h"
+#include "JumpGame/Utils/FastLogger.h"
 
 
 // Sets default values
@@ -35,6 +36,10 @@ void ATestFrog::Tick(float DeltaTime)
 	{
 		OnPressCKey();
 	}
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustReleased(EKeys::C))
+	{
+		OnReleasedCKey();
+	}
 }
 
 // Called to bind functionality to input
@@ -46,43 +51,59 @@ void ATestFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ATestFrog::OnPressCKey()
 {	
-	if (EmotionState == EEmotionState::None)
+	if (EmotionState == EEmotionState::None || EmotionState == EEmotionState::PlayingEmotion)
 	{
 		ShowEmotionUI(true);
 		EmotionState = EEmotionState::WaitingForInput;
 	}
-	else if (EmotionState == EEmotionState::WaitingForInput)
-	{
-		ShowEmotionUI(false);
-		EmotionState = EEmotionState::None;
-	}
 }
 
-void ATestFrog::OnPressEmotionKey(int32 EmotionIndex)
+void ATestFrog::OnReleasedCKey()
 {
 	if (EmotionState == EEmotionState::WaitingForInput)
 	{
-		PlayAnimation(EmotionIndex); 
+		EmotionUI->ConfirmEmotionSelection();
 		EmotionState = EEmotionState::PlayingEmotion;
 		ShowEmotionUI(false);
 	}
 }
 
+void ATestFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
+{
+	// 선택된 감정 처리
+	ShowEmotionUI(false);
+	ServerPlayEmotion(EmotionIndex);
+	FFastLogger::LogScreen(FColor::Red, TEXT("선택인덱스: %d"), EmotionIndex);
+}
+
 void ATestFrog::ShowEmotionUI(bool bIsShow)
 {
 	if (!EmotionUI) return;
-		
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (bIsShow)
 	{
 		EmotionUI->PlayShowAnim(true);
+
+		if (!bIsBind)
+		{
+			EmotionUI->OnEmotionSelected.BindUObject(this, &ATestFrog::OnSelectionEmotionIndex);
+			bIsBind = true;
+		}
+		
+		PC->SetShowMouseCursor(true);
+		PC->SetInputMode(FInputModeGameAndUI());
 	}
 	else
 	{
 		EmotionUI->PlayShowAnim(false);
+
+		PC->SetShowMouseCursor(false);
+		PC->SetInputMode(FInputModeGameAndUI());
 	}
 }
 
-void ATestFrog::CancleEmotion()
+void ATestFrog::CancelEmotion()
 {
 	if (EmotionState == EEmotionState::PlayingEmotion && CurrentEmotionMontage)
 	{
@@ -92,12 +113,12 @@ void ATestFrog::CancleEmotion()
 
 	EmotionState = EEmotionState::None;
 	
-	// 이동할때 취소
+	// TODO: 이동할때 취소되는지 확인 필요
 	// InputAxis MoveForward, InputAxis MoveRight 등에 직접 CancelEmotion 호출?
 	// 그냥 input 들어오면 바꾸기?
 }
 
-void ATestFrog::PlayAnimation(int32 EmotionIndex)
+void ATestFrog::PlayEmotion(int32 EmotionIndex)
 {
 	// 카메라 제어 막기?
 	
@@ -118,4 +139,14 @@ void ATestFrog::PlayAnimation(int32 EmotionIndex)
 
 	PlayAnimMontage(CurrentEmotionMontage);
 	EmotionState = EEmotionState::PlayingEmotion;*/
+}
+
+void ATestFrog::ServerPlayEmotion_Implementation(int32 EmotionIndex)
+{
+	MulticastPlayEmotion(EmotionIndex);
+}
+
+void ATestFrog::MulticastPlayEmotion_Implementation(int32 EmotionIndex)
+{
+	PlayEmotion(EmotionIndex);
 }
