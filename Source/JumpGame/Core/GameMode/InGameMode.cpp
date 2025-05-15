@@ -8,7 +8,6 @@
 #include "JumpGame/Core/PlayerController/InGamePlayerController.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
 #include "JumpGame/Props/SaveLoad/SaveMapComponent.h"
-#include "Kismet/KismetArrayLibrary.h"
 
 AInGameMode::AInGameMode()
 {
