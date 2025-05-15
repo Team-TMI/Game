@@ -6,6 +6,7 @@
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
+#include "JumpGame/AIServices/Shared/HttpMessage.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 
@@ -71,15 +72,15 @@ bool FHttpsMultiPartsHandler::SendGameMessage(const FHttpMessageWrapper& HttpMes
 {
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
-	if (!HttpMessage.HttpMessage.IsType<FHttpMultipartRequest>())
+	const FHttpMultipartRequest* MultipartRequest = std::get_if<FHttpMultipartRequest>(&HttpMessage.HttpMessage);
+	if (!MultipartRequest)
 	{
+		FFastLogger::LogConsole(TEXT("Invalid HttpMessage type"));
 		return false;
 	}
-	// FHttpMultipartRequest로 변환
-	const FHttpMultipartRequest& MultipartRequest = HttpMessage.HttpMessage.Get<FHttpMultipartRequest>();
 	
 	// 서버 URL + 경로
-	FString FullURL = MultipartRequest.ServerURL + MultipartRequest.RequestPath;
+	FString FullURL = MultipartRequest->ServerURL + MultipartRequest->RequestPath;
 	HttpRequest->SetURL(FullURL);
 	HttpRequest->SetVerb(TEXT("POST"));
 
@@ -89,14 +90,14 @@ bool FHttpsMultiPartsHandler::SendGameMessage(const FHttpMessageWrapper& HttpMes
 	HttpRequest->SetHeader(TEXT("Content-Type"), ContentType);
 
 	// 기타 헤더 설정
-	for (const auto& Pair : MultipartRequest.AdditionalHeaders)
+	for (const auto& Pair : MultipartRequest->AdditionalHeaders)
 	{
 		HttpRequest->SetHeader(Pair.Key, Pair.Value);
 	}
 
 	// Body 생성
 	TArray<uint8> RequestBody;
-	BuildMultipartBody(MultipartRequest, Boundary, RequestBody);
+	BuildMultipartBody(*MultipartRequest, Boundary, RequestBody);
 	HttpRequest->SetContent(RequestBody);
 
 	// 응답 처리
@@ -124,14 +125,13 @@ void FHttpsMultiPartsHandler::OnHttpRequestComplete(FHttpRequestPtr Req, FHttpRe
 		ResponseMessage.Header.Type = EMessageType::HttpMultipartResponse;
 
 		// 내용 담기
-		FHttpMessageVariant HttpMessage;
-		HttpMessage.Set<FHttpMultipartResponse>(FHttpMultipartResponse());
-		FHttpMultipartResponse& HttpMultipartResponseRef = HttpMessage.Get<FHttpMultipartResponse>();
+		ResponseMessage.HttpMessage = FHttpMultipartResponse(); // 직접 할당
 
+		FHttpMultipartResponse& HttpMultipartResponseRef = std::get<FHttpMultipartResponse>(ResponseMessage.HttpMessage);
+
+		HttpMultipartResponseRef.ResponseCode = Resp->GetResponseCode();
 		HttpMultipartResponseRef.ResponseData = Resp->GetContent();
 		HttpMultipartResponseRef.ResponseText = Resp->GetContentAsString();
-
-		ResponseMessage.HttpMessage = HttpMessage;
 
 		if (HttpMessageQueue && HttpMessageQueue->find(EMessageType::HttpMultipartResponse) != HttpMessageQueue->end())
 		{

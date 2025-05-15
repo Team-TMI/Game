@@ -21,6 +21,7 @@ void UHttpManagerComponent::BeginPlay()
 	{
 		HttpMessageQueue[Handler.Key] = std::queue<FHttpMessageWrapper>();
 	}
+	HttpMessageQueue[EMessageType::HttpMultipartResponse] = std::queue<FHttpMessageWrapper>();
 	
 	HttpMultipartHandler->Init(FIOHandlerInitInfo(), nullptr, &HttpMessageQueue);
 }

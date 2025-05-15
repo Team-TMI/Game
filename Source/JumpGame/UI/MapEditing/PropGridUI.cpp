@@ -44,8 +44,6 @@ void UPropGridUI::UpdatePropGrid(const EMajorCategoryType& MajorCategory, UCateg
 {
 	ClearPropGrid();
 
-	FFastLogger::LogConsole(TEXT("UpdatePropGrid MajorCategory : %s"), *FCommonUtil::GetEnumDisplayName(MajorCategory).ToString());
-	
 	const TArray<UPropWrap*>& PropList = CategorySystem->GetPropsByMajor(MajorCategory);
 	
 	int32 SlotIndex = 0;

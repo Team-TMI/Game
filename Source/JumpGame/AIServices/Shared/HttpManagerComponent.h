@@ -6,6 +6,7 @@
 #include <queue>
 
 #include "CoreMinimal.h"
+#include "HttpMessage.h"
 #include "Message.h"
 #include "Components/ActorComponent.h"
 #include "HttpManagerComponent.generated.h"

@@ -14,6 +14,7 @@
 #include "Components/Image.h"
 #include "Components/ScrollBox.h"
 #include "JumpGame/AIServices/Shared/HttpManagerComponent.h"
+#include "JumpGame/AIServices/Shared/HttpMessage.h"
 #include "JumpGame/AIServices/Shared/Message.h"
 #include "JumpGame/AIServices/Shared/IOHandlers/IOHandlerInterface.h"
 #include "JumpGame/Core/GameState/MapEditorState.h"
@@ -227,8 +228,8 @@ void UCategoryUI::OnImageSearchButtonClicked()
 	FString ImagePath;
 	if (!OpenFileDialog(ImagePath))
 	{
-		SearchText->SetHintText(FText::FromString(DefaultSearchText));
-		SearchText->SetIsReadOnly(false);
+		SetTextToDefault();
+		SetGridToDefault();
 		return ;
 	}
 	
@@ -237,9 +238,6 @@ void UCategoryUI::OnImageSearchButtonClicked()
 	FString FilePath = FPaths::GetPath(ImagePath);
 	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
 	SearchText->SetText(FText::FromString(FileNameWithExtension));
-	
-	SearchText->SetHintText(FText::FromString(DefaultSearchText));
-	SearchText->SetIsReadOnly(false);
 }
 
 bool UCategoryUI::OpenFileDialog(FString& OutFilePath)
@@ -283,6 +281,8 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 	if (!GameState)
 	{
 		UE_LOG(LogTemp, Error, TEXT("GameState is null"));
+		SetTextToDefault();
+		SetGridToDefault();
 		return false;
 	}
 	
@@ -290,6 +290,8 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 	if (!FFileHelper::LoadFileToArray(ImageData, *ImagePath))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load image file: %s"), *ImagePath);
+		SetTextToDefault();
+		SetGridToDefault();
 		return false;
 	}
 
@@ -304,19 +306,21 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 	Request.ServerURL = GameState->GetImageRequestURL();
 	Request.RequestPath = GameState->GetImageRequestPath();
 	// Request.AdditionalHeaders.Add(TEXT("Authorization"), TEXT("Bearer token"));
-	
 	Request.MultipartFields.Add(ImageField);
 
 	FHttpMessageWrapper Message;
 	Message.Header = FMessageHeader();
 	Message.Header.Type = EMessageType::HttpMultipartRequest;
+	Message.HttpMessage = Request;
 
-	Message.HttpMessage.Set<FHttpMultipartRequest>(Request);
-
-	FHttpMultipartRequest RequestTest = Message.HttpMessage.Get<FHttpMultipartRequest>();
-	
-	bool Flag = GameState->HttpManagerComponent->SendHttpMessage(Message);
-	return Flag;
+	if (!GameState->HttpManagerComponent->SendHttpMessage(Message))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to send image request"));
+		SetTextToDefault();
+		SetGridToDefault();
+		return false;
+	}
+	return true;
 }
 
 void UCategoryUI::OnImageSearchResponse()
@@ -326,16 +330,47 @@ void UCategoryUI::OnImageSearchResponse()
 	if (!GameState)
 	{
 		FFastLogger::LogConsole(TEXT("GameState is null"));
+		SetTextToDefault();
+		SetGridToDefault();
 		return;
 	}
 	
 	if (!GameState->HttpManagerComponent->PopHttpMessage(EMessageType::HttpMultipartResponse, Response))
 	{
+		SetTextToDefault();
+		SetGridToDefault();
 		return ;
 	}
 
-	FHttpMultipartResponse HttpResponse= Response.HttpMessage.Get<FHttpMultipartResponse>();
-
+	// FHttpMultipartResponse HttpResponse = Response.HttpMessage.Get<FHttpMultipartResponse>();
+	FHttpMultipartResponse* HttpResponse = std::get_if<FHttpMultipartResponse>(&Response.HttpMessage);
+	if (!HttpResponse)
+	{
+		FFastLogger::LogConsole(TEXT("Invalid HttpMessage type"));
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+	// 응답코드가 2xx가 아닐 경우
+	if (HttpResponse->ResponseCode % 100 != 2)
+	{
+		FFastLogger::LogConsole(TEXT("Image search failed: %d"), HttpResponse->ResponseCode);
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+	
 	// Json을 카테고리 리스트로 변환
 	// FJsonObjectConverter::JsonObjectStringToUStruct()
+}
+
+void UCategoryUI::SetTextToDefault()
+{
+	SearchText->SetHintText(FText::FromString(DefaultSearchText));
+	SearchText->SetIsReadOnly(false);
+}
+
+void UCategoryUI::SetGridToDefault()
+{
+	GridUI->UpdatePropGrid(SelectedMajorCategory->GetMajorCategoryType(), CategorySystem);
 }

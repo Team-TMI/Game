@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "JumpGame/AIServices/Shared/Message.h"
 #include "IOHandlerInitInfo.h"
+#include "JumpGame/AIServices/Shared/HttpMessage.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnMessageReceived);
 

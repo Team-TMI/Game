@@ -63,6 +63,8 @@ private:
 	bool OpenFileDialog(FString& OutFilePath);
 	bool SendImageRequest(const FString& ImagePath);
 	void OnImageSearchResponse();
+	void SetTextToDefault();
+	void SetGridToDefault();
 
 	FString DefaultSearchText = TEXT("검색 할 내용을 입력하세요");
 
