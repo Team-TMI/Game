@@ -86,3 +86,18 @@ void UPropGridUI::UpdatePropGridBySearch(const FString& String, UCategorySystem*
 		SlotIndex++;
 	}
 }
+
+void UPropGridUI::UpdatePropGridByImageSearch(const TArray<ESubCategoryType>& SubCategories, UCategorySystem* CategorySystem)
+{
+	ClearPropGrid();
+
+	const TArray<UPropWrap*>& PropList = CategorySystem->GetPropsBySubs(SubCategories);
+	
+	int32 SlotIndex = 0;
+	for (int32 i = 0; i < PropList.Num(); i += 2)
+	{
+		PropSlots[SlotIndex]->SetPropSlots(PropList[i], i + 1 < PropList.Num() ? PropList[i + 1] : nullptr);
+		GridScroll->AddChild(PropSlots[SlotIndex]);
+		SlotIndex++;
+	}
+}

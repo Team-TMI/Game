@@ -21,6 +21,7 @@
 #include "JumpGame/Core/GameState/MapGameState.h"
 #include "JumpGame/MapEditor/CategorySystem/CategorySystem.h"
 #include "JumpGame/MapEditor/CategorySystem/ECategoryType.h"
+#include "JumpGame/MapEditor/CategorySystem/ImageResponseJson.h"
 #include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 
 class ANetworkGameState;
@@ -352,7 +353,7 @@ void UCategoryUI::OnImageSearchResponse()
 		return;
 	}
 	// 응답코드가 2xx가 아닐 경우
-	if (HttpResponse->ResponseCode % 100 != 2)
+	if (HttpResponse->ResponseCode / 100 != 2)
 	{
 		FFastLogger::LogConsole(TEXT("Image search failed: %d"), HttpResponse->ResponseCode);
 		SetTextToDefault();
@@ -361,7 +362,18 @@ void UCategoryUI::OnImageSearchResponse()
 	}
 	
 	// Json을 카테고리 리스트로 변환
-	// FJsonObjectConverter::JsonObjectStringToUStruct()
+	FImageResponseJson ImageResponse;
+	FJsonObjectConverter::JsonObjectStringToUStruct(HttpResponse->ResponseText, &ImageResponse);
+	if (!ImageResponse.SubCategoryList.Num())
+	{
+		FFastLogger::LogConsole(TEXT("No subcategories found"));
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+
+	SetTextToDefault();
+	GridUI->UpdatePropGridByImageSearch(ImageResponse.SubCategoryList, CategorySystem);
 }
 
 void UCategoryUI::SetTextToDefault()

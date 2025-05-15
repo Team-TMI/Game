@@ -24,6 +24,8 @@ public:
 	UFUNCTION()
 	void UpdatePropGridBySearch(const FString& String, class UCategorySystem* CategorySystem);
 	UFUNCTION()
+	void UpdatePropGridByImageSearch(const TArray<ESubCategoryType>& SubCategories, class UCategorySystem* CategorySystem);
+	UFUNCTION()
 	void ClearPropGrid();
 
 private:
