@@ -114,7 +114,7 @@ void UIOManagerComponent::RetryReadConnectToPipe(TSharedPtr<FIPCHandler> IPCHand
 			return;
 
 		UIOManagerComponent* StrongThis = WeakThis.Get();
-		if (IPCHandlerToRetry->Init(StrongThis->IOHandlerInitInfo, &StrongThis->MessageQueue, &StrongThis->HttpMessageQueue))
+		if (IPCHandlerToRetry->Init(StrongThis->IOHandlerInitInfo, &StrongThis->MessageQueue, nullptr))
 		{
 			FFastLogger::LogConsole(TEXT("PIPE!!!!!!!!!!! Succedded!! IPCHandler : %s"), *IPCHandlerToRetry->GetPipeName());
 		}
@@ -136,7 +136,7 @@ void UIOManagerComponent::RetrySendConnectToPipe(TSharedPtr<FIPCHandler> IPCHand
 			return;
 
 		UIOManagerComponent* StrongThis = WeakThis.Get();
-		if (IPCHandlerToRetry->Init(StrongThis->IOHandlerInitInfo, &StrongThis->MessageQueue, &StrongThis->HttpMessageQueue))
+		if (IPCHandlerToRetry->Init(StrongThis->IOHandlerInitInfo, &StrongThis->MessageQueue, nullptr))
 		{
 			FFastLogger::LogConsole(TEXT("PIPE!!!!!!!!!!! Succedded!! IPCHandler : %s"), *IPCHandlerToRetry->GetPipeName());
 		}
