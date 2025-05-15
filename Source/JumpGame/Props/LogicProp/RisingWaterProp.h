@@ -63,6 +63,7 @@ public:
 	void StartRising();
 	UFUNCTION()
 	void SetRisingSpeed(float Speed);
+	float GetWaterSurfaceZ();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

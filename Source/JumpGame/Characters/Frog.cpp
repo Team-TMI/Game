@@ -213,7 +213,7 @@ AFrog::AFrog()
 	CameraCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("CameraCollision"));
 	CameraCollision->SetupAttachment(FollowCamera);
 	CameraCollision->SetBoxExtent(FVector(32.f, 32.f, 32.f));
-	CameraCollision->SetRelativeLocation(FVector(0, 0, 0.f));
+	CameraCollision->SetRelativeLocation(FVector(0, 0, -50.f));
 	CameraCollision->SetCollisionProfileName(TEXT("CameraCollision"));
 	CameraCollision->ComponentTags.Add(TEXT("CameraCollision"));
 
@@ -348,6 +348,7 @@ void AFrog::Tick(float DeltaTime)
 
 	if (IsLocallyControlled() && OverlapWaterComponent.IsValid())
 	{
+		// 정렬 시키고 검사
 		CameraCollision->SetWorldRotation(FRotator::ZeroRotator);
 		CalculateWaterCameraOverlapRatio(DeltaTime);
 	}
@@ -1078,24 +1079,42 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 
 			break;
 		case ECharacterStateEnum::Surface:
-			MoveComp->GravityScale = 0.1f;
+			MoveComp->GravityScale = 0.05f;
+
+			float WaterSurfaceZ{CurrentWaterVolume->GetWaterSurfaceZ()};
 			float WaterSurfaceVelocityZ{0.f};
 		// 물이 상승중이라면
-			if (CurrentWaterVolume.IsValid() && CurrentWaterVolume->WaterState == EWaterStateEnum::Rise)
+			if (CurrentWaterVolume.IsValid())
 			{
-				WaterSurfaceVelocityZ = CurrentWaterVolume->CurrentRisingSpeed;
+				if (CurrentWaterVolume->WaterState == EWaterStateEnum::Rise)
+				{
+					WaterSurfaceVelocityZ = CurrentWaterVolume->CurrentRisingSpeed;
+				}
+				
+                // 캐릭터가 물 표면에 거의 닿도록 목표 Z 설정
+                float TargetCharacterCenterZ{WaterSurfaceZ + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.9f};
+                // 현재 캐릭터의 Z 위치와 목표 Z 위치 사이의 차이
+                float DeltaZ{static_cast<float>(TargetCharacterCenterZ - GetActorLocation().Z)};
+                // 목표 Z 위치로 향하는 교정 속도 계산
+                float CorrectiveVelocityZ{DeltaZ * 5.f};
+                // 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
+                float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
+                MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity, FMath::Clamp(DeltaTime * 5.0f, 0.f, 1.f));
+				
+                // Z 속도 제한
+                MoveComp->Velocity.Z = FMath::Clamp(MoveComp->Velocity.Z, -50.f, WaterSurfaceVelocityZ + 100.f);
+
+                // 물이 상승 중이 아닐 때, 캐릭터가 물 표면 근처에 있고 거의 움직이지 않는다면 Z 속도를 0으로
+                if (FMath::Abs(DeltaZ) < 2.0f && WaterSurfaceVelocityZ == 0.f && FMath::Abs(MoveComp->Velocity.Z) < 5.f)
+                {
+                    MoveComp->Velocity.Z = FMath::FInterpTo(MoveComp->Velocity.Z, 0.f, DeltaTime, 5.0f);
+                }
+
+                // 수평 움직임
+                MoveComp->Velocity.X *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
+                MoveComp->Velocity.Y *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
 			}
-		// 캐릭터의 Z 속도가 물의 상승 속도보다 느리면, 물의 상승 속도에 맞춤
-			if (MoveComp->Velocity.Z < WaterSurfaceVelocityZ)
-			{
-				FVector CurrentVelocity{MoveComp->Velocity};
-				MoveComp->Velocity = FVector(CurrentVelocity.X, CurrentVelocity.Y, WaterSurfaceVelocityZ);
-			}
-			else
-			{
-				// 이미 물 상승 속도보다 빠르게 위로 움직이고 있거나, 물이 상승하지 않는 경우
-				MoveComp->Velocity.Z *= 0.9f;
-			}
+			
 			break;
 		}
 	}
