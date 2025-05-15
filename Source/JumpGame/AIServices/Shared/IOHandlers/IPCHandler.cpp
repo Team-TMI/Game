@@ -18,8 +18,7 @@ FIPCHandler::FIPCHandler()
 {
 }
 
-bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo, 
-	std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr)
+bool FIPCHandler::Init(const FIOHandlerInitInfo& InitInfo, MessageQueuePtr InMessageQueuePtr, HttpMessageQueuePtr InHttpMessageQueuePtr)
 {
 	PipeName = bReader ? PIPE_PREFIX + InitInfo.ReadPipeName : PIPE_PREFIX + InitInfo.SendPipeName;
 	MessageQueue = InMessageQueuePtr;

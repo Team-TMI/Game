@@ -39,6 +39,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+
+	void FrogSkinFinder();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input

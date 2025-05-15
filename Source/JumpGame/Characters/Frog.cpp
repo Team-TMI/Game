@@ -131,8 +131,9 @@ AFrog::AFrog()
 		JumpGaugeUIComponent->SetRelativeLocation(FVector(0, 0.f, 0));
 		JumpGaugeUIComponent->SetWidgetClass(JumpGaugeUIClass);
 		JumpGaugeUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
-		JumpGaugeUIComponent->SetDrawSize(FVector2D(240, 200));
-		JumpGaugeUIComponent->SetPivot(FVector2D(1.0, 0.5));
+		JumpGaugeUIComponent->SetDrawSize(FVector2D(180, 150));
+		JumpGaugeUIComponent->SetPivot(FVector2D(3.0, 0.3));
+		JumpGaugeUIComponent->SetDrawAtDesiredSize(true);
 	}
 	ConstructorHelpers::FObjectFinder<UMaterial> WaterPostProcessFinder
 		(TEXT("/Game/PostProcess/MPP_InWater.MPP_InWater"));
@@ -241,6 +242,8 @@ AFrog::AFrog()
 	TimeSpentInWater = 0.f;
 	SurfaceStateForceTime = 5.f;
 	bWaterStateForcedByTime = false;
+
+	FrogSkinFinder();
 }
 
 void AFrog::NotifyControllerChanged()
@@ -263,16 +266,16 @@ void AFrog::NotifyControllerChanged()
 void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (WaterPostProcessComponent && WaterPostProcessMaterial)
 	{
 		WaterPostProcessDynamicMaterial = UMaterialInstanceDynamic::Create(
 			WaterPostProcessMaterial, this);
-		
+
 		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessDynamicMaterial, 1.f);
 		//WaterPostProcessComponent->Settings.Blendables.Add(WaterPostProcessDynamicMaterial);
 	}
-	
+
 	// 로컬 플레이어만 카메라 오버랩 이벤트 바인딩
 	if (IsLocallyControlled() && CameraCollision != nullptr)
 	{
@@ -294,6 +297,7 @@ void AFrog::BeginPlay()
 	
 	InitFrogState();
 }
+
 
 // Called every frame
 void AFrog::Tick(float DeltaTime)
@@ -561,10 +565,10 @@ void AFrog::SetCrouchEnabled(bool bEnabled)
 {
 	bCanCrouch = bEnabled;
 
-	if (JumpGaugeUIComponent != nullptr)
-	{
-		SetJumpGaugeVisibility(bCanCrouch);
-	}
+	// if (JumpGaugeUIComponent != nullptr)
+	// {
+	// 	SetJumpGaugeVisibility(bCanCrouch);
+	// }
 }
 
 void AFrog::StartCrouch()
@@ -676,6 +680,7 @@ void AFrog::MulticastRPC_StartCrouch_Implementation()
 	}
 
 	bIsCrouching = true;
+	SetJumpGaugeVisibility(true);
 	Crouch();
 
 	// 슈퍼 점프 게이지 충전
@@ -706,6 +711,7 @@ void AFrog::MulticastRPC_StopCrouch_Implementation()
 	}
 
 	bIsCrouching = false;
+	SetJumpGaugeVisibility(false);
 	UnCrouch();
 
 	GetWorldTimerManager().ClearTimer(CrouchTimer);
@@ -786,7 +792,7 @@ void AFrog::InitFrogState()
 	// 로컬 클라만 점프 게이지 보이게
 	if (IsLocallyControlled())
 	{
-		SetJumpGaugeVisibility(true);
+		SetJumpGaugeVisibility(false);
 	}
 	else
 	{
@@ -868,7 +874,7 @@ void AFrog::ServerRPC_PrepareMission_Implementation(FVector Loc)
 		SetActorLocation(Loc);
 		StopMovementAndResetRotation();
 		SetCrouchEnabled(false);
-
+		SetJumpGaugeVisibility(false);
 		MulticastRPC_SetMissionCamera();
 	}
 }
@@ -951,7 +957,7 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, TongueLengthRatio);
 	DOREPLIFETIME(AFrog, bIsTongueGrow);
 	DOREPLIFETIME(AFrog, bCanTongAttack);
-	
+
 	DOREPLIFETIME(AFrog, SkinIndex);
 }
 
@@ -977,6 +983,8 @@ void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, c
 		CurrentWaterVolume = WaterVolume;
 		TimeSpentInWater = 0.f;
 		bWaterStateForcedByTime = false;
+		SetJumpGaugeVisibility(false);
+
 		ResetSuperJumpRatio();
 	}
 	else
@@ -1121,31 +1129,34 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 				{
 					WaterSurfaceVelocityZ = CurrentWaterVolume->CurrentRisingSpeed;
 				}
-				
-                // 캐릭터가 물 표면에 거의 닿도록 목표 Z 설정
-                float TargetCharacterCenterZ{WaterSurfaceZ + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.9f};
-                // 현재 캐릭터의 Z 위치와 목표 Z 위치 사이의 차이
-                float DeltaZ{static_cast<float>(TargetCharacterCenterZ - GetActorLocation().Z)};
-                // 목표 Z 위치로 향하는 교정 속도 계산
-                float CorrectiveVelocityZ{DeltaZ * 5.f};
-                // 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
-                float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
-                MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity, FMath::Clamp(DeltaTime * 5.0f, 0.f, 1.f));
-				
-                // Z 속도 제한
-                MoveComp->Velocity.Z = FMath::Clamp(MoveComp->Velocity.Z, -50.f, WaterSurfaceVelocityZ + 100.f);
 
-                // 물이 상승 중이 아닐 때, 캐릭터가 물 표면 근처에 있고 거의 움직이지 않는다면 Z 속도를 0으로
-                if (FMath::Abs(DeltaZ) < 2.0f && WaterSurfaceVelocityZ == 0.f && FMath::Abs(MoveComp->Velocity.Z) < 5.f)
-                {
-                    MoveComp->Velocity.Z = FMath::FInterpTo(MoveComp->Velocity.Z, 0.f, DeltaTime, 5.0f);
-                }
+				// 캐릭터가 물 표면에 거의 닿도록 목표 Z 설정
+				float TargetCharacterCenterZ{
+					WaterSurfaceZ + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.9f
+				};
+				// 현재 캐릭터의 Z 위치와 목표 Z 위치 사이의 차이
+				float DeltaZ{static_cast<float>(TargetCharacterCenterZ - GetActorLocation().Z)};
+				// 목표 Z 위치로 향하는 교정 속도 계산
+				float CorrectiveVelocityZ{DeltaZ * 5.f};
+				// 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
+				float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
+				MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity,
+				                                   FMath::Clamp(DeltaTime * 5.0f, 0.f, 1.f));
 
-                // 수평 움직임
-                MoveComp->Velocity.X *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
-                MoveComp->Velocity.Y *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
+				// Z 속도 제한
+				MoveComp->Velocity.Z = FMath::Clamp(MoveComp->Velocity.Z, -50.f, WaterSurfaceVelocityZ + 100.f);
+
+				// 물이 상승 중이 아닐 때, 캐릭터가 물 표면 근처에 있고 거의 움직이지 않는다면 Z 속도를 0으로
+				if (FMath::Abs(DeltaZ) < 2.0f && WaterSurfaceVelocityZ == 0.f && FMath::Abs(MoveComp->Velocity.Z) < 5.f)
+				{
+					MoveComp->Velocity.Z = FMath::FInterpTo(MoveComp->Velocity.Z, 0.f, DeltaTime, 5.0f);
+				}
+
+				// 수평 움직임
+				MoveComp->Velocity.X *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
+				MoveComp->Velocity.Y *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
 			}
-			
+
 			break;
 		}
 	}
@@ -1265,8 +1276,9 @@ void AFrog::SetTongueLength(float Value)
 
 void AFrog::CalculateWaterCameraOverlapRatio(float dt)
 {
-	if (!OverlapWaterComponent.IsValid()) return;
-	
+	if (!OverlapWaterComponent.IsValid())
+		return;
+
 	FBox CameraBox{CameraCollision->Bounds.GetBox()};
 	FBox WaterBox{OverlapWaterComponent->Bounds.GetBox()};
 	FBox OverlapBox{CameraBox.Overlap(WaterBox)};
@@ -1280,9 +1292,9 @@ void AFrog::CalculateWaterCameraOverlapRatio(float dt)
 		float WaterHeightValue{1.f - 2.f * SubmergedPercent};
 		//FLog::Log("", SubmergedPercent, WaterHeightValue);
 		WaterPostProcessDynamicMaterial->SetScalarParameterValue(
-			   TEXT("Water_Height"), 
-			   WaterHeightValue
-		   );
+			TEXT("Water_Height"),
+			WaterHeightValue
+		);
 	}
 }
 
@@ -1304,6 +1316,67 @@ void AFrog::OnRep_SkinIndex()
 	}
 }
 
+void AFrog::FrogSkinFinder()
+{
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture1
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_1.frog_body_BaseColor_1"));
+	if (Texture1.Succeeded())
+	{
+		SkinTextures.Add(Texture1.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture2
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_2.frog_body_BaseColor_2"));
+	if (Texture2.Succeeded())
+	{
+		SkinTextures.Add(Texture2.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture3
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_3.frog_body_BaseColor_3"));
+	if (Texture3.Succeeded())
+	{
+		SkinTextures.Add(Texture3.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture4
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_4.frog_body_BaseColor_4"));
+	if (Texture4.Succeeded())
+	{
+		SkinTextures.Add(Texture4.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture5
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_5.frog_body_BaseColor_5"));
+	if (Texture5.Succeeded())
+	{
+		SkinTextures.Add(Texture5.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture6
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_6.frog_body_BaseColor_6"));
+	if (Texture6.Succeeded())
+	{
+		SkinTextures.Add(Texture6.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture7
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_7.frog_body_BaseColor_7"));
+	if (Texture7.Succeeded())
+	{
+		SkinTextures.Add(Texture7.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture8
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_8.frog_body_BaseColor_8"));
+	if (Texture8.Succeeded())
+	{
+		SkinTextures.Add(Texture8.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture9
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_9.frog_body_BaseColor_9"));
+	if (Texture9.Succeeded())
+	{
+		SkinTextures.Add(Texture9.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture10
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_10.frog_body_BaseColor_10"));
+	if (Texture10.Succeeded())
+	{
+		SkinTextures.Add(Texture10.Object);
 // 플레이어 감정표현
 void AFrog::OnPressCKey()
 {	

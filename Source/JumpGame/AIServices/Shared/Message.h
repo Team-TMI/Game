@@ -13,6 +13,8 @@ enum class EMessageType : uint8
 	EyeTrackingNotifyMessage = 6,
 	EyeTrackingRequestMessage = 7,
 	EyeTrackingResponseMessage = 8,
+	HttpMultipartRequest = 9,
+	HttpMultipartResponse = 10,
 	ParsedWaveResponse = 100,
 };
 
@@ -120,6 +122,7 @@ struct FEyeTrackingResponseMessage {
 	uint8 State; // 100 : 정상성, 200 : 클라 에러, 300 : 서버 에러
 };
 
+
 #pragma pack(pop)
 
 union FMessageUnion
@@ -133,5 +136,6 @@ union FMessageUnion
 	FEyeTrackingNotifyMessage EyeTrackingNotifyMessage;
 	FEyeTrackingRequestMessage EyeTrackingRequestMessage;
 	FEyeTrackingResponseMessage EyeTrackingResponseMessage;
+
 	uint8 RawData[1460];
 };

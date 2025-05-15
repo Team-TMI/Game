@@ -40,7 +40,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="IO")
 	class UIOManagerComponent* IOManagerComponent = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HTTP")
+	class UHttpManagerComponent* HttpManagerComponent = nullptr;
 
+	FString GetImageRequestURL() const { return HttpsRequestImageURL; }
+	FString GetImageRequestPath() const { return HttpsRequestImagePath; }
+	
 protected:
 	UPROPERTY()
 	class UConnectionVerifyComponent* ConnectionVerifyComponent = nullptr;
@@ -67,4 +72,8 @@ public:
 	FTimerHandle ConnectionTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Connection")
 	float CheckInterval = 0.25f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HttpsURL", meta=(AllowPrivateAccess="true"))
+	FString HttpsRequestImageURL = TEXT("https://example.com");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HttpsURL", meta=(AllowPrivateAccess="true"))
+	FString HttpsRequestImagePath = TEXT("/upload");
 };

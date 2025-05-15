@@ -4,6 +4,7 @@
 #include "MapEditorState.h"
 
 #include "Blueprint/UserWidget.h"
+#include "JumpGame/AIServices/Shared/HttpManagerComponent.h"
 #include "JumpGame/MapEditor/CategorySystem/CategorySystem.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
 #include "JumpGame/Props/SaveLoad/SaveMapComponent.h"
@@ -24,6 +25,7 @@ AMapEditorState::AMapEditorState()
 
 	SaveMapComponent = CreateDefaultSubobject<USaveMapComponent>(TEXT("SaveMapComponent"));
 	LoadMapComponent = CreateDefaultSubobject<ULoadMapComponent>(TEXT("LoadMapComponent"));
+	HttpManagerComponent = CreateDefaultSubobject<UHttpManagerComponent>(TEXT("HttpManagerComponent"));
 }
 
 void AMapEditorState::BeginPlay()

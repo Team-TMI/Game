@@ -12,9 +12,12 @@ class JUMPGAME_API UCategoryUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* DragDropOperation);
 
+	UFUNCTION()
+	void OnPropSlotClicked(FName PropID, class UClass* InPropClass);
 private:
 	void ClearSubCategoryButtons();
 	void ClearMajorCategoryButtons();
@@ -25,6 +28,12 @@ private:
 	class UScrollBox* SubCategories;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UScrollBox* MajorCategories;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UEditableText* SearchText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UImage* PropOverviewImage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UButton* ImageSearchButton;
 
 	UPROPERTY()
 	class UMajorCategoryButtonUI* SelectedMajorCategory = nullptr;
@@ -45,4 +54,20 @@ private:
 	void OnMajorCategoryButtonClicked(const EMajorCategoryType& MajorCategory, bool bAbsolute = false);
 	UFUNCTION()
 	void OnSubCategoryButtonClicked(const EMajorCategoryType& MajorCategory, const ESubCategoryType& SubCategory);
+	UFUNCTION()
+	void OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+	UFUNCTION()
+	void OnSearchTextChanged(const FText& Text);
+	UFUNCTION()
+	void OnImageSearchButtonClicked();
+	bool OpenFileDialog(FString& OutFilePath);
+	bool SendImageRequest(const FString& ImagePath);
+	void OnImageSearchResponse();
+	void SetTextToDefault();
+	void SetGridToDefault();
+
+	FString DefaultSearchText = TEXT("검색 할 내용을 입력하세요");
+
+	FTimerHandle SearchTimerHandle;
+	float SearchDelay = 0.5f;
 };

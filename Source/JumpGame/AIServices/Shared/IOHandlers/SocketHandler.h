@@ -14,8 +14,9 @@ class JUMPGAME_API FSocketHandler : public IIOHandlerInterface, public TSharedFr
 public:
 	FSocketHandler();
 
-	virtual bool Init(const FIOHandlerInitInfo& InitInfo, std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr) override;
+	virtual bool Init(const FIOHandlerInitInfo& InitInfo, MessageQueuePtr InMessageQueuePtr, HttpMessageQueuePtr InHttpMessageQueuePtr) override;
 	virtual bool SendGameMessage(const FMessageUnion& Message) override;
+	virtual bool SendGameMessage(const FHttpMessageWrapper& HttpMessage) override { return false; };
 	virtual bool ReceiveMessage() override { return true; };
 	
 	virtual ~FSocketHandler() override;
