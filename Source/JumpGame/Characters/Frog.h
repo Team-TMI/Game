@@ -48,6 +48,11 @@ public:
 	void OnCameraEndOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION()
+	void OnTongueBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+								   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+								   const FHitResult& SweepResult);
+	
 public:
 	// Input
 	void Move(const struct FInputActionValue& Value);
@@ -58,6 +63,8 @@ public:
 	void StopSprint();
 	void StartCrouch();
 	void StopCrouch();
+	void TongueAttack();
+	void TongueAttackEnd();
 	void DebugMode();
 	void PropActive();
 	void PropCheat();
@@ -72,6 +79,9 @@ public:
 	void ServerRPC_StartSprint();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StopSprint();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StartTongueAttack();
+
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -89,11 +99,10 @@ public:
 	void SetCrouchEnabled(bool bEnabled);
 	UFUNCTION()
 	void OnRep_SuperJumpRatio();
-	
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetJumpAvailableBlock(int32 Block);
-	// UFUNCTION(Server, Reliable)
-	// void ServerRPC_ResetSuperJumpRatio();
+	void CalculateWaterCameraOverlapRatio(float dt);
+	
 public:
 	// 물에 들어갔는지, 나왔는지 업데이트
 	UFUNCTION(Server, Reliable, WithValidation)
@@ -121,8 +130,22 @@ public:
 	void ServerRPC_FinishMission();
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetMovementCamera();
+
+	UFUNCTION()
+	void OnRep_TongueLengthRatio();
+	UFUNCTION()
+	void OnRep_IsTongueGrow();
+	UFUNCTION()
+	void OnRep_CanTongAttack();
 	
-	
+	// 혓바닥
+	void SetTongueLength(float Value);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetSkin(int32 NewIndex);
+	UFUNCTION()
+	void OnRep_SkinIndex();
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -140,6 +163,8 @@ public:
 	class UInputAction* CrouchAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* SprintAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* TongueAttackAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* PropActiveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -184,7 +209,20 @@ public:
 	// 로비 캐릭터인지
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bIsLobbyFrog{false};
-	
+	// 혓바닥 공격
+	FTimerHandle TongueTimer;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_TongueLengthRatio)
+	float TongueLengthRatio{0.f};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_IsTongueGrow)
+	bool bIsTongueGrow{false};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CanTongAttack)
+	bool bCanTongAttack{true};
+	// 스킨
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UTexture2D*> SkinTextures;
+	UPROPERTY(ReplicatedUsing=OnRep_SkinIndex)
+	int32 SkinIndex{};
+
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -202,8 +240,17 @@ public:
 	class UWidgetComponent* JumpGaugeUIComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UMaterial* WaterPostProcessMaterial;
+	UPROPERTY()
+	UMaterialInstanceDynamic* WaterPostProcessDynamicMaterial;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UPostProcessComponent* WaterPostProcessComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UStaticMeshComponent* FrogTongueMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USphereComponent* TongueCollision;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UArrowComponent* TongueTipComponent;
+
 	
 	// Enum
 public:
@@ -214,4 +261,7 @@ public:
 public:
 	UPROPERTY(EditAnywhere)
 	class USoundBase* JumpSound;
+
+	UPROPERTY()
+	TWeakObjectPtr<UPrimitiveComponent> OverlapWaterComponent;
 };

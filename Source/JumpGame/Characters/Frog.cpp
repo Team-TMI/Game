@@ -8,9 +8,11 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PostProcessComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -82,6 +84,13 @@ AFrog::AFrog()
 		SprintAction = Frog_Sprint.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_TongueAttack
+		(TEXT("/Game/Characters/Input/IA_FrogTongueAttack.IA_FrogTongueAttack"));
+	if (Frog_TongueAttack.Succeeded())
+	{
+		TongueAttackAction = Frog_TongueAttack.Object;
+	}
+
 	ConstructorHelpers::FObjectFinder<UInputAction> Frog_DebugMode
 		(TEXT("/Game/Characters/Input/IA_DebugMode.IA_DebugMode"));
 	if (Frog_Sprint.Succeeded())
@@ -102,9 +111,9 @@ AFrog::AFrog()
 	{
 		PropCheatAction = Frog_PropCheat.Object;
 	}
-	
+
 	ConstructorHelpers::FObjectFinder<USoundBase> JumpSoundObject
-	(TEXT("/Game/Sounds/Ques/Jump_Cue.Jump_Cue"));
+		(TEXT("/Game/Sounds/Ques/Jump_Cue.Jump_Cue"));
 	if (JumpSoundObject.Succeeded())
 	{
 		JumpSound = JumpSoundObject.Object;
@@ -131,10 +140,33 @@ AFrog::AFrog()
 		WaterPostProcessMaterial = WaterPostProcessFinder.Object;
 		WaterPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(
 			TEXT("WaterPostProcessComponent"));
-		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessMaterial, 0.5);
+		//WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessMaterial, 0.5);
 		WaterPostProcessComponent->SetupAttachment(GetRootComponent());
 		WaterPostProcessComponent->bEnabled = false;
 	}
+
+	FrogTongueMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FrogTongueMesh"));
+	FrogTongueMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FrogTongueMesh->SetupAttachment(GetMesh(), FName(TEXT("TongueSocket")));
+	FrogTongueMesh->SetRelativeScale3D(FVector(1.f, 0.f, 1.f));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TongueMesh
+		(TEXT("/Game/Characters/Tongue/sm_tongue2.sm_tongue2"));
+	if (TongueMesh.Succeeded())
+	{
+		FrogTongueMesh->SetStaticMesh(TongueMesh.Object);
+	}
+
+	TongueCollision = CreateDefaultSubobject<USphereComponent>(TEXT("TongueCollision"));
+	TongueCollision->SetupAttachment(GetMesh(), FName("TongueSocket"));
+	TongueCollision->SetSphereRadius(10.f);
+	TongueCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//TongueCollision->SetCollisionProfileName(TEXT("TongueCollision"));
+	//TongueCollision->ComponentTags.Add(TEXT("TongueCollision"));
+
+	TongueTipComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("TongueTipComponent"));
+	TongueTipComponent->SetupAttachment(FrogTongueMesh, FName("TongueTipSocket"));
+	TongueTipComponent->SetRelativeRotation(FRotator(0, 90.f, 0));
 
 	// CapsuleComponent Settings
 	GetCapsuleComponent()->InitCapsuleSize(43.f, 70.0f);
@@ -149,7 +181,7 @@ AFrog::AFrog()
 
 	// CharacterMovement Settings
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->MaxAcceleration = 800.0f;
+	GetCharacterMovement()->MaxAcceleration = 1200.0f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
 	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
@@ -164,9 +196,12 @@ AFrog::AFrog()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = false;
+	GetCharacterMovement()->FallingLateralFriction = 5.f;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
 	CameraBoom->TargetArmLength = 400.0f;
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->bEnableCameraLag = true;
@@ -178,7 +213,7 @@ AFrog::AFrog()
 	CameraCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("CameraCollision"));
 	CameraCollision->SetupAttachment(FollowCamera);
 	CameraCollision->SetBoxExtent(FVector(32.f, 32.f, 32.f));
-	CameraCollision->SetRelativeLocation(FVector(0, 0, 0.f));
+	CameraCollision->SetRelativeLocation(FVector(0, 0, -50.f));
 	CameraCollision->SetCollisionProfileName(TEXT("CameraCollision"));
 	CameraCollision->ComponentTags.Add(TEXT("CameraCollision"));
 
@@ -213,8 +248,10 @@ void AFrog::NotifyControllerChanged()
 
 	if (APlayerController* PlayerController{Cast<APlayerController>(Controller)})
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem{ULocalPlayer::GetSubsystem<
-			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())})
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem{
+			ULocalPlayer::GetSubsystem<
+				UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())
+		})
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
@@ -225,12 +262,26 @@ void AFrog::NotifyControllerChanged()
 void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
+	if (WaterPostProcessComponent && WaterPostProcessMaterial)
+	{
+		WaterPostProcessDynamicMaterial = UMaterialInstanceDynamic::Create(
+			WaterPostProcessMaterial, this);
+		
+		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessDynamicMaterial, 1.f);
+		//WaterPostProcessComponent->Settings.Blendables.Add(WaterPostProcessDynamicMaterial);
+	}
+	
 	// 로컬 플레이어만 카메라 오버랩 이벤트 바인딩
 	if (IsLocallyControlled() && CameraCollision != nullptr)
 	{
 		CameraCollision->OnComponentBeginOverlap.AddDynamic(this, &AFrog::OnCameraBeginOverlapWater);
 		CameraCollision->OnComponentEndOverlap.AddDynamic(this, &AFrog::OnCameraEndOverlapWater);
+	}
+
+	if (TongueCollision != nullptr && HasAuthority())
+	{
+		TongueCollision->OnComponentBeginOverlap.AddDynamic(this, &AFrog::OnTongueBeginOverlap);
 	}
 
 	InitFrogState();
@@ -245,6 +296,7 @@ void AFrog::Tick(float DeltaTime)
 	}
 
 	Super::Tick(DeltaTime);
+
 	//FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
 
 	// 공중에 있을 때는 회전 잘 안되게
@@ -293,6 +345,13 @@ void AFrog::Tick(float DeltaTime)
 	{
 		HandleInWaterLogic(DeltaTime);
 	}
+
+	if (IsLocallyControlled() && OverlapWaterComponent.IsValid())
+	{
+		// 정렬 시키고 검사
+		CameraCollision->SetWorldRotation(FRotator::ZeroRotator);
+		CalculateWaterCameraOverlapRatio(DeltaTime);
+	}
 }
 
 // Called to bind functionality to input
@@ -300,8 +359,10 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (UEnhancedInputComponent* EnhancedInputComponent{Cast<UEnhancedInputComponent>(
-		PlayerInputComponent)})
+	if (UEnhancedInputComponent* EnhancedInputComponent{
+		Cast<UEnhancedInputComponent>(
+			PlayerInputComponent)
+	})
 	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this,
 		                                   &AFrog::StartJump);
@@ -317,6 +378,9 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		                                   &AFrog::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this,
 		                                   &AFrog::StopSprint);
+
+		EnhancedInputComponent->BindAction(TongueAttackAction, ETriggerEvent::Started, this,
+		                                   &AFrog::TongueAttack);
 
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFrog::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrog::Look);
@@ -383,7 +447,7 @@ void AFrog::StartJump()
 	{
 		return;
 	}
-	
+
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
@@ -440,7 +504,7 @@ void AFrog::StartSprint()
 	{
 		return;
 	}
-	
+
 	if (GetCharacterMovement()->IsFalling())
 	{
 		return;
@@ -487,13 +551,49 @@ void AFrog::StartCrouch()
 	{
 		return;
 	}
-	
+
 	MulticastRPC_StartCrouch();
 }
 
 void AFrog::StopCrouch()
 {
 	MulticastRPC_StopCrouch();
+}
+
+void AFrog::TongueAttack()
+{
+	if (HasAuthority())
+	{
+		ServerRPC_StartTongueAttack_Implementation();
+	}
+	else
+	{
+		ServerRPC_StartTongueAttack();
+	}
+}
+
+void AFrog::TongueAttackEnd()
+{
+	GetWorldTimerManager().ClearTimer(TongueTimer);
+
+	TongueLengthRatio = 0.f;
+	bIsTongueGrow = false;
+
+	OnRep_TongueLengthRatio();
+	OnRep_IsTongueGrow();
+
+	// 혹시 모르니까 다시 설정
+	TongueCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 혓바닥 공격 쿨타임
+	FTimerDelegate TongueAttackCoolTimeDelegate{
+		FTimerDelegate::CreateLambda([this]() {
+			bCanTongAttack = true;
+			OnRep_CanTongAttack();
+		})
+	};
+
+	GetWorldTimerManager().SetTimer(TongueTimer, TongueAttackCoolTimeDelegate, 1.f, false);
 }
 
 void AFrog::DebugMode()
@@ -602,6 +702,60 @@ void AFrog::ServerRPC_StopSprint_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
 
+void AFrog::ServerRPC_StartTongueAttack_Implementation()
+{
+	if (!bCanTongAttack)
+	{
+		return;
+	}
+
+
+	bCanTongAttack = false;
+	bIsTongueGrow = true;
+	TongueLengthRatio = 0.f;
+
+	// 서버에서 OnRep 함수를 직접 호출하여 서버 화면에서도 즉시 상태 변경이 반영되도록 함
+	OnRep_CanTongAttack();
+	OnRep_IsTongueGrow();
+	OnRep_TongueLengthRatio();
+
+	TongueCollision->SetCollisionProfileName(FName("FrogTongue"));
+	TongueCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	FTimerDelegate TongueAttackDelegate{
+		FTimerDelegate::CreateLambda([this]() {
+			if (bIsTongueGrow)
+			{
+				TongueLengthRatio += GetWorld()->GetDeltaSeconds() * 8.f;
+
+				if (TongueLengthRatio > 1.f)
+				{
+					TongueLengthRatio = 1.f;
+					bIsTongueGrow = false;
+					TongueCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+					OnRep_IsTongueGrow();
+				}
+			}
+			else
+			{
+				TongueLengthRatio -= GetWorld()->GetDeltaSeconds() * 8.f;
+
+				if (TongueLengthRatio < 0.f)
+				{
+					TongueLengthRatio = 0.f;
+					TongueAttackEnd();
+					return;
+				}
+			}
+
+			OnRep_TongueLengthRatio();
+		})
+	};
+
+	GetWorldTimerManager().SetTimer(TongueTimer, TongueAttackDelegate, GetWorld()->GetDeltaSeconds(), true);
+}
+
 void AFrog::InitFrogState()
 {
 	SetJumpAvailableBlock(1);
@@ -638,7 +792,10 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
 	}
 
-	ServerRPC_SetJumpAvailableBlock(Block);
+	if (IsLocallyControlled())
+	{
+		ServerRPC_SetJumpAvailableBlock(Block);
+	}
 }
 
 void AFrog::ResetSuperJumpRatio()
@@ -689,7 +846,7 @@ void AFrog::ServerRPC_PrepareMission_Implementation(FVector Loc)
 		SetActorLocation(Loc);
 		StopMovementAndResetRotation();
 		SetCrouchEnabled(false);
-		
+
 		MulticastRPC_SetMissionCamera();
 	}
 }
@@ -768,6 +925,12 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	// 항상 복제
 	DOREPLIFETIME_CONDITION(AFrog, CharacterWaterState, COND_None);
 	DOREPLIFETIME_CONDITION(AFrog, bIsSwimming, COND_None);
+
+	DOREPLIFETIME(AFrog, TongueLengthRatio);
+	DOREPLIFETIME(AFrog, bIsTongueGrow);
+	DOREPLIFETIME(AFrog, bCanTongAttack);
+	
+	DOREPLIFETIME(AFrog, SkinIndex);
 }
 
 void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, class ARisingWaterProp* WaterVolume)
@@ -919,24 +1082,42 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 
 			break;
 		case ECharacterStateEnum::Surface:
-			MoveComp->GravityScale = 0.1f;
+			MoveComp->GravityScale = 0.05f;
+
+			float WaterSurfaceZ{CurrentWaterVolume->GetWaterSurfaceZ()};
 			float WaterSurfaceVelocityZ{0.f};
 		// 물이 상승중이라면
-			if (CurrentWaterVolume.IsValid() && CurrentWaterVolume->WaterState == EWaterStateEnum::Rise)
+			if (CurrentWaterVolume.IsValid())
 			{
-				WaterSurfaceVelocityZ = CurrentWaterVolume->CurrentRisingSpeed;
+				if (CurrentWaterVolume->WaterState == EWaterStateEnum::Rise)
+				{
+					WaterSurfaceVelocityZ = CurrentWaterVolume->CurrentRisingSpeed;
+				}
+				
+                // 캐릭터가 물 표면에 거의 닿도록 목표 Z 설정
+                float TargetCharacterCenterZ{WaterSurfaceZ + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.9f};
+                // 현재 캐릭터의 Z 위치와 목표 Z 위치 사이의 차이
+                float DeltaZ{static_cast<float>(TargetCharacterCenterZ - GetActorLocation().Z)};
+                // 목표 Z 위치로 향하는 교정 속도 계산
+                float CorrectiveVelocityZ{DeltaZ * 5.f};
+                // 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
+                float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
+                MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity, FMath::Clamp(DeltaTime * 5.0f, 0.f, 1.f));
+				
+                // Z 속도 제한
+                MoveComp->Velocity.Z = FMath::Clamp(MoveComp->Velocity.Z, -50.f, WaterSurfaceVelocityZ + 100.f);
+
+                // 물이 상승 중이 아닐 때, 캐릭터가 물 표면 근처에 있고 거의 움직이지 않는다면 Z 속도를 0으로
+                if (FMath::Abs(DeltaZ) < 2.0f && WaterSurfaceVelocityZ == 0.f && FMath::Abs(MoveComp->Velocity.Z) < 5.f)
+                {
+                    MoveComp->Velocity.Z = FMath::FInterpTo(MoveComp->Velocity.Z, 0.f, DeltaTime, 5.0f);
+                }
+
+                // 수평 움직임
+                MoveComp->Velocity.X *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
+                MoveComp->Velocity.Y *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
 			}
-		// 캐릭터의 Z 속도가 물의 상승 속도보다 느리면, 물의 상승 속도에 맞춤
-			if (MoveComp->Velocity.Z < WaterSurfaceVelocityZ)
-			{
-				FVector CurrentVelocity{MoveComp->Velocity};
-				MoveComp->Velocity = FVector(CurrentVelocity.X, CurrentVelocity.Y, WaterSurfaceVelocityZ);
-			}
-			else
-			{
-				// 이미 물 상승 속도보다 빠르게 위로 움직이고 있거나, 물이 상승하지 않는 경우
-				MoveComp->Velocity.Z *= 0.9f;
-			}
+			
 			break;
 		}
 	}
@@ -961,7 +1142,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 void AFrog::ServerRPC_CallLaunchCharacter_Implementation(const FVector& Dir, float Force, bool bXY, bool bZ)
 {
 	FVector LaunchVelocity{Dir.GetSafeNormal() * Force};
-	
+
 	if (HasAuthority())
 	{
 		LaunchCharacter(LaunchVelocity, bXY, bZ);
@@ -976,6 +1157,9 @@ void AFrog::OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, 
 		ActorHasTag(TEXT("Water")) && OtherComp && OtherComp->ComponentHasTag(TEXT("CameraWater")))
 	{
 		WaterPostProcessComponent->bEnabled = true;
+
+		OverlapWaterComponent = OtherComp;
+		//OtherComp->AddToRoot();
 	}
 }
 
@@ -986,5 +1170,108 @@ void AFrog::OnCameraEndOverlapWater(UPrimitiveComponent* OverlappedComponent, AA
 		ActorHasTag(TEXT("Water")) && OtherComp && OtherComp->ComponentHasTag(TEXT("CameraWater")))
 	{
 		WaterPostProcessComponent->bEnabled = false;
+
+		//OtherComp->RemoveFromRoot();
+		OverlapWaterComponent = nullptr;
+	}
+}
+
+void AFrog::OnTongueBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                 const FHitResult& SweepResult)
+{
+	// 서버에서만 충돌 처리
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
+	if (OverlappingFrog && OverlappingFrog != this)
+	{
+		bIsTongueGrow = false;
+
+		// 충돌체 비활성화, 중복 충돌 방지
+		//TongueCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		TongueCollision->SetCollisionResponseToChannels(ECR_Ignore);
+
+		FVector Dir{TongueTipComponent->GetForwardVector() + FVector::UpVector};
+		Dir.Normalize();
+
+		OverlappingFrog->LaunchCharacter(Dir * 300.f, true, true);
+	}
+}
+
+void AFrog::OnRep_TongueLengthRatio()
+{
+	SetTongueLength(TongueLengthRatio);
+
+	// if (TongueCollision && TongueTipComponent)
+	// {
+	// 	TongueCollision->SetWorldTransform(TongueTipComponent->GetComponentTransform());
+	// }
+}
+
+void AFrog::OnRep_IsTongueGrow()
+{
+	// bIsTongueGrow 상태 변화에 따른 클라이언트 액션
+}
+
+void AFrog::OnRep_CanTongAttack()
+{
+	// bCanTongAttack 상태 변화에 따른 클라이언트 액션
+}
+
+void AFrog::SetTongueLength(float Value)
+{
+	Value = FMath::Clamp(Value, 0.f, 1.f);
+	FrogTongueMesh->SetRelativeScale3D(FVector(1.f, Value, 1.f));
+
+	if (HasAuthority() && TongueCollision && TongueTipComponent)
+	{
+		TongueCollision->SetWorldLocationAndRotation(FVector(TongueTipComponent->GetComponentLocation()),
+		                                             FRotator(TongueTipComponent->GetComponentRotation()));
+	}
+}
+
+
+void AFrog::CalculateWaterCameraOverlapRatio(float dt)
+{
+	if (!OverlapWaterComponent.IsValid()) return;
+	
+	FBox CameraBox{CameraCollision->Bounds.GetBox()};
+	FBox WaterBox{OverlapWaterComponent->Bounds.GetBox()};
+	FBox OverlapBox{CameraBox.Overlap(WaterBox)};
+
+	if (OverlapBox.IsValid && WaterPostProcessDynamicMaterial)
+	{
+		float SubmergedPercent{static_cast<float>(OverlapBox.GetVolume() / CameraBox.GetVolume())};
+
+		// SubmergedPercent: 0 ~ 1
+		// Water_Height: 1 ~ -1
+		float WaterHeightValue{1.f - 2.f * SubmergedPercent};
+		//FLog::Log("", SubmergedPercent, WaterHeightValue);
+		WaterPostProcessDynamicMaterial->SetScalarParameterValue(
+			   TEXT("Water_Height"), 
+			   WaterHeightValue
+		   );
+	}
+}
+
+void AFrog::ServerRPC_SetSkin_Implementation(int32 NewIndex)
+{
+	SkinIndex = NewIndex;
+	OnRep_SkinIndex();
+}
+
+void AFrog::OnRep_SkinIndex()
+{
+	if (GetMesh())
+	{
+		UMaterialInstanceDynamic* DynMat{GetMesh()->CreateAndSetMaterialInstanceDynamic(0)};
+		if (DynMat && SkinTextures.IsValidIndex(SkinIndex))
+		{
+			DynMat->SetTextureParameterValue("Skin", SkinTextures[SkinIndex]);
+		}
 	}
 }
