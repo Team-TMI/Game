@@ -1316,67 +1316,6 @@ void AFrog::OnRep_SkinIndex()
 	}
 }
 
-void AFrog::FrogSkinFinder()
-{
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture1
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_1.frog_body_BaseColor_1"));
-	if (Texture1.Succeeded())
-	{
-		SkinTextures.Add(Texture1.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture2
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_2.frog_body_BaseColor_2"));
-	if (Texture2.Succeeded())
-	{
-		SkinTextures.Add(Texture2.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture3
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_3.frog_body_BaseColor_3"));
-	if (Texture3.Succeeded())
-	{
-		SkinTextures.Add(Texture3.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture4
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_4.frog_body_BaseColor_4"));
-	if (Texture4.Succeeded())
-	{
-		SkinTextures.Add(Texture4.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture5
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_5.frog_body_BaseColor_5"));
-	if (Texture5.Succeeded())
-	{
-		SkinTextures.Add(Texture5.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture6
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_6.frog_body_BaseColor_6"));
-	if (Texture6.Succeeded())
-	{
-		SkinTextures.Add(Texture6.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture7
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_7.frog_body_BaseColor_7"));
-	if (Texture7.Succeeded())
-	{
-		SkinTextures.Add(Texture7.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture8
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_8.frog_body_BaseColor_8"));
-	if (Texture8.Succeeded())
-	{
-		SkinTextures.Add(Texture8.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture9
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_9.frog_body_BaseColor_9"));
-	if (Texture9.Succeeded())
-	{
-		SkinTextures.Add(Texture9.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UTexture2D> Texture10
-		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_10.frog_body_BaseColor_10"));
-	if (Texture10.Succeeded())
-	{
-		SkinTextures.Add(Texture10.Object);
 // 플레이어 감정표현
 void AFrog::OnPressCKey()
 {	
@@ -1558,5 +1497,101 @@ void AFrog::ChangeEyeMaterial(int32 MatIndex)
 		{
 			DynMat->SetTextureParameterValue("Eye", EyeTextures[MatIndex]);
 		}
+	}
+}
+
+
+void AFrog::FrogSkinFinder()
+{
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture1
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_1.frog_body_BaseColor_1"));
+	if (Texture1.Succeeded())
+	{
+		SkinTextures.Add(Texture1.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture2
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_2.frog_body_BaseColor_2"));
+	if (Texture2.Succeeded())
+	{
+		SkinTextures.Add(Texture2.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture3
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_3.frog_body_BaseColor_3"));
+	if (Texture3.Succeeded())
+	{
+		SkinTextures.Add(Texture3.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture4
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_4.frog_body_BaseColor_4"));
+	if (Texture4.Succeeded())
+	{
+		SkinTextures.Add(Texture4.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture5
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_5.frog_body_BaseColor_5"));
+	if (Texture5.Succeeded())
+	{
+		SkinTextures.Add(Texture5.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture6
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_6.frog_body_BaseColor_6"));
+	if (Texture6.Succeeded())
+	{
+		SkinTextures.Add(Texture6.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture7
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_7.frog_body_BaseColor_7"));
+	if (Texture7.Succeeded())
+	{
+		SkinTextures.Add(Texture7.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture8
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_8.frog_body_BaseColor_8"));
+	if (Texture8.Succeeded())
+	{
+		SkinTextures.Add(Texture8.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture9
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_9.frog_body_BaseColor_9"));
+	if (Texture9.Succeeded())
+	{
+		SkinTextures.Add(Texture9.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture10
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_10.frog_body_BaseColor_10"));
+	if (Texture10.Succeeded())
+	{
+		SkinTextures.Add(Texture10.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture1
+	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeBasic.T_EyeBasic'"));
+	if (EyeTexture1.Succeeded())
+	{
+		EyeTextures.Add(EyeTexture1.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture2
+	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeAngry.T_EyeAngry'"));
+	if (EyeTexture2.Succeeded())
+	{
+		EyeTextures.Add(EyeTexture2.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture3
+	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeSleep.T_EyeSleep'"));
+	if (EyeTexture3.Succeeded())
+	{
+		EyeTextures.Add(EyeTexture3.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture4
+	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeCute.T_EyeCute'"));
+	if (EyeTexture4.Succeeded())
+	{
+		EyeTextures.Add(EyeTexture4.Object);
+	}
+	
+	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture5
+	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeConfuse.T_EyeConfuse'"));
+	if (EyeTexture5.Succeeded())
+	{
+		EyeTextures.Add(EyeTexture5.Object);
 	}
 }
