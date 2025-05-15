@@ -52,7 +52,7 @@ public:
 	void OnTongueBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 								   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 								   const FHitResult& SweepResult);
-
+	
 public:
 	// Input
 	void Move(const struct FInputActionValue& Value);
@@ -82,6 +82,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartTongueAttack();
 
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void InitFrogState();
@@ -100,7 +101,8 @@ public:
 	void OnRep_SuperJumpRatio();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetJumpAvailableBlock(int32 Block);
-
+	void CalculateWaterCameraOverlapRatio(float dt);
+	
 public:
 	// 물에 들어갔는지, 나왔는지 업데이트
 	UFUNCTION(Server, Reliable, WithValidation)
@@ -210,7 +212,7 @@ public:
 	bool bIsTongueGrow{false};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CanTongAttack)
 	bool bCanTongAttack{true};
-	
+
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -228,6 +230,8 @@ public:
 	class UWidgetComponent* JumpGaugeUIComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UMaterial* WaterPostProcessMaterial;
+	UPROPERTY()
+	UMaterialInstanceDynamic* WaterPostProcessDynamicMaterial;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UPostProcessComponent* WaterPostProcessComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -236,6 +240,7 @@ public:
 	class USphereComponent* TongueCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UArrowComponent* TongueTipComponent;
+
 	
 	// Enum
 public:
@@ -246,4 +251,7 @@ public:
 public:
 	UPROPERTY(EditAnywhere)
 	class USoundBase* JumpSound;
+
+	UPROPERTY()
+	TWeakObjectPtr<UPrimitiveComponent> OverlapWaterComponent;
 };

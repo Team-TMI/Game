@@ -140,7 +140,7 @@ AFrog::AFrog()
 		WaterPostProcessMaterial = WaterPostProcessFinder.Object;
 		WaterPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(
 			TEXT("WaterPostProcessComponent"));
-		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessMaterial, 0.5);
+		//WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessMaterial, 0.5);
 		WaterPostProcessComponent->SetupAttachment(GetRootComponent());
 		WaterPostProcessComponent->bEnabled = false;
 	}
@@ -181,7 +181,7 @@ AFrog::AFrog()
 
 	// CharacterMovement Settings
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->MaxAcceleration = 800.0f;
+	GetCharacterMovement()->MaxAcceleration = 1200.0f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
 	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
@@ -196,6 +196,8 @@ AFrog::AFrog()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = false;
+	GetCharacterMovement()->FallingLateralFriction = 5.f;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -261,6 +263,15 @@ void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (WaterPostProcessComponent && WaterPostProcessMaterial)
+	{
+		WaterPostProcessDynamicMaterial = UMaterialInstanceDynamic::Create(
+			WaterPostProcessMaterial, this);
+		
+		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessDynamicMaterial, 1.f);
+		//WaterPostProcessComponent->Settings.Blendables.Add(WaterPostProcessDynamicMaterial);
+	}
+	
 	// 로컬 플레이어만 카메라 오버랩 이벤트 바인딩
 	if (IsLocallyControlled() && CameraCollision != nullptr)
 	{
@@ -333,6 +344,12 @@ void AFrog::Tick(float DeltaTime)
 	if (HasAuthority())
 	{
 		HandleInWaterLogic(DeltaTime);
+	}
+
+	if (IsLocallyControlled() && OverlapWaterComponent.IsValid())
+	{
+		CameraCollision->SetWorldRotation(FRotator::ZeroRotator);
+		CalculateWaterCameraOverlapRatio(DeltaTime);
 	}
 }
 
@@ -1118,6 +1135,9 @@ void AFrog::OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, 
 		ActorHasTag(TEXT("Water")) && OtherComp && OtherComp->ComponentHasTag(TEXT("CameraWater")))
 	{
 		WaterPostProcessComponent->bEnabled = true;
+
+		OverlapWaterComponent = OtherComp;
+		//OtherComp->AddToRoot();
 	}
 }
 
@@ -1128,6 +1148,9 @@ void AFrog::OnCameraEndOverlapWater(UPrimitiveComponent* OverlappedComponent, AA
 		ActorHasTag(TEXT("Water")) && OtherComp && OtherComp->ComponentHasTag(TEXT("CameraWater")))
 	{
 		WaterPostProcessComponent->bEnabled = false;
+
+		//OtherComp->RemoveFromRoot();
+		OverlapWaterComponent = nullptr;
 	}
 }
 
@@ -1186,5 +1209,29 @@ void AFrog::SetTongueLength(float Value)
 	{
 		TongueCollision->SetWorldLocationAndRotation(FVector(TongueTipComponent->GetComponentLocation()),
 		                                             FRotator(TongueTipComponent->GetComponentRotation()));
+	}
+}
+
+
+void AFrog::CalculateWaterCameraOverlapRatio(float dt)
+{
+	if (!OverlapWaterComponent.IsValid()) return;
+	
+	FBox CameraBox{CameraCollision->Bounds.GetBox()};
+	FBox WaterBox{OverlapWaterComponent->Bounds.GetBox()};
+	FBox OverlapBox{CameraBox.Overlap(WaterBox)};
+
+	if (OverlapBox.IsValid && WaterPostProcessDynamicMaterial)
+	{
+		float SubmergedPercent{static_cast<float>(OverlapBox.GetVolume() / CameraBox.GetVolume())};
+
+		// SubmergedPercent: 0 ~ 1
+		// Water_Height: 1 ~ -1
+		float WaterHeightValue{1.f - 2.f * SubmergedPercent};
+		//FLog::Log("", SubmergedPercent, WaterHeightValue);
+		WaterPostProcessDynamicMaterial->SetScalarParameterValue(
+			   TEXT("Water_Height"), 
+			   WaterHeightValue
+		   );
 	}
 }
