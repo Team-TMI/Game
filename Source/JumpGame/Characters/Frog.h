@@ -17,6 +17,14 @@ enum class ECharacterStateEnum : uint8
 	Surface
 };
 
+UENUM()
+enum class EEmotionState
+{
+	None,
+	WaitingForInput,
+	PlayingEmotion,
+};
+
 UCLASS()
 class JUMPGAME_API AFrog : public ACharacter
 {
@@ -264,4 +272,57 @@ public:
 
 	UPROPERTY()
 	TWeakObjectPtr<UPrimitiveComponent> OverlapWaterComponent;
+
+public:
+	EEmotionState EmotionState = EEmotionState::None;
+
+	// 감정표현 관련
+	UPROPERTY()
+	bool bIsBind = false;
+	UPROPERTY()
+	bool bCanPlayEmotion = true;
+	
+	UFUNCTION()
+	void OnPressCKey();
+	UFUNCTION()
+	void OnReleasedCKey();
+	UFUNCTION()
+	void OnSelectionEmotionIndex(int32 EmotionIndex);
+	UFUNCTION()
+	void CancelEmotion();
+	UFUNCTION()
+	void PlayEmotion(int32 EmotionIndex);
+
+	// 동기화 (클라이언트는 서버로 요청->처리)
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_PlayEmotion(AFrog* Character, int32 EmotionIndex);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_PlayEmotion(int32 EmotionIndex);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_CancelEmotion(AFrog* Character);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_CancelEmotion();
+
+	// 재생할 몽타주
+	UPROPERTY()
+	UAnimMontage* CurrentEmotionMontage = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* GreetingMontage;
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* AngryMontage;
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* SadMontage;
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* MerongMontage;
+
+	// 감정표현 UI
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UEmotionUI> EmotionUIClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UEmotionUI* EmotionUI;
+	
+	UFUNCTION()
+	void ShowEmotionUI(bool bIsShow);
 };

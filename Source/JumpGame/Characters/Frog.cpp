@@ -17,6 +17,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
+#include "JumpGame/UI/Character/EmotionUI.h"
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -284,6 +285,13 @@ void AFrog::BeginPlay()
 		TongueCollision->OnComponentBeginOverlap.AddDynamic(this, &AFrog::OnTongueBeginOverlap);
 	}
 
+	// 감정표현 UI
+	EmotionUI = CreateWidget<class UEmotionUI>(GetWorld(), EmotionUIClass);
+	if (EmotionUI)
+	{
+		EmotionUI->AddToViewport();
+	}
+	
 	InitFrogState();
 }
 
@@ -352,6 +360,16 @@ void AFrog::Tick(float DeltaTime)
 		CameraCollision->SetWorldRotation(FRotator::ZeroRotator);
 		CalculateWaterCameraOverlapRatio(DeltaTime);
 	}
+
+	// TODO: input으로 만들기
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::C))
+	{
+		OnPressCKey();
+	}
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustReleased(EKeys::C))
+	{
+		OnReleasedCKey();
+	}
 }
 
 // Called to bind functionality to input
@@ -398,6 +416,7 @@ void AFrog::Move(const struct FInputActionValue& Value)
 
 	if (Controller && GetCanMove())
 	{
+		CancelEmotion();
 		
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -455,6 +474,7 @@ void AFrog::StartJump()
 		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
 		{
+			CancelEmotion();
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
@@ -478,6 +498,7 @@ void AFrog::StartJump()
 
 		if (CanJump())
 		{
+			CancelEmotion();
 			Jump();
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
@@ -487,6 +508,7 @@ void AFrog::StartJump()
 	{
 		if (CanJump())
 		{
+			CancelEmotion();
 			Jump();
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
@@ -948,6 +970,9 @@ void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, c
 
 	if (bIsSwimming)
 	{
+		bCanPlayEmotion = false;
+		CancelEmotion();
+		
 		// 현재 상호작용 중인 물 저장
 		CurrentWaterVolume = WaterVolume;
 		TimeSpentInWater = 0.f;
@@ -956,6 +981,9 @@ void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, c
 	}
 	else
 	{
+		bCanPlayEmotion = true;
+		CancelEmotion();
+		
 		// 물에서 벗어나면 null로 설정
 		CurrentWaterVolume = nullptr;
 		CharacterWaterState = ECharacterStateEnum::None;
@@ -1272,6 +1300,152 @@ void AFrog::OnRep_SkinIndex()
 		if (DynMat && SkinTextures.IsValidIndex(SkinIndex))
 		{
 			DynMat->SetTextureParameterValue("Skin", SkinTextures[SkinIndex]);
+		}
+	}
+}
+
+// 플레이어 감정표현
+void AFrog::OnPressCKey()
+{	
+	if (EmotionState == EEmotionState::None || EmotionState == EEmotionState::PlayingEmotion)
+	{
+		ShowEmotionUI(true);
+		EmotionState = EEmotionState::WaitingForInput;
+	}
+}
+
+void AFrog::OnReleasedCKey()
+{
+	if (EmotionState == EEmotionState::WaitingForInput)
+	{
+		EmotionUI->ConfirmEmotionSelection();
+		EmotionState = EEmotionState::PlayingEmotion;
+		ShowEmotionUI(false);
+	}
+}
+
+void AFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
+{
+	// 선택된 감정 처리
+	ShowEmotionUI(false);
+	if (bCanPlayEmotion)
+	{
+		PlayEmotion(EmotionIndex);
+	}
+	
+	FFastLogger::LogScreen(FColor::Red, TEXT("선택인덱스: %d"), EmotionIndex);
+}
+
+void AFrog::ShowEmotionUI(bool bIsShow)
+{
+	if (!EmotionUI) return;
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (bIsShow)
+	{
+		EmotionUI->PlayShowAnim(true);
+
+		if (!bIsBind)
+		{
+			EmotionUI->OnEmotionSelected.BindUObject(this, &AFrog::OnSelectionEmotionIndex);
+			bIsBind = true;
+		}
+		
+		PC->SetShowMouseCursor(true);
+		PC->SetInputMode(FInputModeGameAndUI());
+	}
+	else
+	{
+		EmotionUI->PlayShowAnim(false);
+
+		PC->SetShowMouseCursor(false);
+		PC->SetInputMode(FInputModeGameOnly());
+	}
+}
+
+void AFrog::CancelEmotion()
+{
+	// 로컬 플레이어인 경우에만 서버에 요청을 보냄
+	AFrog* MyCharacter = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (MyCharacter)
+	{
+		// 서버에 요청할 때 어떤 캐릭터가 요청했는지 명확히 전달
+		ServerRPC_CancelEmotion(MyCharacter);
+	}
+}
+
+void AFrog::ServerRPC_CancelEmotion_Implementation(AFrog* Character)
+{
+	// 유효한 캐릭터인지 확인
+	if (Character && Character->GetController() == this->GetController())
+	{
+		// 특정 캐릭터에서만 감정표현 실행
+		Character->MulticastRPC_CancelEmotion();
+	}
+}
+
+void AFrog::MulticastRPC_CancelEmotion_Implementation()
+{
+	if (EmotionState == EEmotionState::PlayingEmotion && CurrentEmotionMontage)
+	{
+		StopAnimMontage(CurrentEmotionMontage);
+		CurrentEmotionMontage = nullptr;
+	}
+
+	EmotionState = EEmotionState::None;
+}
+
+
+void AFrog::PlayEmotion(int32 EmotionIndex)
+{
+	// 로컬 플레이어인 경우에만 서버에 요청을 보냄
+	AFrog* MyCharacter = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (MyCharacter)
+	{
+		// 서버에 요청할 때 어떤 캐릭터가 요청했는지 명확히 전달
+		ServerRPC_PlayEmotion(MyCharacter, EmotionIndex);
+	}
+	
+	// TODO: 카메라 제어 막기?
+}
+
+
+void AFrog::ServerRPC_PlayEmotion_Implementation(AFrog* Character, int32 EmotionIndex)
+{
+	// 유효한 캐릭터인지 확인
+	if (Character && Character->GetController() == this->GetController())
+	{
+		// 특정 캐릭터에서만 감정표현 실행
+		Character->MulticastRPC_PlayEmotion(EmotionIndex);
+	}
+}
+
+void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
+{
+	switch (EmotionIndex)
+	{
+	case 0:
+		CurrentEmotionMontage = GreetingMontage;
+		break;
+	case 1:
+		CurrentEmotionMontage = AngryMontage;
+		break;
+	case 2:
+		CurrentEmotionMontage = SadMontage;
+		break;
+	case 3:
+		CurrentEmotionMontage = MerongMontage;
+		break;
+	default:
+		return;
+	}
+
+	if (CurrentEmotionMontage)
+	{
+		float Duration = PlayAnimMontage(CurrentEmotionMontage);
+		if (Duration > 0.f)
+		{
+			EmotionState = EEmotionState::PlayingEmotion;
 		}
 	}
 }
