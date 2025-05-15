@@ -21,7 +21,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	class AFrog* Frog;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class URadialSlider* JumpGaugeSlider;
+	class UProgressBar* JumpGaugeSlider;
 
 	UFUNCTION()
 	void OnSuperJumpRatioChanged(float NewRatio);

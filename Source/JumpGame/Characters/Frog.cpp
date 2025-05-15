@@ -17,6 +17,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
+#include "JumpGame/UI/Character/EmotionUI.h"
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -130,8 +131,9 @@ AFrog::AFrog()
 		JumpGaugeUIComponent->SetRelativeLocation(FVector(0, 0.f, 0));
 		JumpGaugeUIComponent->SetWidgetClass(JumpGaugeUIClass);
 		JumpGaugeUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
-		JumpGaugeUIComponent->SetDrawSize(FVector2D(240, 200));
-		JumpGaugeUIComponent->SetPivot(FVector2D(1.0, 0.5));
+		JumpGaugeUIComponent->SetDrawSize(FVector2D(180, 150));
+		JumpGaugeUIComponent->SetPivot(FVector2D(3.0, 0.3));
+		JumpGaugeUIComponent->SetDrawAtDesiredSize(true);
 	}
 	ConstructorHelpers::FObjectFinder<UMaterial> WaterPostProcessFinder
 		(TEXT("/Game/PostProcess/MPP_InWater.MPP_InWater"));
@@ -240,6 +242,8 @@ AFrog::AFrog()
 	TimeSpentInWater = 0.f;
 	SurfaceStateForceTime = 5.f;
 	bWaterStateForcedByTime = false;
+
+	FrogSkinFinder();
 }
 
 void AFrog::NotifyControllerChanged()
@@ -262,16 +266,16 @@ void AFrog::NotifyControllerChanged()
 void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (WaterPostProcessComponent && WaterPostProcessMaterial)
 	{
 		WaterPostProcessDynamicMaterial = UMaterialInstanceDynamic::Create(
 			WaterPostProcessMaterial, this);
-		
+
 		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessDynamicMaterial, 1.f);
 		//WaterPostProcessComponent->Settings.Blendables.Add(WaterPostProcessDynamicMaterial);
 	}
-	
+
 	// 로컬 플레이어만 카메라 오버랩 이벤트 바인딩
 	if (IsLocallyControlled() && CameraCollision != nullptr)
 	{
@@ -284,8 +288,16 @@ void AFrog::BeginPlay()
 		TongueCollision->OnComponentBeginOverlap.AddDynamic(this, &AFrog::OnTongueBeginOverlap);
 	}
 
+	// 감정표현 UI
+	EmotionUI = CreateWidget<class UEmotionUI>(GetWorld(), EmotionUIClass);
+	if (EmotionUI && IsLocallyControlled())
+	{
+		EmotionUI->AddToViewport();
+	}
+	
 	InitFrogState();
 }
+
 
 // Called every frame
 void AFrog::Tick(float DeltaTime)
@@ -352,6 +364,16 @@ void AFrog::Tick(float DeltaTime)
 		CameraCollision->SetWorldRotation(FRotator::ZeroRotator);
 		CalculateWaterCameraOverlapRatio(DeltaTime);
 	}
+
+	// TODO: input으로 만들기
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::C))
+	{
+		OnPressCKey();
+	}
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustReleased(EKeys::C))
+	{
+		OnReleasedCKey();
+	}
 }
 
 // Called to bind functionality to input
@@ -398,6 +420,7 @@ void AFrog::Move(const struct FInputActionValue& Value)
 
 	if (Controller && GetCanMove())
 	{
+		CancelEmotion();
 		
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -455,6 +478,7 @@ void AFrog::StartJump()
 		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
 		{
+			CancelEmotion();
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
@@ -478,6 +502,7 @@ void AFrog::StartJump()
 
 		if (CanJump())
 		{
+			CancelEmotion();
 			Jump();
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
@@ -487,6 +512,7 @@ void AFrog::StartJump()
 	{
 		if (CanJump())
 		{
+			CancelEmotion();
 			Jump();
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 		}
@@ -539,10 +565,10 @@ void AFrog::SetCrouchEnabled(bool bEnabled)
 {
 	bCanCrouch = bEnabled;
 
-	if (JumpGaugeUIComponent != nullptr)
-	{
-		SetJumpGaugeVisibility(bCanCrouch);
-	}
+	// if (JumpGaugeUIComponent != nullptr)
+	// {
+	// 	SetJumpGaugeVisibility(bCanCrouch);
+	// }
 }
 
 void AFrog::StartCrouch()
@@ -654,6 +680,7 @@ void AFrog::MulticastRPC_StartCrouch_Implementation()
 	}
 
 	bIsCrouching = true;
+	SetJumpGaugeVisibility(true);
 	Crouch();
 
 	// 슈퍼 점프 게이지 충전
@@ -684,6 +711,7 @@ void AFrog::MulticastRPC_StopCrouch_Implementation()
 	}
 
 	bIsCrouching = false;
+	SetJumpGaugeVisibility(false);
 	UnCrouch();
 
 	GetWorldTimerManager().ClearTimer(CrouchTimer);
@@ -764,7 +792,7 @@ void AFrog::InitFrogState()
 	// 로컬 클라만 점프 게이지 보이게
 	if (IsLocallyControlled())
 	{
-		SetJumpGaugeVisibility(true);
+		SetJumpGaugeVisibility(false);
 	}
 	else
 	{
@@ -846,7 +874,7 @@ void AFrog::ServerRPC_PrepareMission_Implementation(FVector Loc)
 		SetActorLocation(Loc);
 		StopMovementAndResetRotation();
 		SetCrouchEnabled(false);
-
+		SetJumpGaugeVisibility(false);
 		MulticastRPC_SetMissionCamera();
 	}
 }
@@ -929,7 +957,7 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, TongueLengthRatio);
 	DOREPLIFETIME(AFrog, bIsTongueGrow);
 	DOREPLIFETIME(AFrog, bCanTongAttack);
-	
+
 	DOREPLIFETIME(AFrog, SkinIndex);
 }
 
@@ -948,14 +976,22 @@ void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, c
 
 	if (bIsSwimming)
 	{
+		bCanPlayEmotion = false;
+		CancelEmotion();
+		
 		// 현재 상호작용 중인 물 저장
 		CurrentWaterVolume = WaterVolume;
 		TimeSpentInWater = 0.f;
 		bWaterStateForcedByTime = false;
+		SetJumpGaugeVisibility(false);
+
 		ResetSuperJumpRatio();
 	}
 	else
 	{
+		bCanPlayEmotion = true;
+		CancelEmotion();
+		
 		// 물에서 벗어나면 null로 설정
 		CurrentWaterVolume = nullptr;
 		CharacterWaterState = ECharacterStateEnum::None;
@@ -1093,31 +1129,34 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 				{
 					WaterSurfaceVelocityZ = CurrentWaterVolume->CurrentRisingSpeed;
 				}
-				
-                // 캐릭터가 물 표면에 거의 닿도록 목표 Z 설정
-                float TargetCharacterCenterZ{WaterSurfaceZ + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.9f};
-                // 현재 캐릭터의 Z 위치와 목표 Z 위치 사이의 차이
-                float DeltaZ{static_cast<float>(TargetCharacterCenterZ - GetActorLocation().Z)};
-                // 목표 Z 위치로 향하는 교정 속도 계산
-                float CorrectiveVelocityZ{DeltaZ * 5.f};
-                // 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
-                float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
-                MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity, FMath::Clamp(DeltaTime * 5.0f, 0.f, 1.f));
-				
-                // Z 속도 제한
-                MoveComp->Velocity.Z = FMath::Clamp(MoveComp->Velocity.Z, -50.f, WaterSurfaceVelocityZ + 100.f);
 
-                // 물이 상승 중이 아닐 때, 캐릭터가 물 표면 근처에 있고 거의 움직이지 않는다면 Z 속도를 0으로
-                if (FMath::Abs(DeltaZ) < 2.0f && WaterSurfaceVelocityZ == 0.f && FMath::Abs(MoveComp->Velocity.Z) < 5.f)
-                {
-                    MoveComp->Velocity.Z = FMath::FInterpTo(MoveComp->Velocity.Z, 0.f, DeltaTime, 5.0f);
-                }
+				// 캐릭터가 물 표면에 거의 닿도록 목표 Z 설정
+				float TargetCharacterCenterZ{
+					WaterSurfaceZ + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.9f
+				};
+				// 현재 캐릭터의 Z 위치와 목표 Z 위치 사이의 차이
+				float DeltaZ{static_cast<float>(TargetCharacterCenterZ - GetActorLocation().Z)};
+				// 목표 Z 위치로 향하는 교정 속도 계산
+				float CorrectiveVelocityZ{DeltaZ * 5.f};
+				// 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
+				float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
+				MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity,
+				                                   FMath::Clamp(DeltaTime * 5.0f, 0.f, 1.f));
 
-                // 수평 움직임
-                MoveComp->Velocity.X *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
-                MoveComp->Velocity.Y *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
+				// Z 속도 제한
+				MoveComp->Velocity.Z = FMath::Clamp(MoveComp->Velocity.Z, -50.f, WaterSurfaceVelocityZ + 100.f);
+
+				// 물이 상승 중이 아닐 때, 캐릭터가 물 표면 근처에 있고 거의 움직이지 않는다면 Z 속도를 0으로
+				if (FMath::Abs(DeltaZ) < 2.0f && WaterSurfaceVelocityZ == 0.f && FMath::Abs(MoveComp->Velocity.Z) < 5.f)
+				{
+					MoveComp->Velocity.Z = FMath::FInterpTo(MoveComp->Velocity.Z, 0.f, DeltaTime, 5.0f);
+				}
+
+				// 수평 움직임
+				MoveComp->Velocity.X *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
+				MoveComp->Velocity.Y *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
 			}
-			
+
 			break;
 		}
 	}
@@ -1237,8 +1276,9 @@ void AFrog::SetTongueLength(float Value)
 
 void AFrog::CalculateWaterCameraOverlapRatio(float dt)
 {
-	if (!OverlapWaterComponent.IsValid()) return;
-	
+	if (!OverlapWaterComponent.IsValid())
+		return;
+
 	FBox CameraBox{CameraCollision->Bounds.GetBox()};
 	FBox WaterBox{OverlapWaterComponent->Bounds.GetBox()};
 	FBox OverlapBox{CameraBox.Overlap(WaterBox)};
@@ -1252,9 +1292,9 @@ void AFrog::CalculateWaterCameraOverlapRatio(float dt)
 		float WaterHeightValue{1.f - 2.f * SubmergedPercent};
 		//FLog::Log("", SubmergedPercent, WaterHeightValue);
 		WaterPostProcessDynamicMaterial->SetScalarParameterValue(
-			   TEXT("Water_Height"), 
-			   WaterHeightValue
-		   );
+			TEXT("Water_Height"),
+			WaterHeightValue
+		);
 	}
 }
 
@@ -1272,6 +1312,251 @@ void AFrog::OnRep_SkinIndex()
 		if (DynMat && SkinTextures.IsValidIndex(SkinIndex))
 		{
 			DynMat->SetTextureParameterValue("Skin", SkinTextures[SkinIndex]);
+		}
+	}
+}
+
+void AFrog::FrogSkinFinder()
+{
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture1
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_1.frog_body_BaseColor_1"));
+	if (Texture1.Succeeded())
+	{
+		SkinTextures.Add(Texture1.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture2
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_2.frog_body_BaseColor_2"));
+	if (Texture2.Succeeded())
+	{
+		SkinTextures.Add(Texture2.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture3
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_3.frog_body_BaseColor_3"));
+	if (Texture3.Succeeded())
+	{
+		SkinTextures.Add(Texture3.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture4
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_4.frog_body_BaseColor_4"));
+	if (Texture4.Succeeded())
+	{
+		SkinTextures.Add(Texture4.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture5
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_5.frog_body_BaseColor_5"));
+	if (Texture5.Succeeded())
+	{
+		SkinTextures.Add(Texture5.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture6
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_6.frog_body_BaseColor_6"));
+	if (Texture6.Succeeded())
+	{
+		SkinTextures.Add(Texture6.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture7
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_7.frog_body_BaseColor_7"));
+	if (Texture7.Succeeded())
+	{
+		SkinTextures.Add(Texture7.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture8
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_8.frog_body_BaseColor_8"));
+	if (Texture8.Succeeded())
+	{
+		SkinTextures.Add(Texture8.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture9
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_9.frog_body_BaseColor_9"));
+	if (Texture9.Succeeded())
+	{
+		SkinTextures.Add(Texture9.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UTexture2D> Texture10
+		(TEXT("/Game/Characters/Fat_Frog/textures/frog_body_BaseColor_10.frog_body_BaseColor_10"));
+	if (Texture10.Succeeded())
+	{
+		SkinTextures.Add(Texture10.Object);
+// 플레이어 감정표현
+void AFrog::OnPressCKey()
+{	
+	if (EmotionState == EEmotionState::None || EmotionState == EEmotionState::PlayingEmotion)
+	{
+		ShowEmotionUI(true);
+		EmotionState = EEmotionState::WaitingForInput;
+	}
+}
+
+void AFrog::OnReleasedCKey()
+{
+	if (EmotionState == EEmotionState::WaitingForInput)
+	{
+		EmotionUI->ConfirmEmotionSelection();
+		EmotionState = EEmotionState::PlayingEmotion;
+		ShowEmotionUI(false);
+	}
+}
+
+void AFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
+{
+	// 선택된 감정 처리
+	ShowEmotionUI(false);
+	if (bCanPlayEmotion)
+	{
+		PlayEmotion(EmotionIndex);
+	}
+	
+	FFastLogger::LogScreen(FColor::Red, TEXT("선택인덱스: %d"), EmotionIndex);
+}
+
+void AFrog::ShowEmotionUI(bool bIsShow)
+{
+	if (!EmotionUI) return;
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (bIsShow)
+	{
+		EmotionUI->PlayShowAnim(true);
+
+		if (!bIsBind)
+		{
+			EmotionUI->OnEmotionSelected.BindUObject(this, &AFrog::OnSelectionEmotionIndex);
+			bIsBind = true;
+		}
+		
+		PC->SetShowMouseCursor(true);
+		PC->SetInputMode(FInputModeGameAndUI());
+	}
+	else
+	{
+		EmotionUI->PlayShowAnim(false);
+
+		PC->SetShowMouseCursor(false);
+		PC->SetInputMode(FInputModeGameOnly());
+	}
+}
+
+void AFrog::CancelEmotion()
+{
+	// 로컬 플레이어인 경우에만 서버에 요청을 보냄
+	AFrog* MyCharacter = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (MyCharacter)
+	{
+		// 서버에 요청할 때 어떤 캐릭터가 요청했는지 명확히 전달
+		ServerRPC_CancelEmotion(MyCharacter);
+	}
+}
+
+void AFrog::ServerRPC_CancelEmotion_Implementation(AFrog* Character)
+{
+	// 유효한 캐릭터인지 확인
+	if (Character && Character->GetController() == this->GetController())
+	{
+		// 특정 캐릭터에서만 감정표현 실행
+		Character->MulticastRPC_CancelEmotion();
+	}
+}
+
+void AFrog::MulticastRPC_CancelEmotion_Implementation()
+{
+	if (EmotionState == EEmotionState::PlayingEmotion && CurrentEmotionMontage)
+	{
+		StopAnimMontage(CurrentEmotionMontage);
+		ChangeEyeMaterial(0);
+		CurrentEmotionMontage = nullptr;
+	}
+
+	EmotionState = EEmotionState::None;
+}
+
+void AFrog::PlayEmotion(int32 EmotionIndex)
+{
+	// 로컬 플레이어인 경우에만 서버에 요청을 보냄
+	AFrog* MyCharacter = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (MyCharacter)
+	{
+		// 서버에 요청할 때 어떤 캐릭터가 요청했는지 명확히 전달
+		ServerRPC_PlayEmotion(MyCharacter, EmotionIndex);
+	}
+}
+
+
+void AFrog::ServerRPC_PlayEmotion_Implementation(AFrog* Character, int32 EmotionIndex)
+{
+	// 유효한 캐릭터인지 확인
+	if (Character && Character->GetController() == this->GetController())
+	{
+		// 특정 캐릭터에서만 감정표현 실행
+		Character->MulticastRPC_PlayEmotion(EmotionIndex);
+	}
+}
+
+void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
+{
+	UMaterialInterface* CurrentEyeMaterial = nullptr;
+	
+	switch (EmotionIndex)
+	{
+	case 0:
+		CurrentEmotionMontage = GreetingMontage;
+		break;
+	case 1:
+		CurrentEmotionMontage = SadMontage;
+		break;
+	case 2:
+		CurrentEmotionMontage = AngryMontage;
+		break;
+	case 3:
+		CurrentEmotionMontage = MerongMontage;
+		break;
+	default:
+		return;
+	}
+
+	if (CurrentEmotionMontage)
+	{
+		float Duration = PlayAnimMontage(CurrentEmotionMontage);
+		if (Duration > 0.f)
+		{
+			EmotionState = EEmotionState::PlayingEmotion;
+			ChangeEyeMaterial(EmotionIndex);
+
+			SaveCurrentMontage = CurrentEmotionMontage;
+			SaveCurrentIndex = EmotionIndex;
+		}
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		// 콜백 델리게이트 생성
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AFrog::OnEmotionMontageEnd);
+
+		// 몽타주가 끝나면 델리게이트 호출
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentEmotionMontage);
+	}
+}
+
+void AFrog::OnEmotionMontageEnd(UAnimMontage* Montage, bool bInterrupted)
+{
+	// 다른 몽타주가 끝난 것이라면 무시
+	if (Montage != SaveCurrentMontage) return; 
+	
+	EmotionState = EEmotionState::None;
+	ChangeEyeMaterial(0);
+	SaveCurrentMontage = nullptr;
+	SaveCurrentIndex = -1;
+}
+
+void AFrog::ChangeEyeMaterial(int32 MatIndex)
+{
+	if (GetMesh())
+	{
+		UMaterialInstanceDynamic* DynMat{ GetMesh()->CreateAndSetMaterialInstanceDynamic(1) };
+		if (DynMat && EyeTextures.IsValidIndex(MatIndex))
+		{
+			DynMat->SetTextureParameterValue("Eye", EyeTextures[MatIndex]);
 		}
 	}
 }
