@@ -23,7 +23,6 @@ public:
 	UIOManagerComponent();
 
 	bool SendGameMessage(const FMessageUnion& Message);
-	bool SendHttpMessage(const FHttpMessageWrapper& HttpMessage);
 	bool PopMessage(const EMessageType& MessageType, FMessageUnion& OutMessage);
 	void RetryReadConnectToPipe(TSharedPtr<class FIPCHandler> IPCHandlerToRetry);
 	void RetrySendConnectToPipe(TSharedPtr<class FIPCHandler> IPCHandlerToRetry);
@@ -32,7 +31,6 @@ protected:
 	virtual void BeginPlay() override;
 	
 	void RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler);
-	void RegisterHttpHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler);
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
@@ -43,10 +41,7 @@ public:
 	
 	// 어떤 통신 기법으로 보내겠다. (Socket, IPC 등)
 	TMap<EMessageType, TSharedPtr<IIOHandlerInterface>> IOHandlers;
-	TMap<EMessageType, TSharedPtr<IIOHandlerInterface>> HttpHandlers;
-	
 	std::map<EMessageType, std::queue<FMessageUnion>> MessageQueue;
-	std::map<EMessageType, std::queue<FHttpMessageWrapper>> HttpMessageQueue;
 
 	UPROPERTY()
 	FTimerHandle RetryReadTimer;

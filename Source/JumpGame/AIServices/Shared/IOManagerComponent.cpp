@@ -3,6 +3,7 @@
 #include "IOHandlers/HttpsMultiPartsHandler.h"
 #include "IOHandlers/IPCHandler.h"
 #include "IOHandlers/SocketHandler.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 UIOManagerComponent::UIOManagerComponent()
@@ -20,19 +21,6 @@ bool UIOManagerComponent::SendGameMessage(const FMessageUnion& Message)
 
 	FFastLogger::LogConsole(TEXT("UIOManagerComponent::SendGameMessage"));
 	IOHandlers[MessageType]->SendGameMessage(Message);
-	return true;
-}
-
-bool UIOManagerComponent::SendHttpMessage(const FHttpMessageWrapper& HttpMessage)
-{
-	EMessageType MessageType = HttpMessage.Header.Type;
-	if (!HttpHandlers.Contains(MessageType))
-	{
-		return false;
-	}
-	
-	FFastLogger::LogConsole(TEXT("UIOManagerComponent::SendHttpMessage"));
-	HttpHandlers[MessageType]->SendGameMessage(HttpMessage);
 	return true;
 }
 
@@ -63,44 +51,30 @@ void UIOManagerComponent::BeginPlay()
 	RegisterIOHandler(EMessageType::EyeTrackingResponseMessage, IPCReadHandler);
 	RegisterIOHandler(EMessageType::EyeTrackingRequestMessage, IPCReadHandler);
 
-	TSharedPtr<IIOHandlerInterface> HttpMultipartHandler = MakeShared<FHttpsMultiPartsHandler>();
-	
-	RegisterHttpHandler(EMessageType::HttpMultipartRequest, HttpMultipartHandler);
-	
 	// queue 초기화
 	for (auto& Handler : IOHandlers)
 	{
 		MessageQueue[Handler.Key] = std::queue<FMessageUnion>();
 	}
-	for (auto& Handler : HttpHandlers)
-	{
-		HttpMessageQueue[Handler.Key] = std::queue<FHttpMessageWrapper>();
-	}
 
-	if (!IPCReadHandler->Init(IOHandlerInitInfo, &MessageQueue, &HttpMessageQueue))
+	if (!IPCReadHandler->Init(IOHandlerInitInfo, &MessageQueue, nullptr))
 	{
 		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCReadHandler);
 		RetryReadConnectToPipe(SharedIPC);
 	}
 
-	if (!IPCSendHandler->Init(IOHandlerInitInfo, &MessageQueue, &HttpMessageQueue))
+	if (!IPCSendHandler->Init(IOHandlerInitInfo, &MessageQueue, nullptr))
 	{
 		TSharedPtr<FIPCHandler> SharedIPC = StaticCastSharedPtr<FIPCHandler>(IPCSendHandler);
 		RetrySendConnectToPipe(SharedIPC);
 	}
 
-	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue, &HttpMessageQueue);
-	HttpMultipartHandler->Init(IOHandlerInitInfo, &MessageQueue, &HttpMessageQueue);
+	SocketHandler->Init(IOHandlerInitInfo, &MessageQueue, nullptr);
 }
 
 void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)
 {
 	IOHandlers.Add(MessageType, Handler);
-}
-
-void UIOManagerComponent::RegisterHttpHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)
-{
-	HttpHandlers.Add(MessageType, Handler);
 }
 
 void UIOManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,

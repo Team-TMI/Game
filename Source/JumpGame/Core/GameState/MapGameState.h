@@ -34,9 +34,9 @@ public:
 
 	// 프로그레스바 UI
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UGameProgressBarUI> UGameProgressBarUIClass;
+	TSubclassOf<class UGameProgressBarUI> UGameProgressBarUIClass = nullptr;
 	UPROPERTY(editanywhere, BlueprintReadWrite)
-	class UGameProgressBarUI* ProgressBarUI;
+	class UGameProgressBarUI* ProgressBarUI = nullptr;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_RemoveProgressBarUI();

@@ -29,12 +29,9 @@ ANetworkGameState::ANetworkGameState()
 	// 클라이언트에서 호출됨
 	ConnectionVerifyComponent->OnConnectionSucceeded.AddDynamic(this, &ANetworkGameState::OnConnectionSucceeded);
 	ConnectionVerifyComponent->OnConnectionBlocked.AddDynamic(this, &ANetworkGameState::OnConnectionBlocked);
-	
+
+	// TODO: 초기화는 각각의 맵에서 진행하는걸로 한다.
 	IOManagerComponent = CreateDefaultSubobject<UIOManagerComponent>(TEXT("IOManagerComponent"));
-
-	FFastLogger::LogConsole(TEXT("FQuizNotify Message : %llu"), sizeof(FQuizNotifyMessage));
-	FFastLogger::LogConsole(TEXT("FWavResponseMessage Message : %llu"), sizeof(FWavResponseMessage));
-
 }
 
 

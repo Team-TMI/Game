@@ -28,8 +28,9 @@ public:
 	virtual ~IIOHandlerInterface() {};
 
 	bool bConnected = false;
+	
+	FOnMessageReceived OnMessageReceived;
 protected:
 	MessageQueuePtr MessageQueue = nullptr;
 	HttpMessageQueuePtr HttpMessageQueue = nullptr;
-	FOnMessageReceived OnMessageReceived;
 };
