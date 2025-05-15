@@ -313,6 +313,11 @@ void ARisingWaterProp::SetRisingSpeed(float Speed)
 	}
 }
 
+float ARisingWaterProp::GetWaterSurfaceZ()
+{
+	return SurfaceCollision->GetComponentLocation().Z + SurfaceCollision->GetScaledBoxExtent().Z;
+}
+
 void ARisingWaterProp::OnRep_WaterState()
 {
 	// 추후 추가 가능
