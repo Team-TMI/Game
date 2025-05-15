@@ -398,6 +398,7 @@ void AFrog::Move(const struct FInputActionValue& Value)
 
 	if (Controller && GetCanMove())
 	{
+		
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
