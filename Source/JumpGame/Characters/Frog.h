@@ -336,6 +336,12 @@ public:
 
 	UFUNCTION()
 	void ChangeEyeMaterial(int32 MatIndex);
+
+	// 저장
+	UPROPERTY()
+	UAnimMontage* SaveCurrentMontage = nullptr;
+	UPROPERTY()
+	int32 SaveCurrentIndex = -1;
 };
 
 

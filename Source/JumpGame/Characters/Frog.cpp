@@ -1420,6 +1420,8 @@ void AFrog::ServerRPC_PlayEmotion_Implementation(AFrog* Character, int32 Emotion
 
 void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
 {
+	UMaterialInterface* CurrentEyeMaterial = nullptr;
+	
 	switch (EmotionIndex)
 	{
 	case 0:
@@ -1445,6 +1447,9 @@ void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
 		{
 			EmotionState = EEmotionState::PlayingEmotion;
 			ChangeEyeMaterial(EmotionIndex);
+
+			SaveCurrentMontage = CurrentEmotionMontage;
+			SaveCurrentIndex = EmotionIndex;
 		}
 	}
 
@@ -1458,14 +1463,16 @@ void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
 		// 몽타주가 끝나면 델리게이트 호출
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentEmotionMontage);
 	}
-
-	// TODO: 몽타주 끝났을때, 상태바꾸기 + 눈 원래대로
 }
 
 void AFrog::OnEmotionMontageEnd(UAnimMontage* Montage, bool bInterrupted)
 {
+	if (Montage != SaveCurrentMontage) return; // 다른 몽타주가 끝난 것이라면 무시
+	
 	EmotionState = EEmotionState::None;
 	ChangeEyeMaterial(0);
+	SaveCurrentMontage = nullptr;
+	SaveCurrentIndex = -1;
 }
 
 void AFrog::ChangeEyeMaterial(int32 MatIndex)
