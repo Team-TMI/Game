@@ -244,6 +244,13 @@ AFrog::AFrog()
 	bWaterStateForcedByTime = false;
 
 	FrogSkinFinder();
+
+	ConstructorHelpers::FClassFinder<UUserWidget> EmotionUIWidgetClass
+	(TEXT("/Game/UI/Character/WBP_Emotion.WBP_Emotion_C"));
+	if (EmotionUIWidgetClass.Succeeded())
+	{
+		EmotionUIClass = EmotionUIWidgetClass.Class;
+	}
 }
 
 void AFrog::NotifyControllerChanged()
