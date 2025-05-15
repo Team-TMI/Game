@@ -41,7 +41,6 @@ public:
 	
 	// 어떤 통신 기법으로 보내겠다. (Socket, IPC 등)
 	TMap<EMessageType, TSharedPtr<IIOHandlerInterface>> IOHandlers;
-	
 	std::map<EMessageType, std::queue<FMessageUnion>> MessageQueue;
 
 	UPROPERTY()

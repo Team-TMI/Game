@@ -14,11 +14,16 @@ struct FCategoryName : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
 	FText DisplayName;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Prop")
+	bool bHidden = false;
+
 	FCategoryName(
 		const FString& InCategoryName = TEXT(""),
-		const FText& InDisplayName = FText::GetEmpty())
+		const FText& InDisplayName = FText::GetEmpty(),
+		bool InHidden = false)
 		: CategoryName(InCategoryName)
 		, DisplayName(InDisplayName)
+		, bHidden(InHidden)
 	{
 	}
 };

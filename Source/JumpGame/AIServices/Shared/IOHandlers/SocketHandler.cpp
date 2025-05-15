@@ -10,8 +10,7 @@ FSocketHandler::FSocketHandler()
 {
 }
 
-bool FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo,
-	std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr)
+bool FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo, MessageQueuePtr InMessageQueuePtr, HttpMessageQueuePtr InHttpMessageQueuePtr)
 {
 	ServerURL = InitInfo.ServerUrl;
 	ServerProtocol = InitInfo.ServerProtocol;

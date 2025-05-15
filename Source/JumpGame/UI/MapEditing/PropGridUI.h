@@ -15,11 +15,16 @@ class JUMPGAME_API UPropGridUI : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 
-	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* DragDropOperation);
+	void InitWidget(class UClickHandlerManager* ClickHandlerManager, class UWidgetMapEditDragDropOperation* DragDropOperation, class UCategoryUI*
+	                CategoryUI);
 	UFUNCTION()
 	void UpdatePropGrid(const EMajorCategoryType& MajorCategory, class UCategorySystem* CategorySystem);
 	UFUNCTION()
 	void UpdatePropGridBySub(const EMajorCategoryType& MajorCategory, ESubCategoryType SubCategory, class UCategorySystem* CategorySystem);
+	UFUNCTION()
+	void UpdatePropGridBySearch(const FString& String, class UCategorySystem* CategorySystem);
+	UFUNCTION()
+	void UpdatePropGridByImageSearch(const TArray<ESubCategoryType>& SubCategories, class UCategorySystem* CategorySystem);
 	UFUNCTION()
 	void ClearPropGrid();
 

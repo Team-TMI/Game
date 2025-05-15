@@ -3,20 +3,33 @@
 
 #include "CategoryUI.h"
 
+#include "DesktopPlatformModule.h"
+#include "IDesktopPlatform.h"
+#include "JsonObjectConverter.h"
 #include "MajorCategoryButtonUI.h"
 #include "PropGridUI.h"
 #include "SubCategoryButtonUI.h"
+#include "Components/Button.h"
+#include "Components/EditableText.h"
+#include "Components/Image.h"
 #include "Components/ScrollBox.h"
+#include "JumpGame/AIServices/Shared/HttpManagerComponent.h"
+#include "JumpGame/AIServices/Shared/HttpMessage.h"
+#include "JumpGame/AIServices/Shared/Message.h"
+#include "JumpGame/AIServices/Shared/IOHandlers/IOHandlerInterface.h"
 #include "JumpGame/Core/GameState/MapEditorState.h"
+#include "JumpGame/Core/GameState/MapGameState.h"
 #include "JumpGame/MapEditor/CategorySystem/CategorySystem.h"
 #include "JumpGame/MapEditor/CategorySystem/ECategoryType.h"
+#include "JumpGame/MapEditor/CategorySystem/ImageResponseJson.h"
+#include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 
 class ANetworkGameState;
 
 void UCategoryUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
+	
 	ClearMajorCategoryButtons();
 	ClearSubCategoryButtons();
 	
@@ -26,6 +39,7 @@ void UCategoryUI::NativeOnInitialized()
 	{
 		// Category 시스템을 가져옴.
 		CategorySystem = GameState->GetCategorySystem();
+		GameState->HttpManagerComponent->HttpHandlers[EMessageType::HttpMultipartRequest]->OnMessageReceived.AddUObject(this, &UCategoryUI::OnImageSearchResponse);
 	}
 
 	if (!CategorySystem)
@@ -58,7 +72,7 @@ void UCategoryUI::NativeOnInitialized()
 	// SubCategory 버튼들을 미리 만들어두기
 	for (auto& MajorCategory : MajorCategoriesList)
 	{
-		const TArray<ESubCategoryType>& SubCategoryList = CategorySystem->GetSubCategoriesByMajor(MajorCategory);
+		const TArray<ESubCategoryType>& SubCategoryList = CategorySystem->GetSubCategoriesByMajorWithoutHidden(MajorCategory);
 		for (auto& SubCategory : SubCategoryList)
 		{
 			USubCategoryButtonUI* SubCategoryButtonUI = CreateWidget<USubCategoryButtonUI>(GetWorld(), SubCategoryButtonUIClass);
@@ -72,19 +86,35 @@ void UCategoryUI::NativeOnInitialized()
 	}
 
 	OnMajorCategoryButtonClicked(SelectedMajorCategory->GetMajorCategoryType(), true);
+	
+	FText Text = FText::FromString(DefaultSearchText);
+	SearchText->SetHintText(Text);
+
+	SearchText->OnTextCommitted.AddDynamic(this, &UCategoryUI::OnSearchTextCommitted);
+	SearchText->OnTextChanged.AddDynamic(this, &UCategoryUI::OnSearchTextChanged);
+
+	ImageSearchButton->OnClicked.AddDynamic(this, &UCategoryUI::OnImageSearchButtonClicked);
+
+}
+
+void UCategoryUI::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
 }
 
 void UCategoryUI::InitWidget(class UClickHandlerManager* ClickHandlerManager,
-	class UWidgetMapEditDragDropOperation* DragDropOperation)
+                             class UWidgetMapEditDragDropOperation* DragDropOperation)
 {
-	GridUI->InitWidget(ClickHandlerManager, DragDropOperation);
+	GridUI->InitWidget(ClickHandlerManager, DragDropOperation, this);
 }
 
 void UCategoryUI::OnMajorCategoryButtonClicked(const EMajorCategoryType& MajorCategory, bool bAbsolute)
 {
 	ClearSubCategoryButtons();
 
-	const TArray<ESubCategoryType>& SubCategoryList = CategorySystem->GetSubCategoriesByMajor(MajorCategory);
+	const TArray<ESubCategoryType>& SubCategoryList = CategorySystem->GetSubCategoriesByMajorWithoutHidden(MajorCategory);
 	for (auto& SubCategory : SubCategoryList)
     {
         USubCategoryButtonUI* SubCategoryButtonUI = SubCategoryButtons[SubCategory];
@@ -136,4 +166,223 @@ void UCategoryUI::OnSubCategoryButtonClicked(const EMajorCategoryType& MajorCate
 {
     // SubCategory 버튼을 클릭했을 때, PropGridUI를 업데이트한다.
     GridUI->UpdatePropGridBySub(MajorCategory, SubCategory, CategorySystem);
+}
+
+void UCategoryUI::OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
+	if (CommitMethod == ETextCommit::OnEnter)
+	{
+		FString InputText = Text.ToString();
+		GridUI->UpdatePropGridBySearch(InputText, CategorySystem);
+	}
+	FString InputText = Text.ToString();
+	if (InputText == TEXT("") || InputText == DefaultSearchText)
+	{
+		GridUI->UpdatePropGrid(SelectedMajorCategory->GetMajorCategoryType(), CategorySystem);
+		FText DefaultText = FText::FromString(DefaultSearchText);
+		SearchText->SetHintText(DefaultText);
+	}
+}
+
+void UCategoryUI::OnPropSlotClicked(FName PropID, UClass* InPropClass)
+{
+	const UPropWrap* Prop = CategorySystem->GetPropsByID(PropID);
+	if (!Prop)
+	{
+		return;
+	}
+	PropOverviewImage->SetBrushFromTexture(Prop->Data.PropIcon);
+}
+
+void UCategoryUI::OnSearchTextChanged(const FText& Text)
+{
+	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
+	TWeakObjectPtr<UUserWidget> WeakThis = this;
+	GetWorld()->GetTimerManager().SetTimer(SearchTimerHandle, FTimerDelegate::CreateLambda([WeakThis, Text]()
+	{
+		if (!WeakThis.IsValid())
+		{
+			return;
+		}
+		UCategoryUI* CategoryUI = Cast<UCategoryUI>(WeakThis.Get());
+
+		FString InputText = Text.ToString();
+		if (InputText == TEXT(""))
+		{
+			CategoryUI->GridUI->UpdatePropGrid(CategoryUI->SelectedMajorCategory->GetMajorCategoryType(), CategoryUI->CategorySystem);
+		}
+		else
+		{
+			CategoryUI->GridUI->UpdatePropGridBySearch(InputText, CategoryUI->CategorySystem);
+		}
+	}), SearchDelay, false);
+}
+
+void UCategoryUI::OnImageSearchButtonClicked()
+{
+	SearchText->SetText(FText::FromString(TEXT("")));
+	SearchText->SetHintText(FText::FromString(TEXT("이미지 검색 중 입니다...")));
+	SearchText->SetIsReadOnly(true);
+	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
+
+	FString ImagePath;
+	if (!OpenFileDialog(ImagePath))
+	{
+		SetTextToDefault();
+		SetGridToDefault();
+		return ;
+	}
+	
+	SendImageRequest(ImagePath);
+	
+	FString FilePath = FPaths::GetPath(ImagePath);
+	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
+	SearchText->SetText(FText::FromString(FileNameWithExtension));
+}
+
+bool UCategoryUI::OpenFileDialog(FString& OutFilePath)
+{
+	TArray<FString> OutFiles;
+	
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	if (!DesktopPlatform)
+	{
+		return false;
+	}
+	if (!GEngine)
+	{
+		return false;
+	}
+	if (!GEngine->GameViewport)
+	{
+		return false;
+	}
+
+	void* ParentWindowHandle = GEngine->GameViewport->GetWindow()->GetNativeWindow()->GetOSWindowHandle();
+
+	uint32 SelectionFlag = 0;
+	// A value of 0 represents single file selection while a value of 1 represents multiple file selection
+	bool bOpened = DesktopPlatform->OpenFileDialog(ParentWindowHandle, TEXT("이미지 선택"), TEXT(""), TEXT(""),
+		TEXT("Image Files (*.png;*.jpg)|*.png;*.jpg"), SelectionFlag, OutFiles);
+	
+	if (bOpened && OutFiles.Num() > 0)
+	{
+		FFastLogger::LogConsole(TEXT("OutFiles[0] : %s"), *OutFiles[0]);
+		OutFilePath = OutFiles[0];
+		return true;
+	}
+	
+	return false;
+}
+
+bool UCategoryUI::SendImageRequest(const FString& ImagePath)
+{
+	AMapEditorState* GameState = GetWorld()->GetGameState<AMapEditorState>();
+	if (!GameState)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameState is null"));
+		SetTextToDefault();
+		SetGridToDefault();
+		return false;
+	}
+	
+	TArray<uint8> ImageData;
+	if (!FFileHelper::LoadFileToArray(ImageData, *ImagePath))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load image file: %s"), *ImagePath);
+		SetTextToDefault();
+		SetGridToDefault();
+		return false;
+	}
+
+	FHttpMultipartField ImageField;
+	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
+	ImageField.FieldName = TEXT("image");
+	ImageField.FileName = FileNameWithExtension;
+	ImageField.ContentType = TEXT("image/png");
+	ImageField.Data = ImageData;
+
+	FHttpMultipartRequest Request;
+	Request.ServerURL = GameState->GetImageRequestURL();
+	Request.RequestPath = GameState->GetImageRequestPath();
+	// Request.AdditionalHeaders.Add(TEXT("Authorization"), TEXT("Bearer token"));
+	Request.MultipartFields.Add(ImageField);
+
+	FHttpMessageWrapper Message;
+	Message.Header = FMessageHeader();
+	Message.Header.Type = EMessageType::HttpMultipartRequest;
+	Message.HttpMessage = Request;
+
+	if (!GameState->HttpManagerComponent->SendHttpMessage(Message))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to send image request"));
+		SetTextToDefault();
+		SetGridToDefault();
+		return false;
+	}
+	return true;
+}
+
+void UCategoryUI::OnImageSearchResponse()
+{
+	FHttpMessageWrapper Response;
+	AMapEditorState* GameState = GetWorld()->GetGameState<AMapEditorState>();
+	if (!GameState)
+	{
+		FFastLogger::LogConsole(TEXT("GameState is null"));
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+	
+	if (!GameState->HttpManagerComponent->PopHttpMessage(EMessageType::HttpMultipartResponse, Response))
+	{
+		SetTextToDefault();
+		SetGridToDefault();
+		return ;
+	}
+
+	// FHttpMultipartResponse HttpResponse = Response.HttpMessage.Get<FHttpMultipartResponse>();
+	FHttpMultipartResponse* HttpResponse = std::get_if<FHttpMultipartResponse>(&Response.HttpMessage);
+	if (!HttpResponse)
+	{
+		FFastLogger::LogConsole(TEXT("Invalid HttpMessage type"));
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+	// 응답코드가 2xx가 아닐 경우
+	if (HttpResponse->ResponseCode / 100 != 2)
+	{
+		FFastLogger::LogConsole(TEXT("Image search failed: %d"), HttpResponse->ResponseCode);
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+	
+	// Json을 카테고리 리스트로 변환
+	FImageResponseJson ImageResponse;
+	FJsonObjectConverter::JsonObjectStringToUStruct(HttpResponse->ResponseText, &ImageResponse);
+	if (!ImageResponse.SubCategoryList.Num())
+	{
+		FFastLogger::LogConsole(TEXT("No subcategories found"));
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+
+	SetTextToDefault();
+	GridUI->UpdatePropGridByImageSearch(ImageResponse.SubCategoryList, CategorySystem);
+}
+
+void UCategoryUI::SetTextToDefault()
+{
+	SearchText->SetHintText(FText::FromString(DefaultSearchText));
+	SearchText->SetIsReadOnly(false);
+}
+
+void UCategoryUI::SetGridToDefault()
+{
+	GridUI->UpdatePropGrid(SelectedMajorCategory->GetMajorCategoryType(), CategorySystem);
 }

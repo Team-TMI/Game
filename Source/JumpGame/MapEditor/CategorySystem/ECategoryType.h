@@ -62,4 +62,11 @@ enum class ESubCategoryType : uint8
 #pragma endregion
 
 	Count			UMETA(DisplayName = "Count"),			// 카테고리 개수
+
+#pragma region Seasons
+	Spring	= 101		UMETA(DisplayName = "Spring"),			// 봄
+	Summer	= 102		UMETA(DisplayName = "Summer"),			// 여름
+	Fall	= 103		UMETA(DisplayName = "Fall"),				// 가을
+	Winter	= 104		UMETA(DisplayName = "Winter"),			// 겨울
+#pragma endregion
 };

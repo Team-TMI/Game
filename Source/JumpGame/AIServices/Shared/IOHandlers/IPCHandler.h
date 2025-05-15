@@ -15,8 +15,9 @@ class JUMPGAME_API FIPCHandler : public IIOHandlerInterface, public TSharedFromT
 public:
 	FIPCHandler();
 
-	virtual bool Init(const FIOHandlerInitInfo& InitInfo, std::map<EMessageType, std::queue<FMessageUnion>>* InMessageQueuePtr) override;
+	virtual bool Init(const FIOHandlerInitInfo& InitInfo, MessageQueuePtr InMessageQueuePtr, HttpMessageQueuePtr InHttpMessageQueuePtr) override;
 	virtual bool SendGameMessage(const FMessageUnion& Message) override;
+	virtual bool SendGameMessage(const FHttpMessageWrapper& HttpMessage) override { return false; };
 	virtual bool ReceiveMessage() override;
 	virtual void SetReaderMode() override { bReader = true; bWriter = false; }
 	virtual void SetWriterMode() override { bReader = false; bWriter = true; };
