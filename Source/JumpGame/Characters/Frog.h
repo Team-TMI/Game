@@ -292,6 +292,8 @@ public:
 	void CancelEmotion();
 	UFUNCTION()
 	void PlayEmotion(int32 EmotionIndex);
+	UFUNCTION()
+	void OnEmotionMontageEnd(UAnimMontage* Montage, bool bInterrupted);
 
 	// 동기화 (클라이언트는 서버로 요청->처리)
 	UFUNCTION(Server, Reliable)
@@ -325,4 +327,15 @@ public:
 	
 	UFUNCTION()
 	void ShowEmotionUI(bool bIsShow);
+
+	// 눈 바꾸기
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UTexture2D*> EyeTextures;
+	UPROPERTY(EditDefaultsOnly)
+	int32 EyeIndex{};
+
+	UFUNCTION()
+	void ChangeEyeMaterial(int32 MatIndex);
 };
+
+

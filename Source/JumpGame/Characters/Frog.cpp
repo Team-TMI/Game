@@ -287,7 +287,7 @@ void AFrog::BeginPlay()
 
 	// 감정표현 UI
 	EmotionUI = CreateWidget<class UEmotionUI>(GetWorld(), EmotionUIClass);
-	if (EmotionUI)
+	if (EmotionUI && IsLocallyControlled())
 	{
 		EmotionUI->AddToViewport();
 	}
@@ -1389,12 +1389,12 @@ void AFrog::MulticastRPC_CancelEmotion_Implementation()
 	if (EmotionState == EEmotionState::PlayingEmotion && CurrentEmotionMontage)
 	{
 		StopAnimMontage(CurrentEmotionMontage);
+		ChangeEyeMaterial(0);
 		CurrentEmotionMontage = nullptr;
 	}
 
 	EmotionState = EEmotionState::None;
 }
-
 
 void AFrog::PlayEmotion(int32 EmotionIndex)
 {
@@ -1405,8 +1405,6 @@ void AFrog::PlayEmotion(int32 EmotionIndex)
 		// 서버에 요청할 때 어떤 캐릭터가 요청했는지 명확히 전달
 		ServerRPC_PlayEmotion(MyCharacter, EmotionIndex);
 	}
-	
-	// TODO: 카메라 제어 막기?
 }
 
 
@@ -1428,10 +1426,10 @@ void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
 		CurrentEmotionMontage = GreetingMontage;
 		break;
 	case 1:
-		CurrentEmotionMontage = AngryMontage;
+		CurrentEmotionMontage = SadMontage;
 		break;
 	case 2:
-		CurrentEmotionMontage = SadMontage;
+		CurrentEmotionMontage = AngryMontage;
 		break;
 	case 3:
 		CurrentEmotionMontage = MerongMontage;
@@ -1446,6 +1444,38 @@ void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
 		if (Duration > 0.f)
 		{
 			EmotionState = EEmotionState::PlayingEmotion;
+			ChangeEyeMaterial(EmotionIndex);
+		}
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		// 콜백 델리게이트 생성
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AFrog::OnEmotionMontageEnd);
+
+		// 몽타주가 끝나면 델리게이트 호출
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentEmotionMontage);
+	}
+
+	// TODO: 몽타주 끝났을때, 상태바꾸기 + 눈 원래대로
+}
+
+void AFrog::OnEmotionMontageEnd(UAnimMontage* Montage, bool bInterrupted)
+{
+	EmotionState = EEmotionState::None;
+	ChangeEyeMaterial(0);
+}
+
+void AFrog::ChangeEyeMaterial(int32 MatIndex)
+{
+	if (GetMesh())
+	{
+		UMaterialInstanceDynamic* DynMat{ GetMesh()->CreateAndSetMaterialInstanceDynamic(1) };
+		if (DynMat && EyeTextures.IsValidIndex(MatIndex))
+		{
+			DynMat->SetTextureParameterValue("Eye", EyeTextures[MatIndex]);
 		}
 	}
 }
