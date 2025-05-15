@@ -54,6 +54,7 @@ public:
 	
 	const TArray<EMajorCategoryType>& GetMajorCategories();
 	const TArray<ESubCategoryType>& GetSubCategoriesByMajor(EMajorCategoryType Major);
+	const TArray<ESubCategoryType>& GetSubCategoriesByMajorWithoutHidden(EMajorCategoryType MajorCategory);
 
 	// 조회 함수
 	const TArray<class UPropWrap*>& GetPropsByMajor(EMajorCategoryType Major);
@@ -69,6 +70,7 @@ public:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual ~UCategorySystem() override;
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -88,6 +90,8 @@ private:
 	class UDataTable* CategoryDataTable = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
 	class UDataTable* MajorTableInfoTable = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	class UDataTable* CategoryInfoTables = nullptr;
 
 	// 카테고리별로 Prop을 관리하기 위한 Map
 	UPROPERTY()

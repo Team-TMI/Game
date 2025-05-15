@@ -3,13 +3,21 @@
 
 #include "CategoryUI.h"
 
+#include "DesktopPlatformModule.h"
+#include "IDesktopPlatform.h"
+#include "JsonObjectConverter.h"
 #include "MajorCategoryButtonUI.h"
 #include "PropGridUI.h"
 #include "SubCategoryButtonUI.h"
+#include "Components/Button.h"
 #include "Components/EditableText.h"
 #include "Components/Image.h"
 #include "Components/ScrollBox.h"
+#include "JumpGame/AIServices/Shared/HttpManagerComponent.h"
+#include "JumpGame/AIServices/Shared/Message.h"
+#include "JumpGame/AIServices/Shared/IOHandlers/IOHandlerInterface.h"
 #include "JumpGame/Core/GameState/MapEditorState.h"
+#include "JumpGame/Core/GameState/MapGameState.h"
 #include "JumpGame/MapEditor/CategorySystem/CategorySystem.h"
 #include "JumpGame/MapEditor/CategorySystem/ECategoryType.h"
 #include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
@@ -29,6 +37,7 @@ void UCategoryUI::NativeOnInitialized()
 	{
 		// Category 시스템을 가져옴.
 		CategorySystem = GameState->GetCategorySystem();
+		GameState->HttpManagerComponent->HttpHandlers[EMessageType::HttpMultipartRequest]->OnMessageReceived.AddUObject(this, &UCategoryUI::OnImageSearchResponse);
 	}
 
 	if (!CategorySystem)
@@ -61,7 +70,7 @@ void UCategoryUI::NativeOnInitialized()
 	// SubCategory 버튼들을 미리 만들어두기
 	for (auto& MajorCategory : MajorCategoriesList)
 	{
-		const TArray<ESubCategoryType>& SubCategoryList = CategorySystem->GetSubCategoriesByMajor(MajorCategory);
+		const TArray<ESubCategoryType>& SubCategoryList = CategorySystem->GetSubCategoriesByMajorWithoutHidden(MajorCategory);
 		for (auto& SubCategory : SubCategoryList)
 		{
 			USubCategoryButtonUI* SubCategoryButtonUI = CreateWidget<USubCategoryButtonUI>(GetWorld(), SubCategoryButtonUIClass);
@@ -81,6 +90,9 @@ void UCategoryUI::NativeOnInitialized()
 
 	SearchText->OnTextCommitted.AddDynamic(this, &UCategoryUI::OnSearchTextCommitted);
 	SearchText->OnTextChanged.AddDynamic(this, &UCategoryUI::OnSearchTextChanged);
+
+	ImageSearchButton->OnClicked.AddDynamic(this, &UCategoryUI::OnImageSearchButtonClicked);
+
 }
 
 void UCategoryUI::NativeDestruct()
@@ -100,7 +112,7 @@ void UCategoryUI::OnMajorCategoryButtonClicked(const EMajorCategoryType& MajorCa
 {
 	ClearSubCategoryButtons();
 
-	const TArray<ESubCategoryType>& SubCategoryList = CategorySystem->GetSubCategoriesByMajor(MajorCategory);
+	const TArray<ESubCategoryType>& SubCategoryList = CategorySystem->GetSubCategoriesByMajorWithoutHidden(MajorCategory);
 	for (auto& SubCategory : SubCategoryList)
     {
         USubCategoryButtonUI* SubCategoryButtonUI = SubCategoryButtons[SubCategory];
@@ -203,4 +215,127 @@ void UCategoryUI::OnSearchTextChanged(const FText& Text)
 			CategoryUI->GridUI->UpdatePropGridBySearch(InputText, CategoryUI->CategorySystem);
 		}
 	}), SearchDelay, false);
+}
+
+void UCategoryUI::OnImageSearchButtonClicked()
+{
+	SearchText->SetText(FText::FromString(TEXT("")));
+	SearchText->SetHintText(FText::FromString(TEXT("이미지 검색 중 입니다...")));
+	SearchText->SetIsReadOnly(true);
+	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
+
+	FString ImagePath;
+	if (!OpenFileDialog(ImagePath))
+	{
+		SearchText->SetHintText(FText::FromString(DefaultSearchText));
+		SearchText->SetIsReadOnly(false);
+		return ;
+	}
+	
+	SendImageRequest(ImagePath);
+	
+	FString FilePath = FPaths::GetPath(ImagePath);
+	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
+	SearchText->SetText(FText::FromString(FileNameWithExtension));
+	
+	SearchText->SetHintText(FText::FromString(DefaultSearchText));
+	SearchText->SetIsReadOnly(false);
+}
+
+bool UCategoryUI::OpenFileDialog(FString& OutFilePath)
+{
+	TArray<FString> OutFiles;
+	
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	if (!DesktopPlatform)
+	{
+		return false;
+	}
+	if (!GEngine)
+	{
+		return false;
+	}
+	if (!GEngine->GameViewport)
+	{
+		return false;
+	}
+
+	void* ParentWindowHandle = GEngine->GameViewport->GetWindow()->GetNativeWindow()->GetOSWindowHandle();
+
+	uint32 SelectionFlag = 0;
+	// A value of 0 represents single file selection while a value of 1 represents multiple file selection
+	bool bOpened = DesktopPlatform->OpenFileDialog(ParentWindowHandle, TEXT("이미지 선택"), TEXT(""), TEXT(""),
+		TEXT("Image Files (*.png;*.jpg)|*.png;*.jpg"), SelectionFlag, OutFiles);
+	
+	if (bOpened && OutFiles.Num() > 0)
+	{
+		FFastLogger::LogConsole(TEXT("OutFiles[0] : %s"), *OutFiles[0]);
+		OutFilePath = OutFiles[0];
+		return true;
+	}
+	
+	return false;
+}
+
+bool UCategoryUI::SendImageRequest(const FString& ImagePath)
+{
+	AMapEditorState* GameState = GetWorld()->GetGameState<AMapEditorState>();
+	if (!GameState)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameState is null"));
+		return false;
+	}
+	
+	TArray<uint8> ImageData;
+	if (!FFileHelper::LoadFileToArray(ImageData, *ImagePath))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load image file: %s"), *ImagePath);
+		return false;
+	}
+
+	FHttpMultipartField ImageField;
+	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
+	ImageField.FieldName = TEXT("image");
+	ImageField.FileName = FileNameWithExtension;
+	ImageField.ContentType = TEXT("image/png");
+	ImageField.Data = ImageData;
+
+	FHttpMultipartRequest Request;
+	Request.ServerURL = GameState->GetImageRequestURL();
+	Request.RequestPath = GameState->GetImageRequestPath();
+	// Request.AdditionalHeaders.Add(TEXT("Authorization"), TEXT("Bearer token"));
+	
+	Request.MultipartFields.Add(ImageField);
+
+	FHttpMessageWrapper Message;
+	Message.Header = FMessageHeader();
+	Message.Header.Type = EMessageType::HttpMultipartRequest;
+
+	Message.HttpMessage.Set<FHttpMultipartRequest>(Request);
+
+	FHttpMultipartRequest RequestTest = Message.HttpMessage.Get<FHttpMultipartRequest>();
+	
+	bool Flag = GameState->HttpManagerComponent->SendHttpMessage(Message);
+	return Flag;
+}
+
+void UCategoryUI::OnImageSearchResponse()
+{
+	FHttpMessageWrapper Response;
+	AMapEditorState* GameState = GetWorld()->GetGameState<AMapEditorState>();
+	if (!GameState)
+	{
+		FFastLogger::LogConsole(TEXT("GameState is null"));
+		return;
+	}
+	
+	if (!GameState->HttpManagerComponent->PopHttpMessage(EMessageType::HttpMultipartResponse, Response))
+	{
+		return ;
+	}
+
+	FHttpMultipartResponse HttpResponse= Response.HttpMessage.Get<FHttpMultipartResponse>();
+
+	// Json을 카테고리 리스트로 변환
+	// FJsonObjectConverter::JsonObjectStringToUStruct()
 }

@@ -32,6 +32,8 @@ private:
 	class UEditableText* SearchText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UImage* PropOverviewImage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UButton* ImageSearchButton;
 
 	UPROPERTY()
 	class UMajorCategoryButtonUI* SelectedMajorCategory = nullptr;
@@ -56,6 +58,11 @@ private:
 	void OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 	UFUNCTION()
 	void OnSearchTextChanged(const FText& Text);
+	UFUNCTION()
+	void OnImageSearchButtonClicked();
+	bool OpenFileDialog(FString& OutFilePath);
+	bool SendImageRequest(const FString& ImagePath);
+	void OnImageSearchResponse();
 
 	FString DefaultSearchText = TEXT("검색 할 내용을 입력하세요");
 

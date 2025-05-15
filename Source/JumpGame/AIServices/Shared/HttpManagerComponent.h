@@ -23,12 +23,12 @@ public:
 	bool SendHttpMessage(const FHttpMessageWrapper& HttpMessage);
 	bool PopHttpMessage(const EMessageType& MessageType, FHttpMessageWrapper& OutMessage);
 	
+	TMap<EMessageType, TSharedPtr<class IIOHandlerInterface>> HttpHandlers;
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	void RegisterHttpHandler(const EMessageType& MessageType, TSharedPtr<class IIOHandlerInterface> Handler);
-
 	
-	TMap<EMessageType, TSharedPtr<class IIOHandlerInterface>> HttpHandlers;
 	std::map<EMessageType, std::queue<FHttpMessageWrapper>> HttpMessageQueue;
 };

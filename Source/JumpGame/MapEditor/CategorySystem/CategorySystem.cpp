@@ -1,8 +1,11 @@
 #include "CategorySystem.h"
 
+#include "CategoryName.h"
 #include "MajorTableInfo.h"
 #include "PropWrap.h"
 #include "JumpGame/Utils/CommonUtils.h"
+
+struct FCategoryName;
 
 UCategorySystem::UCategorySystem()
 {
@@ -258,6 +261,31 @@ const TArray<ESubCategoryType>& UCategorySystem::GetSubCategoriesByMajor(EMajorC
 
 	for (auto& SubCategory : MajorTableInfo->SubCategoryTypes)
 	{
+		SubCategories.Add(SubCategory);
+	}
+	
+	return SubCategories;
+}
+
+const TArray<ESubCategoryType>& UCategorySystem::GetSubCategoriesByMajorWithoutHidden(EMajorCategoryType MajorCategory)
+{
+	static const TArray<ESubCategoryType> EmptyArray;
+	
+	static TArray<ESubCategoryType> SubCategories;
+	SubCategories.Reset();
+	
+	const FMajorTableInfo* MajorTableInfo = FindMajorTableInfoRow(MajorCategory);
+	if (!MajorTableInfo)
+	{
+		return EmptyArray;
+	}
+
+	for (auto& SubCategory : MajorTableInfo->SubCategoryTypes)
+	{
+		if (CategoryInfoTables->FindRow<FCategoryName>(FName(*FCommonUtil::GetEnumDisplayName(SubCategory).ToString()), TEXT(""), true)->bHidden)
+		{
+			continue ;
+		}
 		SubCategories.Add(SubCategory);
 	}
 	
