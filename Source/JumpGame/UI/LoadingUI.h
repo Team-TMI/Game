@@ -16,11 +16,13 @@ class JUMPGAME_API ULoadingUI : public UUserWidget
 
 public:
 	UFUNCTION()
+	void InitializeLoadingScreen();
+	UFUNCTION()
 	void UpdateLoadingImage();
 	UFUNCTION()
 	void UpdateLoadingProgress(float Value);
 	UFUNCTION()
-	void UpdateLoadingText(FText NewText);
+	void UpdateLoadingText();
 	
 public:
 	UPROPERTY(meta = (BindWidget))
@@ -34,4 +36,8 @@ public:
 	TArray<class UTexture2D*> LoadingImageList;
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FText> LoadingTextList;
+
+	float PrevValue{};
+	
+	FTimerHandle TimerHandle;
 };
