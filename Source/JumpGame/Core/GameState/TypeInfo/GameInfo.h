@@ -48,6 +48,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int32 MapID;
 
+	// 커스텀 맵 인가요?
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bIsCustom;
+	
 	// 맵 썸네일?!
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UTexture2D* Thumbnail;
@@ -59,6 +63,7 @@ public:
 	// 기본 생성자
 	FMapInfo()
 		: MapID(-1)
+		, bIsCustom(false)
 		, Thumbnail(nullptr)
 		, LoadingWidget(nullptr)
 	{}
@@ -96,5 +101,34 @@ public:
 		, MapName(TEXT(""))
 		, RoomID(-1)
 		, bIsLocked(false)
+	{}
+};
+
+USTRUCT(BlueprintType)
+struct FSteamFriendData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	FString DisplayName;
+
+	UPROPERTY(BlueprintReadOnly)
+	FString SteamId;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 FriendIdx;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsPlaying;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsPlayingThisGame;
+
+	FSteamFriendData()
+		: DisplayName(TEXT(""))
+		, SteamId(TEXT(""))
+		, FriendIdx(-1)
+		, bIsPlaying(false)
+		, bIsPlayingThisGame(false)
 	{}
 };
