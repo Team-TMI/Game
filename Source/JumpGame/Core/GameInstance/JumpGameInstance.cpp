@@ -2,14 +2,16 @@
 
 
 #include "JumpGameInstance.h"
+#include "OnlineSubsystemTypes.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
-#include "Blueprint/UserWidget.h"
 #include "JumpGame/Core/GameState/LobbyGameState.h"
-#include "JumpGame/UI/WaitRoomUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 #include "Online/OnlineSessionNames.h"
+#include "Interfaces/OnlineIdentityInterface.h"
+#include "Interfaces/OnlineFriendsInterface.h"
+#include "Interfaces/OnlinePresenceInterface.h"
 #include "HAL/PlatformProcess.h"
 #include "Async/Async.h"
 #include "Misc/Paths.h"
@@ -32,6 +34,8 @@ void UJumpGameInstance::Init()
 		SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UJumpGameInstance::OnFindSessionComplete);
 		// 세션 참여 성공시 호출되는 함수 등록
 		SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UJumpGameInstance::OnJoinSessionComplete);
+		SessionInterface->OnSessionUserInviteAcceptedDelegates.AddUObject(this, &UJumpGameInstance::OnSessionInviteAccepted); // 초대수락
+	
 		// 세션 파괴 성공시 호출되는 함수 등록
 		SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UJumpGameInstance::OnDestroySessionComplete);
 		// 세션 비정상 종료 감지시 호출되는 함수 등록
@@ -316,6 +320,151 @@ FString UJumpGameInstance::StringBase64Decode(FString Str)
 	return UTF8_TO_TCHAR(utf8String.c_str());
 }
 
+void UJumpGameInstance::GetSteamFriends()
+{
+	IOnlineSubsystem* Subsys = IOnlineSubsystem::Get();
+	if (!Subsys)
+	{
+		UE_LOG(LogTemp, Error, TEXT("OnlineSubsystem is NULL"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem Name: %s"), *Subsys->GetSubsystemName().ToString());
+
+	IOnlineFriendsPtr FriendsInterface = Subsys->GetFriendsInterface();
+	if (!FriendsInterface.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("FriendsInterface invalid"));
+		return;
+	}
+
+	IOnlineIdentityPtr Identity = Subsys->GetIdentityInterface();
+	if (!Identity.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("IdentityInterface invalid"));
+		return;
+	}
+
+	int32 LocalUserNumber = 0;
+
+	if (Identity->GetLoginStatus(LocalUserNumber) != ELoginStatus::LoggedIn)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Steam에 로그인되어 있지 않음"));
+		return;
+	}
+
+	TSharedPtr<const FUniqueNetId> UserId = Identity->GetUniquePlayerId(LocalUserNumber);
+	if (!UserId.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("유저 ID를 가져올 수 없음"));
+		return;
+	}
+
+	FriendsInterface->ReadFriendsList(
+		LocalUserNumber,
+		EFriendsLists::ToString(EFriendsLists::Default),
+		FOnReadFriendsListComplete::CreateUObject(this, &UJumpGameInstance::OnReadFriendsComplete));
+}
+
+void UJumpGameInstance::OnReadFriendsComplete(int32 LocalPlayer, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr)
+{
+	IOnlineSubsystem* Subsys = IOnlineSubsystem::Get();
+	if (!Subsys) return;
+
+	IOnlineFriendsPtr FriendsInterface = Subsys->GetFriendsInterface();
+	if (!FriendsInterface.IsValid()) return;
+
+	TArray<TSharedRef<FOnlineFriend>> FriendList;
+	if (!FriendsInterface->GetFriendsList(LocalPlayer, ListName, FriendList)) return;
+
+	// 테스트 중이므로 Spacewar AppID 사용
+	const int32 MyAppId = 480; 
+
+	for (const TSharedRef<FOnlineFriend>& Friend : FriendList)
+	{
+		const FOnlineUserPresence& Presence = Friend->GetPresence();
+
+		// 기본 상태값
+		bool bInSameGame = false;
+
+		// Steam에선 bIsPlayingThisGame은 false일 수 있으므로, bIsPlaying으로 진입
+		if (Presence.bIsPlaying)
+		{
+			// Steam에서는 GameId 정보를 PlatformData에 저장하지 않기 때문에,
+			// bIsPlayingThisGame만으로 판별 시 항상 false로 나올 수 있음.
+			// 따라서 아래 조건은 테스트 용도에서만 한정적으로 사용 가능
+			bInSameGame = Presence.bIsPlayingThisGame;
+		}
+
+		// 결과 출력
+		FString Name = Friend->GetDisplayName();
+		FString IdStr = Friend->GetUserId()->ToString();
+
+		UE_LOG(LogTemp, Log, TEXT("친구: %s | SteamId: %s | 실행 중: %s | 같은 게임: %s"),
+			*Name, *IdStr,
+			Presence.bIsPlaying ? TEXT("O") : TEXT("X"),
+			bInSameGame ? TEXT("O") : TEXT("X"));
+	}
+
+	for (const TSharedRef<FOnlineFriend>& Friend : FriendList)
+	{
+		const FOnlineUserPresence& Presence = Friend->GetPresence();
+
+		// 조건에 맞는 친구만 넣기 (같은 게임 실행 중인 경우 등)
+		if (Presence.bIsPlaying)
+		{
+			FSteamFriendData Data;
+			Data.DisplayName = Friend->GetDisplayName();
+			Data.SteamId = Friend->GetUserId()->ToString();
+			FilteredFriendList.Add(Data);
+		}
+	}
+
+	SetFilteredFriendList(FilteredFriendList);
+}
+
+void UJumpGameInstance::InviteFriendToSession(const FString& FriendIdStr)
+{
+	IOnlineSubsystem* Subsys = IOnlineSubsystem::Get();
+	if (!Subsys) return;
+
+	SessionInterface = Subsys->GetSessionInterface();
+	if (!SessionInterface.IsValid()) return;
+
+	IOnlineIdentityPtr IdentityInterface = Subsys->GetIdentityInterface();
+	if (!IdentityInterface.IsValid()) return;
+
+	TSharedPtr<const FUniqueNetId> LocalUserId = IdentityInterface->GetUniquePlayerId(0);
+	TSharedPtr<const FUniqueNetId> FriendId = IdentityInterface->CreateUniquePlayerId(FriendIdStr);
+
+	if (!LocalUserId.IsValid() || !FriendId.IsValid()) return;
+
+	const FName SessionName = NAME_GameSession;
+
+	SessionInterface->SendSessionInviteToFriend(*LocalUserId, SessionName, *FriendId);
+}
+
+void UJumpGameInstance::OnSessionInviteAccepted(bool bWasSuccessful, int32 LocalUserNum,
+	TSharedPtr<const FUniqueNetId> InvitingPlayerId,
+	const FOnlineSessionSearchResult& SessionToJoin)
+{
+	if (!bWasSuccessful)
+	{
+		UE_LOG(LogTemp, Error, TEXT("초대 수락 실패 또는 거절됨"));
+		// 여기서 UI 띄우거나, 로그 남기기
+		return;
+	}
+
+	if (!SessionToJoin.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("초대 세션 정보가 유효하지 않음"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("초대 수락됨 - 세션 참가 시도"));
+	SessionInterface->JoinSession(LocalUserNum, NAME_GameSession, SessionToJoin);
+}
+
 void UJumpGameInstance::SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin)
 {
 	if (PlayerMap.Contains(PlayerNetID))
@@ -324,6 +473,14 @@ void UJumpGameInstance::SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin)
 		FPlayerInfo& PlayerInfo = PlayerMap[PlayerNetID];
 		PlayerInfo.bIsWin = bIsWin;
 	}
+}
+
+void UJumpGameInstance::SetFilteredFriendList(const TArray<FSteamFriendData>& FriendList)
+{
+	FilteredFriendList = FriendList;
+	
+	// 델리게이트 브로드캐스트!
+	OnFriendListUpdated.Broadcast(FilteredFriendList);
 }
 
 void UJumpGameInstance::RunEyeTrackingScript()

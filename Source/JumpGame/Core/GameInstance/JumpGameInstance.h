@@ -13,6 +13,7 @@
 // DECLARE_DELEGATE_TwoParams(FFindComplete, int32, FString);
 
 DECLARE_DELEGATE_OneParam(FFindComplete, const FRoomData&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFriendListUpdated, const TArray<FSteamFriendData>&, FriendList);
 
 /**
  * 
@@ -68,9 +69,24 @@ public:
 	// 세션 검색완료시 호출되는 델리게이트
 	FFindComplete OnFindComplete;
 
+public:
+	// 친구 검색 관련
+	UPROPERTY()
+	int32 LocalUserNumber = 0;
+	
+	void GetSteamFriends();
+	void OnReadFriendsComplete(int32 LocalPlayer, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
+	void InviteFriendToSession(const FString& FriendIdStr);
+	void OnSessionInviteAccepted(bool bWasSuccessful, int32 LocalUserNum,
+	TSharedPtr<const FUniqueNetId> InvitingPlayerId, const FOnlineSessionSearchResult& SessionToJoin);
+
+	// 친구리스트 갱신 시 브로드캐스트 될 델리게이트
+	FOnFriendListUpdated OnFriendListUpdated;
+	
 private:
 	FString NetID;
 	TMap<FString, FPlayerInfo> PlayerMap;
+	TArray<FSteamFriendData> FilteredFriendList;
 
 public:
 	void SetPlayerInfo(const TMap<FString, FPlayerInfo> info) { PlayerMap = info; }
@@ -82,6 +98,9 @@ public:
 	void SetMapFilePath(const FString& Path) { MapFilePath = Path; }
 	FString GetMapFilePath() { return MapFilePath; }
 	void ClearMapFilePath() { MapFilePath = FString(); }
+
+	void SetFilteredFriendList(const TArray<FSteamFriendData>& FriendList);
+	TArray<FSteamFriendData>& GetFilteredFriendList() { return FilteredFriendList; }
 
 private:
 	UPROPERTY()
