@@ -4,6 +4,7 @@
 #include "LobbyGameState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
+#include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
 #include "JumpGame/UI/WaitRoomUI.h"
 
 ALobbyGameState::ALobbyGameState()
@@ -13,6 +14,8 @@ ALobbyGameState::ALobbyGameState()
 	{
 		WaitRoomUIClass = TempWaitUI.Class;
 	}
+
+	LoadMapComponent = CreateDefaultSubobject<ULoadMapComponent>(TEXT("LoadMapComponent"));
 }
 
 void ALobbyGameState::BeginPlay()

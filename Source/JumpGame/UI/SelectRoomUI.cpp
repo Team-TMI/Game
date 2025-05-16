@@ -59,21 +59,10 @@ void USelectRoomUI::OnPickCustomMap()
 	{
 		return ;
 	}
-	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
-	if (!GI)
-	{
-		return ;
-	}
-	GI->ClearMapFilePath();
 	ALobbyGameState* GameState = Cast<ALobbyGameState>(GetWorld()->GetGameState());
 	if (!GameState)
 	{
 		return ;
 	}
-	FString FileName;
-	if (!GameState->LoadMapComponent->PickFile(FileName))
-	{
-		return ;
-	} 
-	GI->SetMapFilePath(FileName);
+	GameState->LoadMapComponent->PickFile();
 }

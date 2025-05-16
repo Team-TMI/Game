@@ -20,7 +20,7 @@ public:
 	UFUNCTION()
 	void LoadMapWithString(const FString& FileName);
 	UFUNCTION()
-	bool PickFile(FString& OutFileName);
+	void PickFile();
 
 	UFUNCTION()
 	void OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames);
@@ -29,6 +29,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnMapLoaded OnMapLoaded;
+
+	void OnPickFileComplete(const FString& FileName, bool bSuccess);
+	void OnLoadFileComplete(const FString& FileName, bool bSuccess);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -48,4 +51,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapLoad", meta = (AllowPrivateAccess = "true"))
 	class UDataTable* PropTable = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapLoadUI", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UFileBrowserUI> FileBrowserUIClass = nullptr;
+	UPROPERTY()
+	class UFileBrowserUI* FileBrowserUI = nullptr;
 };

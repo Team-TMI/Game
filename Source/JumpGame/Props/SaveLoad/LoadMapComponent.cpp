@@ -4,8 +4,11 @@
 #include "JumpGame/MapEditor/CategorySystem/PropStruct.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "DesktopPlatformModule.h"
+#include "Blueprint/UserWidget.h"
 #include "Developer/DesktopPlatform/Public/IDesktopPlatform.h"
+#include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
+#include "JumpGame/UI/FileBrowser/FileBrowserUI.h"
 
 ULoadMapComponent::ULoadMapComponent()
 {
@@ -15,37 +18,63 @@ ULoadMapComponent::ULoadMapComponent()
 void ULoadMapComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	//
-	// TArray<FString> OutFileNames;
-	// OpenFileDialog(FString(TEXT("Open File Dialog")), FString(TEXT("C:/")), FString(TEXT("All Files (*.*)|*.*")), OutFileNames);
-	// if (OutFileNames.IsValidIndex(0))
-	// {
-	// 	PrintData(OutFileNames[0]);
-	// }
+
+	FileBrowserUI = CreateWidget<UFileBrowserUI>(GetWorld(), FileBrowserUIClass);
+	FileBrowserUI->AddToViewport(999);
+}
+
+void ULoadMapComponent::OnPickFileComplete(const FString& FileName, bool bSuccess)
+{
+	FileBrowserUI->OnFileSelectedDelegate.Unbind();
+	if (!bSuccess)
+	{
+		return ;
+	}
+	
+	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+	if (!GI)
+	{
+		return ;
+	}
+	GI->ClearMapFilePath();
+	GI->SetMapFilePath(FileName);
+}
+
+void ULoadMapComponent::OnLoadFileComplete(const FString& FileName, bool bSuccess)
+{
+	FileBrowserUI->OnFileSelectedDelegate.Unbind();
+	
+	if (!bSuccess)
+	{
+		return ;
+	}
+	
+	FString JsonString;
+
+	FFastLogger::LogScreen(FColor::Red, TEXT("LoadMapComponent::OnLoadFileComplete : %s"), *FileName);
+	
+	if (!LoadFileToJsonString(FileName, JsonString))
+	{
+		return ;
+	}
+	if (!ParseJsonStringToMap(JsonString))
+	{
+		return ;
+	}
+
+	BuildMapFromSaveData();
 }
 
 void ULoadMapComponent::LoadMap()
 {
-	FString JsonString;
+	FFastLogger::LogScreen(FColor::Red, TEXT("LoadMapComponent::LoadMap"));
+	FileBrowserUI->SetVisibility(ESlateVisibility::Visible);
+	FileBrowserUI->OnFileSelectedDelegate.BindUObject(this, &ULoadMapComponent::OnLoadFileComplete);
 
-	TArray<FString> OutFileNames;
-	OpenFileDialog(FString(TEXT("Open File Dialog")), FString(TEXT("C:/")), FString(TEXT("All Files (*.*)|*.*")), OutFileNames);
-	if (OutFileNames.IsValidIndex(0))
-	{
-		FFastLogger::LogScreen(FColor::Red, TEXT("%s"), *OutFileNames[0]);
-		// PrintData(OutFileNames[0]);
+	FString ExecutablePath = FPlatformProcess::ExecutablePath();
+	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
 	
-		if (!LoadFileToJsonString(OutFileNames[0], JsonString))
-		{
-			return ;
-		}
-		if (!ParseJsonStringToMap(JsonString))
-		{
-			return ;
-		}
-	
-		BuildMapFromSaveData();
-	}
+	FileBrowserUI->LoadDirectoryContents(ExecutableDir);
 }
 
 void ULoadMapComponent::LoadMapWithString(const FString& FileName)
@@ -64,19 +93,16 @@ void ULoadMapComponent::LoadMapWithString(const FString& FileName)
 	BuildMapFromSaveData();
 }
 
-bool ULoadMapComponent::PickFile(FString& OutFileName)
+void ULoadMapComponent::PickFile()
 {
-	TArray<FString> OutFileNames;
-	OpenFileDialog(FString(TEXT("Open File Dialog")), FString(TEXT("C:/")), FString(TEXT("All Files (*.*)|*.*")), OutFileNames);
-	if (OutFileNames.IsValidIndex(0))
-	{
-		FFastLogger::LogScreen(FColor::Red, TEXT("%s"), *OutFileNames[0]);
-		OutFileName = OutFileNames[0];
-		return true;
-	}
-	return false;
-}
+	FileBrowserUI->SetVisibility(ESlateVisibility::Visible);
+	FileBrowserUI->OnFileSelectedDelegate.Unbind();
+	FileBrowserUI->OnFileSelectedDelegate.BindUObject(this, &ULoadMapComponent::OnPickFileComplete);
 
+	FString ExecutablePath = FPlatformProcess::ExecutablePath();
+	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
+	FileBrowserUI->LoadDirectoryContents(ExecutableDir);
+}
 
 bool ULoadMapComponent::LoadFileToJsonString(const FString& FilePath, FString& JsonString)
 {
