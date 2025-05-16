@@ -58,4 +58,7 @@ public:
 	void MulticastRPC_UpdateLoadingUI(float Value);
 
 	FTimerHandle LoadingTimerHandle;
+
+	UPROPERTY()
+	class ARisingWaterProp* RisingWaterProp;
 };
