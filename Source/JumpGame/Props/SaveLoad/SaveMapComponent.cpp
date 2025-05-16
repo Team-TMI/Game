@@ -15,7 +15,8 @@ void USaveMapComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DefaultDirectory = FPaths::ProjectDir() + TEXT("SaveMap/");
+	DefaultDirectory += TEXT(R"(SaveMap\)");
+	FFastLogger::LogConsole(TEXT("DefaultDirectory : %s"), *DefaultDirectory);
 }
 
 bool USaveMapComponent::SaveMap(const FString& FileName)

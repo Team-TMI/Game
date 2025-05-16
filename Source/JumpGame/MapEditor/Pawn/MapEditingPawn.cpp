@@ -123,11 +123,6 @@ void AMapEditingPawn::BeginPlay()
 			SubSystem->AddMappingContext(IMC_MapEditing, 0);
 		}
 	}
-	AMapEditorState* MapEditorState = Cast<AMapEditorState>(GetWorld()->GetGameState());
-	if (MapEditorState)
-	{
-		MapEditorState->InitWidget(ClickHandlerManager, DragDropOperation);
-	}
 }
 
 // Called every frame
