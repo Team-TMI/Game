@@ -12,7 +12,7 @@ void UBottomNaviBarUI::NativeOnInitialized()
 
 	Btn_Store->OnClicked.AddDynamic(this, &UBottomNaviBarUI::OnClickStore);
 	Btn_FrogPass->OnClicked.AddDynamic(this, &UBottomNaviBarUI::OnClickFrogPass);
-	Btn_Friend->OnClicked.AddDynamic(this, &UBottomNaviBarUI::OnClickFriend);
+	// Btn_Friend->OnClicked.AddDynamic(this, &UBottomNaviBarUI::OnClickFriend);
 
 	FriendsList = CreateWidget<class UFriendsList>(GetWorld(), FriendsListClass);
 	if (FriendsList)
