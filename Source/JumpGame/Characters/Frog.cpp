@@ -482,7 +482,7 @@ void AFrog::StartJump()
 
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
-		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1000.f};
+		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 900.f};
 
 		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
@@ -490,10 +490,9 @@ void AFrog::StartJump()
 			CancelEmotion();
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
-		ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
+			// 서버에 실제 점프 실행
+			ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
 		}
-
-		// 서버에 실제 점프 실행
 	}
 	// 슈퍼 점프
 	else if (GetCharacterMovement()->IsCrouching())
