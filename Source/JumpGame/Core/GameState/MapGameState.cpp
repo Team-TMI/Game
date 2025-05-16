@@ -7,17 +7,17 @@
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
 #include "JumpGame/UI/GameProgressBarUI.h"
+#include "JumpGame/UI/LoadingUI.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
 
 AMapGameState::AMapGameState()
-{
-	
-}
+{}
 
 void AMapGameState::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	// 최대 몇명의 플레이어가 플레이를 할지 설정하는 함수 (GI에서 정보를 들고와서 설정해준다)
 	int32 MaxPlayer = GI->GetMaxPlayerCount();
@@ -29,9 +29,19 @@ void AMapGameState::BeginPlay()
 		ProgressBarUI->AddToViewport();
 	}
 
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
-	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
-
+	APlayerController* PC{UGameplayStatics::GetPlayerController(this, 0)};
+	if (PC && PC->IsLocalController())
+	{
+		if (LoadingUIClass)
+		{
+			LoadingUI = CreateWidget<ULoadingUI>(PC, LoadingUIClass);
+			if (LoadingUI)
+			{
+				LoadingUI->AddToViewport();
+				LoadingUI->InitializeLoadingScreen();
+			}
+		}
+	}
 }
 
 void AMapGameState::Tick(float DeltaTime)
@@ -67,9 +77,51 @@ void AMapGameState::OnAllClientAdded()
 {
 	Super::OnAllClientAdded();
 
-	// 클라이언트에게 알리자 (2초후)
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMapGameState::MulticastRPC_AllClientAdded, 2, false);
+	if (HasAuthority())
+	{
+		MulticastRPC_UpdateLoadingUI(1.0f);
+		// 클라이언트에게 알리자 (2초후)
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMapGameState::MulticastRPC_AllClientAdded, 2,
+		                                       false);
+	}
+}
+
+void AMapGameState::OnClientAdded(const FString& NetID)
+{
+	Super::OnClientAdded(NetID);
+
+	if (HasAuthority())
+	{
+		UJumpGameInstance* GI{Cast<UJumpGameInstance>(GetWorld()->GetGameInstance())};
+		int32 MaxPlayer{GI->GetMaxPlayerCount()};
+		int32 CurrentPlayers{PlayerArray.Num()};
+		float Progress{0.f};
+
+		if (MaxPlayer > 0)
+		{
+			Progress = static_cast<float>(CurrentPlayers) / static_cast<float>(MaxPlayer);
+		}
+
+		Progress = FMath::Clamp(Progress, 0.0f, 1.0f);
+
+		// 0.5초 있다가 UI에 적용, 너무 바로 되면 이상할까봐
+		TWeakObjectPtr<AMapGameState> WeakThis{this};
+		FTimerDelegate LoadingDelegate{
+			FTimerDelegate::CreateLambda([WeakThis, Progress]() {
+				if (WeakThis.IsValid())
+				{
+					AMapGameState* StrongThis = WeakThis.Get();
+					
+					StrongThis->MulticastRPC_UpdateLoadingUI(Progress);
+
+					StrongThis->GetWorld()->GetTimerManager().ClearTimer(StrongThis->LoadingTimerHandle);
+				}
+			})
+		};
+		
+		GetWorld()->GetTimerManager().SetTimer(LoadingTimerHandle, LoadingDelegate, 0.5f, false);
+	}
 }
 
 void AMapGameState::MulticastRPC_RemoveProgressBarUI_Implementation()
@@ -92,4 +144,29 @@ void AMapGameState::MulticastRPC_AllClientAdded_Implementation()
 	// 브로드캐스트 하자
 	FFastLogger::LogScreen(FColor::Blue, TEXT("모든 클라이언트 들어옴 알림!!"));
 	OnAllClientAddedDelegate.Broadcast();
+
+	// 로딩 UI 제거
+	MulticastRPC_RemoveLoadingUI();
+}
+
+
+void AMapGameState::MulticastRPC_UpdateLoadingUI_Implementation(float Value)
+{
+	if (LoadingUI)
+	{
+		LoadingUI->UpdateLoadingProgress(Value);
+	}
+
+	APlayerController* PC{UGameplayStatics::GetPlayerController(this, 0)};
+	PC->SetInputMode(FInputModeGameOnly());
+	PC->bShowMouseCursor = false;
+}
+
+void AMapGameState::MulticastRPC_RemoveLoadingUI_Implementation()
+{
+	if (LoadingUI)
+	{
+		LoadingUI->RemoveFromParent();
+		LoadingUI = nullptr;
+	}
 }
