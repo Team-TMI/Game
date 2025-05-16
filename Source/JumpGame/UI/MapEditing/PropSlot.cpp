@@ -72,6 +72,7 @@ FReply UPropSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, co
 	FFastLogger::LogScreen(FColor::Orange, TEXT("PropSlot::NativeOnPreviewMouseButtonDown"));
 
 	// DragDropOperation을 새롭게 세팅함
+	// @fixme 왜 DragDropOperation이 없지?
 	DragDropOperation->DefaultDragVisual = PropDragVisual;
 	
 	// 여기서 어떤 Prop이 선택되었는 지를 BroadCast 해준다.
