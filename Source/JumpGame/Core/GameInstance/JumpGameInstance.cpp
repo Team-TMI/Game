@@ -345,7 +345,7 @@ void UJumpGameInstance::GetSteamFriends()
 		return;
 	}
 
-	int32 LocalUserNumber = 0;
+	LocalUserNumber = 0;
 
 	if (Identity->GetLoginStatus(LocalUserNumber) != ELoginStatus::LoggedIn)
 	{
