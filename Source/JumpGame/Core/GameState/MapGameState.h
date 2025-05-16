@@ -19,13 +19,14 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnAllClientAdded() override;
+	virtual void OnClientAdded(const FString& NetID) override;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_AllClientAdded();
 
 	UPROPERTY()
 	FOnAllClientMapAdded OnAllClientAddedDelegate;
-
+	
 	// UI에 플레이어 위치를 동기화하자
 	UPROPERTY()
 	TArray<float> AllPlayerZPos;
@@ -40,5 +41,21 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_RemoveProgressBarUI();
-	
+
+public:
+	// 로딩 UI
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ULoadingUI> LoadingUIClass;
+	UPROPERTY(EditAnywhere)
+	class ULoadingUI* LoadingUI{nullptr};
+
+	// 로딩 UI 제거
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_RemoveLoadingUI();
+
+	// 로딩 업데이트
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_UpdateLoadingUI(float Value);
+
+	FTimerHandle LoadingTimerHandle;
 };

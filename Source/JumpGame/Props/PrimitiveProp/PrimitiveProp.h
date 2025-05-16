@@ -42,7 +42,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetGizmosCollision(bool bCond);
 	UFUNCTION(BlueprintCallable)
-	void RotateAllGizmos();
+	virtual void RotateAllGizmos();
 	UFUNCTION(BlueprintCallable)
 	void SetNewSizeByRotation(const FVector& InSize);
 
