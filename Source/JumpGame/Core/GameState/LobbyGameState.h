@@ -30,8 +30,8 @@ public:
 	// 업데이트 될 UI
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<class UWaitRoomUI> WaitRoomUIClass;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UWaitRoomUI* WaitRoomUI;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LoadMap")
 	class ULoadMapComponent* LoadMapComponent;
 };

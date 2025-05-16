@@ -82,6 +82,11 @@ bool USaveMapComponent::SaveDataToFile(const FSaveDataArray& InSaveDataArray, co
 	}
 
 	FString FullPath = Directory + FileName;
+	// 확장자 추가
+	if (!FullPath.EndsWith(TEXT(".json")))
+	{
+		FullPath += TEXT(".json");
+	}
 	// 저장
 	bool bSuccess = FFileHelper::SaveStringToFile(JsonString, *FullPath);
 
