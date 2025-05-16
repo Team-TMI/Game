@@ -201,7 +201,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = false;
 	GetCharacterMovement()->FallingLateralFriction = 5.f;
-
+	
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
@@ -233,10 +233,11 @@ AFrog::AFrog()
 	Tags.Add(TEXT("Frog"));
 
 	// 동기화 좀 더 빨라지게
-	SetNetUpdateFrequency(200.f);
-	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 	GetCharacterMovement()->bNetworkSkipProxyPredictionOnNetUpdate = true;
-
+	GetCharacterMovement()->bNetworkSmoothingComplete = true;
+	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Linear;
+	SetNetUpdateFrequency(100);
+	
 	// 물 관련 상태
 	bIsSwimming = false;
 	CharacterWaterState = ECharacterStateEnum::None;
@@ -489,10 +490,10 @@ void AFrog::StartJump()
 			CancelEmotion();
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+		ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
 		}
 
 		// 서버에 실제 점프 실행
-		ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
 	}
 	// 슈퍼 점프
 	else if (GetCharacterMovement()->IsCrouching())
@@ -645,6 +646,11 @@ void AFrog::PropCheat()
 	//
 }
 
+void AFrog::MulticastRPC_Launch_Implementation(const FVector& LaunchVelocity)
+{
+	ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+}
+
 void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& LaunchVelocity)
 {
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
@@ -656,7 +662,11 @@ void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& Laun
 		}
 
 		// 서버에서 캐릭터 발사
-		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+		if (HasAuthority())
+		{
+			MulticastRPC_Launch(LaunchVelocity);
+		}
+		//ACharacter::LaunchCharacter(LaunchVelocity, true, true);
 
 		// 1초 후 서버에서 충돌 프로필 되돌리기
 		FTimerHandle TempTimerHandle;
