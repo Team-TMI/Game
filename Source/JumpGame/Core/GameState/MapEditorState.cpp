@@ -53,16 +53,6 @@ void AMapEditorState::BeginPlay()
 void AMapEditorState::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
-	{
-		FFastLogger::LogScreen(FColor::Red, TEXT("Save Map!!"));
-		SaveMapComponent->SaveMap(TEXT(R"(MapData.json)"));
-	}
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
-	{
-		LoadMapComponent->LoadMap();
-	}
 }
 
 void AMapEditorState::InitWidget(class UClickHandlerManager* ClickHandlerManager,
