@@ -50,7 +50,7 @@ void AMapGameMode::PostLogin(APlayerController* NewPlayer)
 				FString SteamName = Identity->GetPlayerNickname(*NetId);
 
 				// 이미 등록되었는지 확인
-				if (!GI->GetPlayerInfo().Contains(Key))
+				if (!GI->GetPlayerInfo().Contains(SteamName))
 				{
 					// 플레이어 저장
 					FPlayerInfo NewPlayerInfo;
@@ -58,7 +58,7 @@ void AMapGameMode::PostLogin(APlayerController* NewPlayer)
 					NewPlayerInfo.PlayerName = SteamName; // 닉네임으로 설정
 
 					// GI에 업데이트 (서버에 저장)
-					GI->AddPlayerInfo(Key, NewPlayerInfo);
+					GI->AddPlayerInfo(SteamName, NewPlayerInfo);
 					PlayerIdx++;
 				}
 			}
