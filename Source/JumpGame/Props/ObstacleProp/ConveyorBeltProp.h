@@ -16,10 +16,12 @@ public:
 	AConveyorBeltProp();
 
 protected:
-	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	                      const FHitResult& SweepResult) override;
-	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
-	
+	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	                              const FHitResult& SweepResult) override;
+	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -47,4 +49,24 @@ public:
 
 	// 이동
 	void ConveyorMove();
+
+public:
+	virtual void ChangeAllMaterialsToUnSelect() override;
+	virtual void ChangeAllMaterialsToSelect() override;
+	virtual void ChangeAllMaterialsToOnCollision() override;
+	
+	virtual void RotateAllGizmos() override;
+
+	void UpdateWaterMaterialRotation();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WidgetComponent", meta = (AllowPrivateAccess = "true"))
+	TArray<class UMaterialInstanceDynamic*> UnSelectedWaterMaterials;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* WaterMeshComp;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UMaterialInterface* ConveyorMaterial;
+	UPROPERTY()
+	class UMaterialInstanceDynamic* ConveyorDynamicMaterial;
 };
