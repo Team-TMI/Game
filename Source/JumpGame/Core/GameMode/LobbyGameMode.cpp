@@ -50,6 +50,8 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	// 이미 등록되어 있다면 리턴
 	if (GI->GetPlayerInfo().Contains(SteamName)) return;
 
+	FFastLogger::LogConsole(TEXT("ALobbyGameMode PlayerIdx: %d"), PlayerIdx);
+	
 	// 새 플레이어 정보 생성 및 저장
 	FPlayerInfo NewPlayerInfo;
 	NewPlayerInfo.PlayerID = PlayerIdx;

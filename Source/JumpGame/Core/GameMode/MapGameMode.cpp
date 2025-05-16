@@ -62,6 +62,8 @@ void AMapGameMode::PostLogin(APlayerController* NewPlayer)
 	NewPlayerInfo.PlayerID = PlayerIdx;
 	NewPlayerInfo.PlayerName = SteamName;
 
+	FFastLogger::LogConsole(TEXT("AMapGameMode PlayerIdx: %d"), PlayerIdx);
+
 	GI->AddPlayerInfo(SteamName, NewPlayerInfo);
 	PlayerIdx++;
 
