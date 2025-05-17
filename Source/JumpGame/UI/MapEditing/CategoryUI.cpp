@@ -219,6 +219,7 @@ void UCategoryUI::OnSearchTextChanged(const FText& Text)
 	}), SearchDelay, false);
 }
 
+// TODO: OpenFileDialog를 사용하지 않게 해야 함.
 void UCategoryUI::OnImageSearchButtonClicked()
 {
 	SearchText->SetText(FText::FromString(TEXT("")));
