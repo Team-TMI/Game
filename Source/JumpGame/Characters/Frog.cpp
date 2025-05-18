@@ -135,7 +135,7 @@ AFrog::AFrog()
 		JumpGaugeUIComponent->SetPivot(FVector2D(3.0, 0.3));
 		JumpGaugeUIComponent->SetDrawAtDesiredSize(true);
 	}
-	
+
 	ConstructorHelpers::FObjectFinder<UMaterial> WaterPostProcessFinder
 		(TEXT("/Game/PostProcess/MPP_InWater.MPP_InWater"));
 	if (WaterPostProcessFinder.Succeeded())
@@ -201,7 +201,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = false;
 	GetCharacterMovement()->FallingLateralFriction = 5.f;
-	
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
@@ -237,7 +237,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->bNetworkSmoothingComplete = true;
 	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Linear;
 	SetNetUpdateFrequency(100);
-	
+
 	// 물 관련 상태
 	bIsSwimming = false;
 	CharacterWaterState = ECharacterStateEnum::None;
@@ -248,7 +248,7 @@ AFrog::AFrog()
 	FrogSkinFinder();
 
 	ConstructorHelpers::FClassFinder<UUserWidget> EmotionUIWidgetClass
-	(TEXT("/Game/UI/Character/WBP_Emotion.WBP_Emotion_C"));
+		(TEXT("/Game/UI/Character/WBP_Emotion.WBP_Emotion_C"));
 	if (EmotionUIWidgetClass.Succeeded())
 	{
 		EmotionUIClass = EmotionUIWidgetClass.Class;
@@ -303,7 +303,7 @@ void AFrog::BeginPlay()
 	{
 		EmotionUI->AddToViewport();
 	}
-	
+
 	InitFrogState();
 }
 
@@ -430,7 +430,7 @@ void AFrog::Move(const struct FInputActionValue& Value)
 	if (Controller && GetCanMove())
 	{
 		CancelEmotion();
-		
+
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
@@ -489,6 +489,8 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+			// GetCharacterMovement()->AddImpulse(LaunchVelocity, true);
+
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 			// 서버에 실제 점프 실행
 			ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
@@ -647,7 +649,11 @@ void AFrog::PropCheat()
 
 void AFrog::MulticastRPC_Launch_Implementation(const FVector& LaunchVelocity)
 {
-	ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+	if (!IsLocallyControlled())
+	{
+		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+		// GetCharacterMovement()->AddImpulse(LaunchVelocity, true);
+	}
 }
 
 void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& LaunchVelocity)
@@ -995,7 +1001,7 @@ void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, c
 	{
 		bCanPlayEmotion = false;
 		CancelEmotion();
-		
+
 		// 현재 상호작용 중인 물 저장
 		CurrentWaterVolume = WaterVolume;
 		TimeSpentInWater = 0.f;
@@ -1008,7 +1014,7 @@ void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, c
 	{
 		bCanPlayEmotion = true;
 		CancelEmotion();
-		
+
 		// 물에서 벗어나면 null로 설정
 		CurrentWaterVolume = nullptr;
 		CharacterWaterState = ECharacterStateEnum::None;
@@ -1335,7 +1341,7 @@ void AFrog::OnRep_SkinIndex()
 
 // 플레이어 감정표현
 void AFrog::OnPressCKey()
-{	
+{
 	if (EmotionState == EEmotionState::None || EmotionState == EEmotionState::PlayingEmotion)
 	{
 		ShowEmotionUI(true);
@@ -1361,13 +1367,14 @@ void AFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
 	{
 		PlayEmotion(EmotionIndex);
 	}
-	
+
 	FFastLogger::LogScreen(FColor::Red, TEXT("선택인덱스: %d"), EmotionIndex);
 }
 
 void AFrog::ShowEmotionUI(bool bIsShow)
 {
-	if (!EmotionUI) return;
+	if (!EmotionUI)
+		return;
 
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (bIsShow)
@@ -1379,7 +1386,7 @@ void AFrog::ShowEmotionUI(bool bIsShow)
 			EmotionUI->OnEmotionSelected.BindUObject(this, &AFrog::OnSelectionEmotionIndex);
 			bIsBind = true;
 		}
-		
+
 		PC->SetShowMouseCursor(true);
 		PC->SetInputMode(FInputModeGameAndUI());
 	}
@@ -1450,7 +1457,7 @@ void AFrog::ServerRPC_PlayEmotion_Implementation(AFrog* Character, int32 Emotion
 void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
 {
 	UMaterialInterface* CurrentEyeMaterial = nullptr;
-	
+
 	switch (EmotionIndex)
 	{
 	case 0:
@@ -1497,8 +1504,9 @@ void AFrog::MulticastRPC_PlayEmotion_Implementation(int32 EmotionIndex)
 void AFrog::OnEmotionMontageEnd(UAnimMontage* Montage, bool bInterrupted)
 {
 	// 다른 몽타주가 끝난 것이라면 무시
-	if (Montage != SaveCurrentMontage) return; 
-	
+	if (Montage != SaveCurrentMontage)
+		return;
+
 	EmotionState = EEmotionState::None;
 	ChangeEyeMaterial(0);
 	SaveCurrentMontage = nullptr;
@@ -1509,7 +1517,7 @@ void AFrog::ChangeEyeMaterial(int32 MatIndex)
 {
 	if (GetMesh())
 	{
-		UMaterialInstanceDynamic* DynMat{ GetMesh()->CreateAndSetMaterialInstanceDynamic(1) };
+		UMaterialInstanceDynamic* DynMat{GetMesh()->CreateAndSetMaterialInstanceDynamic(1)};
 		if (DynMat && EyeTextures.IsValidIndex(MatIndex))
 		{
 			DynMat->SetTextureParameterValue("Eye", EyeTextures[MatIndex]);
@@ -1581,32 +1589,32 @@ void AFrog::FrogSkinFinder()
 		SkinTextures.Add(Texture10.Object);
 	}
 	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture1
-	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeBasic.T_EyeBasic'"));
+		(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeBasic.T_EyeBasic'"));
 	if (EyeTexture1.Succeeded())
 	{
 		EyeTextures.Add(EyeTexture1.Object);
 	}
 	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture2
-	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeAngry.T_EyeAngry'"));
+		(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeAngry.T_EyeAngry'"));
 	if (EyeTexture2.Succeeded())
 	{
 		EyeTextures.Add(EyeTexture2.Object);
 	}
 	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture3
-	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeSleep.T_EyeSleep'"));
+		(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeSleep.T_EyeSleep'"));
 	if (EyeTexture3.Succeeded())
 	{
 		EyeTextures.Add(EyeTexture3.Object);
 	}
 	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture4
-	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeCute.T_EyeCute'"));
+		(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeCute.T_EyeCute'"));
 	if (EyeTexture4.Succeeded())
 	{
 		EyeTextures.Add(EyeTexture4.Object);
 	}
-	
+
 	ConstructorHelpers::FObjectFinder<UTexture2D> EyeTexture5
-	(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeConfuse.T_EyeConfuse'"));
+		(TEXT("/Script/Engine.Texture2D'/Game/Characters/Fat_Frog/EyeTextures/T_EyeConfuse.T_EyeConfuse'"));
 	if (EyeTexture5.Succeeded())
 	{
 		EyeTextures.Add(EyeTexture5.Object);
