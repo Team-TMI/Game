@@ -18,6 +18,9 @@ WidgetSwitcher 구조
 -> FindRoom에서 팝업으로 방을 생성한다
  */
 
+class UButton;
+class UImage;
+
 UCLASS()
 class JUMPGAME_API UClientRoomUI : public UUserWidget
 {
@@ -25,6 +28,7 @@ class JUMPGAME_API UClientRoomUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	UPROPERTY()
 	class UJumpGameInstance* GI;
@@ -35,6 +39,33 @@ public:
 	class UWidgetSwitcher* WidgetSwitcher;
 
 	// WidgetSwitcher (0)
+	// 로고
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* LogoAnim;
+	UPROPERTY(meta = (BindWidget))
+	UButton* Btn_GoMainStart;
+	UPROPERTY(meta = (BindWidget))
+	UImage* Image_Circle;
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynMaterial;
+
+	UFUNCTION()
+	void OnClickGoMainStart();
+	UFUNCTION()
+	void InitLogoMaterial();
+	UFUNCTION()
+	void PlayLogoAnim(bool bIsForward);
+
+	// 배경
+	UPROPERTY()
+	float RadiusStartTime = 0.f;
+	UPROPERTY()
+	bool bIsRadiusAnimating = false;
+	UPROPERTY()
+	float RadiusDuration = 2.f; // 3초 동안 변화
+	UFUNCTION()
+	void RadiusAnimating();
+	
 	// 메인 관련
 	UPROPERTY(meta = (BindWidget))
 	class UCanvasPanel* CanvasMain;
