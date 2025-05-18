@@ -4,6 +4,8 @@
 #include "CarrotBounceBollardProp.h"
 
 #include "JumpGame/Props/Components/PropDataComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 
 // Sets default values
@@ -19,6 +21,13 @@ ACarrotBounceBollardProp::ACarrotBounceBollardProp()
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
+	(TEXT("/Game/Sounds/Ques/Bounce_Cue.Bounce_Cue"));
+	if (SoundAsset.Succeeded())
+	{
+		HitSound = Cast<USoundCue>(SoundAsset.Object);
+	}
+
 	SetSize(FVector(1, 1, 2));
 
 	PropDataComponent->SetPropID(TEXT("2001"));
@@ -29,6 +38,24 @@ void ACarrotBounceBollardProp::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ACarrotBounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::OnBollardHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);
+
+	if (HasAuthority())
+	{
+		this->MulticastRPC_PlayEffect(this->GetActorLocation());
+	}
+}
+
+void ACarrotBounceBollardProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
+{
+	Super::MulticastRPC_PlayEffect_Implementation(Location);
+
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 0.5f, 1.5f);
 }
 
 // Called every frame

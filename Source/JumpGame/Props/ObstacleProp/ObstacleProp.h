@@ -67,6 +67,6 @@ public:
 
 	// 이펙트, 사운드 등
 	UFUNCTION(NetMulticast, reliable)
-	void MulticastRPC_PlayEffect(FVector Location);
+	virtual void MulticastRPC_PlayEffect(FVector Location);
 };
 
