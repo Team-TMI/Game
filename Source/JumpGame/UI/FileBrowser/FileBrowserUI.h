@@ -14,6 +14,7 @@ class JUMPGAME_API UFileBrowserUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 	UFUNCTION()
 	void LoadDirectoryContents(const FString& DirectoryPath);

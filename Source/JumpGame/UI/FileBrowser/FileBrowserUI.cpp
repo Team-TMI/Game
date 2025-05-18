@@ -18,6 +18,15 @@ void UFileBrowserUI::NativeOnInitialized()
 	CloseButton->OnClicked.AddDynamic(this, &UFileBrowserUI::OnCloseButtonClicked);
 }
 
+void UFileBrowserUI::NativeDestruct()
+{
+	OnFileSelectedDelegate.Unbind();
+
+	FileListScrollBox->ClearChildren(); // 기존 목록 초기화
+
+	Super::NativeDestruct();
+}
+
 void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 {
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
