@@ -11,7 +11,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 
 // Sets default values
@@ -76,10 +78,10 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		FLog::Log("AObstacleProp::OnMyBeginOverlap");
 	}
 
-	/*if (HasAuthority())
+	if (HasAuthority())
 	{
-		MulticastRPC_PlayEffect(OtherActor->GetActorLocation());
-	}*/
+		MulticastRPC_PlayEffect(this->GetActorLocation());
+	}
 }
 
 void AObstacleProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -177,5 +179,5 @@ void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
 {
 	// 클라이언트 전부에서 호출됨 (서버 포함)
 	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location);
-	// UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 0.5f, 1.5f);
 }

@@ -4,6 +4,8 @@
 #include "LotusLeafTrampolineProp.h"
 
 #include "JumpGame/Props/Components/PropDataComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 
 // Sets default values
@@ -18,6 +20,14 @@ ALotusLeafTrampolineProp::ALotusLeafTrampolineProp()
 	{
 		MeshComp->SetStaticMesh(MeshAsset.Object);
 	}
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
+	(TEXT("/Game/Sounds/Ques/Bounce_Cue.Bounce_Cue"));
+	if (SoundAsset.Succeeded())
+	{
+		HitSound = Cast<USoundCue>(SoundAsset.Object);
+	}
+
 
 	SetSize(FVector(2, 2, 2));
 

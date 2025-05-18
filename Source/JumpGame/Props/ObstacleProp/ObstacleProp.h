@@ -68,5 +68,9 @@ public:
 	// 이펙트, 사운드 등
 	UFUNCTION(NetMulticast, reliable)
 	virtual void MulticastRPC_PlayEffect(FVector Location);
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
+	class USoundCue* HitSound;
 };
 
