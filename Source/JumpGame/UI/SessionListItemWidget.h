@@ -37,8 +37,6 @@ public:
 	
 	UFUNCTION()
 	void OnClickJoin();
-	/*UFUNCTION()
-	void SetInfo(int32 Idx, FString Info);*/
 	UFUNCTION()
 	void SetRoomInfo(const FRoomData& Data);
 };

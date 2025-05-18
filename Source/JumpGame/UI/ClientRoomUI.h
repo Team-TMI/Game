@@ -56,7 +56,7 @@ public:
 	UFUNCTION()
 	void PlayLogoAnim(bool bIsForward);
 
-	// 배경
+	// 로고 배경
 	UPROPERTY()
 	float RadiusStartTime = 0.f;
 	UPROPERTY()
@@ -194,5 +194,19 @@ public:
 	ESlateVisibility bIsVisible;
 	UFUNCTION()
 	void SetVisibleMain();
+
+public:
+	// 세팅 UI 띄우기
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	TSubclassOf<class UGameSettingUI> GameSettingUIClass;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	UGameSettingUI* GameSettingUI;
+
+public:
+	// 크레딧 UI 띄우기
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	TSubclassOf<class UCreditUI> CreditUIClass;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	UCreditUI* CreditUI;
 };
 
