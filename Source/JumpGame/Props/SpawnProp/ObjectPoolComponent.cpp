@@ -20,6 +20,24 @@ UObjectPoolComponent::UObjectPoolComponent()
 	// ...
 }
 
+void UObjectPoolComponent::DestoryObjectPool()
+{
+	for (ARollingBallProp* Ball : Pool)
+	{
+		if (Ball)
+		{
+			Ball->Destroy();
+		}
+	}
+
+	for (ARollingBallProp* Ball : InactivePool)
+	{
+		if (Ball)
+		{
+			Ball->Destroy();
+		}
+	}
+}
 
 // Called when the game starts
 void UObjectPoolComponent::BeginPlay()
@@ -50,7 +68,9 @@ class ARollingBallProp* UObjectPoolComponent::GetRollingBallProp()
 		return nullptr;
 	}
 	// 마지막 오브젝트 반환
-	return Pool.Pop();
+	ARollingBallProp* BallProp = Pool.Pop();
+	InactivePool.Push(BallProp);
+	return BallProp;
 }
 
 void UObjectPoolComponent::Expand()
@@ -78,6 +98,7 @@ void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject)
 {
 	// FFastLogger::LogConsole(TEXT("알림을 보낸다: 다시 왔음!!"));
 	// 사용하고 나서 다시 풀에 넣자 
+	InactivePool.Remove(ReturnObject);
 	Pool.Push(ReturnObject);
 
 	/*if (GetOwner()->HasAuthority())

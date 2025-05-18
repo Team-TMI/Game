@@ -21,6 +21,7 @@ protected:
 	void OnProjectileReturn();
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 
 	virtual void SetCollision(bool bEnable) override;
 
