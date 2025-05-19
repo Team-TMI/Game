@@ -14,7 +14,7 @@ class JUMPGAME_API ALotusLeafTrampolineProp : public ATrampolineProp
 public:
 	// Sets default values for this actor's properties
 	ALotusLeafTrampolineProp();
-
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -18,6 +18,15 @@ void UFileBrowserUI::NativeOnInitialized()
 	CloseButton->OnClicked.AddDynamic(this, &UFileBrowserUI::OnCloseButtonClicked);
 }
 
+void UFileBrowserUI::NativeDestruct()
+{
+	OnFileSelectedDelegate.Unbind();
+
+	FileListScrollBox->ClearChildren(); // 기존 목록 초기화
+
+	Super::NativeDestruct();
+}
+
 void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 {
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
@@ -32,6 +41,7 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 		NewDirectoryPath = DirectoryPath;
 	}
 
+	CurrentDirectoryText->SetText(FText::FromString(NewDirectoryPath));
 	// FFastLogger::LogScreen(FColor::Red, TEXT("LoadDirectoryContents : %s"), *NewDirectoryPath);
 	
 	if (!PlatformFile.DirectoryExists(*NewDirectoryPath))
@@ -65,7 +75,7 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 		const FString ItemName = FPaths::GetCleanFilename(ItemPath);
 	
 		// json 파일만 검출
-		if (!bIsDirectory && ItemName.EndsWith(".json"))
+		if (!bIsDirectory && ItemName.EndsWith(Suffix))
 		{
 			CreateFileButton(ItemName, ItemPath);
 		}
@@ -145,7 +155,7 @@ void UFileBrowserUI::OnSelectButtonClicked()
 		OnFileSelectedDelegate.Execute(CurrentFilePath, false);
 		return;
 	}
-	if (CurrentFilePath.EndsWith(".json"))
+	if (CurrentFilePath.EndsWith(Suffix))
 	{
 		OnFileSelectedDelegate.Execute(CurrentFilePath, true);
 	}
@@ -160,7 +170,7 @@ void UFileBrowserUI::CreateBackButton()
 {
 	FString ParentDir = FPaths::GetPath(CurrentDirectory);
 
-	if (ParentDir.IsEmpty() || ParentDir == CurrentDirectory)
+	if (ParentDir.IsEmpty() || ParentDir == CurrentDirectory || CurrentDirectory.Equals(TEXT("C:\\")))
 	{
 		return; // 루트면 무시
 	}
@@ -177,7 +187,6 @@ void UFileBrowserUI::CreateBackButton()
 	BackButton->GetBackDirectoryText()->SetText(BackButtonText);
 
 	BackButton->OnDoubleClicked.BindUObject(this, &UFileBrowserUI::LoadDirectoryContents);
-	BackButton->OnClicked.BindUObject(this, &UFileBrowserUI::OnItemClicked);
 
 	FileListScrollBox->AddChild(BackButton);
 }

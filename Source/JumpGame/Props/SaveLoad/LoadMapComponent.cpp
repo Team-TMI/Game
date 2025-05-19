@@ -73,7 +73,8 @@ void ULoadMapComponent::LoadMap()
 
 	FString ExecutablePath = FPlatformProcess::ExecutablePath();
 	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
-	
+
+	FileBrowserUI->SetSuffix(TEXT(".json"));
 	FileBrowserUI->LoadDirectoryContents(ExecutableDir);
 }
 
@@ -93,7 +94,7 @@ void ULoadMapComponent::LoadMapWithString(const FString& FileName)
 	BuildMapFromSaveData();
 }
 
-void ULoadMapComponent::PickFile()
+void ULoadMapComponent::PickFile(const FString& Suffix)
 {
 	FileBrowserUI->SetVisibility(ESlateVisibility::Visible);
 	FileBrowserUI->OnFileSelectedDelegate.Unbind();
@@ -101,6 +102,8 @@ void ULoadMapComponent::PickFile()
 
 	FString ExecutablePath = FPlatformProcess::ExecutablePath();
 	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
+	
+	FileBrowserUI->SetSuffix(Suffix);
 	FileBrowserUI->LoadDirectoryContents(ExecutableDir);
 }
 

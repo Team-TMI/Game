@@ -16,6 +16,8 @@ class JUMPGAME_API UStoryUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
+	
 	//virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 public:
@@ -48,7 +50,8 @@ public:
 	// 대사 애니메이션
 	void ChatAppearAnimation();
 	void CheckNextSpeaker(const FText& FullStoryLine);
-
+	// 대사 등장
+	void TextAppearAnimation();
 	void StoryEnd();
 
 	UPROPERTY(BlueprintReadWrite)
@@ -87,4 +90,10 @@ public:
 	FString SpeakerName{};
 	bool bIsSpeakerChanged{false};
 	bool bIsEnd{false};
+	bool bIsTextAppearing{false};
+	UPROPERTY()
+	UUMGSequencePlayer* SequencePlayerTextAppearing;
+	FString DialogText;
+
+	bool bIsStoryStarted{false};
 };

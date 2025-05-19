@@ -83,6 +83,8 @@ public:
 	void ServerRPC_ExecuteWaterSurfaceJump(const FVector& LaunchVelocity);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_Launch(const FVector& LaunchVelocity);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_Launch(const FVector& LaunchVelocity);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_StartCrouch();
 	UFUNCTION(NetMulticast, Reliable)
@@ -93,6 +95,7 @@ public:
 	void ServerRPC_StopSprint();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartTongueAttack();
+	
 
 
 public:
@@ -346,6 +349,13 @@ public:
 	UAnimMontage* SaveCurrentMontage = nullptr;
 	UPROPERTY()
 	int32 SaveCurrentIndex = -1;
+	
+	UPROPERTY(Replicated)
+	bool bRecentlyLaunched{false};
+	UPROPERTY()
+	FTimerHandle LaunchCooldownTimer;
+	// 플래그 활성화 함수
+	void ActivateRecentlyLaunchedFlag();
 };
 
 

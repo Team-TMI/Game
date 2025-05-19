@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "SaveData.h"
 #include "Components/ActorComponent.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "LoadMapComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMapLoaded);
@@ -20,7 +21,7 @@ public:
 	UFUNCTION()
 	void LoadMapWithString(const FString& FileName);
 	UFUNCTION()
-	void PickFile();
+	void PickFile(const FString& Suffix);
 
 	UFUNCTION()
 	void OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames);
@@ -32,6 +33,8 @@ public:
 
 	void OnPickFileComplete(const FString& FileName, bool bSuccess);
 	void OnLoadFileComplete(const FString& FileName, bool bSuccess);
+
+	GETTER(class UFileBrowserUI*, FileBrowserUI);
 	
 protected:
 	virtual void BeginPlay() override;

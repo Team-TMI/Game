@@ -39,4 +39,14 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void ReverseSwingHammer();
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cable", meta = (AllowPrivateAccess = "true"))
+	class UCableComponent* CableComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cable", meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* CableMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cable", meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* CableTop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cable", meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* Propeller;
 };
