@@ -651,8 +651,8 @@ void AFrog::ServerRPC_Launch_Implementation(const FVector& LaunchVelocity)
 	{
 		GetCharacterMovement()->Launch(LaunchVelocity);
 	}
-	
 	MulticastRPC_Launch(LaunchVelocity);
+	ForceNetUpdate();
 }
 
 void AFrog::MulticastRPC_Launch_Implementation(const FVector& LaunchVelocity)

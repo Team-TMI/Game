@@ -133,6 +133,7 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 	{
 		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 		Character->ServerRPC_Launch(LaunchVelocity);
+		ForceNetUpdate();
 	}
 
 	// 가상 함수: 기본 로직
