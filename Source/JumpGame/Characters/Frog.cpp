@@ -487,11 +487,13 @@ void AFrog::StartJump()
 		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
 		{
-			CancelEmotion();
+			//CancelEmotion();
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+			
 			// 서버에 실제 점프 실행
 			ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
+			ForceNetUpdate();
 		}
 	}
 	// 슈퍼 점프
@@ -651,6 +653,7 @@ void AFrog::ServerRPC_Launch_Implementation(const FVector& LaunchVelocity)
 	{
 		GetCharacterMovement()->Launch(LaunchVelocity);
 	}
+	
 	MulticastRPC_Launch(LaunchVelocity);
 	ForceNetUpdate();
 }
