@@ -111,7 +111,7 @@ void AObstacleProp::GetLifetimeReplicatedProps(
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AObstacleProp, DeltaRot);
+	DOREPLIFETIME(AObstacleProp, Rotation);
 	DOREPLIFETIME(AObstacleProp, bPlayHitEffect)
 }
 
@@ -167,6 +167,7 @@ void AObstacleProp::ObstacleRotate()
 		DeltaRot = RotAxis * RotSpeed;
 		// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
 		PivotScene->AddLocalRotation(DeltaRot, true);
+		Rotation = PivotScene->GetRelativeRotation();
 	}
 }
 
@@ -175,7 +176,8 @@ void AObstacleProp::OnRep_ObstacleRotate()
 	if (bIsActive == false) return;
 	
 	// 클라이언트라면 이 함수가 실행
-	PivotScene->AddLocalRotation(DeltaRot);
+	// PivotScene->AddLocalRotation(DeltaRot);
+	PivotScene->SetRelativeRotation(Rotation);
 }
 
 void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location)

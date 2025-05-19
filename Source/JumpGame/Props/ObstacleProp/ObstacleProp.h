@@ -53,8 +53,10 @@ public:
 
 	// Rotate (자체 회전)관련
 	// 장애물: 회전망치, 뿔망치, 굴러오는 공
-	UPROPERTY(ReplicatedUsing=OnRep_ObstacleRotate)
+	// UPROPERTY(ReplicatedUsing=OnRep_ObstacleRotate)
 	FRotator DeltaRot;
+	UPROPERTY(ReplicatedUsing=OnRep_ObstacleRotate)
+	FRotator Rotation = FRotator(0, 0, 0);
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	float RotAngle = 0;
 	UPROPERTY (EditAnywhere, Category = "Rotate")
