@@ -127,14 +127,21 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 {
 	if (bIsActive == false)
 		return;
-	
+
+	LaunchVelocity = Direction.GetSafeNormal() * Force;
+	if (Character->IsLocallyControlled())
+	{
+		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+		Character->ServerRPC_Launch(LaunchVelocity);
+	}
+
 	// 가상 함수: 기본 로직
 	// 서버라면
-	if (HasAuthority())
-	{
-		LaunchVelocity = Direction.GetSafeNormal() * Force;
-		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-	}
+	// if (HasAuthority())
+	// {
+	// 	LaunchVelocity = Direction.GetSafeNormal() * Force;
+	// 	Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+	// }
 	// else
 	// {
 	// 	ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);

@@ -645,6 +645,16 @@ void AFrog::PropCheat()
 	//
 }
 
+void AFrog::ServerRPC_Launch_Implementation(const FVector& LaunchVelocity)
+{
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->Launch(LaunchVelocity);
+	}
+	
+	MulticastRPC_Launch(LaunchVelocity);
+}
+
 void AFrog::MulticastRPC_Launch_Implementation(const FVector& LaunchVelocity)
 {
 	if (!IsLocallyControlled())
