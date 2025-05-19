@@ -17,6 +17,7 @@ class JUMPGAME_API ALobbyGameMode : public ANetworkGameMode
 
 public:
 	ALobbyGameMode();
+	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 public:

@@ -20,6 +20,11 @@ ALobbyGameMode::ALobbyGameMode()
 	PlayerControllerClass = ALobbyPlayerController::StaticClass();
 }
 
+void ALobbyGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);

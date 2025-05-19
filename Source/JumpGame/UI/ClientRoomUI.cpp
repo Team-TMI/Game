@@ -57,11 +57,6 @@ void UClientRoomUI::NativeOnInitialized()
 	Btn_BackFromFind->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickBackFromFind);
 	GI->OnFindComplete.BindUObject(this, &UClientRoomUI::OnFindComplete);
 
-	// 로고 애니메이션
-	Btn_GoMainStart->OnClicked.AddDynamic(this, &UClientRoomUI::OnClickGoMainStart);
-	InitLogoMaterial();
-	PlayLogoAnim(true);
-
 	// 초기화
 	InitRoomListPool();
 
@@ -83,74 +78,6 @@ void UClientRoomUI::NativeOnInitialized()
 	if (CreditUI)
 	{
 		CreditUI->OnClickBackToLobbyFromCredit.AddDynamic(this, &UClientRoomUI::SetVisibleMain);
-	}
-}
-
-void UClientRoomUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
-{
-	Super::NativeTick(MyGeometry, InDeltaTime);
-
-	if (bIsRadiusAnimating)
-	{
-		RadiusAnimating();
-	}
-}
-
-void UClientRoomUI::OnClickGoMainStart()
-{
-	PlayLogoAnim(false);
-	RadiusStartTime = GetWorld()->GetTimeSeconds();
-	bIsRadiusAnimating = true;
-}
-
-void UClientRoomUI::RadiusAnimating()
-{
-	if (bIsRadiusAnimating && DynMaterial)
-	{
-		float Elapsed = GetWorld()->GetTimeSeconds() - RadiusStartTime;
-		float Alpha = FMath::Clamp(Elapsed / RadiusDuration, 0.f, 1.f);
-		float NewRadius = FMath::Lerp(1.0f, 0.0f, Alpha);
-
-		DynMaterial->SetScalarParameterValue(FName("Radius"), NewRadius);
-		Btn_GoMainStart->SetRenderOpacity(0.f);
-
-		if (Alpha >= 1.f)
-		{
-			bIsRadiusAnimating = false;
-			if (Image_Circle)
-			{
-				Image_Circle->SetVisibility(ESlateVisibility::Hidden);
-			}
-		}
-	}
-}
-
-void UClientRoomUI::InitLogoMaterial()
-{
-	UMaterialInterface* BaseMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/UI/Image/LogoAnim/MI_RingMask.MI_RingMask"));
-	if (BaseMaterial)
-	{
-		DynMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-		if (DynMaterial && Image_Circle)
-		{
-			DynMaterial->SetScalarParameterValue(FName("Radius"), 1.0f);
-
-			FSlateBrush Brush;
-			Brush.SetResourceObject(DynMaterial);
-			Image_Circle->SetBrush(Brush);
-		}
-	}
-}
-
-void UClientRoomUI::PlayLogoAnim(bool bIsForward)
-{
-	if (bIsForward)
-	{
-		PlayAnimationForward(LogoAnim);
-	}
-	else
-	{
-		PlayAnimationReverse(LogoAnim);
 	}
 }
 
