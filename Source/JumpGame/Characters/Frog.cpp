@@ -493,6 +493,7 @@ void AFrog::StartJump()
 
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 			// 서버에 실제 점프 실행
+			//GetCapsuleComponent()->SetCollisionProfileName(TEXT("Jumping"));
 			ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
 		}
 	}

@@ -47,8 +47,12 @@ public:
 	FVector LaunchVelocity	= FVector(0, 0, 0);
 	// 서버에서
 	virtual void LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool bXYOverride = false, bool bZOverride = false);
-	//UFUNCTION(server, reliable)
-	//virtual void ServerRPC_LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool bXYOverride = false, bool bZOverride = false);
+	UFUNCTION(Server, reliable)
+	virtual void ServerRPC_LaunchCharacter(AFrog* Character, FVector LaunchForce, bool bXYOverride = false, bool bZOverride = false);
+	UFUNCTION(NetMulticast, reliable)
+	virtual void MulticastRPC_LaunchCharacter(AFrog* Character, FVector LaunchForce, bool bXYOverride = false, bool bZOverride = false);
+
+
 	virtual void CalculateForce(AFrog* Character);
 
 	// Rotate (자체 회전)관련
