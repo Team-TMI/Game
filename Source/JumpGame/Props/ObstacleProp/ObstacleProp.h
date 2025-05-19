@@ -43,15 +43,10 @@ public:
 	// Launch 관련
 	// 장애물: 트램펄린, 튕기기막대, 회전망치
 	// LaunchVelocity를 초기값으로 주면 튕겨내지 않음
-	UPROPERTY(EditAnywhere, Category = "Launch", Replicated)
+	UPROPERTY(EditAnywhere, Category = "Launch")
 	FVector LaunchVelocity	= FVector(0, 0, 0);
 	// 서버에서
 	virtual void LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool bXYOverride = false, bool bZOverride = false);
-	UFUNCTION(Server, reliable)
-	virtual void ServerRPC_LaunchCharacter(AFrog* Character,FVector Direction, float Force, bool bXYOverride = false, bool bZOverride = false);
-	UFUNCTION(NetMulticast, reliable)
-	virtual void MulticastRPC_LaunchCharacter(AFrog* Character, FVector Direction, float Force, bool bXYOverride = false, bool bZOverride = false);
-
 
 	virtual void CalculateForce(AFrog* Character);
 

@@ -489,11 +489,8 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
-			// GetCharacterMovement()->AddImpulse(LaunchVelocity, true);
-
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 			// 서버에 실제 점프 실행
-			//GetCapsuleComponent()->SetCollisionProfileName(TEXT("Jumping"));
 			ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
 		}
 	}
@@ -652,8 +649,7 @@ void AFrog::MulticastRPC_Launch_Implementation(const FVector& LaunchVelocity)
 {
 	if (!IsLocallyControlled())
 	{
-		ACharacter::LaunchCharacter(LaunchVelocity, true, true);
-		// GetCharacterMovement()->AddImpulse(LaunchVelocity, true);
+		GetCharacterMovement()->Launch(LaunchVelocity);
 	}
 }
 
@@ -670,9 +666,10 @@ void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& Laun
 		// 서버에서 캐릭터 발사
 		if (HasAuthority())
 		{
-			MulticastRPC_Launch(LaunchVelocity);
+			GetCharacterMovement()->Launch(LaunchVelocity);
 		}
-		//ACharacter::LaunchCharacter(LaunchVelocity, true, true);
+
+		MulticastRPC_Launch(LaunchVelocity);
 
 		// 1초 후 서버에서 충돌 프로필 되돌리기
 		FTimerHandle TempTimerHandle;

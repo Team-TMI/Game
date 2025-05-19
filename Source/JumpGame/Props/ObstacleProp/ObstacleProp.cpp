@@ -112,7 +112,6 @@ void AObstacleProp::GetLifetimeReplicatedProps(
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AObstacleProp, DeltaRot);
-	DOREPLIFETIME(AObstacleProp, LaunchVelocity);
 }
 
 // Called every frame
@@ -128,42 +127,18 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 {
 	if (bIsActive == false)
 		return;
-
-	if (Character->IsLocallyControlled())
+	
+	// 가상 함수: 기본 로직
+	// 서버라면
+	if (HasAuthority())
 	{
 		LaunchVelocity = Direction.GetSafeNormal() * Force;
 		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-		ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
 	}
-	// 가상 함수: 기본 로직
-	// 서버라면
-	// if (HasAuthority())
-	// {
-	// 	Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-	// }
 	// else
 	// {
 	// 	ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
 	// }
-}
-
-void AObstacleProp::	ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction, float Force, bool bXYOverride,
-                                                             bool bZOverride)
-{
-	if (HasAuthority())
-	{
-		MulticastRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
-	}
-}
-
-void AObstacleProp::MulticastRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction, float Force, bool bXYOverride,
-                                                                bool bZOverride)
-{
-	if (!Character->IsLocallyControlled())
-	{
-		LaunchVelocity = Direction.GetSafeNormal() * Force;
-		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-	}
 }
 
 void AObstacleProp::CalculateForce(AFrog* Character)
