@@ -12,6 +12,7 @@ void UFriendsList::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
+	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	if (GI)
 	{
 		GI->OnFriendListUpdated.AddDynamic(this, &UFriendsList::UpdateFriendList);
