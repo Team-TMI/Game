@@ -65,6 +65,6 @@ void ABounceBollardProp::CalculateForce(AFrog* Character)
 	DrawDebugLine(GetWorld(),GetActorLocation(),GetActorLocation()+Direction*200,FColor::Red, false, 3.0f, 0, 2.f);
 	float Force = 1000;
 	
-	Super::LaunchCharacter(Character, Direction, Force);
+	Super::LaunchCharacter(Character, Direction, Force, true, true);
 }
 

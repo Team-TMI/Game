@@ -2,9 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "FileBrowserUI.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FOnFileSelected, const FString& /*Path*/, bool /*bIsDirectory*/);
+DECLARE_DELEGATE_TwoParams(FOnFileSelected, const FString& /*Path*/, bool /*bSuccess*/);
 
 UCLASS()
 class JUMPGAME_API UFileBrowserUI : public UUserWidget
@@ -13,6 +14,7 @@ class JUMPGAME_API UFileBrowserUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 	UFUNCTION()
 	void LoadDirectoryContents(const FString& DirectoryPath);
@@ -36,6 +38,8 @@ public:
 	void OnCloseButtonClicked();
 
 	FOnFileSelected OnFileSelectedDelegate;
+
+	SETTER(FString, Suffix);
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
 	TSubclassOf<class UFileItemUI> FileItemClass;
@@ -52,8 +56,12 @@ private:
 	class UButton* SelectButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UButton* CloseButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UTextBlock* CurrentDirectoryText;
 
 	FString CurrentDirectory;
 	FString CurrentFilePath;
 	FString DefaultString = TEXT(R"(파일을 선택하세요)");
+
+	FString Suffix = TEXT("");
 };
