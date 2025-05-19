@@ -33,12 +33,14 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* VictoryPlane;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* VictoryCube;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UArrowComponent* VictoryArrow;
+
+	// 조명
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USpotLightComponent* VictoryLight;
 	
 	// 1등 유저를 소환할 위치값을 반환하는 함수
 	FVector SpawnVictoryCharacter();
