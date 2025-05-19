@@ -235,7 +235,9 @@ AFrog::AFrog()
 	// 동기화 좀 더 빨라지게
 	GetCharacterMovement()->bNetworkSkipProxyPredictionOnNetUpdate = true;
 	GetCharacterMovement()->bNetworkSmoothingComplete = true;
-	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Linear;
+	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
+	GetCharacterMovement()->NetworkSimulatedSmoothLocationTime = 0.05f;
+	GetCharacterMovement()->NetworkSimulatedSmoothRotationTime = 0.05f;
 	SetNetUpdateFrequency(100);
 
 	// 물 관련 상태
@@ -488,8 +490,8 @@ void AFrog::StartJump()
 		if (IsLocallyControlled())
 		{
 			CancelEmotion();
+
 			ACharacter::LaunchCharacter(LaunchVelocity, true, true);
-			ActivateRecentlyLaunchedFlag();
 			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
 
 			// 서버에 실제 점프 실행
@@ -664,7 +666,6 @@ void AFrog::MulticastRPC_Launch_Implementation(const FVector& LaunchVelocity)
 	if (GetLocalRole() == ROLE_SimulatedProxy)
 	{
 		GetCharacterMovement()->Launch(LaunchVelocity);
-		ActivateRecentlyLaunchedFlag();
 	}
 }
 
@@ -682,7 +683,6 @@ void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& Laun
 		if (HasAuthority())
 		{
 			GetCharacterMovement()->Launch(LaunchVelocity);
-			ActivateRecentlyLaunchedFlag();
 		}
 
 		MulticastRPC_Launch(LaunchVelocity);
@@ -1157,8 +1157,6 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 		case ECharacterStateEnum::Surface:
 			MoveComp->GravityScale = 0.05f;
 
-			bool bIsJumpingOrLaunched{MoveComp->IsFalling() || bRecentlyLaunched};
-
 		// 물이 상승중이라면
 			if (CurrentWaterVolume.IsValid())
 			{
@@ -1175,27 +1173,24 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 				};
 				// 현재 캐릭터의 Z 위치와 목표 Z 위치 사이의 차이
 				float DeltaZ{static_cast<float>(TargetCharacterCenterZ - GetActorLocation().Z)};
+				
+				// 목표 Z 위치로 향하는 교정 속도 계산
+				float CorrectiveVelocityZ{DeltaZ * 2.f};
+				// 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
+				float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
+				MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity,
+				                                   FMath::Clamp(DeltaTime * 5.0f, 0.f, 1.f));
 
-				// 점프 중이 아닐 때만
-				if (!bIsJumpingOrLaunched)
+				// Z 속도 제한
+				MoveComp->Velocity.Z = FMath::Clamp(MoveComp->Velocity.Z, -50.f, WaterSurfaceVelocityZ + 100.f);
+
+				// 물이 상승 중이 아닐 때, 캐릭터가 물 표면 근처에 있고 거의 움직이지 않는다면 Z 속도를 0으로
+				if (FMath::Abs(DeltaZ) < 2.0f && WaterSurfaceVelocityZ == 0.f && FMath::Abs(MoveComp->Velocity.Z) <
+					5.f)
 				{
-					// 목표 Z 위치로 향하는 교정 속도 계산
-					float CorrectiveVelocityZ{DeltaZ * 5.f};
-					// 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
-					float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
-					MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity,
-					                                   FMath::Clamp(DeltaTime * 5.0f, 0.f, 1.f));
-
-					// Z 속도 제한
-					MoveComp->Velocity.Z = FMath::Clamp(MoveComp->Velocity.Z, -50.f, WaterSurfaceVelocityZ + 100.f);
-
-					// 물이 상승 중이 아닐 때, 캐릭터가 물 표면 근처에 있고 거의 움직이지 않는다면 Z 속도를 0으로
-					if (FMath::Abs(DeltaZ) < 2.0f && WaterSurfaceVelocityZ == 0.f && FMath::Abs(MoveComp->Velocity.Z) <
-						5.f)
-					{
-						MoveComp->Velocity.Z = FMath::FInterpTo(MoveComp->Velocity.Z, 0.f, DeltaTime, 5.0f);
-					}
+					MoveComp->Velocity.Z = FMath::FInterpTo(MoveComp->Velocity.Z, 0.f, DeltaTime, 5.0f);
 				}
+
 
 				// 수평 움직임
 				MoveComp->Velocity.X *= FMath::FInterpTo(1.0f, 0.9f, DeltaTime, 2.0f);
@@ -1546,17 +1541,6 @@ void AFrog::ChangeEyeMaterial(int32 MatIndex)
 		}
 	}
 }
-
-void AFrog::ActivateRecentlyLaunchedFlag()
-{
-	bRecentlyLaunched = true;
-	
-	GetWorldTimerManager().ClearTimer(LaunchCooldownTimer);
-	GetWorldTimerManager().SetTimer(LaunchCooldownTimer, [this]() {
-		bRecentlyLaunched = false;
-	}, 0.2f, false);
-}
-
 
 void AFrog::FrogSkinFinder()
 {

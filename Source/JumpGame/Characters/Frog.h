@@ -349,12 +349,6 @@ public:
 	UAnimMontage* SaveCurrentMontage = nullptr;
 	UPROPERTY()
 	int32 SaveCurrentIndex = -1;
-
-	bool bRecentlyLaunched{false};
-	UPROPERTY()
-	FTimerHandle LaunchCooldownTimer;
-	// 플래그 활성화 함수
-	void ActivateRecentlyLaunchedFlag();
 };
 
 
