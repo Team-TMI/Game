@@ -155,4 +155,10 @@ public:
 	void OnClickQuitGame();
 	UFUNCTION()
 	void OnClickGoBack();
+
+	// 게임종료 UI 띄우기
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	TSubclassOf<class UGameQuitUI> GameQuitUIClass;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	UGameQuitUI* GameQuitUI;
 };

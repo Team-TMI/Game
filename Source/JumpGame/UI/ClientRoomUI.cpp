@@ -4,6 +4,7 @@
 #include "ClientRoomUI.h"
 
 #include "CreditUI.h"
+#include "GameQuitUI.h"
 #include "GameSettingUI.h"
 #include "SessionListItemWidget.h"
 #include "SessionListItemDouble.h"
@@ -133,7 +134,12 @@ void UClientRoomUI::OnClickGoCredit()
 
 void UClientRoomUI::OnClickGoGameEnd()
 {
-	
+	UE_LOG(LogTemp, Warning, TEXT("OnClickGoGameEnd"));
+	if (GameSettingUI->GameQuitUI)
+	{
+		GameSettingUI->GameQuitUI->PlayQuitAnim(true);
+		UE_LOG(LogTemp, Warning, TEXT("PlayQuitAnim"));
+	}
 }
 
 void UClientRoomUI::OnClickGoCreateRoom()

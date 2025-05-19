@@ -173,8 +173,7 @@ public:
 	TSubclassOf<class UGameSettingUI> GameSettingUIClass;
 	UPROPERTY(editanywhere, BlueprintReadWrite)
 	UGameSettingUI* GameSettingUI;
-
-public:
+	
 	// 크레딧 UI 띄우기
 	UPROPERTY(editanywhere, BlueprintReadWrite)
 	TSubclassOf<class UCreditUI> CreditUIClass;

@@ -25,5 +25,13 @@ public class JumpGame : ModuleRules
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
 
 		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+		
+		// 에디터 전용 모듈은 조건부로 추가
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] {
+				"UnrealEd"
+			});
+		}
 	}
 }

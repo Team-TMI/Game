@@ -3,6 +3,7 @@
 
 #include "GameSettingUI.h"
 
+#include "GameQuitUI.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
@@ -71,6 +72,12 @@ void UGameSettingUI::NativeOnInitialized()
 	// 뒤로가기
 	Btn_QuitGame->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickQuitGame);
 	Btn_GoBack->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickGoBack);
+
+	GameQuitUI = CreateWidget<UGameQuitUI>(GetWorld(), GameQuitUIClass);
+	if (GameQuitUI)
+	{
+		GameQuitUI->AddToViewport(15);
+	}
 }
 
 void UGameSettingUI::PlaySettingAnim(bool bIsForward)
@@ -271,6 +278,10 @@ void UGameSettingUI::OnColorModeChanged(FString SelectedItem, ESelectInfo::Type 
 
 void UGameSettingUI::OnClickQuitGame()
 {
+	if (GameQuitUI)
+	{
+		GameQuitUI->PlayQuitAnim(true);
+	}
 }
 
 void UGameSettingUI::OnClickGoBack()
