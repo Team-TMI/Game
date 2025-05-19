@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class JUMPGAME_API AClientRoomGameState : public ANetworkGameState
+class JUMPGAME_API AClientRoomGameState : public AGameState
 {
 	GENERATED_BODY()
 
