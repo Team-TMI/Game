@@ -185,6 +185,7 @@ void UStoryUI::OnNextChatTriggered()
 		SequencePlayerTextAppearing->Pause();
 		bIsTextAppearing = false;
 		SequencePlayerTextAppearing->OnSequenceFinishedPlaying().Clear();
+		
 		return;
 	}
 	
