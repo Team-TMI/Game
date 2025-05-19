@@ -27,12 +27,6 @@ public:
 	// 화면에 있나요?
 	UPROPERTY()
 	bool bIsInViewport = false;
-	
-	// 버튼 바인딩
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_Hello;
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_Happy;
 
 	// 버튼 하이라이팅
 	UPROPERTY(meta = (BindWidget))
