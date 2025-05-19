@@ -32,8 +32,8 @@ AObstacleProp::AObstacleProp()
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
 	CollisionComp->SetBoxExtent(FVector(55.f, 55.f, 55.f));
-	
-	Super::SetSize(FVector(1,1,1));
+
+	Super::SetSize(FVector(1, 1, 1));
 
 	bReplicates = true;
 }
@@ -42,9 +42,11 @@ void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
                             UPrimitiveComponent* OtherComp, FVector NormalImpulse,
                             const FHitResult& Hit)
 {
-	if (!OtherActor->ActorHasTag("Frog")) return;
-	if (bIsActive == false) return;
-	
+	if (!OtherActor->ActorHasTag("Frog"))
+		return;
+	if (bIsActive == false)
+		return;
+
 	/*AFrog* Character = Cast<AFrog>(OtherActor);
 	if (Character)
 	{
@@ -58,12 +60,14 @@ void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 }
 
 void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	const FHitResult& SweepResult)
+                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                     const FHitResult& SweepResult)
 {
-	if (!OtherActor->ActorHasTag("Frog")) return;
-	if (bIsActive == false) return;
-	
+	if (!OtherActor->ActorHasTag("Frog"))
+		return;
+	if (bIsActive == false)
+		return;
+
 	AFrog* Character = Cast<AFrog>(OtherActor);
 	if (Character)
 	{
@@ -71,10 +75,10 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		{
 			FLog::Log("AObstacleProp::OnMyBeginOverlap");
 		}
-		
+
 		CalculateForce(Character);
 	}
-	
+
 	if (bDebug)
 	{
 		FLog::Log("AObstacleProp::OnMyBeginOverlap");
@@ -87,7 +91,7 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 }
 
 void AObstacleProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+                                   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (bDebug)
 	{
@@ -99,7 +103,7 @@ void AObstacleProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 void AObstacleProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	SetReplicateMovement(true);
 	CollisionComp->OnComponentHit.AddDynamic(this, &AObstacleProp::OnMyHit);
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AObstacleProp::OnMyBeginOverlap);
@@ -126,27 +130,29 @@ void AObstacleProp::Tick(float DeltaTime)
 void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float Force,
                                     bool bXYOverride, bool bZOverride)
 {
-	if (bIsActive == false) return;
-	
+	if (bIsActive == false)
+		return;
+
+	LaunchVelocity = Direction.GetSafeNormal() * Force;
+	if (Character->IsLocallyControlled())
+	{
+		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+		Character->ServerRPC_Launch(LaunchVelocity);
+		ForceNetUpdate();
+	}
+
 	// 가상 함수: 기본 로직
 	// 서버라면
-	if (HasAuthority())
-	{
-		LaunchVelocity = Direction.GetSafeNormal() * Force;
-		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-	}
+	// if (HasAuthority())
+	// {
+	// 	LaunchVelocity = Direction.GetSafeNormal() * Force;
+	// 	Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+	// }
 	// else
 	// {
 	// 	ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
 	// }
 }
-
-// void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction,
-// 	float Force, bool bXYOverride, bool bZOverride)
-// {
-// 	FLog::Log("AObstacleProp::ServerRPC_LaunchCharacter");
-// 	LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
-// }
 
 void AObstacleProp::CalculateForce(AFrog* Character)
 {
@@ -158,8 +164,9 @@ void AObstacleProp::CalculateForce(AFrog* Character)
 
 void AObstacleProp::ObstacleRotate()
 {
-	if (bIsActive == false) return;
-	
+	if (bIsActive == false)
+		return;
+
 	//서버라면
 	if (HasAuthority())
 	{
@@ -173,8 +180,9 @@ void AObstacleProp::ObstacleRotate()
 
 void AObstacleProp::OnRep_ObstacleRotate()
 {
-	if (bIsActive == false) return;
-	
+	if (bIsActive == false)
+		return;
+
 	// 클라이언트라면 이 함수가 실행
 	// PivotScene->AddLocalRotation(DeltaRot);
 	PivotScene->SetRelativeRotation(Rotation);
