@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerState.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
+#include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "JumpGame/UI/GameProgressBarUI.h"
 #include "JumpGame/UI/LoadingUI.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -42,6 +43,9 @@ void AMapGameState::BeginPlay()
 			}
 		}
 	}
+
+	RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
+	RisingWaterProp->StopRising(100);
 }
 
 void AMapGameState::Tick(float DeltaTime)
@@ -147,6 +151,8 @@ void AMapGameState::MulticastRPC_AllClientAdded_Implementation()
 
 	// 로딩 UI 제거
 	MulticastRPC_RemoveLoadingUI();
+
+	RisingWaterProp->StartRising();
 }
 
 
