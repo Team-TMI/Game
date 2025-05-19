@@ -1185,7 +1185,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 				if (!bIsJumpingOrLaunched)
 				{
 					// 목표 Z 위치로 향하는 교정 속도 계산
-					float CorrectiveVelocityZ{DeltaZ * 5.f};
+					float CorrectiveVelocityZ{DeltaZ * 1.f};
 					// 물 상승 속도를 기본으로 하고, 표면 위치 맞추기 위해 보정 속도 추가
 					float DesiredZVelocity{WaterSurfaceVelocityZ + CorrectiveVelocityZ};
 					MoveComp->Velocity.Z = FMath::Lerp(MoveComp->Velocity.Z, DesiredZVelocity,
