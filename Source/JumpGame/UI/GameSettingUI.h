@@ -9,6 +9,15 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class EColorBlindMode : uint8
+{
+	None       UMETA(DisplayName = "보정 없음"),
+	Protanope  UMETA(DisplayName = "적색약"),
+	Deuteranope UMETA(DisplayName = "녹색약"),
+	Tritanope  UMETA(DisplayName = "청색약"),
+};
+
 UCLASS()
 class JUMPGAME_API UGameSettingUI : public UUserWidget
 {
@@ -37,6 +46,24 @@ public:
 	void OnClickGameSet();
 	UFUNCTION()
 	void OnClickOtherSet();
+
+	// 사운드 클라스
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundMix* MasterSoundMix;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundClass* SC_Master;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundClass* SoundClass_Bgm;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundClass* SoundClass_InGameEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundClass* SoundClass_Nature;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundClass* SoundClass_Obstacle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundClass* SoundClass_UI;
 
 	// WidgetSwitcher(0)
 	// 버튼별 기능_사운드
@@ -113,6 +140,9 @@ public:
 	// 색약설정
 	UPROPERTY(meta = (BindWidget))
 	class UComboBoxString* ComboBox_Color;
+
+	UPROPERTY()
+	TMap<FString, EColorBlindMode> ColorBlindMap;
 
 	UFUNCTION()
 	void OnColorModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);

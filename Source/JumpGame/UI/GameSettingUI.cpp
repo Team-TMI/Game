@@ -3,6 +3,7 @@
 
 #include "GameSettingUI.h"
 
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/ComboBoxString.h"
@@ -45,6 +46,18 @@ void UGameSettingUI::NativeOnInitialized()
 	Btn_AntiOff->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickAntiOff);
 
 	// 색약 설정
+	// Enum → 표시 문자열 매핑
+	ColorBlindMap.Add(TEXT("보정 없음"), EColorBlindMode::None);
+	ColorBlindMap.Add(TEXT("적색약"),    EColorBlindMode::Protanope);
+	ColorBlindMap.Add(TEXT("녹색약"),    EColorBlindMode::Deuteranope);
+	ColorBlindMap.Add(TEXT("청색약"),    EColorBlindMode::Tritanope);
+	// 콤보박스에 한글 표시 추가
+	for (const auto& Pair : ColorBlindMap)
+	{
+		ComboBox_Color->AddOption(Pair.Key);
+	}
+	
+	// 콜백 연결
 	ComboBox_Color->OnSelectionChanged.AddDynamic(this, &UGameSettingUI::OnColorModeChanged);
 
 	// 뒤로가기
@@ -76,42 +89,100 @@ void UGameSettingUI::OnClickOtherSet()
 
 void UGameSettingUI::OnClickSoundOn()
 {
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MasterSoundMix, SC_Master, 1.0f, 1.0f, 0.1f);
+	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
+	
+	Btn_SoundOn->SetIsEnabled(false);
+	Btn_SoundOff->SetIsEnabled(true);
 }
 
 void UGameSettingUI::OnClickSoundOff()
 {
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MasterSoundMix, SC_Master, 0.0f, 1.0f, 0.1f);
+	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
+
+	Btn_SoundOn->SetIsEnabled(true);
+	Btn_SoundOff->SetIsEnabled(false);
 }
 
 void UGameSettingUI::OnBGMValueChanged(float Value)
 {
-	/*float Volume = FMath::Clamp(Value, 0.0f, 100.0f);
+	float Volume = FMath::Clamp(Value, 0.0f, 1.0f);
 
 	UGameplayStatics::SetSoundMixClassOverride(
 		GetWorld(),
-		MasterSoundMix, // SoundMix* 변수로 선언하고 세팅
-		BGMSoundClass,  // USoundClass* 변수로 선언하고 세팅
-		Volume,
-		1.0f,  // Pitch
-		0.0f   // FadeInTime
+		MasterSoundMix,       // 대상 SoundMix
+		SoundClass_Bgm,        // 변경할 SoundClass
+		Volume,            // Volume
+		1.0f,            // Pitch
+		0.1f             // FadeInTime (몇 초에 걸쳐 적용될지)
 	);
 
-	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);*/
+	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
 }
 
 void UGameSettingUI::OnWeatherValueChanged(float Value)
 {
+	float Volume = FMath::Clamp(Value, 0.0f, 1.0f);
+
+	UGameplayStatics::SetSoundMixClassOverride(
+		GetWorld(),
+		MasterSoundMix,
+		SoundClass_Nature,
+		Volume,
+		1.0f,
+		0.1f
+	);
+
+	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
 }
 
 void UGameSettingUI::OnUIValueChanged(float Value)
 {
+	float Volume = FMath::Clamp(Value, 0.0f, 1.0f);
+
+	UGameplayStatics::SetSoundMixClassOverride(
+		GetWorld(),
+		MasterSoundMix,
+		SoundClass_UI,
+		Volume,
+		1.0f,
+		0.1f
+	);
+
+	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
 }
 
 void UGameSettingUI::OnCharacterValueChanged(float Value)
 {
+	float Volume = FMath::Clamp(Value, 0.0f, 1.0f);
+
+	UGameplayStatics::SetSoundMixClassOverride(
+		GetWorld(),
+		MasterSoundMix,
+		SoundClass_InGameEffect,
+		Volume,
+		1.0f,
+		0.1f
+	);
+
+	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
 }
 
 void UGameSettingUI::OnObstacleValueChanged(float Value)
 {
+	float Volume = FMath::Clamp(Value, 0.0f, 1.0f);
+
+	UGameplayStatics::SetSoundMixClassOverride(
+		GetWorld(),
+		MasterSoundMix,
+		SoundClass_Obstacle,
+		Volume,
+		1.0f,
+		0.1f
+	);
+
+	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
 }
 
 void UGameSettingUI::OnClickEffectOn()
@@ -144,25 +215,25 @@ void UGameSettingUI::OnClickAntiOff()
 
 void UGameSettingUI::OnColorModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
-	if (SelectedItem == "보정 없음")
+	if (!ColorBlindMap.Contains(SelectedItem)) return;
+	UE_LOG(LogTemp, Warning, TEXT("색약모드 선택: %s | 타입: %d"), *SelectedItem, (int32)SelectionType);
+
+	EColorBlindMode SelectedMode = ColorBlindMap[SelectedItem];
+
+	switch (SelectedMode)
 	{
-		// 색약 보정 끄기
-	}
-	else if (SelectedItem == "적색맹")
-	{
-		// Protanopia
-	}
-	else if (SelectedItem == "녹색맹")
-	{
-		// Deuteranopia
-	}
-	else if (SelectedItem == "청색맹")
-	{
-		// Tritanopia
-	}
-	else if (SelectedItem == "전색맹")
-	{
-		// Achromatopsia (전색맹)
+	case EColorBlindMode::None:
+		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::NormalVision, 1.0f, true, false);
+		break;
+	case EColorBlindMode::Protanope:
+		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Protanope, 1.0f, true, false);
+		break;
+	case EColorBlindMode::Deuteranope:
+		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Deuteranope, 1.0f, true, false);
+		break;
+	case EColorBlindMode::Tritanope:
+		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Tritanope, 1.0f, true, false);
+		break;
 	}
 }
 

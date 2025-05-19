@@ -45,6 +45,7 @@ void UClientRoomLogoUI::RadiusAnimating()
 
 		DynMaterial->SetScalarParameterValue(FName("Radius"), NewRadius);
 		Btn_GoMainStart->SetRenderOpacity(0.f);
+		Btn_GoMainStart->SetIsEnabled(false);
 
 		if (Alpha >= 1.f)
 		{
