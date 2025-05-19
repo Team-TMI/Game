@@ -131,9 +131,8 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 	if (Character->IsLocallyControlled())
 	{
 		LaunchVelocity = Direction.GetSafeNormal() * Force;
-
 		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-		ServerRPC_LaunchCharacter(Character, LaunchVelocity, bXYOverride, bZOverride);
+		ServerRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
 	}
 	// 가상 함수: 기본 로직
 	// 서버라면
@@ -147,20 +146,21 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 	// }
 }
 
-void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector LaunchForce, bool bXYOverride,
+void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction, float Force, bool bXYOverride,
                                                              bool bZOverride)
 {
 	if (HasAuthority())
 	{
-		MulticastRPC_LaunchCharacter(Character, LaunchVelocity, bXYOverride, bZOverride);
+		MulticastRPC_LaunchCharacter(Character, Direction, Force, bXYOverride, bZOverride);
 	}
 }
 
-void AObstacleProp::MulticastRPC_LaunchCharacter_Implementation(AFrog* Character, FVector LaunchForce, bool bXYOverride,
+void AObstacleProp::MulticastRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction, float Force, bool bXYOverride,
                                                                 bool bZOverride)
 {
 	if (!Character->IsLocallyControlled())
 	{
+		LaunchVelocity = Direction.GetSafeNormal() * Force;
 		Character->LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 	}
 }
