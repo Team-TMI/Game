@@ -112,6 +112,7 @@ void AObstacleProp::GetLifetimeReplicatedProps(
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AObstacleProp, DeltaRot);
+	DOREPLIFETIME(AObstacleProp, LaunchVelocity);
 }
 
 // Called every frame
@@ -146,7 +147,7 @@ void AObstacleProp::LaunchCharacter(AFrog* Character, FVector Direction, float F
 	// }
 }
 
-void AObstacleProp::ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction, float Force, bool bXYOverride,
+void AObstacleProp::	ServerRPC_LaunchCharacter_Implementation(AFrog* Character, FVector Direction, float Force, bool bXYOverride,
                                                              bool bZOverride)
 {
 	if (HasAuthority())
