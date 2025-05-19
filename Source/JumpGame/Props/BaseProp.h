@@ -23,7 +23,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetCollision(bool bEnable) override;
 
-	virtual void MaterialChangeOnTick() override;
+	virtual void MaterialChangeOnCollision() override;
 	
 	virtual void ChangeAllMaterialsToUnSelect() override;
 	virtual void ChangeAllMaterialsToSelect() override;

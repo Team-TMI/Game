@@ -61,7 +61,7 @@ protected:
 	void SetGizmoRotation(class UGizmoComponent* Gizmo, const FVector& Direction);
 	
 	UFUNCTION()
-	virtual void MaterialChangeOnTick() {};
+	virtual void MaterialChangeOnCollision() {};
 	UFUNCTION()
 	virtual void ChangeAllMaterialsToUnSelect() {};
 	virtual void ChangeAllMaterialsToSelect() {};
