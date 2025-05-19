@@ -4,6 +4,7 @@
 #include "StoryUI.h"
 
 #include "Animation/UMGSequencePlayer.h"
+#include "Animation/WidgetAnimation.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
@@ -31,6 +32,14 @@ void UStoryUI::NativeOnInitialized()
 	}
 
 	ChatBoxImage->SetRenderOpacity(0.f);
+}
+
+void UStoryUI::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	bIsStoryStarted = true;
+	bIsEnd = false;
 }
 
 // void UStoryUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -75,7 +84,6 @@ void UStoryUI::UpdateSpeakerAndText(const FText& FullStoryLine)
 
 	FString StoryString{FullStoryLine.ToString()};
 	FString NewSpeakerName;
-	FString DialogText;
 
 	// 화자와 대사 분리 (':' 기준)
 	int32 ColonIndex;
@@ -106,7 +114,8 @@ void UStoryUI::UpdateSpeakerAndText(const FText& FullStoryLine)
 	// 대화 내용
 	TextBlock_Talk->SetText(FText::FromString(DialogText));
 	// 대화 내용 서서히 등장
-	PlayAnimation(TextAppear, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+	TextAppearAnimation();
+	// PlayAnimation(TextAppear, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
 
 	if (StoryArray.IsValidIndex(CurrentStoryIndex + 1))
 	{
@@ -138,14 +147,48 @@ void UStoryUI::CheckNextSpeaker(const FText& FullStoryLine)
 	}
 }
 
+void UStoryUI::TextAppearAnimation()
+{
+	if (TextAppear)
+	{
+		bIsTextAppearing = true;
+		
+		SequencePlayerTextAppearing = PlayAnimation(TextAppear, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+		SequencePlayerTextAppearing->OnSequenceFinishedPlaying().AddLambda([this](UUMGSequencePlayer&) {
+			if (!IsValid(this))
+			{
+				return;
+			}
+
+			bIsTextAppearing = false;
+		});
+	}
+}
+
 void UStoryUI::OnNextChatTriggered()
 {
+	if (!bIsStoryStarted)
+	{
+		return;	
+	}
+	
 	if (bIsEnd)
 	{
 		StoryEnd();
 		return;
 	}
-
+	
+	if (bIsTextAppearing)
+	{
+		//FLog::Log("Time", TextAppear->GetEndTime());
+		SequencePlayerTextAppearing->SetCurrentTime(TextAppear->GetEndTime() - 0.001f);
+		SequencePlayerTextAppearing->Pause();
+		bIsTextAppearing = false;
+		SequencePlayerTextAppearing->OnSequenceFinishedPlaying().Clear();
+		
+		return;
+	}
+	
 	TextBlock_Talk->SetText(FText::FromString(TEXT("")));
 
 	// 다음 대사 인덱스 증가
@@ -211,5 +254,6 @@ void UStoryUI::ChatAppearAnimation()
 void UStoryUI::StoryEnd()
 {
 	// 어두워지는 애니메이션
+	bIsStoryStarted = false;
 	RemoveFromParent();
 }
