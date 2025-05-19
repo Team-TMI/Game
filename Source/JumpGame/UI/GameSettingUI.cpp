@@ -9,6 +9,7 @@
 #include "Components/ComboBoxString.h"
 #include "Components/Slider.h"
 #include "Components/WidgetSwitcher.h"
+#include "GameFramework/GameUserSettings.h"
 #include "Kismet/GameplayStatics.h"
 
 void UGameSettingUI::NativeOnInitialized()
@@ -24,7 +25,7 @@ void UGameSettingUI::NativeOnInitialized()
 	Btn_SoundOff->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickSoundOff);
 
 	// 각각 사운드
-	Sd_BGM->OnValueChanged.AddDynamic(this, &UGameSettingUI::OnBGMValueChanged);
+	Sd_Bgm->OnValueChanged.AddDynamic(this, &UGameSettingUI::OnBgmValueChanged);
 	Sd_Weather->OnValueChanged.AddDynamic(this, &UGameSettingUI::OnWeatherValueChanged);
 	Sd_UI->OnValueChanged.AddDynamic(this, &UGameSettingUI::OnUIValueChanged);
 	Sd_Character->OnValueChanged.AddDynamic(this, &UGameSettingUI::OnCharacterValueChanged);
@@ -42,8 +43,16 @@ void UGameSettingUI::NativeOnInitialized()
 	Sd_Light->OnValueChanged.AddDynamic(this, &UGameSettingUI::OnLightValueChanged);
 
 	// 안티앨리어싱
-	Btn_AntiOn->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickAntiOn);
-	Btn_AntiOff->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickAntiOff);
+	AntiAliasingMap.Add(TEXT("사용 안함"), 0);   // None
+	AntiAliasingMap.Add(TEXT("FXAA"), 1);  // Fast Approximate
+	AntiAliasingMap.Add(TEXT("TAA"), 2);   // Temporal AA
+	// 콤보박스에 한글 표시 추가
+	for (const auto& Pair : AntiAliasingMap)
+	{
+		ComboBox_Anti->AddOption(Pair.Key);
+	}
+	// 콜백 연결
+	ComboBox_Anti->OnSelectionChanged.AddDynamic(this, &UGameSettingUI::OnAntiModeChanged);
 
 	// 색약 설정
 	// Enum → 표시 문자열 매핑
@@ -56,7 +65,6 @@ void UGameSettingUI::NativeOnInitialized()
 	{
 		ComboBox_Color->AddOption(Pair.Key);
 	}
-	
 	// 콜백 연결
 	ComboBox_Color->OnSelectionChanged.AddDynamic(this, &UGameSettingUI::OnColorModeChanged);
 
@@ -91,6 +99,12 @@ void UGameSettingUI::OnClickSoundOn()
 {
 	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MasterSoundMix, SC_Master, 1.0f, 1.0f, 0.1f);
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
+
+	Sd_Bgm->SetIsEnabled(true);
+	Sd_Weather->SetIsEnabled(true);
+	Sd_UI->SetIsEnabled(true);
+	Sd_Character->SetIsEnabled(true);
+	Sd_Obstacle->SetIsEnabled(true);
 	
 	Btn_SoundOn->SetIsEnabled(false);
 	Btn_SoundOff->SetIsEnabled(true);
@@ -101,11 +115,17 @@ void UGameSettingUI::OnClickSoundOff()
 	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MasterSoundMix, SC_Master, 0.0f, 1.0f, 0.1f);
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
 
+	Sd_Bgm->SetIsEnabled(false);
+	Sd_Weather->SetIsEnabled(false);
+	Sd_UI->SetIsEnabled(false);
+	Sd_Character->SetIsEnabled(false);
+	Sd_Obstacle->SetIsEnabled(false);
+
 	Btn_SoundOn->SetIsEnabled(true);
 	Btn_SoundOff->SetIsEnabled(false);
 }
 
-void UGameSettingUI::OnBGMValueChanged(float Value)
+void UGameSettingUI::OnBgmValueChanged(float Value)
 {
 	float Volume = FMath::Clamp(Value, 0.0f, 1.0f);
 
@@ -205,18 +225,30 @@ void UGameSettingUI::OnLightValueChanged(float Value)
 {
 }
 
-void UGameSettingUI::OnClickAntiOn()
+void UGameSettingUI::SetAntiAliasingQuality(const FString& SelectedOption)
 {
+	// Mode: 0 = None, 1 = FXAA, 2 = TAA
+	if (AntiAliasingMap.Contains(SelectedOption))
+	{
+		int32 Mode = AntiAliasingMap[SelectedOption];
+		FString Cmd = FString::Printf(TEXT("r.AntiAliasingMethod %d"), Mode);
+		if (GEngine)
+		{
+			GEngine->Exec(GetWorld(), *Cmd);
+		}
+	}
 }
 
-void UGameSettingUI::OnClickAntiOff()
+void UGameSettingUI::OnAntiModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
+	if (!AntiAliasingMap.Contains(SelectedItem)) return;
+	
+	SetAntiAliasingQuality(SelectedItem);
 }
 
 void UGameSettingUI::OnColorModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
 	if (!ColorBlindMap.Contains(SelectedItem)) return;
-	UE_LOG(LogTemp, Warning, TEXT("색약모드 선택: %s | 타입: %d"), *SelectedItem, (int32)SelectionType);
 
 	EColorBlindMode SelectedMode = ColorBlindMap[SelectedItem];
 

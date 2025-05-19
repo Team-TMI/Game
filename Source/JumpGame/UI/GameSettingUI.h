@@ -78,7 +78,7 @@ public:
 	void OnClickSoundOff();
 
 	UPROPERTY(meta = (BindWidget))
-	class USlider* Sd_BGM;
+	class USlider* Sd_Bgm;
 	UPROPERTY(meta = (BindWidget))
 	class USlider* Sd_Weather;
 	UPROPERTY(meta = (BindWidget))
@@ -89,7 +89,7 @@ public:
 	class USlider* Sd_Obstacle;
 
 	UFUNCTION()
-	void OnBGMValueChanged(float Value);
+	void OnBgmValueChanged(float Value);
 	UFUNCTION()
 	void OnWeatherValueChanged(float Value);
 	UFUNCTION()
@@ -125,25 +125,23 @@ public:
 	
 	UFUNCTION()
 	void OnLightValueChanged(float Value);
-
+	
+	// 안티엘리어싱
+	UPROPERTY()
+	TMap<FString, int32> AntiAliasingMap;
 	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_AntiOn;
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_AntiOff;
-
+	class UComboBoxString* ComboBox_Anti;
 	UFUNCTION()
-	void OnClickAntiOn();
+	void SetAntiAliasingQuality(const FString& SelectedOption);
 	UFUNCTION()
-	void OnClickAntiOff();
+	void OnAntiModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 	
 	// WidgetSwitcher(1)
 	// 색약설정
 	UPROPERTY(meta = (BindWidget))
 	class UComboBoxString* ComboBox_Color;
-
 	UPROPERTY()
 	TMap<FString, EColorBlindMode> ColorBlindMap;
-
 	UFUNCTION()
 	void OnColorModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 
