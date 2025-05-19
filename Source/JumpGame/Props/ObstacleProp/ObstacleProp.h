@@ -68,9 +68,15 @@ public:
 	// 이펙트, 사운드 등
 	UFUNCTION(NetMulticast, reliable)
 	virtual void MulticastRPC_PlayEffect(FVector Location);
-
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void PlayHitEffect();
+	
 protected:
 	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
 	class USoundCue* HitSound;
+
+	UPROPERTY(Replicated, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bPlayHitEffect = false;
 };
 

@@ -12,6 +12,7 @@
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
 
@@ -21,6 +22,7 @@ AObstacleProp::AObstacleProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 	Tags.Add("Obstacle");
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
@@ -110,6 +112,7 @@ void AObstacleProp::GetLifetimeReplicatedProps(
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AObstacleProp, DeltaRot);
+	DOREPLIFETIME(AObstacleProp, bPlayHitEffect)
 }
 
 // Called every frame
@@ -180,4 +183,15 @@ void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
 	// 클라이언트 전부에서 호출됨 (서버 포함)
 	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 0.5f, 1.5f);
+	this->PlayHitEffect();
+}
+
+// 블루 프린트에서 타임라인이 다 꺼지면 false로 바꿔주자. (서버만!!!!)
+void AObstacleProp::PlayHitEffect_Implementation()
+{
+	// 서버에서 실행이 처리되면 
+	if (HasAuthority() && !bPlayHitEffect)
+	{
+		bPlayHitEffect = true;
+	}
 }

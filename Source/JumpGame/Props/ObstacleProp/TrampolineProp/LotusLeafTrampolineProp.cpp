@@ -5,6 +5,7 @@
 
 #include "JumpGame/Props/Components/PropDataComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
 
 
@@ -13,6 +14,7 @@ ALotusLeafTrampolineProp::ALotusLeafTrampolineProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset
 	(TEXT("/Game/Fab/Trampoline/Green_Leaf_Curve_0509064638_texture.Green_Leaf_Curve_0509064638_texture"));
@@ -27,7 +29,6 @@ ALotusLeafTrampolineProp::ALotusLeafTrampolineProp()
 	{
 		HitSound = Cast<USoundCue>(SoundAsset.Object);
 	}
-
 
 	SetSize(FVector(2, 2, 2));
 
