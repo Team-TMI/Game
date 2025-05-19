@@ -8,6 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/CanvasPanel.h"
 #include "JumpGame/UI/ClientRoomUI.h"
+#include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -26,19 +27,12 @@ ULobbyCameraComp::ULobbyCameraComp()
 void ULobbyCameraComp::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	MainCamera = Cast<ALobbyMainCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), ALobbyMainCamera::StaticClass()));
 	SubCamera = Cast<ALobbySubCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), ALobbySubCamera::StaticClass()));
 
 	PC = GetWorld()->GetFirstPlayerController();
 	PC->SetViewTarget(MainCamera);
-	
-	/*APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (OwnerPawn)
-	{
-		PC = Cast<APlayerController>(OwnerPawn->GetController());
-		PC->SetViewTarget(MainCamera);
-	}*/
 }
 
 

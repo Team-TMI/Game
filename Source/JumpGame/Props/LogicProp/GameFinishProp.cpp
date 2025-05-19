@@ -18,6 +18,9 @@
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "OnlineSubsystem.h"
+#include "Components/ArrowComponent.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -104,7 +107,10 @@ void AGameFinishProp::GameEnd()
 	DefeatP = GetWorld()->SpawnActor<ADefeatPlatform>(DefeatPos, FRotator::ZeroRotator);
 
 	// 우승자 앞에 보게 정렬하기
-	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
+	WinnerForward = VictoryP->VictoryArrow->GetForwardVector();
+	WinnerRotation = WinnerForward.Rotation();
+	WinnerCharacter->SetActorRotation(WinnerRotation);
+	
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
 	if (IsValid(Character) && Character != WinnerCharacter)
@@ -112,7 +118,7 @@ void AGameFinishProp::GameEnd()
 		Character->SetActorLocation(DefeatP->SpawnDefeatCharacter());
 	}
 	
-	// 게임 끝
+	// 게임 끝 멀티캐스트
 	MulticastRPC_GameEnd();
 
 	// 그리고 진행도 UI 지우자
@@ -160,16 +166,36 @@ void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 	PC->bShowMouseCursor = true;
 	
 	// 우승자 앞에 보게 정렬하기
-	WinnerCharacter->SetActorRotation(FRotator(0, 90, 0));
-
+	WinnerCharacter->SetActorRotation(WinnerRotation);
+	
 	// 카메라 정렬
 	PC->SetViewTargetWithBlend(VictoryP, 0.5f);
 	
 	// UI를 띄우자
+	FString Key = WinnerCharacter->GetName();
+	FString WinnerName = Key; // 스팀 없을때 기본값
+
+	// 1등 플레이어의 고유한 네트워크 ID값 가져오기
+	const FUniqueNetIdRepl& NetIdRepl = WinnerCharacter->GetPlayerState<APlayerState>()->GetUniqueId();
+	if (!NetIdRepl.IsValid()) return;
+	
+	TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+	if (!NetId.IsValid()) return;
+	
+	// Steam 닉네임이 있다면 사용
+	if (IOnlineSubsystem* Subsys = IOnlineSubsystem::Get())
+	{
+		IOnlineIdentityPtr Identity = Subsys->GetIdentityInterface();
+		if (Identity.IsValid())
+		{
+			WinnerName = Identity->GetPlayerNickname(*NetId);
+		}
+	}
+	
 	VictoryPageUI = CreateWidget<UVictoryPageUI>(GetWorld(), VictoryPageUIClass);
 	if (VictoryPageUI)
 	{
-		VictoryPageUI->SetVictoryPlayerName(WinnerCharacter->GetName());
+		VictoryPageUI->SetVictoryPlayerName(WinnerName);
 		VictoryPageUI->AddToViewport();
 	}
 }

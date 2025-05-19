@@ -18,6 +18,9 @@ WidgetSwitcher 구조
 -> FindRoom에서 팝업으로 방을 생성한다
  */
 
+class UButton;
+class UImage;
+
 UCLASS()
 class JUMPGAME_API UClientRoomUI : public UUserWidget
 {
@@ -34,7 +37,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* WidgetSwitcher;
 
-	// WidgetSwitcher (0)
+	// WidgetSwitcher (0)	
 	// 메인 관련
 	UPROPERTY(meta = (BindWidget))
 	class UCanvasPanel* CanvasMain;
@@ -163,5 +166,18 @@ public:
 	ESlateVisibility bIsVisible;
 	UFUNCTION()
 	void SetVisibleMain();
+
+public:
+	// 세팅 UI 띄우기
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	TSubclassOf<class UGameSettingUI> GameSettingUIClass;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	UGameSettingUI* GameSettingUI;
+	
+	// 크레딧 UI 띄우기
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	TSubclassOf<class UCreditUI> CreditUIClass;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	UCreditUI* CreditUI;
 };
 

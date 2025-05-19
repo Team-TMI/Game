@@ -58,6 +58,10 @@ public:
 	AVictoryPlatform* VictoryP;
 	UPROPERTY()
 	ADefeatPlatform* DefeatP;
+	UPROPERTY()
+	FVector WinnerForward;
+	UPROPERTY()
+	FRotator WinnerRotation;
 
 	// UI관련
 	UPROPERTY(EditAnywhere, blueprintReadWrite)

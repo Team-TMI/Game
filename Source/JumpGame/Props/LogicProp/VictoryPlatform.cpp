@@ -4,6 +4,7 @@
 #include "VictoryPlatform.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 
 
@@ -34,7 +35,12 @@ AVictoryPlatform::AVictoryPlatform()
 	VictoryPlane->SetupAttachment(MeshComp);
 	VictoryPlane->SetRelativeLocation(FVector(0, -50, 500));
 	VictoryPlane->SetRelativeRotation(FRotator(0, 0, 90));
-	VictoryPlane->SetRelativeScale3D(FVector(3, 1.5, 1));
+	VictoryPlane->SetRelativeScale3D(FVector(2.5, 1.5, 1));
+
+	// 1등 정렬 화살표
+	VictoryArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("VictoryArrow"));
+	VictoryArrow->SetupAttachment(MeshComp);
+	VictoryArrow->SetRelativeRotation(FRotator(0, 90, 0));
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
 		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleBaseCube.SM_ObstacleBaseCube'"));

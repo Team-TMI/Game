@@ -85,13 +85,11 @@ void UWaitRoomUI::UpdateWaitPlayer()
 	TArray<UTextBlock*> UpdateNames = { Text_Player1, Text_Player2, Text_Player3, Text_Player4, Text_Player5, Text_Player6};
 	
 	TMap<FString, FPlayerInfo> PlayerInfo = GI->GetPlayerInfo();
-	FString Key;
 	
 	for (int i = 0; i < UpdateImgs.Num(); i++)
 	{
 		for (auto& it : PlayerInfo)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Stored Key : %s"), *it.Key);
 			if (it.Value.PlayerID == i)
 			{
 				// 플레이어 인덱스와 같은 이미지, 이름을 보이게 하자

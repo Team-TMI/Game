@@ -121,4 +121,8 @@ public:
 private:
 	UPROPERTY()
 	FString MapFilePath;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsGameStart = false;
 };
