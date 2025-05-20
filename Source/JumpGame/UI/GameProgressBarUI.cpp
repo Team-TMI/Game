@@ -78,7 +78,7 @@ void UGameProgressBarUI::UpdatePlayerPos()
 			{
 				// FFastLogger::LogConsole(TEXT("UpdatePlayerPos: %d"),PlayerIndex);
 				// 플레이어 위치값(Z좌표임) 저장
-				float Position = Frog->GetActorLocation().Z;
+				float Position = Frog->GetActorLocation().Z - 30.f;
 				PlayerPos[PlayerIndex] = Position; // PlayerID에 해당하는 인덱스에 저장
             
 				// 1등 플레이어 위치 갱신
@@ -181,7 +181,7 @@ void UGameProgressBarUI::UpdatePlayerMarkers()
 		float PlayerProgress = (PlayerPos[i] - StartPropZ) / TotalGamePos;
 		PlayerProgress = FMath::Clamp(PlayerProgress, 0.0f, 1.0f);
         
-		float MarkerY = BarHeight * (1.0f - PlayerProgress);
+		float MarkerY = BarHeight * (1.0f - PlayerProgress) - 30.f;
 		FVector2D MarkerPos(0.f, MarkerY);
 		
 		// 마커 위치 설정

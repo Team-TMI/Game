@@ -29,6 +29,8 @@ ARollingBallProp::ARollingBallProp()
 	BoxComp->SetupAttachment(RootComponent);
 	BoxComp->SetRelativeLocation(FVector(-30, 0, 0));
 	BoxComp->SetBoxExtent(FVector(35));
+	BoxComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	BoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSphere(
 		TEXT("/Script/Engine.StaticMesh'/Game/Fab/RollingBall/SM_Acorn.SM_Acorn'"));
@@ -38,6 +40,7 @@ ARollingBallProp::ARollingBallProp()
 	}
 	MeshComp->SetRelativeScale3D(FVector(1.f));
 	MeshComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
 void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -81,8 +84,8 @@ void ARollingBallProp::OnMyRollingBallOverlap(UPrimitiveComponent* OverlappedCom
 	}
 
 	// 타이머 초기화
-	// GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
-	ReturnSelf();
+	GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
+	ReturnSelf(BackTime - LaunchTime);
 	
 	if (HasAuthority())
 	{
@@ -108,18 +111,28 @@ void ARollingBallProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	RollingBall();
+
+	if (bActive)
+	{
+		// 발사된 후 시간 계산
+		LaunchTime += DeltaTime;
+	}
 }
 
-void ARollingBallProp::ReturnSelf()
+void ARollingBallProp::ReturnSelf(float RemainTime)
 {
+	FFastLogger::LogConsole(TEXT("ReturnSelf5555555555555"));
+	
 	// 소속 풀 없으면 함수 나가자
 	if (ObjectPool == nullptr) return;
 
+	FFastLogger::LogConsole(TEXT("ReturnSelf6666666666666"));
+	
 	if (HasAuthority())
 	{
-		// 오브젝트 풀에 스스로를 반환하고 비활성화
+		LaunchTime = 0;
 		SetActive(false);
-		ObjectPool->ReturnObject(this);
+		ObjectPool->ReturnObject(this, RemainTime);
 	}
 }
 
@@ -131,25 +144,31 @@ void ARollingBallProp::SetActive(bool bIsActive)
 	SetActorTickEnabled(bIsActive);
 	if (bIsActive)
 	{
-		MeshComp->SetCollisionProfileName(TEXT("RollingBall"));
+		MeshComp->SetCollisionProfileName(TEXT("OverlapProp"));
+		MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
+		BoxComp->SetCollisionProfileName(TEXT("OverlapProp"));
+		BoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	}
 	else
 	{
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		BoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
 void ARollingBallProp::LaunchProjectile()
 {
-	LaunchDir = Arrow->GetForwardVector();
-
+	LaunchDir = Arrow->GetForwardVector().GetSafeNormal();
+	
 	// 발사 후 다시 복귀하는 타이밍
 	// 바닥에 닿지않으면, 4초후에 복귀하자
 	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, FTimerDelegate::CreateLambda([this]()
 	{
-		this->ReturnSelf();
-	}), 4.0f, false);
-
+		this->ReturnSelf(0);
+	}), BackTime, false);
+	
 	if (HasAuthority())
 	{
 		// 있던 자리에서 터지기
@@ -159,20 +178,18 @@ void ARollingBallProp::LaunchProjectile()
 
 void ARollingBallProp::RollingBall()
 {
+	// 1. 앞으로 이동
 	FVector MeshPos = GetActorLocation();
-	
-	float DeltaTime = GetWorld()->GetDeltaSeconds();
-	FVector Movement = LaunchDir * (RollingSpeed * DeltaTime);
-	
-	SetActorLocation(MeshPos + Movement, true);
+	// 프레임당 이동거리
+	FVector MovePos = LaunchDir * (RollingSpeed * GetWorld()->GetDeltaSeconds());
+	SetActorLocation(MeshPos + MovePos, true);
 
-	// 회전하기
-	float Distance = Movement.Size();
-	// 반지름이 작아질수록 회전 속도가 빨라짐
-	float Radius = 50.0f; 
+	// 2. 회전
+	float Distance = MovePos.Size(); 
+	float Radius = 60.0f; // 반지름
 	float RotationDegrees = FMath::RadiansToDegrees(Distance / Radius);
 	
-	FVector RotationAxis = FVector::CrossProduct(LaunchDir.GetSafeNormal(), FVector::UpVector);
+	FVector RotationAxis = FVector::CrossProduct(FVector::RightVector, FVector::UpVector);
 	FQuat DeltaQuat = FQuat(RotationAxis, FMath::DegreesToRadians(RotationDegrees));
 	DrawDebugCoordinateSystem(GetWorld(), GetActorLocation(), GetActorRotation(), 100.f, false, -1.f, 0, 2.f);
 

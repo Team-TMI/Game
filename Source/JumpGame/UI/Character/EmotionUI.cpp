@@ -12,9 +12,6 @@ void UEmotionUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	Btn_Hello->OnClicked.AddDynamic(this, &UEmotionUI::OnClickHello);
-	Btn_Happy->OnClicked.AddDynamic(this, &UEmotionUI::OnClickHappy);
-
 	EmotionImages = { Image_Emotion0, Image_Emotion1, Image_Emotion2, Image_Emotion3 };
 }
 
@@ -33,18 +30,6 @@ void UEmotionUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 			UpdateEmotionSelect(MousePos, Center);
 		}
 	}
-}
-
-void UEmotionUI::OnClickHello()
-{
-	FFastLogger::LogScreen(FColor::Red, TEXT("Hello 클릭"));
-	PlayShowAnim(false);
-}
-
-void UEmotionUI::OnClickHappy()
-{
-	FFastLogger::LogScreen(FColor::Red, TEXT("Happy 클릭"));
-	PlayShowAnim(false);
 }
 
 void UEmotionUI::UpdateEmotionHighlight()
@@ -96,6 +81,7 @@ void UEmotionUI::UpdateEmotionSelect(const FVector2D& MousePos, const FVector2D&
 	float AngleRad = FMath::Atan2(Dir.Y, Dir.X); // -π ~ π
 	float AngleDeg = FMath::RadiansToDegrees(AngleRad); // -180 ~ 180
 
+	AngleDeg -= 45.f; // 45도 기울이기
 	if (AngleDeg < 0.f)
 		AngleDeg += 360.f;
 

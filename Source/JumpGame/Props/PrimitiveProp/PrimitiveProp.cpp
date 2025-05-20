@@ -94,6 +94,7 @@ void APrimitiveProp::OnGridPropBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	}
 	CollisionCount++;
 	bIsOnCollision = true;
+	MaterialChangeOnCollision();
 }
 
 void APrimitiveProp::OnGridPropEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -110,6 +111,7 @@ void APrimitiveProp::OnGridPropEndOverlap(UPrimitiveComponent* OverlappedCompone
 		CollisionCount = 0;
 		bIsOnCollision = false;
 	}
+	MaterialChangeOnCollision();
 }
 
 void APrimitiveProp::SetSize(const FVector& InSize)
@@ -205,6 +207,7 @@ void APrimitiveProp::SetSelected()
 	}
 
 	this->SetCollision(false);
+	MaterialChangeOnCollision();
 }
 
 void APrimitiveProp::SetUnSelected()
@@ -227,6 +230,7 @@ void APrimitiveProp::SetUnSelected()
 	}
 
 	this->SetCollision(true);
+	MaterialChangeOnCollision();
 }
 
 void APrimitiveProp::SetPrimitivePropCollision(bool bCond)

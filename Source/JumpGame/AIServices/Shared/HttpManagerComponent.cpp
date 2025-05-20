@@ -23,17 +23,17 @@ void UHttpManagerComponent::BeginPlay()
 	}
 	HttpMessageQueue[EMessageType::HttpMultipartResponse] = std::queue<FHttpMessageWrapper>();
 
-	// 목업 데이터 하나 넣어보자!
-	FHttpMessageWrapper Message;
-	Message.Header.Type = EMessageType::HttpMultipartResponse;
-	Message.HttpMessage = FHttpMultipartResponse();
-	FHttpMultipartResponse& HttpMultipartResponseRef = std::get<FHttpMultipartResponse>(Message.HttpMessage);
-	HttpMultipartResponseRef.ResponseCode = 200;
-	HttpMultipartResponseRef.ResponseText = TEXT(R"({
-"SubCategoryList": [102]
-})");
+// 	// 목업 데이터 하나 넣어보자!
+// 	FHttpMessageWrapper Message;
+// 	Message.Header.Type = EMessageType::HttpMultipartResponse;
+// 	Message.HttpMessage = FHttpMultipartResponse();
+// 	FHttpMultipartResponse& HttpMultipartResponseRef = std::get<FHttpMultipartResponse>(Message.HttpMessage);
+// 	HttpMultipartResponseRef.ResponseCode = 200;
+// 	HttpMultipartResponseRef.ResponseText = TEXT(R"({
+// "SubCategoryList": [102]
+// })");
 
-	HttpMessageQueue[EMessageType::HttpMultipartResponse].push(Message);
+	// HttpMessageQueue[EMessageType::HttpMultipartResponse].push(Message);
 	
 	HttpMultipartHandler->Init(FIOHandlerInitInfo(), nullptr, &HttpMessageQueue);
 }
