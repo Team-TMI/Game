@@ -776,8 +776,7 @@ void AFrog::ServerRPC_StartTongueAttack_Implementation()
 	{
 		return;
 	}
-
-
+	
 	bCanTongAttack = false;
 	bIsTongueGrow = true;
 	TongueLengthRatio = 0.f;
@@ -872,10 +871,10 @@ void AFrog::ResetSuperJumpRatio()
 	OnSuperJumpRatioChanged.Broadcast(0.f);
 }
 
-void AFrog::StopMovementAndResetRotation()
+void AFrog::StopMovementAndResetRotation(const FRotator& Rot)
 {
 	bCanMove = false;
-	SetActorRotation(FRotator::ZeroRotator);
+	SetActorRotation(Rot);
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
 
@@ -907,12 +906,12 @@ void AFrog::CameraMovementMode()
 	CameraBoom->TargetArmLength = 400.f;
 }
 
-void AFrog::ServerRPC_PrepareMission_Implementation(FVector Loc)
+void AFrog::ServerRPC_PrepareMission_Implementation(const FVector& Loc,const FRotator& Rot)
 {
 	if (HasAuthority())
 	{
 		SetActorLocation(Loc);
-		StopMovementAndResetRotation();
+		StopMovementAndResetRotation(Rot);
 		SetCrouchEnabled(false);
 		SetJumpGaugeVisibility(false);
 		MulticastRPC_SetMissionCamera();

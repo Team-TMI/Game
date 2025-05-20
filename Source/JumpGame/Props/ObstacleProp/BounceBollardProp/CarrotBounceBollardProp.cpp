@@ -76,9 +76,9 @@ void ACarrotBounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, A
 	Super::OnBollardHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);
 }
 
-void ACarrotBounceBollardProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
+void ACarrotBounceBollardProp::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
 {
-	Super::MulticastRPC_PlayEffect_Implementation(Location);
+	Super::MulticastRPC_PlayEffect_Implementation(Location, Index);
 
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 0.5f, 1.5f);
 }

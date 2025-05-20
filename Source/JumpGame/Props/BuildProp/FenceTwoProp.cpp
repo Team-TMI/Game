@@ -10,7 +10,7 @@
 AFenceTwoProp::AFenceTwoProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset
 	(TEXT("/Game/Kobo_ForestVillage/Meshes/SM-Fence-02.SM-Fence-02"));
