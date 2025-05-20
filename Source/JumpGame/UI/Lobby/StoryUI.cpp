@@ -10,6 +10,7 @@
 #include "Components/TextBlock.h"
 #include "JumpGame/Core/PlayerController/LobbyPlayerController.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
 
 void UStoryUI::NativeOnInitialized()
 {
@@ -40,6 +41,9 @@ void UStoryUI::NativeConstruct()
 
 	bIsStoryStarted = true;
 	bIsEnd = false;
+	
+	APlayerController* PC{UGameplayStatics::GetPlayerController(this, 0)};
+	PC->bShowMouseCursor = false;
 }
 
 // void UStoryUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -253,7 +257,12 @@ void UStoryUI::ChatAppearAnimation()
 
 void UStoryUI::StoryEnd()
 {
-	// 어두워지는 애니메이션
+	// Todo : 어두워지는 애니메이션 추가
+	
 	bIsStoryStarted = false;
+	
+	APlayerController* PC{UGameplayStatics::GetPlayerController(this, 0)};
+	PC->bShowMouseCursor = true;
+	
 	RemoveFromParent();
 }
