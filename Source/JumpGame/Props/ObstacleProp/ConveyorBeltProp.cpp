@@ -112,7 +112,7 @@ void AConveyorBeltProp::ConveyorMove()
 		FVector DeltaPos = BeltSpeed * GetWorld()->DeltaTimeSeconds * BeltDir;
 
 		// TODO: 택1
-		Frog->AddActorWorldOffset(DeltaPos, true);
+		Frog->AddActorWorldOffset(DeltaPos, true, nullptr, ETeleportType::TeleportPhysics);
 		// Frog->SetActorLocation(Frog->GetActorLocation() + DeltaPos);		
 	}
 }
