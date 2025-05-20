@@ -35,13 +35,18 @@ public:
 	// 오브젝트 풀링으로 관리될 오브젝트
 	// 오브젝트 풀의 레퍼런스 초기화를 위한 함수 (어디소속인지)
 	FORCEINLINE void SetObjectPool(class UObjectPoolComponent* InObjectPool) { ObjectPool = InObjectPool; }
-	void ReturnSelf();
+	void ReturnSelf(float RemainTime);
 	void SetActive(bool bIsActive);
 	FORCEINLINE bool IsActive() { return bActive; }
 	
 private:
-	// 현재 사용중인가요?
-	bool bActive;
+	UPROPERTY()
+	bool bActive; // 현재 사용중인가요?
+	UPROPERTY()
+	float BackTime = 4.0f; // 몇초 지나면 돌아올지
+	UPROPERTY()
+	float LaunchTime = 0; // 몇초 지났니
+	
 	// 소속 풀
 	UPROPERTY()
 	class UObjectPoolComponent* ObjectPool;

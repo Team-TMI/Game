@@ -13,7 +13,7 @@
 // DECLARE_DELEGATE_TwoParams(FFindComplete, int32, FString);
 
 DECLARE_DELEGATE_OneParam(FFindComplete, const FRoomData&);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFriendListUpdated, const TArray<FSteamFriendData>&, FriendList);
+DECLARE_DELEGATE_OneParam(FFriendListUpdated, const FSteamFriendData&);
 
 /**
  * 
@@ -81,7 +81,7 @@ public:
 	TSharedPtr<const FUniqueNetId> InvitingPlayerId, const FOnlineSessionSearchResult& SessionToJoin);
 
 	// 친구리스트 갱신 시 브로드캐스트 될 델리게이트
-	FOnFriendListUpdated OnFriendListUpdated;
+	FFriendListUpdated OnFriendListUpdated;
 	
 private:
 	FString NetID;

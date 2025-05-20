@@ -28,6 +28,7 @@ ARollingCannonProp::ARollingCannonProp()
 
 void ARollingCannonProp::OnProjectileReturn()
 {
+	FFastLogger::LogConsole(TEXT("알림을 받았다: 다시 발사!!222222222222"));
 	// 서버에서만 처리
 	// OnObjectReturned은 모든 클라이언트에서 호출되어, FireRollingBall() 중복될 수도 있음
 	if (HasAuthority())
@@ -48,7 +49,7 @@ void ARollingCannonProp::BeginPlay()
 	if (HasAuthority() && ObjectPool)
 	{
 		FireRollingBall();
-		// ObjectPool->OnObjectReturn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
+		ObjectPool->OnObjectReturn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
 	}
 }
 
@@ -73,7 +74,7 @@ void ARollingCannonProp::Tick(float DeltaTime)
 void ARollingCannonProp::FireRollingBall()
 {
 	if (!ObjectPool) return;
-
+	
 	ARollingBallProp* Projectile = ObjectPool->GetRollingBallProp();
 	if (Projectile)
 	{
@@ -81,10 +82,6 @@ void ARollingCannonProp::FireRollingBall()
 		Projectile->SetActorRotation(GetActorRotation());
 		Projectile->SetActive(true);
 		Projectile->LaunchProjectile();
-
-		// 여기서 타이머 설정
-		FTimerHandle FireTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ARollingCannonProp::FireRollingBall, 4.0f, false);
 	}
 }
 

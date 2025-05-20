@@ -377,50 +377,43 @@ void UJumpGameInstance::OnReadFriendsComplete(int32 LocalPlayer, bool bWasSucces
 	TArray<TSharedRef<FOnlineFriend>> FriendList;
 	if (!FriendsInterface->GetFriendsList(LocalPlayer, ListName, FriendList)) return;
 
+	TArray<FSteamFriendData> OnlineFriends;
+	TArray<FSteamFriendData> OfflineFriends;
+
 	// 테스트 중이므로 Spacewar AppID 사용
 	const int32 MyAppId = 480; 
 
 	for (const TSharedRef<FOnlineFriend>& Friend : FriendList)
-	{
-		const FOnlineUserPresence& Presence = Friend->GetPresence();
+    {
+    	const FOnlineUserPresence& Presence = Friend->GetPresence();
 
-		// 기본 상태값
-		bool bInSameGame = false;
+    	FSteamFriendData Data;
+    	Data.DisplayName = Friend->GetDisplayName();
+    	Data.SteamId = Friend->GetUserId()->ToString();
+    	Data.bIsOnline = Presence.bIsOnline;
 
-		// Steam에선 bIsPlayingThisGame은 false일 수 있으므로, bIsPlaying으로 진입
-		if (Presence.bIsPlaying)
-		{
-			// Steam에서는 GameId 정보를 PlatformData에 저장하지 않기 때문에,
-			// bIsPlayingThisGame만으로 판별 시 항상 false로 나올 수 있음.
-			// 따라서 아래 조건은 테스트 용도에서만 한정적으로 사용 가능
-			bInSameGame = Presence.bIsPlayingThisGame;
-		}
+		UE_LOG(LogTemp, Log, TEXT("친구: %s | 상태: %s"), 
+		*Data.DisplayName,
+		Data.bIsOnline ? TEXT("온라인") : TEXT("오프라인"));
 
-		// 결과 출력
-		FString Name = Friend->GetDisplayName();
-		FString IdStr = Friend->GetUserId()->ToString();
+    	// 결과 출력
+    	FString Name = Friend->GetDisplayName();
+    	FString IdStr = Friend->GetUserId()->ToString();
 
-		UE_LOG(LogTemp, Log, TEXT("친구: %s | SteamId: %s | 실행 중: %s | 같은 게임: %s"),
-			*Name, *IdStr,
-			Presence.bIsPlaying ? TEXT("O") : TEXT("X"),
-			bInSameGame ? TEXT("O") : TEXT("X"));
-	}
+    	if (Presence.bIsOnline)
+    	{
+    		OnlineFriends.Add(Data);
+    	}
+    	else
+    	{
+    		OfflineFriends.Add(Data);
+    	}
+    }
+	
+    TArray<FSteamFriendData> MergedList = OnlineFriends;
+    MergedList.Append(OfflineFriends);
 
-	for (const TSharedRef<FOnlineFriend>& Friend : FriendList)
-	{
-		const FOnlineUserPresence& Presence = Friend->GetPresence();
-
-		// 조건에 맞는 친구만 넣기 (같은 게임 실행 중인 경우 등)
-		if (Presence.bIsPlaying)
-		{
-			FSteamFriendData Data;
-			Data.DisplayName = Friend->GetDisplayName();
-			Data.SteamId = Friend->GetUserId()->ToString();
-			FilteredFriendList.Add(Data);
-		}
-	}
-
-	SetFilteredFriendList(FilteredFriendList);
+    SetFilteredFriendList(MergedList);
 }
 
 void UJumpGameInstance::InviteFriendToSession(const FString& FriendIdStr)
@@ -479,8 +472,18 @@ void UJumpGameInstance::SetFilteredFriendList(const TArray<FSteamFriendData>& Fr
 {
 	FilteredFriendList = FriendList;
 	
-	// 델리게이트 브로드캐스트!
-	OnFriendListUpdated.Broadcast(FilteredFriendList);
+	// 한 명씩 델리게이트 호출
+	for (int32 i = 0; i < FilteredFriendList.Num(); ++i)
+	{
+		FSteamFriendData Copy = FilteredFriendList[i];
+		Copy.FriendIdx = i; // 인덱스 부여
+		OnFriendListUpdated.ExecuteIfBound(Copy);
+	}
+
+	// 종료 신호
+	FSteamFriendData EndFlag;
+	EndFlag.FriendIdx = -1;
+	OnFriendListUpdated.ExecuteIfBound(EndFlag);
 }
 
 void UJumpGameInstance::RunEyeTrackingScript()

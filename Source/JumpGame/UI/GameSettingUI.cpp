@@ -4,13 +4,13 @@
 #include "GameSettingUI.h"
 
 #include "GameQuitUI.h"
+#include "Animation/UMGSequencePlayer.h"
+#include "Animation/WidgetAnimation.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Button.h"
-#include "Components/CanvasPanel.h"
 #include "Components/ComboBoxString.h"
 #include "Components/Slider.h"
 #include "Components/WidgetSwitcher.h"
-#include "GameFramework/GameUserSettings.h"
 #include "Kismet/GameplayStatics.h"
 
 void UGameSettingUI::NativeOnInitialized()
@@ -84,11 +84,22 @@ void UGameSettingUI::PlaySettingAnim(bool bIsForward)
 {
 	if (bIsForward)
 	{
+		this->SetVisibility(ESlateVisibility::Visible);
 		PlayAnimationForward(SettingAnim);
+		UE_LOG(LogTemp, Warning, TEXT("PlayAnimationForward"));
 	}
 	else
 	{
-		PlayAnimationReverse(SettingAnim);
+		UUMGSequencePlayer* SCPlayer = PlayAnimationReverse(SettingAnim);
+		if (SCPlayer)
+		{
+			auto& FinishedEvent = SCPlayer->OnSequenceFinishedPlaying();
+			FinishedEvent.AddLambda([this](UUMGSequencePlayer& Player) {
+				this->SetVisibility(ESlateVisibility::Collapsed);
+				UE_LOG(LogTemp, Warning, TEXT("Animation finished - Widget Collapsed"));
+			});
+		}
+		UE_LOG(LogTemp, Warning, TEXT("PlayAnimationReverse"));
 	}
 }
 

@@ -11,6 +11,7 @@
 #include "JumpGame/UI/Obstacle/EyeTrackingUI.h"
 #include "JumpGame/UI/Obstacle/FlyingObjectUI.h"
 #include "JumpGame/UI/Obstacle/TimeRemainUI.h"
+#include "Net/UnrealNetwork.h"
 
 AObjectEyeHunterProp::AObjectEyeHunterProp()
 {
@@ -86,17 +87,26 @@ void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompo
                                             const FHitResult& SweepResult)
 {
 	//Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-	
+
 	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
 	if (OverlappingFrog)
 	{
 		if (OverlappingFrog->IsLocallyControlled())
 		{
 			Frog = OverlappingFrog;
-			StartMission();
+
+			StopCharacter();
+			GetWorldTimerManager().SetTimer(StartTimerHandle, this, &AObjectEyeHunterProp::StartMission, 2.f, false);
+			//StartMission();
+		}
+		
+		if (HasAuthority())
+		{
+			SetOwner(OverlappingFrog);
+			MulticastRPC_PlayEffect(this->GetActorLocation());
 		}
 	}
-	
+
 	// if (OtherActor->ActorHasTag(TEXT("Frog")))
 	// {
 	// 	Frog = Cast<AFrog>(OtherActor);
@@ -110,13 +120,13 @@ void AObjectEyeHunterProp::StartMission()
 	FLog::Log("StartMission");
 	Super::SendEyeTrackingStart();
 
-	StopCharacter();
+	//StopCharacter();
 
 	if (FlyingObjectUI)
 	{
 		FlyingObjectUI->InitializeParameters();
 	}
-	
+
 	if (TimeRemainUI)
 	{
 		TimeRemainUI->AddToViewport();
@@ -187,11 +197,12 @@ void AObjectEyeHunterProp::StopCharacter()
 {
 	if (Frog && Frog->IsLocallyControlled())
 	{
-		 Frog->CameraMissionMode();
-		 Frog->StopMovementAndResetRotation();
-		 Frog->SetCrouchEnabled(false);
-		
-		Frog->ServerRPC_PrepareMission(MissionLocation->GetComponentLocation());
+		Frog->CameraMissionMode();
+		Frog->StopMovementAndResetRotation(GetActorRotation());
+		Frog->SetCrouchEnabled(false);
+
+		Frog->ServerRPC_PrepareMission(MissionLocation->GetComponentLocation(),
+		                               MissionLocation->GetComponentRotation());
 
 		// FLog::Log("ClientLoc", GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 		// FLog::Log("ClientRoc", GetActorRotation().Yaw, GetActorRotation().Pitch);
@@ -215,18 +226,26 @@ void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedCompone
                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	//Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
-
+	FLog::Log("1");
 	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
-	if (OverlappingFrog && OverlappingFrog->IsLocallyControlled())
+	if (OverlappingFrog)
 	{
-		if (bIsStartHunt)
+		if (OverlappingFrog->IsLocallyControlled())
 		{
-			EndMission(false);
+	FLog::Log("2");
+			if (bIsStartHunt)
+			{
+	FLog::Log("3");
+				EndMission(false);
+			}
+			
+			Frog = nullptr;
+
+			SetOwner(nullptr);
 		}
-		
-		Frog = nullptr;
 	}
-	
+
+
 	// if (OtherActor->ActorHasTag(TEXT("Frog")))
 	// {
 	// 	if (bIsStartHunt)
@@ -234,6 +253,13 @@ void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedCompone
 	// 		EndMission(false);
 	// 	}
 	// }
+}
+
+void AObjectEyeHunterProp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AObjectEyeHunterProp, Frog);
 }
 
 void AObjectEyeHunterProp::Tick(float DeltaTime)
@@ -367,7 +393,7 @@ void AObjectEyeHunterProp::TrackLocation(FVector2f Resolution, FVector2f ScreenL
 	float ScreenY{static_cast<float>(NormalizedY * ViewportSize.Y)};
 
 	//FLog::Log("Loc", ScreenX, ScreenY);
-	
+
 	if (TrackingUI && bIsStartHunt)
 	{
 		// 뷰포트에 없으면 추가
@@ -435,8 +461,8 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 
 		if (Frog)
 		{
-			FVector Direction{Frog->GetActorForwardVector() + FVector::UpVector};
-			float Force{2'000.f};
+			FVector Direction{FVector::UpVector};
+			float Force{1'500.f};
 
 			Frog->ServerRPC_CallLaunchCharacter(Direction, Force, false, false);
 			//Super::LaunchCharacter(Frog, Direction, Force);
@@ -451,8 +477,8 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 
 		if (Frog)
 		{
-			FVector Direction{-1 * Frog->GetActorForwardVector() + FVector::UpVector};
-			float Force{300};
+			FVector Direction{FVector::UpVector};
+			float Force{800};
 
 			Frog->ServerRPC_CallLaunchCharacter(Direction, Force, false, false);
 			//Super::LaunchCharacter(Frog, Direction, Force);
@@ -461,13 +487,22 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		FlyingObjectUI->FailMission();
 	}
 
+	if (HasAuthority())
+	{
+		MulticastRPC_PlayEffect(this->GetActorLocation(), 1);
+	}
+	else
+	{
+		ServerRPC_PlayEffect(this->GetActorLocation(), 1);
+	}
+
 	ResetMission();
 }
 
 void AObjectEyeHunterProp::ResetMission()
 {
 	ResumeCharacter();
-	
+
 	// 미션 끝
 	bIsStartHunt = false;
 
@@ -482,7 +517,7 @@ void AObjectEyeHunterProp::ResetMission()
 	{
 		TimeRemainUI->RemoveFromParent();
 	}
-	
+
 	FlowTime = 0.f;
 	SuccessRatio = 0.f;
 
@@ -582,4 +617,9 @@ void AObjectEyeHunterProp::SetTargetPositionsByViewport()
 	{
 		TargetPositions.Add(FVector2D(ViewportSize.X * Ratio.X, ViewportSize.Y * Ratio.Y));
 	}
+}
+
+void AObjectEyeHunterProp::ServerRPC_PlayEffect_Implementation(const FVector& Vector, int32 Index)
+{
+	MulticastRPC_PlayEffect(Vector, Index);
 }

@@ -104,7 +104,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetJumpAvailableBlock(int32 Block);
 	void ResetSuperJumpRatio();
-	void StopMovementAndResetRotation();
+	void StopMovementAndResetRotation(const FRotator& Rot);
 	void ResumeMovement();
 	bool GetCanMove() const;
 	void CameraMissionMode();
@@ -138,7 +138,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_CallLaunchCharacter(const FVector& Dir, float Force, bool bXY, bool bZ);
 	UFUNCTION(Server, Reliable)
-	void ServerRPC_PrepareMission(FVector Loc);
+	void ServerRPC_PrepareMission(const FVector& Loc, const FRotator& Rot);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetMissionCamera();
 	UFUNCTION(Server, Reliable)

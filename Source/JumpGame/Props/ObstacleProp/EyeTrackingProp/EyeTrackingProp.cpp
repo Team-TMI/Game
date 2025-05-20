@@ -8,6 +8,7 @@
 #include "JumpGame/AIServices/Shared/IOManagerComponent.h"
 #include "JumpGame/Core/GameState/NetworkGameState.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
