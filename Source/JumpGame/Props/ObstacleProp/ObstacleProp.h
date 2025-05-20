@@ -52,8 +52,10 @@ public:
 
 	// Rotate (자체 회전)관련
 	// 장애물: 회전망치, 뿔망치, 굴러오는 공
-	UPROPERTY(ReplicatedUsing=OnRep_ObstacleRotate)
+	// UPROPERTY(ReplicatedUsing=OnRep_ObstacleRotate)
 	FRotator DeltaRot;
+	UPROPERTY(ReplicatedUsing=OnRep_ObstacleRotate)
+	FRotator Rotation = FRotator(0, 0, 0);
 	UPROPERTY(EditAnywhere, Category = "Rotate")
 	float RotAngle = 0;
 	UPROPERTY (EditAnywhere, Category = "Rotate")
@@ -66,6 +68,15 @@ public:
 
 	// 이펙트, 사운드 등
 	UFUNCTION(NetMulticast, reliable)
-	void MulticastRPC_PlayEffect(FVector Location);
+	virtual void MulticastRPC_PlayEffect(FVector Location, int32 Index = 0);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void PlayHitEffect(int32 Index = 0);
+	
+protected:
+	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
+	class USoundCue* HitSound;
+
+	UPROPERTY(Replicated, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bPlayHitEffect = false;
 };
 

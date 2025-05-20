@@ -17,10 +17,12 @@ class JUMPGAME_API UObjectPoolComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UObjectPoolComponent();
+	void DestoryObjectPool();
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	
 
 public:
 	// Called every frame
@@ -50,4 +52,6 @@ private:
 	// 오브젝트 들어있는 배열
 	UPROPERTY()
 	TArray<class ARollingBallProp*> Pool;
+	UPROPERTY()
+	TArray<class ARollingBallProp*> InactivePool;
 };

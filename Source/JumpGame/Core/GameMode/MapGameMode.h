@@ -34,10 +34,4 @@ public:
 	
 	UPROPERTY()
 	class UJumpGameInstance* GI;
-
-	// 플레이어 정보 저장
-	UPROPERTY()
-	FString Key;
-	UPROPERTY()
-	TMap<FString, FPlayerInfo> PlayersMap;
 };

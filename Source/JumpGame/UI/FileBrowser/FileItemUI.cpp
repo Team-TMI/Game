@@ -23,6 +23,17 @@ FReply UFileItemUI::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, 
 	return FReply::Handled();
 }
 
+FReply UFileItemUI::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	if (OnClicked.IsBound())
+	{
+		OnClicked.Execute(FilePath);
+	}
+	return FReply::Handled();
+}
+
 void UFileItemUI::OnButtonClicked()
 {
 	if (OnClicked.IsBound())

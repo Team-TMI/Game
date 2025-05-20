@@ -65,6 +65,7 @@ private:
 	void OnImageSearchResponse();
 	void SetTextToDefault();
 	void SetGridToDefault();
+	void OnImageSearchButtonResponse(const FString& ImgPath, bool bSuccess);
 
 	FString DefaultSearchText = TEXT("검색 할 내용을 입력하세요");
 

@@ -10,7 +10,7 @@
 APathSixProp::APathSixProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset
 	(TEXT("/Game/Kobo_ForestVillage/Meshes/SM-Path-06.SM-Path-06"));

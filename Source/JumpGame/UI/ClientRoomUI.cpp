@@ -3,6 +3,9 @@
 
 #include "ClientRoomUI.h"
 
+#include "CreditUI.h"
+#include "GameQuitUI.h"
+#include "GameSettingUI.h"
 #include "SessionListItemWidget.h"
 #include "SessionListItemDouble.h"
 #include "Components/Button.h"
@@ -17,6 +20,7 @@
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 #include "StoryMenuUI.h"
+#include "Components/Image.h"
 #include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
 
 
@@ -63,6 +67,19 @@ void UClientRoomUI::NativeOnInitialized()
 	{
 		StoryMenuUI->OnClickBackToLobby.AddDynamic(this, &UClientRoomUI::SetVisibleMain);
 	}
+
+	GameSettingUI = CreateWidget<UGameSettingUI>(GetWorld(), GameSettingUIClass);
+	if (GameSettingUI)
+	{
+		GameSettingUI->AddToViewport(10);
+		GameSettingUI->SettingPanel->SetRenderOpacity(0);
+	}
+
+	CreditUI = CreateWidget<UCreditUI>(GetWorld(), CreditUIClass);
+	if (CreditUI)
+	{
+		CreditUI->OnClickBackToLobbyFromCredit.AddDynamic(this, &UClientRoomUI::SetVisibleMain);
+	}
 }
 
 void UClientRoomUI::SetVisibleMain()
@@ -101,18 +118,28 @@ void UClientRoomUI::OnClickGoStoryMenu()
 
 void UClientRoomUI::OnClickGoSettings()
 {
-	
+	GameSettingUI->PlaySettingAnim(true);
 }
 
 void UClientRoomUI::OnClickGoCredit()
 {
-	CanvasMain->SetVisibility(ESlateVisibility::Hidden);
 	CameraComp->SetViewTarget();
+	CanvasMain->SetVisibility(ESlateVisibility::Hidden);
+	if (CreditUI)
+	{
+		CreditUI->AddToViewport();
+		CreditUI->CreditCanvas->SetRenderOpacity(1);
+	}
 }
 
 void UClientRoomUI::OnClickGoGameEnd()
 {
-	
+	UE_LOG(LogTemp, Warning, TEXT("OnClickGoGameEnd"));
+	if (GameSettingUI->GameQuitUI)
+	{
+		GameSettingUI->GameQuitUI->PlayQuitAnim(true);
+		UE_LOG(LogTemp, Warning, TEXT("PlayQuitAnim"));
+	}
 }
 
 void UClientRoomUI::OnClickGoCreateRoom()

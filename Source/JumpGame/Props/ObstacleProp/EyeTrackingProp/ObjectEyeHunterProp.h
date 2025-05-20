@@ -28,6 +28,9 @@ protected:
 	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 								UPrimitiveComponent* OtherComp,
 								int32 OtherBodyIndex) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -75,7 +78,7 @@ public:
 	UTimeRemainUI* TimeRemainUI;
 	
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Replicated)
 	class AFrog* Frog;
 	UPROPERTY(EditAnywhere)
 	bool bIsDebug{false};
@@ -103,7 +106,11 @@ public:
 	FVector2D PreviousPosition;
 	
 	FTimerHandle EndTimerHandle;
+	FTimerHandle StartTimerHandle;
 
 	// 뷰포트 크기 변화 고려
 	TArray<FVector2D> TargetPositionsRatio;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_PlayEffect(const FVector& Vector, int32 Index);
 };

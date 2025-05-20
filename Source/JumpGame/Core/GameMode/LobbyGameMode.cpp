@@ -20,54 +20,48 @@ ALobbyGameMode::ALobbyGameMode()
 	PlayerControllerClass = ALobbyPlayerController::StaticClass();
 }
 
+void ALobbyGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
 	// 게임 인스턴스 가져오기
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
+
+	FString Key;
+	FString SteamName = Key; // 스팀없을때 기본값
 	
 	// 플레이어의 고유한 네트워크 ID값 가져오기
 	const FUniqueNetIdRepl& NetIdRepl = NewPlayer->GetPlayerState<APlayerState>()->GetUniqueId();
-	if (NetIdRepl.IsValid())
+	if (!NetIdRepl.IsValid()) return;
+	
+	TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
+	if (!NetId.IsValid()) return;
+	
+	// Steam 닉네임이 있다면 사용
+	if (IOnlineSubsystem* Subsys = IOnlineSubsystem::Get())
 	{
-		TSharedPtr<const FUniqueNetId> NetId = NetIdRepl.GetUniqueNetId();
-		// 문자열로 추출하자
-		Key = NetId->ToString();
-
-		if (IOnlineSubsystem* Subsys = IOnlineSubsystem::Get())
+		IOnlineIdentityPtr Identity = Subsys->GetIdentityInterface();
+		if (Identity.IsValid())
 		{
-			IOnlineIdentityPtr Identity = Subsys->GetIdentityInterface();
-			if (Identity.IsValid())
-			{
-				FString SteamName = Identity->GetPlayerNickname(*NetId);
-
-				// 이미 등록되었는지 확인
-				if (!GI->GetPlayerInfo().Contains(SteamName))
-				{
-					// 플레이어 저장
-					FPlayerInfo NewPlayerInfo;
-					NewPlayerInfo.PlayerID = PlayerIdx;
-					NewPlayerInfo.PlayerName = SteamName; // 닉네임으로 설정
-
-					// GI에 업데이트 (서버에 저장)
-					GI->AddPlayerInfo(SteamName, NewPlayerInfo);
-					PlayerIdx++;
-				}
-			}
-		}
-		else
-		{
-			if (GI->GetPlayerInfo().Contains(Key)) return;
-			
-			// 플레이어 저장
-			FPlayerInfo NewPlayerInfo;
-			NewPlayerInfo.PlayerID = PlayerIdx;
-			NewPlayerInfo.PlayerName = Key;
-
-			// GI에 업데이트 (서버에 저장)
-			GI->AddPlayerInfo(Key, NewPlayerInfo);
-			PlayerIdx++;
+			SteamName = Identity->GetPlayerNickname(*NetId);
 		}
 	}
+	
+	// 이미 등록되어 있다면 리턴
+	if (GI->GetPlayerInfo().Contains(SteamName)) return;
+	
+	// FFastLogger::LogConsole(TEXT("ALobbyGameMode PlayerIdx: %d"), PlayerIdx);
+	
+	// 새 플레이어 정보 생성 및 저장
+	FPlayerInfo NewPlayerInfo;
+	NewPlayerInfo.PlayerID = PlayerIdx;
+	NewPlayerInfo.PlayerName = SteamName;
+
+	GI->AddPlayerInfo(SteamName, NewPlayerInfo);
+	PlayerIdx++;
 }

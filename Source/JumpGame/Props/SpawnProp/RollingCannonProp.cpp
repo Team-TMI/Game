@@ -52,6 +52,13 @@ void ARollingCannonProp::BeginPlay()
 	}
 }
 
+void ARollingCannonProp::Destroyed()
+{
+	ObjectPool->DestoryObjectPool();
+	
+	Super::Destroyed();
+}
+
 void ARollingCannonProp::SetCollision(bool bEnable)
 {
 	Super::SetCollision(bEnable);

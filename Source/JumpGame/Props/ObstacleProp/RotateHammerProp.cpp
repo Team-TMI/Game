@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
+#include "Sound/SoundCue.h"
 
 
 // Sets default values
@@ -19,6 +20,13 @@ ARotateHammerProp::ARotateHammerProp()
 	// CollisionComp랑 충돌
 	// CollisionComp->SetCollisionProfileName(TEXT("Prop"));
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
+	(TEXT("/Game/Sounds/Ques/Bounce_Cue.Bounce_Cue"));
+	if (SoundAsset.Succeeded())
+	{
+		HitSound = Cast<USoundCue>(SoundAsset.Object);
+	}
 
 	PropDataComponent->SetPropID(TEXT("2007"));
 }

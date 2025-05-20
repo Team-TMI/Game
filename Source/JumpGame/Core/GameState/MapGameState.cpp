@@ -46,6 +46,9 @@ void AMapGameState::BeginPlay()
 
 	RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 	RisingWaterProp->StopRising(100);
+
+	PC->SetInputMode(FInputModeUIOnly());
+	PC->bShowMouseCursor = false;
 }
 
 void AMapGameState::Tick(float DeltaTime)

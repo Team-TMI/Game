@@ -6,6 +6,7 @@
 #include "ToolContextInterfaces.h"
 #include "Components/BoxComponent.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
+#include "CableComponent.h"
 
 
 // Sets default values
@@ -15,10 +16,10 @@ ARotateSpikeProp::ARotateSpikeProp()
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("RotateSpike");
 
-	MeshComp->SetupAttachment(PivotScene);
+	MeshComp->SetupAttachment(RootComponent);
 	
 	Hammer = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hammer"));
-	Hammer->SetupAttachment(MeshComp);
+	Hammer->SetupAttachment(PivotScene);
 	Hammer->SetRelativeLocation(FVector(0, 180, -40));
 	
 	CollisionComp->SetBoxExtent(FVector(116,40,42));
@@ -35,7 +36,35 @@ ARotateSpikeProp::ARotateSpikeProp()
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	MeshComp->SetCollisionProfileName(TEXT("Prop"));
 	Hammer->SetCollisionProfileName(TEXT("Prop"));
+	Hammer->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
+	CableComp = CreateDefaultSubobject<UCableComponent>(TEXT("CableComp"));
+	CableComp->SetupAttachment(PivotScene);
+	CableComp->bAttachStart = true;
+	CableComp->bAttachEnd = true;
+	CableComp->CableLength = 50;
+	CableComp->NumSegments = 2;
+	CableComp->EndLocation = FVector(0.000000,32.261419,-3.143982);
+	CableComp->SetRelativeLocation(FVector(-0.000000,144.798420,-3.422057));
+	CableComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	CableMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CableMesh"));
+	CableMesh->SetupAttachment(CableComp);
+	CableMesh->SetRelativeLocation(FVector(0.000004,29.778368,-6.061648));
+	CableMesh->SetRelativeScale3D(FVector(0.075000,0.075000,0.150000));
+	CableMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	CableTop = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CableTop"));
+	CableTop->SetupAttachment(MeshComp);
+	CableTop->SetRelativeLocation(FVector(0.000008,0.137836,57.444227));
+	CableTop->SetRelativeScale3D(FVector(0.150000,0.150000,0.250000));
+	CableTop->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	Propeller = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Propeller"));
+	Propeller->SetupAttachment(RootComponent);
+	Propeller->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	PropDataComponent->SetPropID(TEXT("2008"));
 }
 
 // Called when the game starts or when spawned
@@ -50,6 +79,11 @@ void ARotateSpikeProp::BeginPlay()
 void ARotateSpikeProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	const float PropellerSpeed = 500.f;
+	float DeltaAngle = PropellerSpeed * DeltaTime;
+	FRotator NewRot = FRotator(0, DeltaAngle, 0);
+	Propeller->AddLocalRotation(NewRot);
 }
 
 void ARotateSpikeProp::CalculateForce(AFrog* Character)
@@ -74,14 +108,14 @@ inline void ARotateSpikeProp::SetCollision(bool bEnable)
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		Hammer->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		Spike->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		// Spike->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
 	else
 	{
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Hammer->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Spike->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		// Spike->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		// TODO: Material 불투명하게 바꿔주기
 	}
 }

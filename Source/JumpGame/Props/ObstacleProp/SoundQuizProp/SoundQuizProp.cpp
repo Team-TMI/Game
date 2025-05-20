@@ -412,7 +412,7 @@ void ASoundQuizProp::MulticastRPC_PlayerStopMovement_Implementation()
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (Frog)
 	{
-		Frog->StopMovementAndResetRotation();
+		Frog->StopMovementAndResetRotation(FRotator::ZeroRotator);
 		Frog->CameraMissionMode();
 		Frog->SetCrouchEnabled(false);
 		Frog->SetJumpGaugeVisibility(false);

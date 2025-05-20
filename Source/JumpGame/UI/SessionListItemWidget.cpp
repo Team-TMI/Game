@@ -16,17 +16,12 @@ void USessionListItemWidget::NativeConstruct()
 
 void USessionListItemWidget::OnClickJoin()
 {
+	// 버튼을 비활성화
+	Btn_Join->SetIsEnabled(false);
+	
 	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	GI->JoinOtherSession(RoomIdx);
 }
-
-/*void USessionListItemWidget::SetInfo(int32 Idx, FString Info)
-{
-	// 현재 몇번째 방인지?
-	RoomIdx = Idx;
-	// 방 정보 받기 (업데이트)
-	Text_RoomInfo->SetText(FText::FromString(Info));
-}*/
 
 void USessionListItemWidget::SetRoomInfo(const FRoomData& Data)
 {

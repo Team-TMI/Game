@@ -17,6 +17,7 @@ class JUMPGAME_API ALobbyGameMode : public ANetworkGameMode
 
 public:
 	ALobbyGameMode();
+	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 public:
@@ -25,10 +26,4 @@ public:
 	
 	UPROPERTY()
 	class UJumpGameInstance* GI;
-
-	// 플레이어 정보 저장
-	UPROPERTY()
-	FString Key;
-	UPROPERTY()
-	TMap<FString, FPlayerInfo> PlayersMap;
 };

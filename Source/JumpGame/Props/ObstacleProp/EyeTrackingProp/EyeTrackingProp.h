@@ -27,7 +27,7 @@ protected:
 	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                            UPrimitiveComponent* OtherComp,
 	                            int32 OtherBodyIndex) override;
-
+	
 	virtual void SetCollision(bool bEnable) override;
 
 public:
@@ -66,6 +66,7 @@ public:
 	uint8 State;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsStartHunt{false};
 	FVector2D SettingLocation[4]{};
 	int32 SettingCount{};

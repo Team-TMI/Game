@@ -23,6 +23,8 @@
 #include "JumpGame/MapEditor/CategorySystem/ECategoryType.h"
 #include "JumpGame/MapEditor/CategorySystem/ImageResponseJson.h"
 #include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
+#include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
+#include "JumpGame/UI/FileBrowser/FileBrowserUI.h"
 
 class ANetworkGameState;
 
@@ -219,6 +221,7 @@ void UCategoryUI::OnSearchTextChanged(const FText& Text)
 	}), SearchDelay, false);
 }
 
+// TODO: OpenFileDialog를 사용하지 않게 해야 함.
 void UCategoryUI::OnImageSearchButtonClicked()
 {
 	SearchText->SetText(FText::FromString(TEXT("")));
@@ -226,19 +229,22 @@ void UCategoryUI::OnImageSearchButtonClicked()
 	SearchText->SetIsReadOnly(true);
 	GetWorld()->GetTimerManager().ClearTimer(SearchTimerHandle);
 
-	FString ImagePath;
-	if (!OpenFileDialog(ImagePath))
+	AMapEditorState* GameState = GetWorld()->GetGameState<AMapEditorState>();
+	if (!GameState)
 	{
+		FFastLogger::LogConsole(TEXT("GameState is null"));
 		SetTextToDefault();
 		SetGridToDefault();
-		return ;
+		return;
 	}
-	
-	SendImageRequest(ImagePath);
-	
-	FString FilePath = FPaths::GetPath(ImagePath);
-	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
-	SearchText->SetText(FText::FromString(FileNameWithExtension));
+
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.Unbind();
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &UCategoryUI::OnImageSearchButtonResponse);
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffix(TEXT(".png"));
+	FString ExecutablePath = FPlatformProcess::ExecutablePath();
+	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetVisibility(ESlateVisibility::Visible);
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->LoadDirectoryContents(ExecutableDir);
 }
 
 bool UCategoryUI::OpenFileDialog(FString& OutFilePath)
@@ -385,4 +391,21 @@ void UCategoryUI::SetTextToDefault()
 void UCategoryUI::SetGridToDefault()
 {
 	GridUI->UpdatePropGrid(SelectedMajorCategory->GetMajorCategoryType(), CategorySystem);
+}
+
+void UCategoryUI::OnImageSearchButtonResponse(const FString& ImgPath, bool bSuccess)
+{
+	FFastLogger::LogScreen(FColor::Red, TEXT("OnImageSearchButtonResponse : %s"), *ImgPath);
+	if (!bSuccess)
+	{
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+	
+	SendImageRequest(ImgPath);
+	
+	FString FilePath = FPaths::GetPath(ImgPath);
+	FString FileNameWithExtension = FPaths::GetCleanFilename(ImgPath);
+	SearchText->SetText(FText::FromString(FileNameWithExtension));
 }

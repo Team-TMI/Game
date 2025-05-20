@@ -20,6 +20,17 @@ FReply UBackItemUI::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, 
 	return FReply::Handled();
 }
 
+FReply UBackItemUI::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	if (OnClicked.IsBound())
+	{
+		OnClicked.Execute(BackDirectoryPath);
+	}
+	return FReply::Handled();
+}
+
 void UBackItemUI::OnButtonClicked()
 {
 	if (OnClicked.IsBound())

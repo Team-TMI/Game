@@ -64,5 +64,6 @@ void USelectRoomUI::OnPickCustomMap()
 	{
 		return ;
 	}
-	GameState->LoadMapComponent->PickFile();
+	FString Suffix = TEXT(".json");
+	GameState->LoadMapComponent->PickFile(Suffix);
 }

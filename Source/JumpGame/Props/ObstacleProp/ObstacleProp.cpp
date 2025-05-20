@@ -11,7 +11,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 
 // Sets default values
@@ -19,6 +22,7 @@ AObstacleProp::AObstacleProp()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 	Tags.Add("Obstacle");
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
@@ -80,10 +84,10 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		FLog::Log("AObstacleProp::OnMyBeginOverlap");
 	}
 
-	/*if (HasAuthority())
+	if (HasAuthority())
 	{
-		MulticastRPC_PlayEffect(OtherActor->GetActorLocation());
-	}*/
+		MulticastRPC_PlayEffect(this->GetActorLocation());
+	}
 }
 
 void AObstacleProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -111,7 +115,8 @@ void AObstacleProp::GetLifetimeReplicatedProps(
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AObstacleProp, DeltaRot);
+	DOREPLIFETIME(AObstacleProp, Rotation);
+	DOREPLIFETIME(AObstacleProp, bPlayHitEffect)
 }
 
 // Called every frame
@@ -169,6 +174,7 @@ void AObstacleProp::ObstacleRotate()
 		DeltaRot = RotAxis * RotSpeed;
 		// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
 		PivotScene->AddLocalRotation(DeltaRot, true);
+		Rotation = PivotScene->GetRelativeRotation();
 	}
 }
 
@@ -178,12 +184,24 @@ void AObstacleProp::OnRep_ObstacleRotate()
 		return;
 
 	// 클라이언트라면 이 함수가 실행
-	PivotScene->AddLocalRotation(DeltaRot);
+	// PivotScene->AddLocalRotation(DeltaRot);
+	PivotScene->SetRelativeRotation(Rotation);
 }
 
-void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
+void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
 {
 	// 클라이언트 전부에서 호출됨 (서버 포함)
 	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location);
-	// UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 0.5f, 1.5f);
+	this->PlayHitEffect(Index);
+}
+
+// 블루 프린트에서 타임라인이 다 꺼지면 false로 바꿔주자. (서버만!!!!)
+void AObstacleProp::PlayHitEffect_Implementation(int32 Index)
+{
+	// 서버에서 실행이 처리되면
+	if (HasAuthority() && !bPlayHitEffect)
+	{
+		bPlayHitEffect = true;
+	}
 }

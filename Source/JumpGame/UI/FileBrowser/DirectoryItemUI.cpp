@@ -20,6 +20,17 @@ FReply UDirectoryItemUI::NativeOnMouseButtonDoubleClick(const FGeometry& InGeome
 	return FReply::Handled();
 }
 
+FReply UDirectoryItemUI::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	
+	if (OnClicked.IsBound())
+	{
+		OnClicked.Execute(DirectoryPath);
+	}
+	return FReply::Handled();
+}
+
 void UDirectoryItemUI::OnButtonClicked()
 {
 	if (OnClicked.IsBound())
