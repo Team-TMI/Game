@@ -41,7 +41,7 @@ void UClientRoomLogoUI::RadiusAnimating()
 	{
 		float Elapsed = GetWorld()->GetTimeSeconds() - RadiusStartTime;
 		float Alpha = FMath::Clamp(Elapsed / RadiusDuration, 0.f, 1.f);
-		float NewRadius = FMath::Lerp(1.0f, 0.0f, Alpha);
+		float NewRadius = FMath::Lerp(3.0f, 0.0f, Alpha);
 
 		DynMaterial->SetScalarParameterValue(FName("Radius"), NewRadius);
 		Btn_GoMainStart->SetRenderOpacity(0.f);
@@ -66,7 +66,7 @@ void UClientRoomLogoUI::InitLogoMaterial()
 		DynMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
 		if (DynMaterial && Image_Circle)
 		{
-			DynMaterial->SetScalarParameterValue(FName("Radius"), 1.0f);
+			DynMaterial->SetScalarParameterValue(FName("Radius"), 3.0f);
 
 			FSlateBrush Brush;
 			Brush.SetResourceObject(DynMaterial);

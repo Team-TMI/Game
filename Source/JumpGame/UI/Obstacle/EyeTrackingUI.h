@@ -15,10 +15,6 @@ class JUMPGAME_API UEyeTrackingUI : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	virtual void NativeConstruct() override;
-	
-	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* TargetLocationImage;
 };
