@@ -6,9 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "GameSettingUI.generated.h"
 
-/**
- * 
- */
+/**/
+
 UENUM(BlueprintType)
 enum class EColorBlindMode : uint8
 {
@@ -31,12 +30,10 @@ public:
 	class UWidgetAnimation* SettingAnim;
 	UFUNCTION()
 	void PlaySettingAnim(bool bIsForward);
-	
+
 	// 전환
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* SettingSwitcher;
-	UPROPERTY(meta = (BindWidget))
-	class UCanvasPanel* SettingPanel;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GameSet;
 	UPROPERTY(meta = (BindWidget))

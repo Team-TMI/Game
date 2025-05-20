@@ -39,7 +39,7 @@ AGameStartProp::AGameStartProp()
 		StartPoints.Add(StartPoint);
 	}
 
-	Super::SetSize(FVector(5,20,1));
+	Super::SetSize(FVector(12,20,5));
 }
 
 // Called when the game starts or when spawned

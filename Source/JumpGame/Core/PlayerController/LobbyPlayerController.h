@@ -62,4 +62,11 @@ private:
 	FVector2D PlusPitchMinMax = FVector2D(0.f, 0.f);
 	UPROPERTY()
 	FVector2D PlusYawMinMax = FVector2D(0.f, 0.f);
+
+public:
+	// 팝업으로 띄울 UI
+	UPROPERTY(editanywhere)
+	TSubclassOf<class UBottomNaviBarUI> BottomNaviBarUIClass;
+	UPROPERTY(editanywhere, BlueprintReadWrite)
+	UBottomNaviBarUI* BottomNaviBarUI;
 };

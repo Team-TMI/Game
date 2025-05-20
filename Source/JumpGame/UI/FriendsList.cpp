@@ -12,9 +12,10 @@ void UFriendsList::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
+	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	if (GI)
 	{
-		GI->OnFriendListUpdated.AddDynamic(this, &UFriendsList::UpdateFriendList);
+		GI->OnFriendListUpdated.BindUObject(this, &UFriendsList::OnFindComplete);
 	}
 
 	Btn_Refresh->OnClicked.AddDynamic(this, &UFriendsList::OnClickRefresh);
@@ -44,6 +45,7 @@ void UFriendsList::Init()
 
 void UFriendsList::UpdateFriendList(const TArray<FSteamFriendData>& FriendDataArray)
 {
+	UE_LOG(LogTemp, Display, TEXT("FriendsList::UpdateFriendList"));
 	for (int i = 0; i < FriendsItemPool.Num(); ++i)
 	{
 		if (i < FriendDataArray.Num())
@@ -60,11 +62,28 @@ void UFriendsList::UpdateFriendList(const TArray<FSteamFriendData>& FriendDataAr
 
 void UFriendsList::OnClickRefresh()
 {
+	UE_LOG(LogTemp, Display, TEXT("FriendsList::OnClickRefresh"));
+	
+	AllFoundFriends.Empty(); // 중복 방지
+	UpdateFriendList(AllFoundFriends);
 	GI->GetSteamFriends();
+
+	// 찾는 중 버튼 비활성화
+	Btn_Refresh->SetIsEnabled(false);
 }
 
 void UFriendsList::OnFindComplete(const FSteamFriendData& Data)
 {
+	if (Data.FriendIdx == -1) // 종료 신호
+	{
+		// 활성화
+		Btn_Refresh->SetIsEnabled(true);
+		UpdateFriendList(AllFoundFriends);
+	}
+	else
+	{
+		AllFoundFriends.Add(Data);
+	}
 }
 
 void UFriendsList::PlayShowAnim(bool bIsForward)

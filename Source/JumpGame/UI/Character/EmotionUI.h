@@ -27,12 +27,6 @@ public:
 	// 화면에 있나요?
 	UPROPERTY()
 	bool bIsInViewport = false;
-	
-	// 버튼 바인딩
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_Hello;
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_Happy;
 
 	// 버튼 하이라이팅
 	UPROPERTY(meta = (BindWidget))
@@ -47,12 +41,6 @@ public:
 	// 이미지 배열
 	UPROPERTY()
 	TArray<class UImage*> EmotionImages;
-
-	// 버튼 눌렀을 때 실행할 함수
-	UFUNCTION()
-	void OnClickHello();
-	UFUNCTION()
-	void OnClickHappy();
 
 	// 버튼 하이라이팅
 	UFUNCTION()

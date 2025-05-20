@@ -12,12 +12,12 @@ void UBottomNaviBarUI::NativeOnInitialized()
 
 	Btn_Store->OnClicked.AddDynamic(this, &UBottomNaviBarUI::OnClickStore);
 	Btn_FrogPass->OnClicked.AddDynamic(this, &UBottomNaviBarUI::OnClickFrogPass);
-	// Btn_Friend->OnClicked.AddDynamic(this, &UBottomNaviBarUI::OnClickFriend);
+	Btn_Friend->OnClicked.AddDynamic(this, &UBottomNaviBarUI::OnClickFriend);
 
 	FriendsList = CreateWidget<class UFriendsList>(GetWorld(), FriendsListClass);
 	if (FriendsList)
 	{
-		FriendsList->AddToViewport();
+		FriendsList->AddToViewport(5);
 	}
 }
 
@@ -31,16 +31,7 @@ void UBottomNaviBarUI::OnClickFrogPass()
 
 void UBottomNaviBarUI::OnClickFriend()
 {
-	if (!bIsOnViewport)
-	{
-		// 띄우고
-		FriendsList->PlayShowAnim(true);
-		bIsOnViewport = true;
-	}
-	else
-	{
-		// 지우고
-		FriendsList->PlayShowAnim(false);
-		bIsOnViewport = false;
-	}
+	bool bShow = !bIsOnViewport;
+	FriendsList->PlayShowAnim(bShow);
+	bIsOnViewport = bShow;
 }

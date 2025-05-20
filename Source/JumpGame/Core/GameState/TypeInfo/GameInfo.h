@@ -119,7 +119,7 @@ struct FSteamFriendData
 	int32 FriendIdx;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool bIsPlaying;
+	bool bIsOnline;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsPlayingThisGame;
@@ -128,7 +128,7 @@ struct FSteamFriendData
 		: DisplayName(TEXT(""))
 		, SteamId(TEXT(""))
 		, FriendIdx(-1)
-		, bIsPlaying(false)
+		, bIsOnline(false)
 		, bIsPlayingThisGame(false)
 	{}
 };
