@@ -26,11 +26,10 @@ void UWaitRoomUI::NativeOnInitialized()
 	
 	Btn_GameStart->OnClicked.AddDynamic(this, &UWaitRoomUI::OnClickGameStart);
 	// TODO : 맵 선택 하는거 더 자연스럽게
-	// Btn_SelectMap->OnClicked.AddDynamic(this, &UWaitRoomUI::OnClickSelectMap);
+	Btn_SelectMap->OnClicked.AddDynamic(this, &UWaitRoomUI::OnClickSelectMap);
 	Btn_BackFromLobby->OnClicked.AddDynamic(this, &UWaitRoomUI::OnClickBackFromLobby);
 
 	SelectRoomUI = CreateWidget<USelectRoomUI>(GetWorld(), SelectRoomFactory);
-	Btn_SelectMap->OnClicked.AddDynamic(SelectRoomUI, &USelectRoomUI::OnPickCustomMap);
 }
 
 void UWaitRoomUI::OnClickGameStart()
