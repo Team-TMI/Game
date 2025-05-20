@@ -74,8 +74,7 @@ void ARollingCannonProp::Tick(float DeltaTime)
 void ARollingCannonProp::FireRollingBall()
 {
 	if (!ObjectPool) return;
-
-	FFastLogger::LogConsole(TEXT("FireRollingBall3333333333333"));
+	
 	ARollingBallProp* Projectile = ObjectPool->GetRollingBallProp();
 	if (Projectile)
 	{

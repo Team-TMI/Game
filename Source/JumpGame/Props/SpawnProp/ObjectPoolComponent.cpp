@@ -96,7 +96,6 @@ void UObjectPoolComponent::Expand()
 
 void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject, float RemainTime)
 {
-	FFastLogger::LogConsole(TEXT("알림을 보낸다: 다시 왔음!!111111111111111"));
 	// 사용하고 나서 다시 풀에 넣자 
 	InactivePool.Remove(ReturnObject);
 	Pool.Push(ReturnObject);
