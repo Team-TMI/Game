@@ -37,8 +37,8 @@ void ALobbyPlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(LobbyMappingContext, 0);
 	}
-
-	UCursorManager::SetCursor(this, ECursorName::FlyCursor);
+	
+	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
 	
 	SetInputMode(FInputModeUIOnly());
 	SetShowMouseCursor(true);
