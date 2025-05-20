@@ -20,6 +20,8 @@ class JUMPGAME_API AMapEditingPlayerController : public ANetworkPlayerController
 public:
 	AMapEditingPlayerController();
 
+	virtual void BeginPlay() override;
+
 #pragma region CLICK_OPERATION
 	// Click Operation
 public:

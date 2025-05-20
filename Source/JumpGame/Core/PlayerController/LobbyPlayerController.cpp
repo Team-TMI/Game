@@ -10,6 +10,7 @@
 #include "Blueprint/UserWidget.h"
 #include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
 #include "JumpGame/UI/BottomNaviBarUI.h"
+#include "JumpGame/Utils/CursorManager.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -44,6 +45,11 @@ void ALobbyPlayerController::BeginPlay()
 	{
 		BottomNaviBarUI->AddToViewport(5);
 	}
+	
+	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
+	
+	SetInputMode(FInputModeUIOnly());
+	SetShowMouseCursor(true);
 }
 
 void ALobbyPlayerController::SetupInputComponent()

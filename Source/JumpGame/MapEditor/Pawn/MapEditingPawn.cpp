@@ -25,6 +25,7 @@
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/UI/MapEditing/MapEditingHUD.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 AMapEditingPawn::AMapEditingPawn()
@@ -85,6 +86,18 @@ AMapEditingPawn::AMapEditingPawn()
 	if (IA_AXIS.Succeeded())
 	{
 		IA_Axis= IA_AXIS.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_SCROLL
+	(TEXT("/Game/MapEditor/Input/Actions/IA_Scroll.IA_Scroll"));
+	if (IA_SCROLL.Succeeded())
+	{
+		IA_Scroll = IA_SCROLL.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_TELEPORT
+	(TEXT("/Game/MapEditor/Input/Actions/IA_Teleport.IA_Teleport"));
+	if (IA_TELEPORT.Succeeded())
+	{
+		IA_Teleport = IA_TELEPORT.Object;
 	}
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponentMapEditing"));
@@ -155,6 +168,9 @@ void AMapEditingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 		PlayerInput->BindAction(IA_Rotate, ETriggerEvent::Started, this, &AMapEditingPawn::HandleRotate);
 		PlayerInput->BindAction(IA_Axis, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleAxis);
+
+		PlayerInput->BindAction(IA_Scroll, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleScroll);
+		PlayerInput->BindAction(IA_Teleport, ETriggerEvent::Started, this, &AMapEditingPawn::HandleTeleport);
 	}
 }
 
@@ -256,6 +272,60 @@ void AMapEditingPawn::HandleAxis(const FInputActionValue& InputActionValue)
 	FVector Axis = InputActionValue.Get<FVector>();
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
 	RotateHandlerManager->HandleAxis(Axis, ControlledInfo);
+}
+
+void AMapEditingPawn::HandleScroll(const FInputActionValue& InputActionValue)
+{
+	float Scroll = InputActionValue.Get<float>();
+	if (FMath::IsNearlyZero(Scroll)) return;
+
+	// 스크롤을 통해서 이동 속도 조절
+	if (UFloatingPawnMovement* FloatMove = Cast<UFloatingPawnMovement>(MovementComponent))
+	{
+		FloatMove->MaxSpeed = FMath::Clamp(
+			FloatMove->MaxSpeed + Scroll * ScrollStep,
+			MinSpeed, MaxSpeed);
+
+		// 가속/감속값도 같이 늘려서 조작감을 유지
+		FloatMove->Acceleration = FloatMove->MaxSpeed * 2.f;
+		FloatMove->Deceleration = FloatMove->MaxSpeed * 6.f;
+	}
+}
+
+void AMapEditingPawn::HandleTeleport(const FInputActionValue& InputActionValue)
+{
+	FClickResponse HandlingInfo = ClickHandlerManager->GetControlledClickResponse();
+	if (!HandlingInfo.TargetProp || !HandlingInfo.TargetProp->IsValidLowLevel())
+	{
+		return;
+	}
+	// Target Location을 가져옴
+	FVector TargetLocation = HandlingInfo.TargetProp->GetActorLocation();
+	// Target Location에서 현재 카메라가 보고 있는 방향의 뒤로 Size + @ 만큼 이동
+	FVector Direction = Controller->GetControlRotation().Vector();
+	FVector Size = HandlingInfo.TargetProp->GetGridComp()->GetSize() * HandlingInfo.TargetProp->GetGridComp()->GetSnapSize();
+	float MaxOffset = Size.GetMax() + 200.f;
+	FVector NewLocation = TargetLocation - Direction * MaxOffset;
+
+	// Pawn을 이동
+	/** --- Latent action 설정 --- */
+	FLatentActionInfo LatentInfo;
+	LatentInfo.CallbackTarget   = this;          // 필수
+	LatentInfo.UUID             = __LINE__;      // 고유값(아무 숫자나 OK)
+	LatentInfo.Linkage          = 0;
+	LatentInfo.ExecutionFunction = NAME_None;    // 이동 완료 시 호출 함수 이름(선택)
+
+	// 0.25초 동안 EaseIn‧EaseOut 보간
+	UKismetSystemLibrary::MoveComponentTo(
+		GetRootComponent(),          // Pawn 루트(전 Actor 이동)
+		NewLocation,                 // 최종 위치
+		GetActorRotation(),          // 회전 유지
+		true,                        // bEaseOut
+		true,                        // bEaseIn
+		0.25f,                       // Duration
+		false,                       // bForceShortestRotationPath
+		EMoveComponentAction::Move,  // 바로 이동
+		LatentInfo);
 }
 
 void AMapEditingPawn::MoveForward(float Val)

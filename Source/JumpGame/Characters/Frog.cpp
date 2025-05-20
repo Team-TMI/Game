@@ -17,6 +17,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
+#include "JumpGame/Props/ObstacleProp/ObstacleProp.h"
 #include "JumpGame/UI/Character/EmotionUI.h"
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
 #include "Kismet/GameplayStatics.h"
@@ -1274,6 +1275,12 @@ void AFrog::OnTongueBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		return;
 	}
 
+	if (OtherComp->ComponentHasTag(FName("Shield")))
+	{
+		bIsTongueGrow = false;
+		return;
+	}
+
 	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
 	if (OverlappingFrog && OverlappingFrog != this)
 	{
@@ -1561,6 +1568,14 @@ void AFrog::ActivateRecentlyLaunchedFlag()
 	}, 0.2f, false);
 }
 
+void AFrog::ServerRPC_ProcessOverlap_Implementation(class AObstacleProp* ObstacleProp)
+{
+	if (!ObstacleProp || this->IsLocallyControlled())
+	{
+		return ;
+	}
+	ObstacleProp->MulticastRPC_PlayEffect(ObstacleProp->GetActorLocation());
+}
 
 void AFrog::FrogSkinFinder()
 {

@@ -79,10 +79,10 @@ void ABaseProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!bInGame)
-	{
-		MaterialChangeOnTick();
-	}
+	// if (!bInGame)
+	// {
+	// 	MaterialChangeOnTick();
+	// }
 }
 
 void ABaseProp::SetPropActive(bool Value)
@@ -95,9 +95,9 @@ void ABaseProp::SetPropCheatMode(bool Value)
 	bCheatMode = Value;
 }
 
-void ABaseProp::MaterialChangeOnTick()
+void ABaseProp::MaterialChangeOnCollision()
 {
-	Super::MaterialChangeOnTick();
+	Super::MaterialChangeOnCollision();
 
 	if (bSelected && bIsOnCollision)
 	{

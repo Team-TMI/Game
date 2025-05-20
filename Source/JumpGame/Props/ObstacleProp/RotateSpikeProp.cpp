@@ -7,6 +7,9 @@
 #include "Components/BoxComponent.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
 #include "CableComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -65,6 +68,13 @@ ARotateSpikeProp::ARotateSpikeProp()
 	Propeller->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	PropDataComponent->SetPropID(TEXT("2008"));
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> TempSound
+	(TEXT("/Game/Sounds/Ques/SwingWind_Cue.SwingWind_Cue"));
+	if (TempSound.Succeeded())
+	{
+		HitSound = TempSound.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -73,6 +83,20 @@ void ARotateSpikeProp::BeginPlay()
 	Super::BeginPlay();
 
 	SwingHammer();
+}
+
+void ARotateSpikeProp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARotateSpikeProp, HammerAngle);
+}
+
+void ARotateSpikeProp::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
+{
+	// Super::MulticastRPC_PlayEffect_Implementation(Location);
+
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 0.5f, 2.0f);
 }
 
 // Called every frame
@@ -89,6 +113,11 @@ void ARotateSpikeProp::Tick(float DeltaTime)
 void ARotateSpikeProp::CalculateForce(AFrog* Character)
 {
 	Super::CalculateForce(Character);
+}
+
+void ARotateSpikeProp::OnRep_SwingHammer()
+{
+	PivotScene->SetRelativeRotation(FRotator(0, HammerAngle, 0));
 }
 
 void ARotateSpikeProp::SwingHammer_Implementation()

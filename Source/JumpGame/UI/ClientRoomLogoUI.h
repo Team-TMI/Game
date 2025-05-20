@@ -47,7 +47,7 @@ public:
 	UPROPERTY()
 	bool bIsRadiusAnimating = false;
 	UPROPERTY()
-	float RadiusDuration = 2.f; // 몇초동안 원형 변화
+	float RadiusDuration = 0.7f; // 몇초동안 원형 변화
 	UFUNCTION()
 	void RadiusAnimating();
 };
