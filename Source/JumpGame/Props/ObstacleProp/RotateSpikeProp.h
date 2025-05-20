@@ -21,7 +21,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void MulticastRPC_PlayEffect_Implementation(FVector Location) override;
+	virtual void MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index = 0) override;
 
 public:
 	// Called every frame

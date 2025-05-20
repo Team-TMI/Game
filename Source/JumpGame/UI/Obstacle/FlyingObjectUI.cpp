@@ -24,12 +24,6 @@ void UFlyingObjectUI::InitializeParameters()
 	GaugeValue = 0.f;
 }
 
-void UFlyingObjectUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
-{
-	Super::NativeTick(MyGeometry, InDeltaTime);
-	
-}
-
 void UFlyingObjectUI::ChangeGaugeValue(float Value)
 {
 	Value = FMath::Clamp(Value, 0.0f, 1.0f);

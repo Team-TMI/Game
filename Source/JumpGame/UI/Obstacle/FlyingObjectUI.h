@@ -13,10 +13,9 @@ UCLASS()
 class JUMPGAME_API UFlyingObjectUI : public UUserWidget
 {
 	GENERATED_BODY()
+
 public:
 	virtual void NativeConstruct() override;
-	
-	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void ChangeGaugeValue(float Value);
 	void InitializeParameters();
@@ -28,7 +27,7 @@ public:
 	// 애니메이션 재생하고 UI 지움
 	UFUNCTION(BlueprintImplementableEvent)
 	void VanishMission();
-	
+
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* TargetLocationImage;

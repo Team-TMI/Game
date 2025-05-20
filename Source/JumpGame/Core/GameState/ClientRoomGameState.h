@@ -15,5 +15,17 @@ class JUMPGAME_API AClientRoomGameState : public AGameState
 	GENERATED_BODY()
 
 public:
+	AClientRoomGameState();
 	
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	
+public:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UFollower> FollowerUIClass;
+	UPROPERTY(EditAnywhere)
+	class UFollower* FollowerUI{nullptr};
+
+	UPROPERTY(EditAnywhere)
+	FVector2D PrevLoc;
 };

@@ -6,6 +6,7 @@
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
+#include "JumpGame/Utils/CursorManager.h"
 #include "Kismet/GameplayStatics.h"
 
 AMapEditingPlayerController::AMapEditingPlayerController()
@@ -13,6 +14,16 @@ AMapEditingPlayerController::AMapEditingPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	bShowMouseCursor = true;
+}
+
+void AMapEditingPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UCursorManager::SetCursor(this, ECursorName::GreenCursor);
+
+	SetInputMode(FInputModeGameAndUI());
+	SetShowMouseCursor(true);
 }
 
 bool AMapEditingPlayerController::OnClickOperation(APrimitiveProp* InControlledProp, FClickResponse& ClickResponse)
