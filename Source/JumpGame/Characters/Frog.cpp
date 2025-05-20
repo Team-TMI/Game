@@ -1275,6 +1275,12 @@ void AFrog::OnTongueBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		return;
 	}
 
+	if (OtherComp->ComponentHasTag(FName("Shield")))
+	{
+		bIsTongueGrow = false;
+		return;
+	}
+
 	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
 	if (OverlappingFrog && OverlappingFrog != this)
 	{
