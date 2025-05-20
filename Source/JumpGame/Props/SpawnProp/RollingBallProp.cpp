@@ -29,6 +29,8 @@ ARollingBallProp::ARollingBallProp()
 	BoxComp->SetupAttachment(RootComponent);
 	BoxComp->SetRelativeLocation(FVector(-30, 0, 0));
 	BoxComp->SetBoxExtent(FVector(35));
+	BoxComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	BoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSphere(
 		TEXT("/Script/Engine.StaticMesh'/Game/Fab/RollingBall/SM_Acorn.SM_Acorn'"));
@@ -38,6 +40,7 @@ ARollingBallProp::ARollingBallProp()
 	}
 	MeshComp->SetRelativeScale3D(FVector(1.f));
 	MeshComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
 void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -81,8 +84,8 @@ void ARollingBallProp::OnMyRollingBallOverlap(UPrimitiveComponent* OverlappedCom
 	}
 
 	// 타이머 초기화
-	// GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
-	ReturnSelf();
+	GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
+	ReturnSelf(BackTime - LaunchTime);
 	
 	if (HasAuthority())
 	{
@@ -108,18 +111,28 @@ void ARollingBallProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	RollingBall();
+
+	if (bActive)
+	{
+		// 발사된 후 시간 계산
+		LaunchTime += DeltaTime;
+	}
 }
 
-void ARollingBallProp::ReturnSelf()
+void ARollingBallProp::ReturnSelf(float RemainTime)
 {
+	FFastLogger::LogConsole(TEXT("ReturnSelf5555555555555"));
+	
 	// 소속 풀 없으면 함수 나가자
 	if (ObjectPool == nullptr) return;
 
+	FFastLogger::LogConsole(TEXT("ReturnSelf6666666666666"));
+	
 	if (HasAuthority())
 	{
-		// 오브젝트 풀에 스스로를 반환하고 비활성화
+		LaunchTime = 0;
 		SetActive(false);
-		ObjectPool->ReturnObject(this);
+		ObjectPool->ReturnObject(this, RemainTime);
 	}
 }
 
@@ -131,24 +144,33 @@ void ARollingBallProp::SetActive(bool bIsActive)
 	SetActorTickEnabled(bIsActive);
 	if (bIsActive)
 	{
-		MeshComp->SetCollisionProfileName(TEXT("RollingBall"));
+		MeshComp->SetCollisionProfileName(TEXT("OverlapProp"));
+		MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
+		BoxComp->SetCollisionProfileName(TEXT("OverlapProp"));
+		BoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	}
 	else
 	{
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		BoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
 void ARollingBallProp::LaunchProjectile()
 {
 	LaunchDir = Arrow->GetForwardVector();
-
+	FFastLogger::LogConsole(TEXT("LaunchProjectile444444444444444"));
+	
 	// 발사 후 다시 복귀하는 타이밍
 	// 바닥에 닿지않으면, 4초후에 복귀하자
 	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, FTimerDelegate::CreateLambda([this]()
 	{
-		this->ReturnSelf();
-	}), 4.0f, false);
+		this->ReturnSelf(0);
+	}), BackTime, false);
+	
+	FFastLogger::LogConsole(TEXT("LaunchProjectile555555555555555555"));
 
 	if (HasAuthority())
 	{

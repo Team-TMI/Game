@@ -32,7 +32,7 @@ public:
 public:
 	class ARollingBallProp* GetRollingBallProp();
 	void Expand();
-	void ReturnObject(class ARollingBallProp* ReturnObject);
+	void ReturnObject(class ARollingBallProp* ReturnObject, float RemainTime);
 	void Initialize();
 
 	// 델리게이트 함수
