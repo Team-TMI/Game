@@ -240,7 +240,7 @@ void UCategoryUI::OnImageSearchButtonClicked()
 
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.Unbind();
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &UCategoryUI::OnImageSearchButtonResponse);
-	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffix(TEXT(".png"));
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffix(TEXT(".jpg"));
 	FString ExecutablePath = FPlatformProcess::ExecutablePath();
 	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetVisibility(ESlateVisibility::Visible);
@@ -304,9 +304,9 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 
 	FHttpMultipartField ImageField;
 	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
-	ImageField.FieldName = TEXT("image");
+	ImageField.FieldName = TEXT("image_file");
 	ImageField.FileName = FileNameWithExtension;
-	ImageField.ContentType = TEXT("image/png");
+	ImageField.ContentType = TEXT("image/jpeg");
 	ImageField.Data = ImageData;
 
 	FHttpMultipartRequest Request;
