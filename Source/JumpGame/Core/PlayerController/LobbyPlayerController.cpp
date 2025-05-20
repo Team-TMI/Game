@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
+#include "JumpGame/Utils/CursorManager.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -36,6 +37,11 @@ void ALobbyPlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(LobbyMappingContext, 0);
 	}
+
+	UCursorManager::SetCursor(this, ECursorName::FlyCursor);
+	
+	SetInputMode(FInputModeUIOnly());
+	SetShowMouseCursor(true);
 }
 
 void ALobbyPlayerController::SetupInputComponent()
