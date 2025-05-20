@@ -304,7 +304,7 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 
 	FHttpMultipartField ImageField;
 	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
-	ImageField.FieldName = TEXT("image_file");
+	ImageField.FieldName = TEXT("file");
 	ImageField.FileName = FileNameWithExtension;
 	ImageField.ContentType = TEXT("image/jpeg");
 	ImageField.Data = ImageData;
