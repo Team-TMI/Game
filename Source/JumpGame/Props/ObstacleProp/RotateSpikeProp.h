@@ -20,6 +20,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void MulticastRPC_PlayEffect_Implementation(FVector Location) override;
 
 public:
 	// Called every frame
@@ -49,4 +51,9 @@ private:
 	class UStaticMeshComponent* CableTop;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cable", meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* Propeller;
+
+	UPROPERTY(ReplicatedUsing = OnRep_SwingHammer, BlueprintReadWrite, Category = "Hammer", meta = (AllowPrivateAccess = "true"), EditAnywhere)
+	float HammerAngle;
+	UFUNCTION()
+	void OnRep_SwingHammer();
 };

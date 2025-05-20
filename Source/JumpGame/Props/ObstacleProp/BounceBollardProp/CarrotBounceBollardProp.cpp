@@ -68,9 +68,13 @@ void ACarrotBounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, A
 		}), CoolTime, false);
 	}
 	
-	if (HasAuthority())
+	if (HasAuthority() && Frog->IsLocallyControlled())
 	{
-		this->MulticastRPC_PlayEffect(this->GetActorLocation());
+		MulticastRPC_PlayEffect(this->GetActorLocation());
+	}
+	else if (!HasAuthority() && Frog->IsLocallyControlled())
+	{
+		Frog->ServerRPC_ProcessOverlap(this);
 	}
 	
 	Super::OnBollardHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);

@@ -81,6 +81,7 @@ bool FHttpsMultiPartsHandler::SendGameMessage(const FHttpMessageWrapper& HttpMes
 	
 	// 서버 URL + 경로
 	FString FullURL = MultipartRequest->ServerURL + MultipartRequest->RequestPath;
+	FFastLogger::LogConsole(TEXT("FullURL: %s"), *FullURL);
 	HttpRequest->SetURL(FullURL);
 	HttpRequest->SetVerb(TEXT("POST"));
 
@@ -146,7 +147,10 @@ void FHttpsMultiPartsHandler::OnHttpRequestComplete(FHttpRequestPtr Req, FHttpRe
 	}
 	else
 	{
-		FFastLogger::LogConsole(TEXT("HTTP Request Failed"));
+		FFastLogger::LogConsole(TEXT("HTTP Request Failed : %s"), *Req->GetURL());
+		FFastLogger::LogConsole(TEXT("Error: %d"), Resp.IsValid() ? Resp->GetResponseCode() : -1);
+		FFastLogger::LogConsole(TEXT("Error (Success): %d"), bSuccess);
+		OnMessageReceived.Broadcast();
 	}
 }
 

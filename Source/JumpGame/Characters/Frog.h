@@ -356,6 +356,10 @@ public:
 	FTimerHandle LaunchCooldownTimer;
 	// 플래그 활성화 함수
 	void ActivateRecentlyLaunchedFlag();
+
+public :
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ProcessOverlap(class AObstacleProp* ObstacleProp);
 };
 
 

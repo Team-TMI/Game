@@ -54,6 +54,10 @@ private:
 	void HandleRotate(const FInputActionValue& InputActionValue);
 	UFUNCTION()
 	void HandleAxis(const FInputActionValue& InputActionValue);
+	UFUNCTION()
+	void HandleScroll(const FInputActionValue& InputActionValue);
+	UFUNCTION()
+	void HandleTeleport(const FInputActionValue& InputActionValue);
 
 	UFUNCTION()
 	void MoveForward(float Val);
@@ -90,6 +94,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Axis = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_Scroll = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_Teleport = nullptr;
+
 	UPROPERTY()
 	bool bCanMove = false;
 
@@ -112,4 +122,13 @@ private:
 
 	UPROPERTY()
 	bool bActive = true;
+
+	UPROPERTY(EditAnywhere, Category = "Movement|Speed")
+	float ScrollStep = 200.f;          // 한 번 스크롤할 때 증감폭
+
+	UPROPERTY(EditAnywhere, Category = "Movement|Speed")
+	float MinSpeed  = 300.f;
+
+	UPROPERTY(EditAnywhere, Category = "Movement|Speed")
+	float MaxSpeed  = 6000.f;
 };
