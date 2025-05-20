@@ -67,7 +67,7 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		return;
 	if (bIsActive == false)
 		return;
-
+	
 	AFrog* Character = Cast<AFrog>(OtherActor);
 	if (Character)
 	{
@@ -84,9 +84,13 @@ void AObstacleProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		FLog::Log("AObstacleProp::OnMyBeginOverlap");
 	}
 
-	if (HasAuthority())
+	if (HasAuthority() && Character->IsLocallyControlled())
 	{
 		MulticastRPC_PlayEffect(this->GetActorLocation());
+	}
+	else if (!HasAuthority() && Character->IsLocallyControlled())
+	{
+		Character->ServerRPC_ProcessOverlap(this);
 	}
 }
 

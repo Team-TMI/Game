@@ -67,7 +67,7 @@ public:
 	void OnRep_ObstacleRotate();
 
 	// 이펙트, 사운드 등
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, reliable, BlueprintCallable)
 	virtual void MulticastRPC_PlayEffect(FVector Location);
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
