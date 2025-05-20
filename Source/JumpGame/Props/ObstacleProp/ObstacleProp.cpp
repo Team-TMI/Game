@@ -188,18 +188,18 @@ void AObstacleProp::OnRep_ObstacleRotate()
 	PivotScene->SetRelativeRotation(Rotation);
 }
 
-void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
+void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
 {
 	// 클라이언트 전부에서 호출됨 (서버 포함)
 	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 0.5f, 1.5f);
-	this->PlayHitEffect();
+	this->PlayHitEffect(Index);
 }
 
 // 블루 프린트에서 타임라인이 다 꺼지면 false로 바꿔주자. (서버만!!!!)
-void AObstacleProp::PlayHitEffect_Implementation()
+void AObstacleProp::PlayHitEffect_Implementation(int32 Index)
 {
-	// 서버에서 실행이 처리되면 
+	// 서버에서 실행이 처리되면
 	if (HasAuthority() && !bPlayHitEffect)
 	{
 		bPlayHitEffect = true;

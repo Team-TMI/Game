@@ -160,7 +160,7 @@ void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 	
 	// 플레이어들 조작막기
 	AFrog* LocalCharacter = Cast<AFrog>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	LocalCharacter->StopMovementAndResetRotation();
+	LocalCharacter->StopMovementAndResetRotation(FRotator::ZeroRotator);
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	PC->SetInputMode(FInputModeUIOnly());
 	PC->bShowMouseCursor = true;
