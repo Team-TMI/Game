@@ -92,7 +92,7 @@ void ARotateSpikeProp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	DOREPLIFETIME(ARotateSpikeProp, HammerAngle);
 }
 
-void ARotateSpikeProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
+void ARotateSpikeProp::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
 {
 	// Super::MulticastRPC_PlayEffect_Implementation(Location);
 
