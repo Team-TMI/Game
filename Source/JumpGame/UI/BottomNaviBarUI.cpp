@@ -31,16 +31,7 @@ void UBottomNaviBarUI::OnClickFrogPass()
 
 void UBottomNaviBarUI::OnClickFriend()
 {
-	if (!bIsOnViewport)
-	{
-		// 띄우고
-		FriendsList->PlayShowAnim(true);
-		bIsOnViewport = true;
-	}
-	else
-	{
-		// 지우고
-		FriendsList->PlayShowAnim(false);
-		bIsOnViewport = false;
-	}
+	bool bShow = !bIsOnViewport;
+	FriendsList->PlayShowAnim(bShow);
+	bIsOnViewport = bShow;
 }

@@ -72,7 +72,7 @@ void UClientRoomUI::NativeOnInitialized()
 	if (GameSettingUI)
 	{
 		GameSettingUI->AddToViewport(10);
-		GameSettingUI->SettingPanel->SetRenderOpacity(0);
+		GameSettingUI->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	CreditUI = CreateWidget<UCreditUI>(GetWorld(), CreditUIClass);

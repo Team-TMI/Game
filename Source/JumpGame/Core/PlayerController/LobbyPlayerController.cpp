@@ -7,7 +7,9 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blueprint/UserWidget.h"
 #include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
+#include "JumpGame/UI/BottomNaviBarUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -35,6 +37,12 @@ void ALobbyPlayerController::BeginPlay()
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())})
 	{
 		Subsystem->AddMappingContext(LobbyMappingContext, 0);
+	}
+
+	BottomNaviBarUI = CreateWidget<UBottomNaviBarUI>(GetWorld(), BottomNaviBarUIClass);
+	if (BottomNaviBarUI)
+	{
+		BottomNaviBarUI->AddToViewport(5);
 	}
 }
 
