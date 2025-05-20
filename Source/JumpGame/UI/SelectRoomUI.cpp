@@ -21,6 +21,12 @@ void USelectRoomUI::NativeOnInitialized()
 	Btn_OriginMap->OnClicked.AddDynamic(this, &USelectRoomUI::OnClickOriginMap);
 	Btn_CustomMap->OnClicked.AddDynamic(this, &USelectRoomUI::OnClickCustomMap);
 	Btn_PickFile->OnClicked.AddDynamic(this, &USelectRoomUI::OnPickCustomMap);
+
+	
+	OriginMapList = GetMapList(TEXT(".json"), TEXT("Content/Maps/OriginMap"));
+	CustomMapList = GetMapList(TEXT(".json"), TEXT("Content/Maps/CustomMap"));
+	CombinedMapList.Append(OriginMapList);
+	CombinedMapList.Append(CustomMapList);
 }
 
 void USelectRoomUI::OnClickGoBackWait()
@@ -40,16 +46,19 @@ void USelectRoomUI::OnClickSelectComplete()
 void USelectRoomUI::OnClickAllMap()
 {
 	WidgetSwitcher_SR->SetActiveWidgetIndex(0);
+
 }
 
 void USelectRoomUI::OnClickOriginMap()
 {
 	WidgetSwitcher_SR->SetActiveWidgetIndex(1);
+
 }
 
 void USelectRoomUI::OnClickCustomMap()
 {
 	WidgetSwitcher_SR->SetActiveWidgetIndex(2);
+
 }
 
 void USelectRoomUI::OnPickCustomMap()
@@ -66,4 +75,34 @@ void USelectRoomUI::OnPickCustomMap()
 	}
 	FString Suffix = TEXT(".json");
 	GameState->LoadMapComponent->PickFile(Suffix);
+}
+
+TArray<FString> USelectRoomUI::GetMapList(const FString& MapType, const FString& MapDir)
+{
+	TArray<FString> MapList;
+
+	FString ExecutablePath = FPlatformProcess::ExecutablePath();
+	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
+	FString MapPath = FPaths::Combine(ExecutableDir, MapDir);
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	if (!PlatformFile.DirectoryExists(*MapPath))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Directory does not exist"));
+		return MapList;
+	}
+	
+	PlatformFile.IterateDirectory(*MapPath, [this, &MapList, &MapType](const TCHAR* Path, bool bIsDirectory) -> bool
+	{
+		const FString ItemPath = FString(Path);
+		const FString ItemName = FPaths::GetCleanFilename(ItemPath);
+
+		if (!bIsDirectory && ItemName.EndsWith(MapType))
+		{
+			MapList.Add(ItemName);
+		}
+		return true;
+	});
+	
+	return MapList;
 }

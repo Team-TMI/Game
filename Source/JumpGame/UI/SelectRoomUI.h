@@ -45,8 +45,20 @@ public:
 	void OnClickCustomMap();
 	UFUNCTION()
 	void OnPickCustomMap();
+
+	UFUNCTION()
+	TArray<FString> GetMapList(const FString& MapType, const FString& MapDir);
 	
 	// 맵 리스트 관련
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* WidgetSwitcher_SR;
+
+private:
+	
+	UPROPERTY()
+	TArray<FString> OriginMapList;
+	UPROPERTY()
+	TArray<FString> CustomMapList;
+	UPROPERTY()
+	TArray<FString> CombinedMapList;
 };
