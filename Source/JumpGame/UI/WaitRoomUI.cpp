@@ -34,6 +34,11 @@ void UWaitRoomUI::NativeOnInitialized()
 
 void UWaitRoomUI::OnClickGameStart()
 {
+	// 버튼 비활성화
+	Btn_GameStart->SetIsEnabled(false);
+	Btn_SelectMap->SetIsEnabled(false);
+	Btn_BackFromLobby->SetIsEnabled(false);
+	
 	// 서버만 게임을 시작할 수 있다
 	PC = GetWorld()->GetFirstPlayerController();
 	if (PC->HasAuthority())
