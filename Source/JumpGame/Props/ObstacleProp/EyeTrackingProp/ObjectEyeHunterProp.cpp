@@ -145,12 +145,12 @@ void AObjectEyeHunterProp::StartMission()
 {
 	FLog::Log("StartMission");
 
+	Super::SendEyeTrackingStart();
+
 	if (LookCenterUI)
 	{
 		LookCenterUI->RemoveFromParent();
 	}
-
-	Super::SendEyeTrackingStart();
 
 	//StopCharacter();
 
@@ -191,23 +191,23 @@ void AObjectEyeHunterProp::StartMission()
 	CurrentTargetIndex = 0;
 	BezierAlpha = 0.f;
 	ObjectSpeed = 0.3f;
-
-	if (FlyingObjectUI)
+	
+	if (FlyingObjectUI && TrackingUI)
 	{
 		FlyingObjectUI->AddToViewport();
+		TrackingUI->AddToViewport();
 
 		// 내 Screen 좌표로 변환
 		const float ScreenX{static_cast<float>(ViewportSize.X / 2)};
 		const float ScreenY{static_cast<float>(ViewportSize.Y / 2)};
 
 		ObjectScreenLocation = {ScreenX, ScreenY};
-
+		
+		CurrentEyePosition = ObjectScreenLocation;
+		TargetEyePosition = ObjectScreenLocation;
+		
 		FlyingObjectUI->SetPositionInViewport(ObjectScreenLocation);
-	}
-
-	if (TrackingUI)
-	{
-		TrackingUI->AddToViewport();
+		TrackingUI->SetPositionInViewport(ObjectScreenLocation);
 	}
 
 	// 미션 시작
@@ -344,9 +344,12 @@ void AObjectEyeHunterProp::Tick(float DeltaTime)
 		}
 	}
 
-	if (!bIsDebug)
+	if (!bIsDebug && TrackingUI)
 	{
 		RecvEyeTrackingInfo();
+
+		CurrentEyePosition = FMath::Lerp(CurrentEyePosition, TargetEyePosition, 0.2);
+		TrackingUI->SetPositionInViewport(CurrentEyePosition);
 	}
 }
 
@@ -354,6 +357,11 @@ void AObjectEyeHunterProp::RecvEyeTrackingInfo()
 {
 	Super::RecvEyeTrackingInfo();
 
+	if (QuizID == 0)
+	{
+		return;
+	}
+	
 	// TODO : 받아오는 값으로 수정
 	TrackLocation({2880, 1800}, FVector2f(X, Y));
 	//TrackLocation(FVector2f(Width, Height), FVector2f(X, Y))
@@ -442,8 +450,9 @@ void AObjectEyeHunterProp::TrackLocation(FVector2f Resolution, FVector2f ScreenL
 		}
 
 		// 위치 갱신
-		EyeScreenLocation = {ScreenX, ScreenY};
-		TrackingUI->SetPositionInViewport(EyeScreenLocation);
+		EyeScreenLocation = FVector2D{ScreenX, ScreenY};
+		TargetEyePosition = EyeScreenLocation;
+		//TrackingUI->SetPositionInViewport(EyeScreenLocation);
 	}
 }
 
@@ -455,7 +464,7 @@ bool AObjectEyeHunterProp::IsObjectAndEyeOverlap(FVector2D ObjectLocation, FVect
 			static_cast<float>(FMath::Abs(FVector2D::Distance(EyeLocation, ObjectLocation)))
 		};
 
-		if (Length <= 110.f)
+		if (Length <= 120.f)
 		{
 			FlyingObjectUI->Overlapping();
 			return true;

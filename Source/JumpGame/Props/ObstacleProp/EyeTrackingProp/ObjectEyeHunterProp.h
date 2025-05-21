@@ -126,5 +126,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
 	class USoundCue* PlantMoveSound;
-	
+
+	// 받는 눈 좌표 보간
+	FVector2D CurrentEyePosition{FVector2D::ZeroVector};
+	FVector2D TargetEyePosition{FVector2D::ZeroVector};
 };
