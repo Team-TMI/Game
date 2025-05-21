@@ -45,6 +45,8 @@ void ASoundQuizProp::BeginPlay()
 	NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
 	RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 
+	PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 }
 
@@ -98,31 +100,23 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 {
 	if (!OtherActor->ActorHasTag("Frog")) return;
 	if (bIsActive == false) return;
+
+	FTimerHandle SoundTimerHandle;
 	
 	if (!bIsOverlap)
 	{
 		// GameState 캐스팅
 		NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
-		AFrog* Character = Cast<AFrog>(OtherActor);
+		Character = Cast<AFrog>(OtherActor);
 
-		if (HasAuthority() && Character->IsLocallyControlled())
-		{
-			MulticastRPC_PlayEffect(this->GetActorLocation());
-		}
-		else if (!HasAuthority() && Character->IsLocallyControlled())
-		{
-			Character->ServerRPC_ProcessOverlap(this);
-		}
-		
-		// 이때 퀴즈 시작!
-		SendStartSoundQuizNotify();
-		
 		// 캐릭터 퀴즈 카메라로 전환
 		if (OtherActor->ActorHasTag(TEXT("Frog")))
 		{
 			// 모든 플레이어의 움직임 제한
 			MulticastRPC_PlayerStopMovement();
 		}
+
+		GetWorldTimerManager().SetTimer(SoundTimerHandle, this, &ASoundQuizProp::StartSoundQuiz, 2.f, false);
 		
 		// 물 멈추자
 		if (RisingWaterProp)
@@ -153,7 +147,6 @@ void ASoundQuizProp::SendStartSoundQuizNotify()
 	FString Key;
 	
 	// 플레이어의 고유한 네트워크 ID값 가져오기
-	APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	const FUniqueNetIdRepl& NetIdRepl = PC->GetPlayerState<APlayerState>()->GetUniqueId();
 	if (NetIdRepl.IsValid())
 	{
@@ -164,11 +157,15 @@ void ASoundQuizProp::SendStartSoundQuizNotify()
 		// 게임 인스턴스 가져오기
 		UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 		TMap<FString, FPlayerInfo>& InfoMap = GI->GetPlayerInfo();
-		PlayerIdx = InfoMap[Key].PlayerID;
-	}
-	else
-	{
-		PlayerIdx = 0;
+
+		if (InfoMap.Contains(Key))
+		{
+			PlayerIdx = InfoMap[Key].PlayerID;
+		}
+		else
+		{
+			PlayerIdx = 0;
+		}
 	}
 	
 	// AI쪽에서 첫번째 문장을 준다면, 5초동안 녹음 후 전송
@@ -458,6 +455,24 @@ void ASoundQuizProp::ServerRPC_EndPlayerCount_Implementation()
 	TotalPlayerCount = GetWorld()->GetGameState()->PlayerArray.Num();
 
 	StartRisingWater();
+}
+
+void ASoundQuizProp::StartSoundQuiz()
+{
+	// GameState 캐스팅
+	NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
+
+	if (HasAuthority() && Character->IsLocallyControlled())
+	{
+		MulticastRPC_PlayEffect(this->GetActorLocation());
+	}
+	else if (!HasAuthority() && Character->IsLocallyControlled())
+	{
+		Character->ServerRPC_ProcessOverlap(this);
+	}
+		
+	// 이때 퀴즈 시작!
+	SendStartSoundQuizNotify();
 }
 
 void ASoundQuizProp::StartRisingWater()

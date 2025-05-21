@@ -37,7 +37,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	// 퀴즈 한번만 실행
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool bIsOverlap = false;
 	
 	// 퀴즈 소켓 전송 관련
@@ -99,6 +99,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class AFrog* Frog;
+	UPROPERTY()
+	class APlayerController* PC;
 
 protected:
 	// 녹음 컴포넌트 붙이기
@@ -122,6 +124,12 @@ protected:
 	UPROPERTY()
 	int32 TotalPlayerCount = 0;
 
+	// 플레이어
+	UPROPERTY()
+	AFrog* Character = nullptr;
+
+	UFUNCTION()
+	virtual void StartSoundQuiz();
 	UFUNCTION()
 	void StartRisingWater();
 	UFUNCTION(NetMulticast, Reliable)
