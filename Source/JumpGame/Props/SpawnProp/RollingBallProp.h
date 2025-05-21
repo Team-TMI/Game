@@ -79,4 +79,10 @@ public:
 	// 이펙트
 	UFUNCTION(netmulticast, reliable)
 	void MulticastRPC_PlayEffect(FVector Location);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundCue* HitSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle")
+	class UParticleSystemComponent* HitEffectComp;
 };

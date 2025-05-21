@@ -29,6 +29,7 @@ protected:
 
 	// 해당 위젯이 클릭되었을 때 호출되는 함수
 	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	// 해당 위젯에서 Drag가 감지 되었을 때 호출되는 함수
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	

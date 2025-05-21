@@ -40,16 +40,33 @@ void AClientRoomGameState::Tick(float DeltaSeconds)
 
 	if (FollowerUI)
 	{
-		FollowerUI->SetPositionInViewport(
-			UKismetMathLibrary::Vector2DInterpTo(PrevLoc, MousePos, DeltaSeconds / 10.f, 10.f));
-		float CurrentAngle{FollowerUI->GetRenderTransformAngle()};
-		float TargetAngle{
-			static_cast<float>(UKismetMathLibrary::DegAtan2((PrevLoc - MousePos).Y, (PrevLoc - MousePos).X))
-		};
-		TargetAngle = UKismetMathLibrary::FClamp(TargetAngle, -80.f, 80.f);
-		FollowerUI->SetRenderTransformAngle(
-			UKismetMathLibrary::FInterpTo(CurrentAngle, TargetAngle, DeltaSeconds / 10.f, 10.f));
-	}
+		PrevLoc = FMath::Lerp(PrevLoc, MousePos, 0.1);
+		FollowerUI->SetPositionInViewport(PrevLoc);
 
-	PrevLoc = MousePos;
+		// float CurrentAngle{FollowerUI->GetRenderTransformAngle()};
+		// float TargetAngle{
+		// 	static_cast<float>(UKismetMathLibrary::DegAtan2((PrevLoc - MousePos).Y, (PrevLoc - MousePos).X))
+		// };
+		// TargetAngle = UKismetMathLibrary::FClamp(TargetAngle, -80.f, 80.f);
+		// CurrentAngle = FMath::Lerp(CurrentAngle, TargetAngle, 0.3f);
+		// // FollowerUI->SetRenderTransformAngle(
+		// // 	UKismetMathLibrary::FInterpTo(CurrentAngle, TargetAngle, DeltaSeconds / 10.f, 10.f));
+		// FollowerUI->SetRenderTransformAngle(CurrentAngle);
+		//
+		// FLog::Log("C, T", CurrentAngle, TargetAngle);
+		
+		FVector2D MouseVelocity{MousePos - PrevMousePos};
+		// 마우스 속도에 따른 각도 크기
+		float TargetAngle{static_cast<float>(FMath::Clamp(MouseVelocity.Size() * 3.f, 0.f, 80.f))};
+		// 마우스 이동 방향에 따른 각도 부호 설정
+		if (MouseVelocity.X < 0)
+		{
+			TargetAngle *= -1.f;
+		}
+
+		AngleVelocity = FMath::Lerp(AngleVelocity, TargetAngle, 0.1f);
+		FollowerUI->SetRenderTransformAngle(AngleVelocity);
+
+		PrevMousePos = MousePos;
+	}
 }

@@ -48,8 +48,10 @@ void ALobbyPlayerController::BeginPlay()
 	
 	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
 	
-	SetInputMode(FInputModeUIOnly());
-	SetShowMouseCursor(true);
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);  // ★ 핵심! : 이렇게 해야 마우스가 창 밖으로 안나감
+	SetInputMode(InputMode);
+	bShowMouseCursor = true;
 }
 
 void ALobbyPlayerController::SetupInputComponent()

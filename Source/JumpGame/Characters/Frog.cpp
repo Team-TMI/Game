@@ -143,7 +143,7 @@ AFrog::AFrog()
 		JumpGaugeUIComponent->SetPivot(FVector2D(3.0, 0.3));
 		JumpGaugeUIComponent->SetDrawAtDesiredSize(true);
 	}
-
+	
 	ConstructorHelpers::FObjectFinder<UMaterial> WaterPostProcessFinder
 		(TEXT("/Game/PostProcess/MPP_InWater.MPP_InWater"));
 	if (WaterPostProcessFinder.Succeeded())
@@ -315,6 +315,26 @@ void AFrog::BeginPlay()
 	}
 
 	InitFrogState();
+}
+
+void AFrog::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// 로컬 클라만 점프 게이지 보이게
+	if (IsLocallyControlled())
+	{
+		SetJumpGaugeVisibility(false);
+	}
+	else
+	{
+		// 다른 클라에서 삭제
+		if (JumpGaugeUIComponent)
+		{
+			JumpGaugeUIComponent->DestroyComponent();
+			JumpGaugeUIComponent = nullptr;
+		}
+	}
 }
 
 
@@ -829,17 +849,17 @@ void AFrog::InitFrogState()
 	SetJumpAvailableBlock(1);
 	ResetSuperJumpRatio();
 
-	// 로컬 클라만 점프 게이지 보이게
-	if (IsLocallyControlled())
-	{
-		SetJumpGaugeVisibility(false);
-	}
-	else
-	{
-		// 다른 클라에서 삭제
-		JumpGaugeUIComponent->DestroyComponent();
-		JumpGaugeUIComponent = nullptr;
-	}
+	// // 로컬 클라만 점프 게이지 보이게
+	// if (IsLocallyControlled())
+	// {
+	// 	SetJumpGaugeVisibility(false);
+	// }
+	// else
+	// {
+	// 	// 다른 클라에서 삭제
+	// 	JumpGaugeUIComponent->DestroyComponent();
+	// 	JumpGaugeUIComponent = nullptr;
+	// }
 }
 
 void AFrog::SetJumpAvailableBlock(int32 Block)
@@ -1420,8 +1440,10 @@ void AFrog::ShowEmotionUI(bool bIsShow)
 			bIsBind = true;
 		}
 
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 		PC->SetShowMouseCursor(true);
-		PC->SetInputMode(FInputModeGameAndUI());
+		PC->SetInputMode(InputMode);
 	}
 	else
 	{

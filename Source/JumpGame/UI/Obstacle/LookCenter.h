@@ -16,6 +16,9 @@ class JUMPGAME_API ULookCenter : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
+
+public:
+	void TextMoveAnimation();
 	
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))

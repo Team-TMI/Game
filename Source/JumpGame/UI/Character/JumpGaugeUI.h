@@ -25,4 +25,7 @@ public:
 
 	UFUNCTION()
 	void OnSuperJumpRatioChanged(float NewRatio);
+
+	UFUNCTION()
+	void DelegateBind(AFrog* NewFrog);
 };

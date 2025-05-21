@@ -12,11 +12,8 @@ void UJumpGaugeUI::NativeOnInitialized()
 	Super::NativeOnInitialized();
 	
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	
-	if (Frog)
-	{
-		Frog->OnSuperJumpRatioChanged.AddDynamic(this, &UJumpGaugeUI::OnSuperJumpRatioChanged);
-	}
+
+	DelegateBind(Frog);
 }
 
 void UJumpGaugeUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -40,5 +37,13 @@ void UJumpGaugeUI::OnSuperJumpRatioChanged(float NewRatio)
 	else
 	{
 		JumpGaugeSlider->SetFillColorAndOpacity(FLinearColor::Green);
+	}
+}
+
+void UJumpGaugeUI::DelegateBind(AFrog* NewFrog)
+{
+	if (NewFrog)
+	{
+		NewFrog->OnSuperJumpRatioChanged.AddDynamic(this, &UJumpGaugeUI::OnSuperJumpRatioChanged);
 	}
 }

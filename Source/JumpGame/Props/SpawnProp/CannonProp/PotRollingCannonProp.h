@@ -14,6 +14,8 @@ class JUMPGAME_API APotRollingCannonProp : public ARollingCannonProp
 public:
 	// Sets default values for this actor's properties
 	APotRollingCannonProp();
+	virtual void MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index = 0) override;
+	virtual void PlayHitEffect_Implementation(int32 Index = 0) override;
 
 protected:
 	// Called when the game starts or when spawned
