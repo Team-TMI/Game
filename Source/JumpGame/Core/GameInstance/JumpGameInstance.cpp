@@ -458,16 +458,6 @@ void UJumpGameInstance::OnSessionInviteAccepted(bool bWasSuccessful, int32 Local
 	SessionInterface->JoinSession(LocalUserNum, NAME_GameSession, SessionToJoin);
 }
 
-void UJumpGameInstance::SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin)
-{
-	if (PlayerMap.Contains(PlayerNetID))
-	{
-		// 승리 상태 업데이트
-		FPlayerInfo& PlayerInfo = PlayerMap[PlayerNetID];
-		PlayerInfo.bIsWin = bIsWin;
-	}
-}
-
 void UJumpGameInstance::SetFilteredFriendList(const TArray<FSteamFriendData>& FriendList)
 {
 	FilteredFriendList = FriendList;
