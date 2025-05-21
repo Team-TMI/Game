@@ -162,7 +162,10 @@ void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 	AFrog* LocalCharacter = Cast<AFrog>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	LocalCharacter->StopMovementAndResetRotation(FRotator::ZeroRotator);
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	PC->SetInputMode(FInputModeUIOnly());
+
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+	PC->SetInputMode(InputMode);
 	PC->bShowMouseCursor = true;
 	
 	// 우승자 앞에 보게 정렬하기

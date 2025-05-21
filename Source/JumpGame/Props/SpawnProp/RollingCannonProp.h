@@ -34,5 +34,8 @@ public:
 	class UObjectPoolComponent* ObjectPool;
 
 	// 발사하자
+	UFUNCTION(BlueprintCallable)
 	void FireRollingBall();
+	UFUNCTION(BlueprintCallable)
+	void FireRollingBallAfterAnimation();
 };

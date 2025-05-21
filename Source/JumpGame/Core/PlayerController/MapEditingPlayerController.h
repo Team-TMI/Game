@@ -34,6 +34,7 @@ public:
 	bool OnActorClickOperation(class APrimitiveProp* InControlledProp, FClickResponse& ClickResponse);
 	UFUNCTION()
 	bool OnBackgroundClickOperation(class APrimitiveProp* InControlledProp, FClickResponse& ClickResponse);
+	bool GetMyHitResultAtScreenPosition(const FVector2D ScreenPosition, const ECollisionChannel TraceChannel, const FCollisionQueryParams& CollisionQueryParams, TArray<FHitResult>& OutHitResult) const;
 
 private:
 	using FClickOpFunc = bool (AMapEditingPlayerController::*)(class APrimitiveProp*, FClickResponse&);

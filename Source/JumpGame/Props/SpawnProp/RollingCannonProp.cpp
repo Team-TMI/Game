@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Particles/ParticleSystemComponent.h"
 
 
 // Sets default values
@@ -48,6 +49,7 @@ void ARollingCannonProp::BeginPlay()
 	// 서버에서만
 	if (HasAuthority() && ObjectPool)
 	{
+		// 블루 프린트에서 호출 (애니메이션 재생 후 발사)
 		FireRollingBall();
 		ObjectPool->OnObjectReturn.AddDynamic(this, &ARollingCannonProp::OnProjectileReturn);
 	}
@@ -71,10 +73,16 @@ void ARollingCannonProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+// 블루 프린트에서 호출
 void ARollingCannonProp::FireRollingBall()
 {
 	if (!ObjectPool) return;
-	
+
+	this->MulticastRPC_PlayEffect(FVector::ZeroVector, 0);
+}
+
+void ARollingCannonProp::FireRollingBallAfterAnimation()
+{
 	ARollingBallProp* Projectile = ObjectPool->GetRollingBallProp();
 	if (Projectile)
 	{
@@ -82,6 +90,7 @@ void ARollingCannonProp::FireRollingBall()
 		Projectile->SetActorRotation(GetActorRotation());
 		Projectile->SetActive(true);
 		Projectile->LaunchProjectile();
+		MulticastRPC_PlayEffect(GetActorLocation(), 1);
 	}
 }
 

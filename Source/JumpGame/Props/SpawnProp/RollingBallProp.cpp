@@ -7,6 +7,10 @@
 #include "Components/ArrowComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 
 // Sets default values
@@ -29,8 +33,9 @@ ARollingBallProp::ARollingBallProp()
 	BoxComp->SetupAttachment(RootComponent);
 	BoxComp->SetRelativeLocation(FVector(-30, 0, 0));
 	BoxComp->SetBoxExtent(FVector(35));
-	BoxComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	BoxComp->SetCollisionProfileName(TEXT("RollingBall"));
 	BoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	BoxComp->SetCollisionResponseToChannel(ECC_GameTraceChannel6, ECR_Ignore);
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempSphere(
 		TEXT("/Script/Engine.StaticMesh'/Game/Fab/RollingBall/SM_Acorn.SM_Acorn'"));
@@ -39,8 +44,28 @@ ARollingBallProp::ARollingBallProp()
 		MeshComp->SetStaticMesh(TempSphere.Object);
 	}
 	MeshComp->SetRelativeScale3D(FVector(1.f));
-	MeshComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	MeshComp->SetCollisionProfileName(TEXT("RollingBall"));
 	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel6, ECR_Ignore);
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
+	(TEXT("/Game/Sounds/Ques/Bounce_Cue.Bounce_Cue"));
+	if (SoundAsset.Succeeded())
+	{
+		HitSound = Cast<USoundCue>(SoundAsset.Object);
+	}
+
+	HitEffectComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HitEffectComp"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset
+	(TEXT("/Game/_Resource/FX/VFX_Toolkit_V1/ParticleSystems/356Days/Par_FightCloud_01.Par_FightCloud_01"));
+	if (ParticleAsset.Succeeded())
+	{
+		HitEffectComp->SetTemplate(ParticleAsset.Object);
+	}
+	HitEffectComp->SetupAttachment(RootComponent);
+	HitEffectComp->SetAutoActivate(false);
+	// HitEffectComp->SetRelativeScale3D({0.25, 0.25, 0.25});
+	// HitEffectComp->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 }
 
 void ARollingBallProp::OnMyRollingBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -72,25 +97,27 @@ void ARollingBallProp::OnMyRollingBallOverlap(UPrimitiveComponent* OverlappedCom
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	FVector HitLocation = SweepResult.Location;
+	FVector HitLocation = GetActorLocation();
 	FLog::Log("OnMyRollingBallOverlap");
 	
 	AFrog* Frog = Cast<AFrog>(OtherActor);
-	if (Frog)
+	if (!Frog)
 	{
-		FVector LaunchVelocity = LaunchDir.GetSafeNormal() * 500;
-		Frog->LaunchCharacter(LaunchVelocity, true, true);
-		FLog::Log("OnMyRollingBallOverlap Frog");
+		return ;
 	}
-
-	// 타이머 초기화
-	GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
-	ReturnSelf(BackTime - LaunchTime);
 	
+	FVector LaunchVelocity = LaunchDir.GetSafeNormal() * 2000;
+	Frog->LaunchCharacter(LaunchVelocity, true, true);
+	FLog::Log("OnMyRollingBallOverlap Frog");
+
 	if (HasAuthority())
 	{
 		MulticastRPC_PlayEffect(HitLocation);
 	}
+	// 타이머 초기화
+	GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
+	ReturnSelf(BackTime - LaunchTime);
+	
 }
 
 // Called when the game starts or when spawned
@@ -110,7 +137,10 @@ void ARollingBallProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	RollingBall();
+	if (HasAuthority())
+	{
+		RollingBall();
+	}
 
 	if (bActive)
 	{
@@ -121,13 +151,9 @@ void ARollingBallProp::Tick(float DeltaTime)
 
 void ARollingBallProp::ReturnSelf(float RemainTime)
 {
-	FFastLogger::LogConsole(TEXT("ReturnSelf5555555555555"));
-	
 	// 소속 풀 없으면 함수 나가자
 	if (ObjectPool == nullptr) return;
 
-	FFastLogger::LogConsole(TEXT("ReturnSelf6666666666666"));
-	
 	if (HasAuthority())
 	{
 		LaunchTime = 0;
@@ -144,11 +170,13 @@ void ARollingBallProp::SetActive(bool bIsActive)
 	SetActorTickEnabled(bIsActive);
 	if (bIsActive)
 	{
-		MeshComp->SetCollisionProfileName(TEXT("OverlapProp"));
+		MeshComp->SetCollisionProfileName(TEXT("RollingBall"));
 		MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+		BoxComp->SetCollisionResponseToChannel(ECC_GameTraceChannel6, ECR_Ignore);
 
-		BoxComp->SetCollisionProfileName(TEXT("OverlapProp"));
+		BoxComp->SetCollisionProfileName(TEXT("RollingBall"));
 		BoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+		BoxComp->SetCollisionResponseToChannel(ECC_GameTraceChannel6, ECR_Ignore);
 	}
 	else
 	{
@@ -164,16 +192,22 @@ void ARollingBallProp::LaunchProjectile()
 	
 	// 발사 후 다시 복귀하는 타이밍
 	// 바닥에 닿지않으면, 4초후에 복귀하자
-	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, FTimerDelegate::CreateLambda([this]()
+	TWeakObjectPtr<ARollingBallProp> WeakThis(this);
+	GetWorld()->GetTimerManager().SetTimer(PoolTimerHandle, FTimerDelegate::CreateLambda([WeakThis]()
 	{
-		this->ReturnSelf(0);
+		if (!WeakThis.IsValid())
+		{
+			return;
+		}
+		ARollingBallProp* This = WeakThis.Get();
+		if (This->HasAuthority())
+		{
+			// 있던 자리에서 터지기
+			This->MulticastRPC_PlayEffect(This->GetActorLocation());
+		}
+		This->ReturnSelf(0);
 	}), BackTime, false);
-	
-	if (HasAuthority())
-	{
-		// 있던 자리에서 터지기
-		MulticastRPC_PlayEffect(GetActorLocation());
-	}
+	//
 }
 
 void ARollingBallProp::RollingBall()
@@ -200,7 +234,13 @@ void ARollingBallProp::RollingBall()
 void ARollingBallProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
 {
 	// 클라이언트 전부에서 호출됨 (서버 포함)
-	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location);
-	// UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location);
+	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location, FRotator::ZeroRotator, FVector(0.25, 0.25, 0.25), true);
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffectComp->Template, Location, FRotator::ZeroRotator, FVector(0.25, 0.25, 0.25), true);
+	
+	// FFastLogger::LogScreen(FColor::Red, TEXT("Play Effect"));
+	// HitEffectComp->SetWorldLocation(Location);
+	// HitEffectComp->ActivateSystem();
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location);
 }
 

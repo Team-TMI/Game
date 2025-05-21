@@ -1440,8 +1440,10 @@ void AFrog::ShowEmotionUI(bool bIsShow)
 			bIsBind = true;
 		}
 
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 		PC->SetShowMouseCursor(true);
-		PC->SetInputMode(FInputModeGameAndUI());
+		PC->SetInputMode(InputMode);
 	}
 	else
 	{

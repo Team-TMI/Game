@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
 
@@ -36,6 +37,10 @@ AObstacleProp::AObstacleProp()
 	Super::SetSize(FVector(1, 1, 1));
 
 	bReplicates = true;
+
+	HitEffectComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HitEffectComp"));
+	HitEffectComp->SetupAttachment(RootComponent);
+	HitEffectComp->SetAutoActivate(false);
 }
 
 void AObstacleProp::OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -196,9 +201,8 @@ void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location, int
 {
 	// 클라이언트 전부에서 호출됨 (서버 포함)
 	// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, Location);
-
+	HitEffectComp->ActivateSystem();
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 0.5f, 1.5f);
-	
 	this->PlayHitEffect(Index);
 }
 

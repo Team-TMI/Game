@@ -65,6 +65,8 @@ private:
 	void MoveRight(float Val);
 	UFUNCTION()
 	void MoveUp(float Val);
+	UFUNCTION(BlueprintCallable)
+	void OnMoveFinished();
 
 	// IMC_MAPEDITING
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
