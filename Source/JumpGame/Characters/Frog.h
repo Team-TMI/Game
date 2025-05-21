@@ -185,6 +185,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* PropCheatAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* EmotionAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* DebugModeAction;
 	
 	// 일반 변수

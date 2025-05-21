@@ -114,6 +114,13 @@ AFrog::AFrog()
 		PropCheatAction = Frog_PropCheat.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Emotion
+		(TEXT("/Game/Characters/Input/IA_FrogEmotion.IA_FrogEmotion"));
+	if (Frog_Emotion.Succeeded())
+	{
+		EmotionAction = Frog_Emotion.Object;
+	}
+
 	ConstructorHelpers::FObjectFinder<USoundBase> JumpSoundObject
 		(TEXT("/Game/Sounds/Ques/Jump_Cue.Jump_Cue"));
 	if (JumpSoundObject.Succeeded())
@@ -376,16 +383,6 @@ void AFrog::Tick(float DeltaTime)
 		CameraCollision->SetWorldRotation(FRotator::ZeroRotator);
 		CalculateWaterCameraOverlapRatio(DeltaTime);
 	}
-
-	// TODO: input으로 만들기
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::C))
-	{
-		OnPressCKey();
-	}
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustReleased(EKeys::C))
-	{
-		OnReleasedCKey();
-	}
 }
 
 // Called to bind functionality to input
@@ -422,6 +419,9 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(PropActiveAction, ETriggerEvent::Started, this, &AFrog::PropActive);
 		EnhancedInputComponent->BindAction(PropCheatAction, ETriggerEvent::Started, this, &AFrog::PropCheat);
 		EnhancedInputComponent->BindAction(DebugModeAction, ETriggerEvent::Started, this, &AFrog::DebugMode);
+
+		EnhancedInputComponent->BindAction(EmotionAction, ETriggerEvent::Started, this, &AFrog::OnPressCKey);
+		EnhancedInputComponent->BindAction(EmotionAction, ETriggerEvent::Completed, this, &AFrog::OnReleasedCKey);
 	}
 }
 
