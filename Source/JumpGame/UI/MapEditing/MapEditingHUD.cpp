@@ -6,6 +6,7 @@
 #include "CategoryUI.h"
 #include "PropSlot.h"
 #include "Components/Border.h"
+#include "Components/SizeBox.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -57,4 +58,26 @@ void UMapEditingHUD::AddDragDropFunctionsToDelegate(UWidgetMapEditDragDropOperat
 {
 	OnDragEnterWidget.AddDynamic(DragDropOperation, &UWidgetMapEditDragDropOperation::OnDragEnter);
 	OnDragLeaveWidget.AddDynamic(DragDropOperation, &UWidgetMapEditDragDropOperation::OnDragLeave);
+}
+
+void UMapEditingHUD::HideCategory()
+{
+	if (bIsCategoryHidden || !EditCategoryUI)
+	{
+		return;
+	}
+	ToggleBox->SetRenderTransformAngle(-180.f);
+	PlayAnimation(CategoryHideAnim, 0.f, 1, EUMGSequencePlayMode::Forward, 0.3f);
+	bIsCategoryHidden = true;
+}
+
+void UMapEditingHUD::ShowCategory()
+{
+	if (!bIsCategoryHidden || !EditCategoryUI)
+	{
+		return;
+	}
+	ToggleBox->SetRenderTransformAngle(0.f);
+	PlayAnimation(CategoryHideAnim, 0.f, 1, EUMGSequencePlayMode::Reverse, 0.3f);
+	bIsCategoryHidden = false;
 }
