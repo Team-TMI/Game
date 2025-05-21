@@ -84,7 +84,7 @@ public:
 	FFriendListUpdated OnFriendListUpdated;
 	
 private:
-	FString NetID;
+	// FString NetID;
 	TMap<FString, FPlayerInfo> PlayerMap;
 	TArray<FSteamFriendData> FilteredFriendList;
 
@@ -92,8 +92,6 @@ public:
 	void SetPlayerInfo(const TMap<FString, FPlayerInfo> info) { PlayerMap = info; }
 	void AddPlayerInfo(const FString& PlayerKey, const FPlayerInfo& PlayerInfo) { PlayerMap.Add(PlayerKey, PlayerInfo); }
 	TMap<FString, FPlayerInfo>& GetPlayerInfo() { return PlayerMap; }
-	// 승리 판별 (bIsWin값 변경)
-	void SetPlayerWinInfo(const FString PlayerNetID, bool bIsWin);
 
 	void SetMapFilePath(const FString& Path) { MapFilePath = Path; }
 	FString GetMapFilePath() { return MapFilePath; }

@@ -27,4 +27,7 @@ void AClientRoomGameMode::BeginPlay()
 			GI->bIsGameStart = true;
 		}
 	}
+
+	// TODO: GI 초기화
+	GI->GetPlayerInfo().Empty();
 }
