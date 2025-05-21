@@ -86,11 +86,6 @@ bool AMapEditingPlayerController::GetMyHitResultAtScreenPosition(const FVector2D
 	FVector WorldDirection;
 	if (UGameplayStatics::DeprojectScreenToWorld(this, ScreenPosition, WorldOrigin, WorldDirection) == true)
 	{
-		FFastLogger::LogScreen(FColor::Red, TEXT("WorldOrigin: %s"), *WorldOrigin.ToString());
-		FFastLogger::LogScreen(FColor::Red, TEXT("WorldDirection: %s"), *WorldDirection.ToString());
-		FFastLogger::LogScreen(FColor::Red, TEXT("HitResultTraceDistance: %f"), HitResultTraceDistance);
-		DrawDebugLine(GetWorld(), WorldOrigin, WorldOrigin + WorldDirection * HitResultTraceDistance, FColor::Red, false, 5.f, 0, 1.f);
-
 		// TODO: TroubleShooting
 		// TraceChannel하고 ObjectType의 차이를 확인해야함
 		return GetWorld()->LineTraceMultiByObjectType(OutHitResult, WorldOrigin, WorldOrigin + WorldDirection * HitResultTraceDistance, TraceChannel, CollisionQueryParams);
