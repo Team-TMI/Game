@@ -24,6 +24,7 @@
 #include "JumpGame/MapEditor/RotateHandlers/RotateHandlerManager.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 #include "JumpGame/UI/MapEditing/MapEditingHUD.h"
+#include "JumpGame/Utils/CursorManager.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -136,6 +137,7 @@ void AMapEditingPawn::BeginPlay()
 			SubSystem->AddMappingContext(IMC_MapEditing, 0);
 		}
 	}
+	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
 }
 
 // Called every frame
@@ -192,6 +194,7 @@ void AMapEditingPawn::HandleLeftPressedStarted(const FInputActionValue& InputAct
 	
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
 	PressedHandlerManager->InitializeSettings(ControlledInfo, PC);
+	UCursorManager::SetCursor(this, ECursorName::LeafPoint);
 }
 
 void AMapEditingPawn::HandleLeftPressed(const FInputActionValue& InputActionValue)
@@ -209,6 +212,7 @@ void AMapEditingPawn::HandleLeftPressed(const FInputActionValue& InputActionValu
 void AMapEditingPawn::HandleLeftPressedCompleted(const FInputActionValue& InputActionValue)
 {
 	PressedHandlerManager->ResetPositions();
+	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
 }
 
 void AMapEditingPawn::HandleRightClickStarted(const FInputActionValue& InputActionValue)
@@ -300,7 +304,7 @@ void AMapEditingPawn::HandleTeleport(const FInputActionValue& InputActionValue)
 		return;
 	}
 	// Target Location을 가져옴
-	FVector TargetLocation = HandlingInfo.TargetProp->GetActorLocation();
+	FVector TargetLocation = HandlingInfo.TargetProp->GetActorLocation() - FVector(0.f, 0.f, 50.f);
 	// Target Location에서 현재 카메라가 보고 있는 방향의 뒤로 Size + @ 만큼 이동
 	FVector Direction = Controller->GetControlRotation().Vector();
 	FVector Size = HandlingInfo.TargetProp->GetGridComp()->GetSize() * HandlingInfo.TargetProp->GetGridComp()->GetSnapSize();
@@ -313,7 +317,7 @@ void AMapEditingPawn::HandleTeleport(const FInputActionValue& InputActionValue)
 	LatentInfo.CallbackTarget   = this;          // 필수
 	LatentInfo.UUID             = __LINE__;      // 고유값(아무 숫자나 OK)
 	LatentInfo.Linkage          = 0;
-	LatentInfo.ExecutionFunction = NAME_None;    // 이동 완료 시 호출 함수 이름(선택)
+	LatentInfo.ExecutionFunction = FName(TEXT("OnMoveFinished"));;    // 이동 완료 시 호출 함수 이름(선택)
 
 	// 0.25초 동안 EaseIn‧EaseOut 보간
 	UKismetSystemLibrary::MoveComponentTo(
@@ -361,4 +365,8 @@ void AMapEditingPawn::MoveUp(float Val)
 void AMapEditingPawn::SetActive(bool bInActive)
 {
 	bActive = bInActive;
+}
+
+void AMapEditingPawn::OnMoveFinished()
+{
 }

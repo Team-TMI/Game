@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Widget.h"
+#include "JumpGame/Utils/CursorManager.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Slate/SceneViewport.h"
 
@@ -40,11 +41,13 @@ void UWidgetMapEditDragDropOperation::Dragged_Implementation(const FPointerEvent
 void UWidgetMapEditDragDropOperation::OnDragging(UDragDropOperation* Operation)
 {
 	// FFastLogger::LogScreen(FColor::Emerald, TEXT("Dragging"));
+	UCursorManager::SetCursor(this, ECursorName::LeafPoint);
 }
 
 void UWidgetMapEditDragDropOperation::OnDraggingCancelled(UDragDropOperation* Operation)
 {
 	OnDragCancelledWidget.Broadcast();
+	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
 }
 
 void UWidgetMapEditDragDropOperation::OnDragEnter()

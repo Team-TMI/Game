@@ -75,6 +75,8 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
 	class USoundCue* HitSound;
+	UPROPERTY(EditAnywhere, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	class UParticleSystemComponent* HitEffectComp;
 
 	UPROPERTY(Replicated, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool bPlayHitEffect = false;

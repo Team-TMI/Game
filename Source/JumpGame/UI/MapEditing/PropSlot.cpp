@@ -10,6 +10,7 @@
 #include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
+#include "JumpGame/Utils/CursorManager.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/KismetInputLibrary.h"
 
@@ -77,12 +78,21 @@ FReply UPropSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, co
 	
 	// 여기서 어떤 Prop이 선택되었는 지를 BroadCast 해준다.
 	OnPropSlotClicked.Broadcast(PropID, PropClass);
+
+	UCursorManager::SetCursor(this, ECursorName::LeafPoint);
 	
 	return Reply.NativeReply;
 }
 
+FReply UPropSlot::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
+
+	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
+}
+
 void UPropSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent,
-	UDragDropOperation*& OutOperation)
+                                     UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 
