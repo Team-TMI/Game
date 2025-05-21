@@ -29,6 +29,15 @@ void USelectRoomUI::NativeOnInitialized()
 	ScrollBox_AllMap->ClearChildren();
 	ScrollBox_OriginMap->ClearChildren();
 	ScrollBox_CustomMap->ClearChildren();
+}
+
+void USelectRoomUI::InitSelectRoomUI()
+{
+	if (bIsInitialized)
+	{
+		return ;
+	}
+	bIsInitialized = true;
 	
 	OriginMapList = GetMapList(TEXT(".json"), TEXT("Content\\Maps\\OriginMap"));
 	CustomMapList = GetMapList(TEXT(".json"), TEXT("Content\\Maps\\CustomMap"));

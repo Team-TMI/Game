@@ -63,6 +63,7 @@ void UWaitRoomUI::OnClickSelectMap()
 	{
 		// 맵선택 UI가 뜨게 하자
 		SelectRoomUI->AddToViewport();
+		SelectRoomUI->InitSelectRoomUI();
 		ShowMapSelect();
 		FFastLogger::LogConsole(TEXT("OnClickSelectMapOnClickSelectMapOnClickSelectMap"));
 	}

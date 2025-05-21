@@ -15,6 +15,7 @@ class JUMPGAME_API USelectRoomUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	void InitSelectRoomUI();
 
 	// 맵 선택 창 관련
 	UPROPERTY(meta = (BindWidget))
@@ -94,4 +95,5 @@ private:
 	UPROPERTY()
 	TArray<class UHorizontalBox*> MapSlotBoxes;
 	int32 HorizontalBoxCount = 10;
+	bool bIsInitialized = false;
 };
