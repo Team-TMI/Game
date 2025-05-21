@@ -39,8 +39,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual void PossessedBy(AController* NewController) override;
 
-	void FrogSkinFinder();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input
@@ -48,7 +48,8 @@ public:
 	virtual void NotifyControllerChanged() override;
 	virtual bool CanJumpInternal_Implementation() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	
+	void FrogSkinFinder();
+
 	// 카메라 물 오버랩 감지 후 포스트프로세스
 	UFUNCTION()
 	void OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -62,7 +63,7 @@ public:
 	void OnTongueBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 								   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 								   const FHitResult& SweepResult);
-	
+
 public:
 	// Input
 	void Move(const struct FInputActionValue& Value);
