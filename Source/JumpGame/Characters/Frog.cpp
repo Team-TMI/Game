@@ -310,6 +310,26 @@ void AFrog::BeginPlay()
 	InitFrogState();
 }
 
+void AFrog::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// 로컬 클라만 점프 게이지 보이게
+	if (IsLocallyControlled())
+	{
+		SetJumpGaugeVisibility(false);
+	}
+	else
+	{
+		// 다른 클라에서 삭제
+		if (JumpGaugeUIComponent)
+		{
+			JumpGaugeUIComponent->DestroyComponent();
+			JumpGaugeUIComponent = nullptr;
+		}
+	}
+}
+
 
 // Called every frame
 void AFrog::Tick(float DeltaTime)
@@ -829,17 +849,17 @@ void AFrog::InitFrogState()
 	SetJumpAvailableBlock(1);
 	ResetSuperJumpRatio();
 
-	// 로컬 클라만 점프 게이지 보이게
-	if (IsLocallyControlled())
-	{
-		SetJumpGaugeVisibility(false);
-	}
-	else
-	{
-		// 다른 클라에서 삭제
-		JumpGaugeUIComponent->DestroyComponent();
-		JumpGaugeUIComponent = nullptr;
-	}
+	// // 로컬 클라만 점프 게이지 보이게
+	// if (IsLocallyControlled())
+	// {
+	// 	SetJumpGaugeVisibility(false);
+	// }
+	// else
+	// {
+	// 	// 다른 클라에서 삭제
+	// 	JumpGaugeUIComponent->DestroyComponent();
+	// 	JumpGaugeUIComponent = nullptr;
+	// }
 }
 
 void AFrog::SetJumpAvailableBlock(int32 Block)
