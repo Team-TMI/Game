@@ -30,7 +30,7 @@ public:
 			TStoryUI* Instance{CreateWidget<TStoryUI>(OwningPlayer, WidgetClass)};
 			if (Instance)
 			{
-				Instance->AddToViewport();
+				Instance->AddToViewport(100);
 
 				return Instance;
 			}
@@ -96,4 +96,5 @@ public:
 	FString DialogText;
 
 	bool bIsStoryStarted{false};
+	bool bIsNextTriggered{false};
 };

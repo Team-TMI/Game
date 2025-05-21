@@ -21,9 +21,10 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-								  UPrimitiveComponent* OtherComp,
-								  int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
+	                              UPrimitiveComponent* OtherComp,
+	                              int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	
 	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 								UPrimitiveComponent* OtherComp,
@@ -39,6 +40,7 @@ public:
 	virtual void RecvEyeTrackingInfo() override;
 
 public:
+	void DisplayMessage();
 	void FlyingObjectMovement(float DeltaTime);
 	void TrackLocation(FVector2f Resolution, FVector2f ScreenLoc);
 	bool IsObjectAndEyeOverlap(FVector2D ObjectLocation, FVector2D EyeLocation);
@@ -73,9 +75,14 @@ public:
 	TSubclassOf<class UFlyingObjectUI> FlyingObjectUIClass;
 	UPROPERTY(EditAnywhere)
 	UFlyingObjectUI* FlyingObjectUI;
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UTimeRemainUI> TimeRemainUIClass;
 	UPROPERTY(EditAnywhere)
 	UTimeRemainUI* TimeRemainUI;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ULookCenter> LookCenterUIClass;
+	UPROPERTY(EditAnywhere)
+	ULookCenter* LookCenterUI;
 	
 public:
 	UPROPERTY(EditAnywhere, Replicated)
@@ -113,4 +120,11 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_PlayEffect(const FVector& Vector, int32 Index);
+
+	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
+	class USoundCue* LaunchSound;
+	
+	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
+	class USoundCue* PlantMoveSound;
+	
 };

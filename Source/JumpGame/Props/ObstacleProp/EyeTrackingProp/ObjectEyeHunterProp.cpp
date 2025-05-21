@@ -11,7 +11,9 @@
 #include "JumpGame/UI/Obstacle/EyeTrackingUI.h"
 #include "JumpGame/UI/Obstacle/FlyingObjectUI.h"
 #include "JumpGame/UI/Obstacle/TimeRemainUI.h"
+#include "JumpGame/UI/Obstacle/LookCenter.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 AObjectEyeHunterProp::AObjectEyeHunterProp()
 {
@@ -38,6 +40,13 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 		TimeRemainUIClass = TimeRemainWidget.Class;
 	}
 
+	ConstructorHelpers::FClassFinder<ULookCenter> LookCenterWidget
+		(TEXT("/Game/UI/Obstacle/WBP_LookCenter.WBP_LookCenter_C"));
+	if (LookCenterWidget.Succeeded())
+	{
+		LookCenterUIClass = LookCenterWidget.Class;
+	}
+
 	MissionLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MissionLocation"));
 	if (MissionLocation)
 	{
@@ -45,6 +54,20 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 		MissionLocation->SetRelativeLocation(FVector(0, 0, 100.f));
 	}
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
+		(TEXT("/Game/Sounds/Ques/Bounce_Cue.Bounce_Cue"));
+	if (SoundAsset.Succeeded())
+	{
+		LaunchSound = Cast<USoundCue>(SoundAsset.Object);
+	}
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> PlantMoveSoundAsset
+		(TEXT("/Game/Sounds/Ques/PlantMove_Cue.PlantMove_Cue"));
+	if (PlantMoveSoundAsset.Succeeded())
+	{
+		PlantMoveSound = Cast<USoundCue>(PlantMoveSoundAsset.Object);
+	}
+	
 	CollisionComp->SetRelativeLocation(FVector(0, 0, 100.f));
 	MeshComp->SetRelativeLocation(FVector(0, 0, -100.f));
 
@@ -67,6 +90,7 @@ void AObjectEyeHunterProp::InitializeMission()
 	FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
 	TrackingUI = CreateWidget<UEyeTrackingUI>(GetWorld(), EyeTrackingUIClass);
 	TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
+	LookCenterUI = CreateWidget<ULookCenter>(GetWorld(), LookCenterUIClass);
 
 	if (TimeRemainUI)
 	{
@@ -96,13 +120,15 @@ void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompo
 			Frog = OverlappingFrog;
 
 			StopCharacter();
+			DisplayMessage();
 			GetWorldTimerManager().SetTimer(StartTimerHandle, this, &AObjectEyeHunterProp::StartMission, 2.f, false);
 			//StartMission();
 		}
-		
+
 		if (HasAuthority())
 		{
 			SetOwner(OverlappingFrog);
+			HitSound = PlantMoveSound;
 			MulticastRPC_PlayEffect(this->GetActorLocation());
 		}
 	}
@@ -118,6 +144,12 @@ void AObjectEyeHunterProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompo
 void AObjectEyeHunterProp::StartMission()
 {
 	FLog::Log("StartMission");
+
+	if (LookCenterUI)
+	{
+		LookCenterUI->RemoveFromParent();
+	}
+
 	Super::SendEyeTrackingStart();
 
 	//StopCharacter();
@@ -226,19 +258,16 @@ void AObjectEyeHunterProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedCompone
                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	//Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
-	FLog::Log("1");
 	AFrog* OverlappingFrog{Cast<AFrog>(OtherActor)};
 	if (OverlappingFrog)
 	{
 		if (OverlappingFrog->IsLocallyControlled())
 		{
-	FLog::Log("2");
 			if (bIsStartHunt)
 			{
-	FLog::Log("3");
 				EndMission(false);
 			}
-			
+
 			Frog = nullptr;
 
 			SetOwner(nullptr);
@@ -328,6 +357,16 @@ void AObjectEyeHunterProp::RecvEyeTrackingInfo()
 	// TODO : 받아오는 값으로 수정
 	TrackLocation({2880, 1800}, FVector2f(X, Y));
 	//TrackLocation(FVector2f(Width, Height), FVector2f(X, Y))
+}
+
+void AObjectEyeHunterProp::DisplayMessage()
+{
+	// 메시지 띄우기
+	if (LookCenterUI)
+	{
+		LookCenterUI->AddToViewport();
+		LookCenterUI->TextMoveAnimation();
+	}
 }
 
 void AObjectEyeHunterProp::FlyingObjectMovement(float DeltaTime)
@@ -486,6 +525,8 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 
 		FlyingObjectUI->FailMission();
 	}
+
+	HitSound = LaunchSound;
 
 	if (HasAuthority())
 	{

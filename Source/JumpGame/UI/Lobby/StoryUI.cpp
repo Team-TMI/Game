@@ -165,13 +165,14 @@ void UStoryUI::TextAppearAnimation()
 			}
 
 			bIsTextAppearing = false;
+			bIsNextTriggered = false;
 		});
 	}
 }
 
 void UStoryUI::OnNextChatTriggered()
 {
-	if (!bIsStoryStarted)
+	if (!bIsStoryStarted || bIsNextTriggered)
 	{
 		return;	
 	}
@@ -181,6 +182,8 @@ void UStoryUI::OnNextChatTriggered()
 		StoryEnd();
 		return;
 	}
+
+	bIsNextTriggered = true;
 	
 	if (bIsTextAppearing)
 	{
@@ -189,6 +192,8 @@ void UStoryUI::OnNextChatTriggered()
 		SequencePlayerTextAppearing->Pause();
 		bIsTextAppearing = false;
 		SequencePlayerTextAppearing->OnSequenceFinishedPlaying().Clear();
+
+		bIsNextTriggered = false;
 		
 		return;
 	}
@@ -233,6 +238,8 @@ void UStoryUI::OnNextChatTriggered()
 		{
 			TextBlock_Baby->SetVisibility(ESlateVisibility::Hidden);
 		}
+
+		bIsNextTriggered = false;
 	}
 }
 
@@ -246,6 +253,8 @@ void UStoryUI::ChatAppearAnimation()
 			{
 				return;
 			}
+			
+			bIsNextTriggered = false;
 
 			if (StoryArray.IsValidIndex(CurrentStoryIndex))
 			{

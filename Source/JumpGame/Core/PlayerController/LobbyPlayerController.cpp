@@ -48,7 +48,7 @@ void ALobbyPlayerController::BeginPlay()
 	
 	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
 	
-	SetInputMode(FInputModeUIOnly());
+	SetInputMode(FInputModeGameAndUI());
 	SetShowMouseCursor(true);
 }
 
