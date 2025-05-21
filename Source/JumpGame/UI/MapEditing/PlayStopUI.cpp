@@ -3,9 +3,11 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "Components/WidgetComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
+#include "JumpGame/UI/Character/JumpGaugeUI.h"
 
 void UPlayStopUI::NativeOnInitialized()
 {
@@ -14,6 +16,9 @@ void UPlayStopUI::NativeOnInitialized()
 	PlayPawn = GetWorld()->SpawnActor<AFrog>(AFrog::StaticClass(), FVector(-1000, -1000, -1000), FRotator::ZeroRotator);
 	PlayPawn->SetActorHiddenInGame(true);
 
+	UJumpGaugeUI* FrogJumpGauge{Cast<UJumpGaugeUI>(PlayPawn->JumpGaugeUIComponent->GetWidget())};
+	FrogJumpGauge->DelegateBind(PlayPawn);
+	
 	PlayStopButton->OnClicked.AddDynamic(this, &UPlayStopUI::OnPlayStopButtonClicked);
 	
 	IMG_PlayStop->SetBrushFromTexture(PlayIcon);

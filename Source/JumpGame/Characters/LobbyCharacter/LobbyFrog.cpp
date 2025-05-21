@@ -3,6 +3,7 @@
 
 #include "LobbyFrog.h"
 
+#include "Components/WidgetComponent.h"
 #include "JumpGame/Core/PlayerController/LobbyPlayerController.h"
 #include "JumpGame/UI/UICam/LobbyCameraComp.h"
 
@@ -24,6 +25,8 @@ ALobbyFrog::ALobbyFrog()
 	}
 
 	CameraComp = CreateDefaultSubobject<ULobbyCameraComp>(TEXT("CameraComp"));
+	
+	JumpGaugeUIComponent->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
