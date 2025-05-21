@@ -28,4 +28,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FVector2D PrevLoc;
+
+	FVector2D PrevMousePos{FVector2D::ZeroVector};
+	float AngleVelocity{};
 };
