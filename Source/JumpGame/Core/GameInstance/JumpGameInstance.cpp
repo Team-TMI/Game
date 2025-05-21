@@ -122,7 +122,7 @@ void UJumpGameInstance::FindOtherSession()
 
 void UJumpGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 {
-	if (bWasSuccessful)
+	if (bWasSuccessful && SessionSearch && SessionSearch->SearchResults.Num() != 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("세션 검색 성공!"));
 		// 검색된 세션 결과들
