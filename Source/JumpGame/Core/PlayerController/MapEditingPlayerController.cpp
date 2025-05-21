@@ -14,6 +14,8 @@ AMapEditingPlayerController::AMapEditingPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	bShowMouseCursor = true;
+
+	HitResultTraceDistance = 10000.f;
 }
 
 void AMapEditingPlayerController::BeginPlay()
@@ -22,7 +24,9 @@ void AMapEditingPlayerController::BeginPlay()
 
 	UCursorManager::SetCursor(this, ECursorName::GreenCursor);
 
-	SetInputMode(FInputModeGameAndUI());
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);  // ★ 핵심! : 이렇게 해야 마우스가 창 밖으로 안나감
+	SetInputMode(InputMode);
 	SetShowMouseCursor(true);
 }
 
@@ -49,49 +53,52 @@ bool AMapEditingPlayerController::OnGizmoClickOperation(APrimitiveProp* InContro
 	// 선택되어 있는 액터가 없다면 false를 반환
 	if (!InControlledProp) return false;
 	
-	// 선택되어 있는 액터가 있다면 그 의외의 액터들의 Collision을 모두 꺼준다.
-	TArray<AActor*> AllActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APrimitiveProp::StaticClass(), AllActors);
-	for (AActor* Actor : AllActors)
+	// 충돌 체크를 진행한다.
+	bool bResult = false;
+	TArray<FHitResult> HitResults;
+	FCollisionQueryParams CollisionQueryParams(SCENE_QUERY_STAT(ClickableTrace), true);
+	GetMyHitResultAtScreenPosition(MouseScreenPosition, ECC_GameTraceChannel5, CollisionQueryParams, HitResults);
+	for (auto& HitResult : HitResults)
 	{
-		APrimitiveProp* PrimitiveProp = Cast<APrimitiveProp>(Actor);
-		if (PrimitiveProp && PrimitiveProp != InControlledProp)
+		if (HitResult.IsValidBlockingHit() && HitResult.GetComponent() && HitResult.GetComponent()->GetOwner() == InControlledProp)
 		{
-			PrimitiveProp->SetPrimitivePropCollision(false);
+			bResult = true;
+			ClickResponse.Result = EClickHandlingResult::GizmoEditing;
+			ClickResponse.HitResult = HitResult;
+			ClickResponse.MouseWorldPosition = HitResult.Location;
+			break ;
 		}
 	}
-
-	// 충돌 체크를 진행한다.
-	bool bResult = true;
-	FHitResult HitResult;
-	GetHitResultAtScreenPosition(MouseScreenPosition, ECC_Visibility, true, HitResult);
-	if (HitResult.IsValidBlockingHit() && HitResult.GetActor() == InControlledProp)
+	if (!bResult)
 	{
-		bResult = true;
-		ClickResponse.Result = EClickHandlingResult::GizmoEditing;
-		ClickResponse.HitResult = HitResult;
-		ClickResponse.MouseWorldPosition = HitResult.Location;
-	}
-	else
-	{
-		bResult = false;
 		ClickResponse.Result = EClickHandlingResult::None;
 		ClickResponse.HitResult = FHitResult();
 		ClickResponse.MouseWorldPosition = FVector::ZeroVector;
 	}
-
-	// 선택되어 있는 액터가 있다면 그 의외의 액터들의 Collision을 다시 켜준다.
-	for (AActor* Actor : AllActors)
-	{
-		APrimitiveProp* PrimitiveProp = Cast<APrimitiveProp>(Actor);
-		if (PrimitiveProp && PrimitiveProp != InControlledProp)
-		{
-			PrimitiveProp->SetPrimitivePropCollision(true);
-		}
-	}
 	
 	return bResult;
 }
+
+// 최적화용 HitResult
+bool AMapEditingPlayerController::GetMyHitResultAtScreenPosition(const FVector2D ScreenPosition, const ECollisionChannel TraceChannel, const FCollisionQueryParams& CollisionQueryParams, TArray<FHitResult>& OutHitResult) const
+{
+	FVector WorldOrigin;
+	FVector WorldDirection;
+	if (UGameplayStatics::DeprojectScreenToWorld(this, ScreenPosition, WorldOrigin, WorldDirection) == true)
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("WorldOrigin: %s"), *WorldOrigin.ToString());
+		FFastLogger::LogScreen(FColor::Red, TEXT("WorldDirection: %s"), *WorldDirection.ToString());
+		FFastLogger::LogScreen(FColor::Red, TEXT("HitResultTraceDistance: %f"), HitResultTraceDistance);
+		DrawDebugLine(GetWorld(), WorldOrigin, WorldOrigin + WorldDirection * HitResultTraceDistance, FColor::Red, false, 5.f, 0, 1.f);
+
+		// TODO: TroubleShooting
+		// TraceChannel하고 ObjectType의 차이를 확인해야함
+		return GetWorld()->LineTraceMultiByObjectType(OutHitResult, WorldOrigin, WorldOrigin + WorldDirection * HitResultTraceDistance, TraceChannel, CollisionQueryParams);
+	}
+
+	return false;
+}
+
 
 // Click Operation : Actor // Gizmo가 실패하고 나서 다시 시도
 bool AMapEditingPlayerController::OnActorClickOperation(APrimitiveProp* InControlledProp, FClickResponse& ClickResponse)
