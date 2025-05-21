@@ -26,6 +26,8 @@ UGizmoComponent::UGizmoComponent()
 	Super::SetCollisionProfileName(TEXT("GizmoPrefet"));
 	Super::SetMaterial(0, GizmoMaterial);
 	SetRelativeScale3D({0.5f, 0.25f, 0.5f});
+
+	SetCastShadow(false);
 }
 
 FVector UGizmoComponent::GetDirection() const

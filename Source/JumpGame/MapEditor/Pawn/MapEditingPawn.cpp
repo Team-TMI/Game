@@ -181,8 +181,10 @@ void AMapEditingPawn::HandleLeftClick(const FInputActionValue& InputActionValue)
 	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
 	if (!PC) return ;
 
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 	PC->SetShowMouseCursor(true);
-	PC->SetInputMode(FInputModeGameAndUI());
+	PC->SetInputMode(InputMode);
 	
 	ClickHandlerManager->HandleClick(PC);
 }
@@ -202,8 +204,10 @@ void AMapEditingPawn::HandleLeftPressed(const FInputActionValue& InputActionValu
 	AMapEditingPlayerController* PC = Cast<AMapEditingPlayerController>(GetController());
 	if (!PC) return ;
 
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 	PC->SetShowMouseCursor(true);
-	PC->SetInputMode(FInputModeGameAndUI());
+	PC->SetInputMode(InputMode);
 	
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
 	PressedHandlerManager->HandlePressed(ControlledInfo, PC);
@@ -230,8 +234,10 @@ void AMapEditingPawn::HandleRightClickStarted(const FInputActionValue& InputActi
 	}
 	else
 	{
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 		PC->SetShowMouseCursor(true);
-		PC->SetInputMode(FInputModeGameAndUI());
+		PC->SetInputMode(InputMode);
 	}
 }
 

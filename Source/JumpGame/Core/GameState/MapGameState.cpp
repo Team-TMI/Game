@@ -47,7 +47,9 @@ void AMapGameState::BeginPlay()
 	RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
 	RisingWaterProp->StopRising(100);
 
-	PC->SetInputMode(FInputModeUIOnly());
+	FInputModeUIOnly InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+	PC->SetInputMode(InputMode);
 	PC->bShowMouseCursor = false;
 }
 
