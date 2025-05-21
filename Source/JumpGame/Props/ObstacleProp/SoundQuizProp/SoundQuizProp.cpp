@@ -10,6 +10,8 @@
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "Runtime/Core/Public/Containers/StringConv.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 
 class UJumpGameInstance;
@@ -23,6 +25,14 @@ ASoundQuizProp::ASoundQuizProp()
 	if (!VoiceRecorderComponent)
 	{
 		FFastLogger::LogConsole(TEXT("보이스 레코더 없습니다"));
+	}
+
+	// 여기서
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
+	(TEXT("/Game/Sounds/Ques/SQ_Radio.SQ_Radio"));
+	if (SoundAsset.Succeeded())
+	{
+		HitSound = Cast<USoundCue>(SoundAsset.Object);
 	}
 }
 
@@ -86,29 +96,41 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep,
-	                        SweepResult);
-
 	if (!OtherActor->ActorHasTag("Frog")) return;
 	if (bIsActive == false) return;
+	
+	if (!bIsOverlap)
+	{
+		// GameState 캐스팅
+		NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
+		AFrog* Character = Cast<AFrog>(OtherActor);
+
+		if (HasAuthority() && Character->IsLocallyControlled())
+		{
+			MulticastRPC_PlayEffect(this->GetActorLocation());
+		}
+		else if (!HasAuthority() && Character->IsLocallyControlled())
+		{
+			Character->ServerRPC_ProcessOverlap(this);
+		}
 		
-	// GameState 캐스팅
-	NetGS = Cast<ANetworkGameState>(GetWorld()->GetGameState());
-	
-	// 이때 퀴즈 시작!
-	SendStartSoundQuizNotify();
-	
-	// 캐릭터 퀴즈 카메라로 전환
-	if (OtherActor->ActorHasTag(TEXT("Frog")))
-	{
-		// 모든 플레이어의 움직임 제한
-		MulticastRPC_PlayerStopMovement();
-	}
-	
-	// 물 멈추자
-	if (RisingWaterProp)
-	{
-		RisingWaterProp->StopRising();
+		// 이때 퀴즈 시작!
+		SendStartSoundQuizNotify();
+		
+		// 캐릭터 퀴즈 카메라로 전환
+		if (OtherActor->ActorHasTag(TEXT("Frog")))
+		{
+			// 모든 플레이어의 움직임 제한
+			MulticastRPC_PlayerStopMovement();
+		}
+		
+		// 물 멈추자
+		if (RisingWaterProp)
+		{
+			RisingWaterProp->StopRising();
+		}
+
+		bIsOverlap = true;
 	}
 }
 
@@ -117,6 +139,13 @@ void ASoundQuizProp::OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 {
 	Super::OnMyEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 	
+}
+
+void ASoundQuizProp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASoundQuizProp ,bIsOverlap);
 }
 
 void ASoundQuizProp::SendStartSoundQuizNotify()
