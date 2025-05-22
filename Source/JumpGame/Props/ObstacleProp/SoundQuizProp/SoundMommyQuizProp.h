@@ -26,11 +26,19 @@ public:
 	virtual void ReceiveSoundQuizMessage() override;
 	virtual void SendSoundQuizMessage() override;
 	virtual void SendEndSoundQuizNotify() override;
+
+	virtual void StartSoundQuiz() override;
 	
 	virtual void StartRecord() override;
 	virtual void StopRecord() override;
 	
 public:
+	// 퀴즈 시작 UI
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UStartSoundUI> StartSoundUIClass;
+	UPROPERTY(EditAnywhere)
+	UStartSoundUI* StartSoundUI;
+	
 	// 퀴즈 플레이 UI
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class USoundQuizUI> SoundQuizUIClass;

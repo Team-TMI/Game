@@ -99,6 +99,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class AFrog* Frog;
+	UPROPERTY()
+	class APlayerController* PC;
 
 protected:
 	// 녹음 컴포넌트 붙이기
@@ -122,6 +124,12 @@ protected:
 	UPROPERTY()
 	int32 TotalPlayerCount = 0;
 
+	// 플레이어
+	UPROPERTY()
+	AFrog* Character = nullptr;
+
+	UFUNCTION()
+	virtual void StartSoundQuiz();
 	UFUNCTION()
 	void StartRisingWater();
 	UFUNCTION(NetMulticast, Reliable)

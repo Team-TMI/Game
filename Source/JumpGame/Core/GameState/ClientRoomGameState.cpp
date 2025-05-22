@@ -4,6 +4,7 @@
 #include "ClientRoomGameState.h"
 
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "JumpGame/UI/Cinematic/IntroCinematic.h"
 #include "JumpGame/UI/Lobby/Follower.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"

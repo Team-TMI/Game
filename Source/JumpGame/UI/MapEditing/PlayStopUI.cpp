@@ -1,10 +1,12 @@
 #include "PlayStopUI.h"
 
 #include "EnhancedInputSubsystems.h"
+#include "MapEditingHUD.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/WidgetComponent.h"
 #include "JumpGame/Characters/Frog.h"
+#include "JumpGame/Core/GameState/MapEditorState.h"
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
@@ -28,13 +30,18 @@ void UPlayStopUI::OnPlayStopButtonClicked()
 {
 	bIsPlayMode = !bIsPlayMode;
 
+	AMapEditorState* MapEditorState = Cast<AMapEditorState>(GetWorld()->GetGameState());
+	if (!MapEditorState) return;
+	UMapEditingHUD* MapEditingHUD = MapEditorState->GetMapEditingHUD();
 	if (bIsPlayMode)
 	{
+		MapEditingHUD->HideCategory();
 		IMG_PlayStop->SetBrushFromTexture(StopIcon);
 		PlayPawn->SetActorHiddenInGame(false);
 	}
 	else
 	{
+		MapEditingHUD->ShowCategory();
 		IMG_PlayStop->SetBrushFromTexture(PlayIcon);
 		PlayPawn->SetActorHiddenInGame(true);
 	}

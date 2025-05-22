@@ -31,4 +31,5 @@ public:
 
 	FVector2D PrevMousePos{FVector2D::ZeroVector};
 	float AngleVelocity{};
+	
 };

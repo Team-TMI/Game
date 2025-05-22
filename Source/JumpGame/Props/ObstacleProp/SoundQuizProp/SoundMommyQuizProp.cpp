@@ -11,6 +11,7 @@
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/UI/Obstacle/SoundQuizUI.h"
+#include "JumpGame/UI/Obstacle/StartSoundUI.h"
 #include "JumpGame/UI/Obstacle/TimeRemainUI.h"
 
 
@@ -35,6 +36,8 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 void ASoundMommyQuizProp::BeginPlay()
 {
 	Super::BeginPlay();
+
+	StartSoundUI = CreateWidget<UStartSoundUI>(GetWorld(), StartSoundUIClass);
 	SoundQuizUI = CreateWidget<USoundQuizUI>(GetWorld(), SoundQuizUIClass);
 	SoundQuizUI->SetVoiceRecorderComponent(VoiceRecorderComponent);
 	SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
@@ -57,18 +60,17 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 {
 	Super::OnMyBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep,
 	                        SweepResult);
-
-	APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	
 	if (!PC) return;
 	
 	// 각각의 화면에서 UI를 띄우자
 	// 그렇게 해야 remove했을때 본인의 화면에서 사라짐
 	if (PC->IsLocalPlayerController())
 	{
-		// 시작하면 UI 띄우자
-		if (SoundQuizUI)
+		if (StartSoundUI)
 		{
-			SoundQuizUI->AddToViewport();
+			StartSoundUI->AddToViewport();
+			StartSoundUI->PlayStartSoundAnim();
 		}
 	}
 }
@@ -131,6 +133,26 @@ void ASoundMommyQuizProp::SendEndSoundQuizNotify()
 	
 	SoundQuizUI->RemoveFromParent();
 	TimeRemainUI->RemoveFromParent();
+}
+
+void ASoundMommyQuizProp::StartSoundQuiz()
+{
+	Super::StartSoundQuiz();
+	
+	if (!PC) return;
+	
+	if (PC->IsLocalPlayerController())
+	{
+		// 시작하면 UI 띄우자
+		if (SoundQuizUI)
+		{
+			SoundQuizUI->AddToViewport();
+		}
+		if (StartSoundUI)
+		{
+			StartSoundUI->RemoveFromParent();
+		}
+	}
 }
 
 void ASoundMommyQuizProp::StartRecord()

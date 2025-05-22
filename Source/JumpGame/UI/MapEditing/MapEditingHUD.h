@@ -20,6 +20,11 @@ public:
 	void AddClickFunctionsToDelegate(class UClickHandlerManager* ClickHandlerManager);
 	void AddDragDropFunctionsToDelegate(class UWidgetMapEditDragDropOperation* DragDropOperation);
 
+	UFUNCTION(BlueprintCallable)
+	void HideCategory();
+	UFUNCTION(BlueprintCallable)
+	void ShowCategory();
+
 	UPROPERTY(BlueprintAssignable)
 	FOnDragEnterWidget OnDragEnterWidget;
 	UPROPERTY(BlueprintAssignable)
@@ -27,4 +32,10 @@ public:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UCategoryUI* EditCategoryUI;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidgetAnim), Transient, meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UWidgetAnimation* CategoryHideAnim;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class USizeBox* ToggleBox;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
+	bool bIsCategoryHidden = false;
 };
