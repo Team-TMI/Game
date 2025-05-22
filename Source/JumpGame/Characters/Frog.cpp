@@ -198,6 +198,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
 	GetCharacterMovement()->GroundFriction = 5.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	GetCharacterMovement()->MaxStepHeight = 65.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 150.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 1500.0f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
