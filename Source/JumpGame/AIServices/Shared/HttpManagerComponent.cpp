@@ -1,5 +1,6 @@
 ﻿#include "HttpManagerComponent.h"
 
+#include "JsonObjectConverter.h"
 #include "IOHandlers/HttpsMultiPartsHandler.h"
 #include "JumpGame/Utils/FastLogger.h"
 
@@ -11,6 +12,11 @@ UHttpManagerComponent::UHttpManagerComponent()
 void UHttpManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!InitializeConfigFile())
+	{
+		return ;
+	}
 
 	// TODO : HttpManagerComponent를 두자
 	TSharedPtr<IIOHandlerInterface> HttpMultipartHandler = MakeShared<FHttpsMultiPartsHandler>();
@@ -56,6 +62,31 @@ void UHttpManagerComponent::RegisterHttpHandler(const EMessageType& MessageType,
 {
 	FFastLogger::LogConsole(TEXT("UIOManagerComponent::RegisterHttpHandler : %d"), MessageType);
 	HttpHandlers.Add(MessageType, Handler);
+}
+
+bool UHttpManagerComponent::InitializeConfigFile()
+{
+	FString ConfigFilePath = FPaths::ProjectConfigDir() + TEXT("HttpHandlerConfig.json");
+	if (!FPaths::FileExists(ConfigFilePath))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Config file not found: %s"), *ConfigFilePath);
+		return false;
+	}
+
+	FString ConfigContent;
+	FFileHelper::LoadFileToString(ConfigContent, *ConfigFilePath);
+	if (ConfigContent.IsEmpty())
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Config file is empty: %s"), *ConfigFilePath);
+		return false;
+	}
+	if (!FJsonObjectConverter::JsonObjectStringToUStruct(ConfigContent, &HttpHandlerInitInfo))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Failed to parse config file: %s"), *ConfigFilePath);
+		return false;
+	}
+
+	return true;
 }
 
 bool UHttpManagerComponent::PopHttpMessage(const EMessageType& MessageType, FHttpMessageWrapper& OutMessage)

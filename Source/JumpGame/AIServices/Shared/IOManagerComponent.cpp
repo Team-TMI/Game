@@ -86,7 +86,6 @@ void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSh
 bool UIOManagerComponent::InitializeConfigFile()
 {
 	FString ConfigFilePath = FPaths::ProjectConfigDir() + TEXT("IOHandlerConfig.json");
-	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("Config file path: %s"), *ConfigFilePath);
 	if (!FPaths::FileExists(ConfigFilePath))
 	{
 		FFastLogger::LogScreen(FColor::Red, TEXT("Config file not found: %s"), *ConfigFilePath);
@@ -105,18 +104,6 @@ bool UIOManagerComponent::InitializeConfigFile()
 		FFastLogger::LogScreen(FColor::Red, TEXT("Failed to parse config file: %s"), *ConfigFilePath);
 		return false;
 	}
-
-	FFastLogger::LogConsole(TEXT("Config file loaded successfully: %s"), *ConfigContent);
-	FFastLogger::LogConsole(TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ServerUrl);
-	FFastLogger::LogConsole(TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ServerProtocol);
-	FFastLogger::LogConsole(TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ReadPipeName);
-	FFastLogger::LogConsole(TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.SendPipeName);
-
-	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("Config file loaded successfully: %s"), *ConfigContent);
-	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ServerUrl);
-	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ServerProtocol);
-	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ReadPipeName);
-	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.SendPipeName);
 	
 	return true;
 }

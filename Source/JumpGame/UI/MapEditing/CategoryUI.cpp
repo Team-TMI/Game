@@ -310,8 +310,9 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 	ImageField.Data = ImageData;
 
 	FHttpMultipartRequest Request;
-	Request.ServerURL = GameState->GetImageRequestURL();
-	Request.RequestPath = GameState->GetImageRequestPath();
+	FHTTPHandlerInitInfo HttpInfo = GameState->HttpManagerComponent->GetHttpHandlerInitInfo();
+	Request.ServerURL = HttpInfo.HttpsRequestImageURL;
+	Request.RequestPath = HttpInfo.HttpsRequestImagePath;
 	// Request.AdditionalHeaders.Add(TEXT("Authorization"), TEXT("Bearer token"));
 	Request.MultipartFields.Add(ImageField);
 
