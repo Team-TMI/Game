@@ -28,6 +28,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Media")
 	UFileMediaSource* MediaSource;
 
+	// 재생 속도
+	UPROPERTY()
+	float CurrentPlayRate = 1.0f;
+	
 	// 스킵
 	UPROPERTY(meta=(BindWidgetAnim),Transient)
 	class UWidgetAnimation* SkipAnim;
