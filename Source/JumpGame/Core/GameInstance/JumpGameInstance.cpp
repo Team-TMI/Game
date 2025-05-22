@@ -77,11 +77,12 @@ void UJumpGameInstance::CreateMySession(FString DisplayName, int32 PlayerCount, 
 	SessionSettings.Set(FName(TEXT("DP_NAME")), DisplayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	// 세션 이름 저장
 	CurrentSessionName = EncodedName;
-
 	// 잠금 여부
 	bool bIsLocked = !Password.IsEmpty();
 	SessionSettings.Set(FName(TEXT("IS_LOCKED")), bIsLocked ? 1 : 0, EOnlineDataAdvertisementType::ViaOnlineService);
-
+	// 세션 파괴 여부 판단하기
+	SessionSettings.Set(FName("bIsEnded"), false, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	
 	// 세션 생성
 	SessionInterface->CreateSession(0, FName(DisplayName), SessionSettings);
 }
@@ -129,6 +130,15 @@ void UJumpGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 		auto results = SessionSearch->SearchResults;
 		for (int32 i = 0; i < results.Num(); i++)
 		{
+			// 파괴된 세션 필터
+			bool bIsEnded = true; // 기본 true로 두고, Get 실패해도 거르도록
+			results[i].Session.SessionSettings.Get(FName("bIsEnded"), bIsEnded);
+			if (bIsEnded)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("세션 [%d]는 이미 종료된 세션입니다. 자동으로 제외됩니다."), i);
+				continue;
+			}
+			
 			FRoomData Room;
 
 			// 룸 인덱스
@@ -241,6 +251,17 @@ void UJumpGameInstance::LeaveSession(bool bDestroySession)
 		{
 			// 생성된 세션의 이름을 가져오자
 			FName SessionName = CurrentSessionName;
+
+			FNamedOnlineSession* Session = SessionInterface->GetNamedSession(SessionName);
+			if (Session)
+			{
+				// bIsEnded = true로 설정
+				Session->SessionSettings.Set(FName("bIsEnded"), true, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+
+				// 업데이트 반영
+				SessionInterface->UpdateSession(SessionName, Session->SessionSettings, true);
+			}
+			
 			// 서버가 방을 떠나면, 세션을 삭제하자
 			if (PC->HasAuthority())
 			{

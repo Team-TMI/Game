@@ -43,5 +43,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Media")
 	class UButton* Btn_Skip;
 	UFUNCTION()
-	void OnCickSkip();
+	void OnClickSkip();
 };

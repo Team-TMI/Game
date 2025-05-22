@@ -94,6 +94,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsLocked;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsEnded;
+
 	FRoomData()
 		: RoomName(TEXT(""))
 		, PlayerCount(0)
@@ -101,6 +104,7 @@ public:
 		, MapName(TEXT(""))
 		, RoomID(-1)
 		, bIsLocked(false)
+		, bIsEnded(false)
 	{}
 };
 

@@ -16,6 +16,11 @@ bool FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo, MessageQueuePtr In
 	ServerProtocol = InitInfo.ServerProtocol;
 	MessageQueue = InMessageQueuePtr;
 	// ...
+
+	FFastLogger::LogConsole(TEXT("FSocketHandler::Init()"));
+	FFastLogger::LogConsole(TEXT("ServerURL: %s"), *ServerURL);
+	FFastLogger::LogConsole(TEXT("ServerProtocol: %s"), *ServerProtocol);
+	
 	Socket = FWebSocketsModule::Get().CreateWebSocket(ServerURL, ServerProtocol);
 
 	TWeakPtr<FSocketHandler> WeakSharedThis = AsShared();
@@ -26,7 +31,7 @@ bool FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo, MessageQueuePtr In
 		TSharedPtr<FSocketHandler> StrongThis = WeakSharedThis.Pin();
 
 		StrongThis->bConnected = true;
-		
+
 		UE_LOG(LogTemp, Warning, TEXT("Connected to WebSocket server."));
 	});
 
@@ -65,6 +70,8 @@ bool FSocketHandler::SendGameMessage(const FMessageUnion& Message)
 	}
 
 	// FFastLogger::LogScreen(FColor::Red, TEXT("Message Send : Size : %d"), Message.Header.PayloadSize);
+
+	FFastLogger::LogConsole(TEXT("SendGameMessage() : %d"), Message.Header.PayloadSize);
 	
 	Socket->Send(Message.RawData, Message.Header.PayloadSize, true);
 	return true;
