@@ -98,8 +98,8 @@ public:
 	void ServerRPC_StartTongueAttack();
 	
 
-
 public:
+	void InitJumpGaugeUIComponent();
 	UFUNCTION(BlueprintCallable)
 	void InitFrogState();
 	UFUNCTION(BlueprintCallable)

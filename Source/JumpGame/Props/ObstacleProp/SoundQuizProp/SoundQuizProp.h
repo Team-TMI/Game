@@ -37,7 +37,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	// 퀴즈 한번만 실행
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool bIsOverlap = false;
 	
 	// 퀴즈 소켓 전송 관련

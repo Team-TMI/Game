@@ -16,4 +16,9 @@ class JUMPGAME_API AInGamePlayerController : public ANetworkPlayerController
 
 public:
 	virtual void BeginPlay() override;
+
+	virtual void OnRep_PlayerState() override;
+	virtual void ReceivedPlayer() override;
+
+	void StartInitialize();
 };

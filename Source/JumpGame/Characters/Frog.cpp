@@ -313,7 +313,8 @@ void AFrog::BeginPlay()
 	{
 		EmotionUI->AddToViewport();
 	}
-
+	
+	InitJumpGaugeUIComponent();
 	InitFrogState();
 }
 
@@ -321,20 +322,7 @@ void AFrog::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	// 로컬 클라만 점프 게이지 보이게
-	if (IsLocallyControlled())
-	{
-		SetJumpGaugeVisibility(false);
-	}
-	else
-	{
-		// 다른 클라에서 삭제
-		if (JumpGaugeUIComponent)
-		{
-			JumpGaugeUIComponent->DestroyComponent();
-			JumpGaugeUIComponent = nullptr;
-		}
-	}
+	InitJumpGaugeUIComponent();
 }
 
 
@@ -842,6 +830,24 @@ void AFrog::ServerRPC_StartTongueAttack_Implementation()
 	};
 
 	GetWorldTimerManager().SetTimer(TongueTimer, TongueAttackDelegate, GetWorld()->GetDeltaSeconds(), true);
+}
+
+void AFrog::InitJumpGaugeUIComponent()
+{
+	// 로컬 클라만 점프 게이지 보이게
+	if (IsLocallyControlled())
+	{
+		SetJumpGaugeVisibility(false);
+	}
+	else
+	{
+		// 다른 클라에서 삭제
+		if (JumpGaugeUIComponent)
+		{
+			JumpGaugeUIComponent->DestroyComponent();
+			JumpGaugeUIComponent = nullptr;
+		}
+	}
 }
 
 void AFrog::InitFrogState()
