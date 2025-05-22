@@ -14,7 +14,7 @@ void UMapMenuUI::NativeOnInitialized()
 
 	SaveButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnSaveButtonClicked);
 	LoadButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnLoadButtonClicked);
-	SavePopup->SetVisibility(ESlateVisibility::Hidden);
+	SavePopup->SetVisibility(ESlateVisibility::Collapsed);
 	SaveConfirm->OnClicked.AddDynamic(this, &UMapMenuUI::OnSaveConfirmClicked);
 
 	BackButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnBackButtonClicked);
@@ -42,7 +42,7 @@ void UMapMenuUI::OnSaveConfirmClicked()
 		FString FileName = FileNameTextBox->GetText().ToString();
 		MapEditorState->GetSaveMapComponent()->SaveMap(FileName);
 	}
-	SavePopup->SetVisibility(ESlateVisibility::Hidden);
+	SavePopup->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UMapMenuUI::OnBackButtonClicked()

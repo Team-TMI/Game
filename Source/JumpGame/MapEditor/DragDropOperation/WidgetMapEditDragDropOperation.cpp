@@ -62,7 +62,7 @@ void UWidgetMapEditDragDropOperation::OnDragLeave()
 {
 	if (DefaultDragVisual)
 	{
-		DefaultDragVisual->SetVisibility(ESlateVisibility::Hidden);
+		DefaultDragVisual->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 

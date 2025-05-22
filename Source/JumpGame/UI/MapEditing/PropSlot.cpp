@@ -45,7 +45,7 @@ void UPropSlot::ClearInfo()
 	PropImage->SetBrushFromTexture(nullptr);
 	PropClass = nullptr;
 	PropText->SetText(FText::GetEmpty());
-	this->SetVisibility(ESlateVisibility::Hidden);
+	this->SetVisibility(ESlateVisibility::Collapsed);
 	PropDragVisual->PropImage->SetBrushFromTexture(nullptr);
 }
 

@@ -12,7 +12,7 @@ void UFileBrowserUI::NativeOnInitialized()
 	Super::NativeOnInitialized();
 
 	CurrentFileText->SetHintText(FText::FromString(DefaultString));
-	SetVisibility(ESlateVisibility::Hidden);
+	SetVisibility(ESlateVisibility::Collapsed);
 
 	SelectButton->OnClicked.AddDynamic(this, &UFileBrowserUI::OnSelectButtonClicked);
 	CloseButton->OnClicked.AddDynamic(this, &UFileBrowserUI::OnCloseButtonClicked);
@@ -138,7 +138,7 @@ void UFileBrowserUI::OnFileSelected(const FString& FullPath)
 	CurrentDirectory = TEXT("");
 	CurrentFilePath = TEXT("");
 	
-	SetVisibility(ESlateVisibility::Hidden);
+	SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UFileBrowserUI::OnItemClicked(const FString& FilePath)
@@ -163,7 +163,7 @@ void UFileBrowserUI::OnSelectButtonClicked()
 	{
 		OnFileSelectedDelegate.Execute(CurrentFilePath, false);
 	}
-	SetVisibility(ESlateVisibility::Hidden);
+	SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UFileBrowserUI::CreateBackButton()
@@ -194,7 +194,7 @@ void UFileBrowserUI::CreateBackButton()
 void UFileBrowserUI::OnCloseButtonClicked()
 {
 	// Close the file browser UI
-	SetVisibility(ESlateVisibility::Hidden);
+	SetVisibility(ESlateVisibility::Collapsed);
 
 	CurrentDirectory = TEXT("");
 	CurrentFilePath = TEXT("");
