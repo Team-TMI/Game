@@ -16,14 +16,14 @@ class JUMPGAME_API UPlayStopUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
-	
+
 private:
 	void ChangeToFrog();
 	void ChangeToEditor();
 	void ChangePlayer();
 	UFUNCTION()
 	void OnPlayStopButtonClicked();
-	
+
 	UPROPERTY()
 	class AFrog* PlayPawn;
 	UPROPERTY()
@@ -46,4 +46,6 @@ private:
 
 	UPROPERTY()
 	bool bIsPlayMode = false;
+	
+	FTimerHandle WidgetTimerHandle;
 };

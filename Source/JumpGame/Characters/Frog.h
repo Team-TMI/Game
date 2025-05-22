@@ -161,6 +161,8 @@ public:
 	void ServerRPC_SetSkin(int32 NewIndex);
 	UFUNCTION()
 	void OnRep_SkinIndex();
+	void SetMapEditingPawn(bool bCond) {bMapEditingPawn = bCond;}
+	bool bMapEditingPawn = false;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)

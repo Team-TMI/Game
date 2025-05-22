@@ -15,14 +15,22 @@ void UPlayStopUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	PlayPawn = GetWorld()->SpawnActor<AFrog>(AFrog::StaticClass(), FVector(-1000, -1000, -1000), FRotator::ZeroRotator);
-	PlayPawn->SetActorHiddenInGame(true);
+	FTransform SpawnTransform;
+	SpawnTransform.SetScale3D({1.f, 1.f, 1.f});
+	SpawnTransform.SetTranslation({-1000,-1000,-1000});
+	PlayPawn = GetWorld()->SpawnActorDeferred<AFrog>(AFrog::StaticClass(), SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	if (PlayPawn)
+	{
+		PlayPawn->SetMapEditingPawn(true);
+		PlayPawn->SetActorHiddenInGame(true);
+		PlayPawn->FinishSpawning(SpawnTransform);
+	}
 
 	UJumpGaugeUI* FrogJumpGauge{Cast<UJumpGaugeUI>(PlayPawn->JumpGaugeUIComponent->GetWidget())};
 	FrogJumpGauge->DelegateBind(PlayPawn);
-	
+
 	PlayStopButton->OnClicked.AddDynamic(this, &UPlayStopUI::OnPlayStopButtonClicked);
-	
+
 	IMG_PlayStop->SetBrushFromTexture(PlayIcon);
 }
 
@@ -31,7 +39,8 @@ void UPlayStopUI::OnPlayStopButtonClicked()
 	bIsPlayMode = !bIsPlayMode;
 
 	AMapEditorState* MapEditorState = Cast<AMapEditorState>(GetWorld()->GetGameState());
-	if (!MapEditorState) return;
+	if (!MapEditorState)
+		return;
 	UMapEditingHUD* MapEditingHUD = MapEditorState->GetMapEditingHUD();
 	if (bIsPlayMode)
 	{
@@ -63,7 +72,8 @@ void UPlayStopUI::ChangePlayer()
 void UPlayStopUI::ChangeToFrog()
 {
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (!PC) return;
+	if (!PC)
+		return;
 
 	EditPawn = Cast<AMapEditingPawn>(PC->GetPawn());
 
@@ -71,7 +81,7 @@ void UPlayStopUI::ChangeToFrog()
 
 	FVector CamLocation = PC->PlayerCameraManager->GetCameraLocation();
 	FRotator CamRotation = PC->PlayerCameraManager->GetCameraRotation();
-	
+
 	PlayPawn->SetActorLocation(CamLocation);
 	PlayPawn->SetActorRotation(CamRotation);
 
@@ -85,7 +95,8 @@ void UPlayStopUI::ChangeToFrog()
 	// 🎯 Enhanced Input 갱신
 	if (ULocalPlayer* LocalPlayer = PC->GetLocalPlayer())
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>())
 		{
 			Subsystem->ClearAllMappings();
 
@@ -98,12 +109,13 @@ void UPlayStopUI::ChangeToFrog()
 void UPlayStopUI::ChangeToEditor()
 {
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (!PC) return;
+	if (!PC)
+		return;
 
 	PlayPawn->SetActorHiddenInGame(true);
 
 	FRotator CamRotation = PC->PlayerCameraManager->GetCameraRotation();
-	
+
 	EditPawn->SetActorLocation(PlayPawn->GetActorLocation());
 	EditPawn->SetActorRotation(CamRotation);
 
@@ -119,7 +131,8 @@ void UPlayStopUI::ChangeToEditor()
 	// 🎯 Enhanced Input 갱신
 	if (ULocalPlayer* LocalPlayer = PC->GetLocalPlayer())
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>())
 		{
 			Subsystem->ClearAllMappings();
 
