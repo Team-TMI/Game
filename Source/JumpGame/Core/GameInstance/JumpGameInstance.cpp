@@ -481,18 +481,22 @@ void UJumpGameInstance::RunEyeTrackingScript()
 	FLog::Log("RunEyeTrackingScript");
 	
 	FString PythonPath = TEXT("C:\\Users\\user\\miniconda3\\envs\\myenv_311\\python.exe");
-	FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\main.py");
+	FString ScriptPath = FPaths::ProjectDir() + TEXT("AppData/PythonScripts/main.py");
+	FString AbsoluteScriptPath = FPaths::ConvertRelativePathToFull(ScriptPath);
+	
 	//FString ScriptPath = TEXT("C:\\FinalProject\\Game\\AI_Service\\eye_tracking\\infinite_counter.py");
-	FString WorkingDirectory = FPaths::GetPath(ScriptPath);
+	FString WorkingDirectory = FPaths::GetPath(AbsoluteScriptPath);
+
+	FFastLogger::LogScreen(FColor::Red, TEXT("Python Path: %s"), *AbsoluteScriptPath);
 
 	// Python 실행 명령 구성
-	FString Command = FString::Printf(TEXT("\"%s\" \"%s\""), *PythonPath, *ScriptPath);
+	FString Command = FString::Printf(TEXT("\"%s\" \"%s\""), *PythonPath, *AbsoluteScriptPath);
 
 	// 비동기 작업 실행
-	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [Command, WorkingDirectory, PythonPath, ScriptPath]() {
+	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [Command, WorkingDirectory, PythonPath, AbsoluteScriptPath]() {
 		FProcHandle ProcHandle = FPlatformProcess::CreateProc(
 		   *PythonPath,        // 실행 파일 경로
-		   *FString::Printf(TEXT("\"%s\""), *ScriptPath), // 인수 (스크립트 경로)
+		   *FString::Printf(TEXT("\"%s\""), *AbsoluteScriptPath), // 인수 (스크립트 경로)
 		   false,              // bLaunchHidden
 		   false,              // bLaunchReallyHidden
 		   false,              // bLaunchInBackground (AsyncTask가 이미 백그라운드에서 실행)
