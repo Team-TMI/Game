@@ -31,7 +31,7 @@ bool FSocketHandler::Init(const FIOHandlerInitInfo& InitInfo, MessageQueuePtr In
 		TSharedPtr<FSocketHandler> StrongThis = WeakSharedThis.Pin();
 
 		StrongThis->bConnected = true;
-		
+
 		UE_LOG(LogTemp, Warning, TEXT("Connected to WebSocket server."));
 	});
 
