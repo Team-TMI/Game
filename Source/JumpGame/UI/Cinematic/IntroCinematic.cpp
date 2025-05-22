@@ -22,7 +22,7 @@ void UIntroCinematic::NativeOnInitialized()
 	// 일정 시간마다 애니메이션 반복 실행
 	GetWorld()->GetTimerManager().SetTimer(AnimTimerhandle,	this, &UIntroCinematic::PlaySkipAnim, 3.0f, true);
 
-	Btn_Skip->OnClicked.AddDynamic(this, &UIntroCinematic::OnCickSkip);
+	Btn_Skip->OnClicked.AddDynamic(this, &UIntroCinematic::OnClickSkip);
 }
 
 void UIntroCinematic::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -47,7 +47,7 @@ void UIntroCinematic::PlaySkipAnim()
 	PlayAnimation(SkipAnim);
 }
 
-void UIntroCinematic::OnCickSkip()
+void UIntroCinematic::OnClickSkip()
 {
 	AClientRoomGameMode* GM = Cast<AClientRoomGameMode>(GetWorld()->GetAuthGameMode());
 	if (GM)
