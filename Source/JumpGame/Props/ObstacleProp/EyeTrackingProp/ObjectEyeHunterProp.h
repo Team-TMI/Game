@@ -61,6 +61,7 @@ public:
 	FVector2D GenerateRandomControlPoint(FVector2D StartPos, FVector2D EndPos, float RandomRadius);
 	// 뷰포트에 따른 TargetPositions 위치 결정 함수
 	void SetTargetPositionsByViewport();
+	void ChooseTargetPositionsRatio();
 	
 public:
 	UPROPERTY(VisibleAnywhere)
