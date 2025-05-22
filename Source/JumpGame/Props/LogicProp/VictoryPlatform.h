@@ -34,7 +34,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* VictoryPlane;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UStaticMeshComponent* VictoryCube;
+	class UStaticMeshComponent* VictoryTomb;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* VictoryTreeOne;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* VictoryTreeTwo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UArrowComponent* VictoryArrow;
 
