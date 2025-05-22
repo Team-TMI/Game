@@ -56,26 +56,26 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 테스트용 키바인딩
-	/*if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Six))
-	{
-		// 6번 누르면 녹음시작
-		StartRecord();
-	}
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Five))
-	{
-		// 5번 누르면 녹음끝
-		StopRecord();
-	}
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Seven))
-	{
-		// 7번 누르면 퀴즈 메세지 받아오기
-		ReceiveSoundQuizMessage();
-	}
-		if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
-	{
-		// 9번 누르면 퀴즈 음성 파일 메세지 전송
-		SendSoundQuizMessage();
-	}*/
+	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Six))
+	// {
+	// 	// 6번 누르면 녹음시작
+	// 	StartRecord();
+	// }
+	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Five))
+	// {
+	// 	// 5번 누르면 녹음끝
+	// 	StopRecord();
+	// }
+	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Seven))
+	// {
+	// 	// 7번 누르면 퀴즈 메세지 받아오기
+	// 	ReceiveSoundQuizMessage();
+	// }
+	// 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
+	// {
+	// 	// 9번 누르면 퀴즈 음성 파일 메세지 전송
+	// 	SendSoundQuizMessage();
+	// }
 
 	// 치트키
 	if (bCheatMode)
@@ -206,7 +206,9 @@ void ASoundQuizProp::SendSoundQuizMessage()
 	// 1. 바이너리 데이터를 로딩하자 (처음 한번만!)
 	if (CurrentSendIndex == 0)
 	{
-		FString FilePath = TEXT("C:/FinalProject/Game/Saved/SoundQuizResponseFile.wav");
+		// FString FilePath = TEXT("C:/FinalProject/Game/Saved/SoundQuizResponseFile.wav");
+		FString FilePath = FPaths::ProjectDir() + TEXT("Saved/AudioRecordings/") + TEXT("SoundQuizResponseFile.wav");
+		FFastLogger::LogFile(TEXT("SocketLog.txt"), TEXT("Sound FilePath : %s"), *FilePath);
 		LoadWavFileBinary(FilePath, CachedBinaryWav);
 		// 없으면 로그 출력
 		if (CachedBinaryWav.Num() == 0)

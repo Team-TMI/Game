@@ -66,8 +66,19 @@ void UVoiceRecorderComponent::StopRecording(const bool bIsStop)
 
 	if (!bIsStop)
 	{
-		FString FiledirectoryPath = FPaths::ProjectSavedDir();
-		FFastLogger::LogConsole(TEXT("FiledirectoryPath: %s"), *FiledirectoryPath);
+		// 상대 경로를 절대 경로로 변경해줘야 함.
+		FString FiledirectoryPath = FPaths::ProjectDir() + TEXT("Saved/AudioRecordings/");
+		if (!FPaths::DirectoryExists(FiledirectoryPath))
+		{
+			// 디렉토리 없으면 생성
+			IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+			if (!PlatformFile.DirectoryExists(*FiledirectoryPath))
+			{
+				PlatformFile.CreateDirectoryTree(*FiledirectoryPath);
+			}
+		}
+		FString AbsolutePath = FPaths::ConvertRelativePathToFull(FiledirectoryPath);
+		
 		Audio::FMixerDevice* MixerDevice = FAudioDeviceManager::GetAudioMixerDeviceFromWorldContext(GetWorld());
 		if (MixerDevice)
 		{
@@ -78,14 +89,13 @@ void UVoiceRecorderComponent::StopRecording(const bool bIsStop)
 
 			if (RecordedBuffer.Num() == 0)
 			{
-				FFastLogger::LogConsole(TEXT("오디오 데이터가 없습니다"));
 				return;
 			}
 
 			RecordingData.Reset(new Audio::FAudioRecordingData());
 			RecordingData->InputBuffer = Audio::TSampleBuffer<int16>(RecordedBuffer, OutChannelCount, OutSampleRate);
 
-			RecordingData->Writer.BeginWriteToWavFile(RecordingData->InputBuffer, TEXT("SoundQuizResponseFile"), FiledirectoryPath, [this]()
+			RecordingData->Writer.BeginWriteToWavFile(RecordingData->InputBuffer, TEXT("SoundQuizResponseFile"), AbsolutePath, [this]()
 			{
 				if (RecordSoundSubmix && RecordSoundSubmix->OnSubmixRecordedFileDone.IsBound())
 				{
