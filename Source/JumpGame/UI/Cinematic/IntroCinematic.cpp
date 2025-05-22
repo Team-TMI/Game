@@ -2,9 +2,10 @@
 
 
 #include "IntroCinematic.h"
-
 #include "FileMediaSource.h"
 #include "MediaPlayer.h"
+#include "Components/Button.h"
+#include "JumpGame/Core/GameMode/ClientRoomGameMode.h"
 
 void UIntroCinematic::NativeOnInitialized()
 {
@@ -15,6 +16,13 @@ void UIntroCinematic::NativeOnInitialized()
 		MediaPlayer->OpenSource(MediaSource);
 		MediaPlayer->Play();
 	}
+	
+	PlayAnimation(SkipAnim);
+
+	// 일정 시간마다 애니메이션 반복 실행
+	GetWorld()->GetTimerManager().SetTimer(AnimTimerhandle,	this, &UIntroCinematic::PlaySkipAnim, 3.0f, true);
+
+	Btn_Skip->OnClicked.AddDynamic(this, &UIntroCinematic::OnCickSkip);
 }
 
 void UIntroCinematic::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -31,5 +39,20 @@ void UIntroCinematic::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("배속 재생이 지원되지 않습니다."));
 		}
+	}
+}
+
+void UIntroCinematic::PlaySkipAnim()
+{
+	PlayAnimation(SkipAnim);
+}
+
+void UIntroCinematic::OnCickSkip()
+{
+	AClientRoomGameMode* GM = Cast<AClientRoomGameMode>(GetWorld()->GetAuthGameMode());
+	if (GM)
+	{
+		GM->OnVideoEnd();
+		GetWorld()->GetTimerManager().ClearTimer(AnimTimerhandle);
 	}
 }
