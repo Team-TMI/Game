@@ -241,8 +241,8 @@ void UCategoryUI::OnImageSearchButtonClicked()
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.Unbind();
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &UCategoryUI::OnImageSearchButtonResponse);
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffix(TEXT(".jpg"));
-	FString ExecutablePath = FPlatformProcess::ExecutablePath();
-	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
+	
+	FString ExecutableDir = FPaths::ProjectDir();
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetVisibility(ESlateVisibility::Visible);
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->LoadDirectoryContents(ExecutableDir);
 }

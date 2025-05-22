@@ -40,8 +40,8 @@ void USelectRoomUI::InitSelectRoomUI()
 	}
 	bIsInitialized = true;
 	
-	OriginMapList = GetMapList(TEXT(".json"), TEXT("Content\\Maps\\OriginMap"));
-	CustomMapList = GetMapList(TEXT(".json"), TEXT("Content\\Maps\\CustomMap"));
+	OriginMapList = GetMapList(TEXT(".json"), TEXT("OriginMap\\"));
+	CustomMapList = GetMapList(TEXT(".json"), TEXT("CustomMap\\"));
 	CombinedMapList.Append(OriginMapList);
 	CombinedMapList.Append(CustomMapList);
 
@@ -54,6 +54,8 @@ void USelectRoomUI::InitSelectRoomUI()
 		UHorizontalBox* HorizontalBox = NewObject<UHorizontalBox>(this, UHorizontalBox::StaticClass());
 		MapSlotBoxes.Add(HorizontalBox);
 	}
+
+	OnClickAllMap();
 }
 
 void USelectRoomUI::OnClickGoBackWait()
@@ -151,8 +153,7 @@ TArray<FString> USelectRoomUI::GetMapList(const FString& MapType, const FString&
 {
 	TArray<FString> MapList;
 
-	FString ExecutablePath = FPlatformProcess::ExecutablePath();
-	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
+	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData\\Content\\Maps\\");
 	FString MapPath = FPaths::Combine(ExecutableDir, MapDir);
 
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
