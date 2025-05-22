@@ -18,6 +18,7 @@ void UMapMenuUI::NativeOnInitialized()
 	SaveConfirm->OnClicked.AddDynamic(this, &UMapMenuUI::OnSaveConfirmClicked);
 
 	BackButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnBackButtonClicked);
+	SaveCloseButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnSaveCloseButtonClicked);
 }
 
 void UMapMenuUI::OnSaveButtonClicked()
@@ -51,3 +52,7 @@ void UMapMenuUI::OnBackButtonClicked()
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("/Game/Maps/ClientRoomLevel"));
 }
 
+void UMapMenuUI::OnSaveCloseButtonClicked()
+{
+	SavePopup->SetVisibility(ESlateVisibility::Collapsed);
+}
