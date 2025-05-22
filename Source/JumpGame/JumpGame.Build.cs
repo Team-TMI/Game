@@ -13,10 +13,10 @@ public class JumpGame : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
 			"UMG", "OnlineSubsystem" , "OnlineSubsystemSteam", "SlateCore",
 			"Json", "JsonUtilities", "HTTP", "WebSockets", "InteractiveToolsFramework",
-			"MotionTrajectory", "AdvancedWidgets", "AudioMixer", "CableComponent"
+			"MotionTrajectory", "AdvancedWidgets", "AudioMixer", "CableComponent", "MediaAssets"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
