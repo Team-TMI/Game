@@ -94,11 +94,14 @@ void ULoadMapComponent::LoadMapWithString(const FString& FileName)
 	BuildMapFromSaveData();
 }
 
-void ULoadMapComponent::PickFile(const FString& Suffix)
+void ULoadMapComponent::PickFile(const FString& Suffix, bool bBindFunction)
 {
 	FileBrowserUI->SetVisibility(ESlateVisibility::Visible);
-	FileBrowserUI->OnFileSelectedDelegate.Unbind();
-	FileBrowserUI->OnFileSelectedDelegate.BindUObject(this, &ULoadMapComponent::OnPickFileComplete);
+	if (bBindFunction)
+	{
+		FileBrowserUI->OnFileSelectedDelegate.Unbind();
+		FileBrowserUI->OnFileSelectedDelegate.BindUObject(this, &ULoadMapComponent::OnPickFileComplete);
+	}
 
 	FString ExecutablePath = FPlatformProcess::ExecutablePath();
 	FString ExecutableDir = FPaths::GetPath(ExecutablePath);

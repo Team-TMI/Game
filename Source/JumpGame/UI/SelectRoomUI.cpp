@@ -12,6 +12,7 @@
 #include "Components/TextBlock.h"
 #include "MapSlotUI.h"
 #include "Components/HorizontalBox.h"
+#include "FileBrowser/FileBrowserUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 
 void USelectRoomUI::NativeOnInitialized()
@@ -59,6 +60,10 @@ void USelectRoomUI::OnClickGoBackWait()
 {
 	// 맵 선택 취소
 	// RemoveFromParent();
+	if (PreviewSelectedMapSlotUI)
+	{
+		PreviewSelectedMapSlotUI->RemoveFromParent();
+	}
 	PreviewSelectedMapSlotUI = nullptr;
 }
 
@@ -67,6 +72,12 @@ void USelectRoomUI::OnClickSelectComplete()
 	// TODO: 맵 정보 넘겨주기
 	// 선택완료 됐으니 팝업창 지우자
 	RemoveFromParent();
+	// 현재 선택 중인 맵이 PickFile로 선택되었던 거랴면 RemoveFromParent를 해줌
+	if (bCurrentByPickedFile)
+	{
+		CurrentSelectedMapSlotUI->RemoveFromParent();
+	}
+	bCurrentByPickedFile = bPreviewByPickedFile;
 	CurrentSelectedMapSlotUI = PreviewSelectedMapSlotUI;
 	PreviewSelectedMapSlotUI = nullptr;
 	UJumpGameInstance* GameInstance = Cast<UJumpGameInstance>(GetGameInstance());
@@ -109,8 +120,32 @@ void USelectRoomUI::OnPickCustomMap()
 		return ;
 	}
 	FString Suffix = TEXT(".json");
-	GameState->LoadMapComponent->PickFile(Suffix);
+	GameState->LoadMapComponent->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &USelectRoomUI::OnPickFileComplete);
+	GameState->LoadMapComponent->PickFile(Suffix, false);
 }
+
+void USelectRoomUI::OnPickFileComplete(const FString& FilePath, bool bSuccess)
+{
+	ALobbyGameState* GameState = Cast<ALobbyGameState>(GetWorld()->GetGameState());
+	if (!GameState)
+	{
+		return ;
+	}
+	GameState->LoadMapComponent->GetFileBrowserUI()->OnFileSelectedDelegate.Unbind();
+	if (!bSuccess)
+	{
+		return ;
+	}
+
+	FFastLogger::LogScreen(FColor::Red, TEXT("here"));
+	
+	UMapSlotUI* MapSlot = CreateWidget<UMapSlotUI>(GetWorld(), MapSlotClass);
+	FString FileName = FPaths::GetCleanFilename(FilePath);
+	MapSlot->Init(FilePath, FileName);
+	PreviewSelectedMapSlotUI = MapSlot;
+	bPreviewByPickedFile = true;
+}
+
 
 TArray<FString> USelectRoomUI::GetMapList(const FString& MapType, const FString& MapDir)
 {
@@ -189,7 +224,8 @@ void USelectRoomUI::OnMapClicked(UMapSlotUI* MapSlot)
 		return ;
 	}
 
-	PreviewSelectedMapSlotUI = MapSlot;	
+	PreviewSelectedMapSlotUI = MapSlot;
+	bPreviewByPickedFile = false;
 }
 
 void USelectRoomUI::FillScrollBox(UScrollBox* ScrollBox, const TArray<UMapSlotUI*>& MapList)
