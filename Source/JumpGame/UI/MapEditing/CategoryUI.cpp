@@ -241,10 +241,14 @@ void UCategoryUI::OnImageSearchButtonClicked()
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.Unbind();
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &UCategoryUI::OnImageSearchButtonResponse);
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffix(TEXT(".jpg"));
-	FString ExecutablePath = FPlatformProcess::ExecutablePath();
-	FString ExecutableDir = FPaths::GetPath(ExecutablePath);
+
+	FString RelativeDir = FPaths::ProjectDir();
+
+	FString AbsoluteDir = FPaths::ConvertRelativePathToFull(RelativeDir);
+	FPaths::MakePlatformFilename(AbsoluteDir);
+	
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetVisibility(ESlateVisibility::Visible);
-	GameState->GetLoadMapComponent()->GetFileBrowserUI()->LoadDirectoryContents(ExecutableDir);
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->LoadDirectoryContents(AbsoluteDir);
 }
 
 bool UCategoryUI::OpenFileDialog(FString& OutFilePath)
@@ -310,8 +314,9 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 	ImageField.Data = ImageData;
 
 	FHttpMultipartRequest Request;
-	Request.ServerURL = GameState->GetImageRequestURL();
-	Request.RequestPath = GameState->GetImageRequestPath();
+	FHTTPHandlerInitInfo HttpInfo = GameState->HttpManagerComponent->GetHttpHandlerInitInfo();
+	Request.ServerURL = HttpInfo.HttpsRequestImageURL;
+	Request.RequestPath = HttpInfo.HttpsRequestImagePath;
 	// Request.AdditionalHeaders.Add(TEXT("Authorization"), TEXT("Bearer token"));
 	Request.MultipartFields.Add(ImageField);
 

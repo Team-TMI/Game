@@ -6,9 +6,11 @@
 #include <queue>
 
 #include "CoreMinimal.h"
+#include "HTTPHandlerInitInfo.h"
 #include "HttpMessage.h"
 #include "Message.h"
 #include "Components/ActorComponent.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "HttpManagerComponent.generated.h"
 
 
@@ -25,11 +27,17 @@ public:
 	bool PopHttpMessage(const EMessageType& MessageType, FHttpMessageWrapper& OutMessage);
 	
 	TMap<EMessageType, TSharedPtr<class IIOHandlerInterface>> HttpHandlers;
+
+	GETTER(FHTTPHandlerInitInfo, HttpHandlerInitInfo);
 	
 protected:
+	UPROPERTY()
+	FHTTPHandlerInitInfo HttpHandlerInitInfo;
+
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	void RegisterHttpHandler(const EMessageType& MessageType, TSharedPtr<class IIOHandlerInterface> Handler);
+	bool InitializeConfigFile();
 	
 	std::map<EMessageType, std::queue<FHttpMessageWrapper>> HttpMessageQueue;
 };

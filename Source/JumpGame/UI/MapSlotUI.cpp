@@ -18,9 +18,15 @@ void UMapSlotUI::Init(const FString& InMapFullPath, const FString& InMapName)
 {
 	MapName = InMapName;
 	MapFullPath = InMapFullPath;
+	// 파일 이름이 너무 길면 자르자
 	if (Text_MapName)
 	{
-		Text_MapName->SetText(FText::FromString(MapName));
+		FString ShortenedMapName = MapName;
+		if (ShortenedMapName.Len() > 10)
+		{
+			ShortenedMapName = ShortenedMapName.Left(10) + TEXT("...");
+		}
+		Text_MapName->SetText(FText::FromString(ShortenedMapName));
 	}
 }
 

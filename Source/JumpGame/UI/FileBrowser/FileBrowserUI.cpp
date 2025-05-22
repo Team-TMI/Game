@@ -41,7 +41,9 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 		NewDirectoryPath = DirectoryPath;
 	}
 
-	CurrentDirectoryText->SetText(FText::FromString(NewDirectoryPath));
+	FString ShownString = EllipsisLastFolders(NewDirectoryPath);
+	
+	CurrentDirectoryText->SetText(FText::FromString(ShownString));
 	// FFastLogger::LogScreen(FColor::Red, TEXT("LoadDirectoryContents : %s"), *NewDirectoryPath);
 	
 	if (!PlatformFile.DirectoryExists(*NewDirectoryPath))
@@ -61,7 +63,7 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 		const FString ItemPath = FString(Path);
 		const FString ItemName = FPaths::GetCleanFilename(ItemPath);
 
-		if (bIsDirectory)
+		if (bIsDirectory && !ItemName.StartsWith(TEXT(".")))
 		{
 			CreateDirectoryButton(ItemName, ItemPath);
 		}
@@ -125,7 +127,9 @@ void UFileBrowserUI::CreateFileButton(const FString& FileName, const FString& Fu
 void UFileBrowserUI::OnDirectorySelected(const FString& FullPath)
 {
 	// 디렉토리 선택 시 해당 디렉토리의 내용을 로드
-	LoadDirectoryContents(FullPath);
+	FString AbsolutePath = FPaths::ConvertRelativePathToFull(FullPath);
+	FPaths::MakePlatformFilename(AbsolutePath);
+	LoadDirectoryContents(AbsolutePath);
 }
 
 // 외부에 최종적으로 선택된 파일 경로를 전달
@@ -202,4 +206,48 @@ void UFileBrowserUI::OnCloseButtonClicked()
 	CurrentFileText->SetHintText(FText::FromString(DefaultString));
 
 	OnFileSelectedDelegate.Execute(CurrentFilePath, false);
+}
+
+FString UFileBrowserUI::EllipsisLastFolders(const FString& InPath, int32 NumFoldersToKeep)
+{
+	// 1) OS 구분자를 통일해 두면 처리하기가 쉽다
+	FString Normalized = InPath;
+	FPaths::NormalizeFilename(Normalized);      // '\' → '/'
+
+	// 뒤에 슬래시가 붙어 있으면 제거
+	if (Normalized.EndsWith(TEXT("/")))
+	{
+		Normalized.LeftChopInline(1);
+	}
+
+	// 2) 디렉터리 조각을 분리
+	TArray<FString> Segments;
+	Normalized.ParseIntoArray(Segments, TEXT("/"), /* CullEmpty = */ true);
+
+	if (Segments.Num() <= NumFoldersToKeep)
+	{
+		// 폴더가 2개 이하 → 전부 표시 (굳이 줄이지 않음)
+		return Normalized;
+	}
+
+	// 3) 마지막 N개만 다시 조립
+	FString EllipsisPath;
+	EllipsisPath.Append(TEXT("…"));
+	for (int32 i = Segments.Num() - NumFoldersToKeep; i < Segments.Num(); ++i)
+	{
+		EllipsisPath.Append(TEXT("/"));
+		// 4) 만약에 Segment의 길이가 4자 이상이면 뒤에 ..
+		// 그리고 마지막이면 ..을 붙이지 않음
+		const bool bIsLast = (i == Segments.Num() - 1);
+		if (Segments[i].Len() > 4 && !bIsLast)
+		{
+			EllipsisPath.Append(Segments[i].Left(4));
+			EllipsisPath.Append(TEXT(".."));
+		}
+		else
+		{
+			EllipsisPath.Append(Segments[i]);
+		}
+	}
+	return FString(EllipsisPath);
 }
