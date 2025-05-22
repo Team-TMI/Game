@@ -28,6 +28,7 @@ public:
 	GETTER(class UCategorySystem*, CategorySystem);
 	GETTER(class USaveMapComponent*, SaveMapComponent);
 	GETTER(class ULoadMapComponent*, LoadMapComponent);
+	GETTER(class UMapEditingHUD*, MapEditingHUD);
 
 private:
 	UPROPERTY(Category = EditorState, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
