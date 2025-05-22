@@ -61,7 +61,7 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 		const FString ItemPath = FString(Path);
 		const FString ItemName = FPaths::GetCleanFilename(ItemPath);
 
-		if (bIsDirectory)
+		if (bIsDirectory && !ItemName.StartsWith(TEXT(".")))
 		{
 			CreateDirectoryButton(ItemName, ItemPath);
 		}
@@ -125,7 +125,9 @@ void UFileBrowserUI::CreateFileButton(const FString& FileName, const FString& Fu
 void UFileBrowserUI::OnDirectorySelected(const FString& FullPath)
 {
 	// 디렉토리 선택 시 해당 디렉토리의 내용을 로드
-	LoadDirectoryContents(FullPath);
+	FString AbsolutePath = FPaths::ConvertRelativePathToFull(FullPath);
+	FPaths::MakePlatformFilename(AbsolutePath);
+	LoadDirectoryContents(AbsolutePath);
 }
 
 // 외부에 최종적으로 선택된 파일 경로를 전달

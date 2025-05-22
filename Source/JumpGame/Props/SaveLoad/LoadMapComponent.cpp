@@ -71,10 +71,13 @@ void ULoadMapComponent::LoadMap()
 	FileBrowserUI->SetVisibility(ESlateVisibility::Visible);
 	FileBrowserUI->OnFileSelectedDelegate.BindUObject(this, &ULoadMapComponent::OnLoadFileComplete);
 
-	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
+	FString RelativeDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
 
+	FString AbsoluteDir = FPaths::ConvertRelativePathToFull(RelativeDir);
+	FPaths::MakePlatformFilename(AbsoluteDir);
+	
 	FileBrowserUI->SetSuffix(TEXT(".json"));
-	FileBrowserUI->LoadDirectoryContents(ExecutableDir);
+	FileBrowserUI->LoadDirectoryContents(AbsoluteDir);
 }
 
 void ULoadMapComponent::LoadMapWithString(const FString& FileName)
@@ -102,10 +105,13 @@ void ULoadMapComponent::PickFile(const FString& Suffix, bool bBindFunction)
 		FileBrowserUI->OnFileSelectedDelegate.BindUObject(this, &ULoadMapComponent::OnPickFileComplete);
 	}
 
-	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
+	FString RelativeDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
+
+	FString AbsoluteDir = FPaths::ConvertRelativePathToFull(RelativeDir);
+	FPaths::MakePlatformFilename(AbsoluteDir);
 	
 	FileBrowserUI->SetSuffix(Suffix);
-	FileBrowserUI->LoadDirectoryContents(ExecutableDir);
+	FileBrowserUI->LoadDirectoryContents(AbsoluteDir);
 }
 
 bool ULoadMapComponent::LoadFileToJsonString(const FString& FilePath, FString& JsonString)
