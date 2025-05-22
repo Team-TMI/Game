@@ -23,6 +23,7 @@ void USaveMapComponent::BeginPlay()
 bool USaveMapComponent::SaveMap(const FString& FileName)
 {
 	CollisionPropTags.Empty();
+	SaveDataArray.SaveDataArray.Empty();
 	GetAllPropsInfo(SaveDataArray.SaveDataArray);
 	if (CollisionPropTags.Num() != 0)
 	{

@@ -60,14 +60,14 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 	{
 		LaunchSound = Cast<USoundCue>(SoundAsset.Object);
 	}
-	
+
 	static ConstructorHelpers::FObjectFinder<USoundCue> PlantMoveSoundAsset
 		(TEXT("/Game/Sounds/Ques/PlantMove_Cue.PlantMove_Cue"));
 	if (PlantMoveSoundAsset.Succeeded())
 	{
 		PlantMoveSound = Cast<USoundCue>(PlantMoveSoundAsset.Object);
 	}
-	
+
 	CollisionComp->SetRelativeLocation(FVector(0, 0, 100.f));
 	MeshComp->SetRelativeLocation(FVector(0, 0, -100.f));
 
@@ -172,18 +172,7 @@ void AObjectEyeHunterProp::StartMission()
 	}
 
 	// Object가 움직일 경로 (비율로 저장)
-	// 오른쪽 상단
-	TargetPositionsRatio.Add(FVector2D(0.15f, 0.15f));
-	// 오른쪽 하단
-	TargetPositionsRatio.Add(FVector2D(0.15f, 0.85f));
-	// 중간
-	TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
-	// 왼쪽 상단
-	TargetPositionsRatio.Add(FVector2D(0.85f, 0.15f));
-	// 왼쪽 하단
-	TargetPositionsRatio.Add(FVector2D(0.85f, 0.85f));
-	// 중간
-	TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+
 
 	// 초기 목표 위치 계산
 	SetTargetPositionsByViewport();
@@ -191,7 +180,7 @@ void AObjectEyeHunterProp::StartMission()
 	CurrentTargetIndex = 0;
 	BezierAlpha = 0.f;
 	ObjectSpeed = 0.3f;
-	
+
 	if (FlyingObjectUI && TrackingUI)
 	{
 		FlyingObjectUI->AddToViewport();
@@ -202,10 +191,10 @@ void AObjectEyeHunterProp::StartMission()
 		const float ScreenY{static_cast<float>(ViewportSize.Y / 2)};
 
 		ObjectScreenLocation = {ScreenX, ScreenY};
-		
+
 		CurrentEyePosition = ObjectScreenLocation;
 		TargetEyePosition = ObjectScreenLocation;
-		
+
 		FlyingObjectUI->SetPositionInViewport(ObjectScreenLocation);
 		TrackingUI->SetPositionInViewport(ObjectScreenLocation);
 	}
@@ -361,7 +350,7 @@ void AObjectEyeHunterProp::RecvEyeTrackingInfo()
 	{
 		return;
 	}
-	
+
 	// TODO : 받아오는 값으로 수정
 	TrackLocation({2880, 1800}, FVector2f(X, Y));
 	//TrackLocation(FVector2f(Width, Height), FVector2f(X, Y))
@@ -666,6 +655,85 @@ void AObjectEyeHunterProp::SetTargetPositionsByViewport()
 	for (const FVector2D& Ratio : TargetPositionsRatio)
 	{
 		TargetPositions.Add(FVector2D(ViewportSize.X * Ratio.X, ViewportSize.Y * Ratio.Y));
+	}
+}
+
+void AObjectEyeHunterProp::ChooseTargetPositionsRatio()
+{
+	int32 ChooseNum{FMath::RandRange(0, 3)};
+
+	switch (ChooseNum)
+	{
+	case 0:
+		// 오른쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.15f));
+	// 오른쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.85f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+	// 왼쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.15f));
+	// 왼쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.85f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+		break;
+	case 1:
+		// 왼쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.15f));
+	// 왼쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.85f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+	// 오른쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.15f));
+	// 오른쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.85f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+		break;
+	case 2:
+		// 오른쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.85f));
+	// 오른쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.15f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+	// 왼쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.85f));
+	// 왼쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.15f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+		break;
+	case 3:
+		// 왼쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.85f));
+	// 왼쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.15f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+	// 오른쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.85f));
+	// 오른쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.15f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+		break;
+	default:
+		// 오른쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.15f));
+	// 오른쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.15f, 0.85f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+	// 왼쪽 상단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.15f));
+	// 왼쪽 하단
+		TargetPositionsRatio.Add(FVector2D(0.85f, 0.85f));
+	// 중간
+		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
+		break;
 	}
 }
 
