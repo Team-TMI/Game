@@ -27,5 +27,21 @@ public:
 	// mp4 등 외부 파일 소스
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Media")
 	UFileMediaSource* MediaSource;
+
+	// 재생 속도
+	UPROPERTY()
+	float CurrentPlayRate = 1.0f;
 	
+	// 스킵
+	UPROPERTY(meta=(BindWidgetAnim),Transient)
+	class UWidgetAnimation* SkipAnim;
+	UFUNCTION(BlueprintCallable, Category="Media")
+	void PlaySkipAnim();
+
+	FTimerHandle AnimTimerhandle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Media")
+	class UButton* Btn_Skip;
+	UFUNCTION()
+	void OnCickSkip();
 };

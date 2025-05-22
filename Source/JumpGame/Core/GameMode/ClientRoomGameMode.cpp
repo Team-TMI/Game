@@ -34,7 +34,6 @@ void AClientRoomGameMode::BeginPlay()
 	}
 }
 
-
 void AClientRoomGameMode::OnVideoEnd()
 {
 	if (IntroCinematic)

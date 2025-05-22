@@ -34,4 +34,7 @@ void UBottomNaviBarUI::OnClickFriend()
 	bool bShow = !bIsOnViewport;
 	FriendsList->PlayShowAnim(bShow);
 	bIsOnViewport = bShow;
+	
+	// 맨 처음 자동 검색
+	FriendsList->OnClickRefresh();
 }
