@@ -1,0 +1,6 @@
+{
+  "ServerUrl": "ws://192.168.20.58:8000/voice_quest",
+  "ServerProtocol": "ws",
+  "ReadPipeName": "python_to_unreal",
+  "SendPipeName": "unreal_to_python"
+}

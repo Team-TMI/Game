@@ -31,6 +31,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 	void RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler);
+	bool InitializeConfigFile();
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,

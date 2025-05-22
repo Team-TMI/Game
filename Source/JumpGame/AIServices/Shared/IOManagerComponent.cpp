@@ -1,5 +1,6 @@
 #include "IOManagerComponent.h"
 
+#include "JsonObjectConverter.h"
 #include "IOHandlers/HttpsMultiPartsHandler.h"
 #include "IOHandlers/IPCHandler.h"
 #include "IOHandlers/SocketHandler.h"
@@ -28,6 +29,11 @@ void UIOManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!InitializeConfigFile())
+	{
+		return ;
+	}
+	
 	// TODO: 방어코드 재설정
 	if (!GetWorld()->GetMapName().Contains(TEXT("InGameLevel")))
 	{
@@ -75,6 +81,44 @@ void UIOManagerComponent::BeginPlay()
 void UIOManagerComponent::RegisterIOHandler(const EMessageType& MessageType, TSharedPtr<IIOHandlerInterface> Handler)
 {
 	IOHandlers.Add(MessageType, Handler);
+}
+
+bool UIOManagerComponent::InitializeConfigFile()
+{
+	FString ConfigFilePath = FPaths::ProjectConfigDir() + TEXT("IOHandlerConfig.json");
+	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("Config file path: %s"), *ConfigFilePath);
+	if (!FPaths::FileExists(ConfigFilePath))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Config file not found: %s"), *ConfigFilePath);
+		return false;
+	}
+
+	FString ConfigContent;
+	FFileHelper::LoadFileToString(ConfigContent, *ConfigFilePath);
+	if (ConfigContent.IsEmpty())
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Config file is empty: %s"), *ConfigFilePath);
+		return false;
+	}
+	if (!FJsonObjectConverter::JsonObjectStringToUStruct(ConfigContent, &IOHandlerInitInfo))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Failed to parse config file: %s"), *ConfigFilePath);
+		return false;
+	}
+
+	FFastLogger::LogConsole(TEXT("Config file loaded successfully: %s"), *ConfigContent);
+	FFastLogger::LogConsole(TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ServerUrl);
+	FFastLogger::LogConsole(TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ServerProtocol);
+	FFastLogger::LogConsole(TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ReadPipeName);
+	FFastLogger::LogConsole(TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.SendPipeName);
+
+	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("Config file loaded successfully: %s"), *ConfigContent);
+	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ServerUrl);
+	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ServerProtocol);
+	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.ReadPipeName);
+	FFastLogger::LogFile(TEXT("ConfigLog"), TEXT("IOHandlerInitInfo: %s"), *IOHandlerInitInfo.SendPipeName);
+	
+	return true;
 }
 
 void UIOManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
