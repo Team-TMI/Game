@@ -71,7 +71,7 @@ void ULoadMapComponent::LoadMap()
 	FileBrowserUI->SetVisibility(ESlateVisibility::Visible);
 	FileBrowserUI->OnFileSelectedDelegate.BindUObject(this, &ULoadMapComponent::OnLoadFileComplete);
 
-	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData\\Content\\Maps\\");
+	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
 
 	FileBrowserUI->SetSuffix(TEXT(".json"));
 	FileBrowserUI->LoadDirectoryContents(ExecutableDir);
@@ -102,7 +102,7 @@ void ULoadMapComponent::PickFile(const FString& Suffix, bool bBindFunction)
 		FileBrowserUI->OnFileSelectedDelegate.BindUObject(this, &ULoadMapComponent::OnPickFileComplete);
 	}
 
-	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData\\Content\\Maps\\");
+	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
 	
 	FileBrowserUI->SetSuffix(Suffix);
 	FileBrowserUI->LoadDirectoryContents(ExecutableDir);

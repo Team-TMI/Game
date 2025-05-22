@@ -153,7 +153,7 @@ TArray<FString> USelectRoomUI::GetMapList(const FString& MapType, const FString&
 {
 	TArray<FString> MapList;
 
-	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData\\Content\\Maps\\");
+	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
 	FString MapPath = FPaths::Combine(ExecutableDir, MapDir);
 
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
