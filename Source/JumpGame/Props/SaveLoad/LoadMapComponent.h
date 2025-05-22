@@ -21,7 +21,7 @@ public:
 	UFUNCTION()
 	void LoadMapWithString(const FString& FileName);
 	UFUNCTION()
-	void PickFile(const FString& Suffix);
+	void PickFile(const FString& Suffix, bool bBindFunction = true);
 
 	UFUNCTION()
 	void OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames);

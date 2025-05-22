@@ -55,6 +55,7 @@ public:
 	void OnPickCustomMap();
 	UFUNCTION()
 	void OnMapClicked(class UMapSlotUI* MapSlotUI);
+	void OnPickFileComplete(const FString& FilePath, bool bSuccess);
 
 	UFUNCTION()
 	TArray<FString> GetMapList(const FString& MapType, const FString& MapDir);
@@ -96,4 +97,7 @@ private:
 	TArray<class UHorizontalBox*> MapSlotBoxes;
 	int32 HorizontalBoxCount = 10;
 	bool bIsInitialized = false;
+
+	bool bPreviewByPickedFile = false;
+	bool bCurrentByPickedFile = false;
 };
