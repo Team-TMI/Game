@@ -41,6 +41,8 @@ public:
 
 	SETTER(FString, Suffix);
 private:
+	FString EllipsisLastFolders(const FString& InPath, int32 NumFoldersToKeep = 2);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
 	TSubclassOf<class UFileItemUI> FileItemClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
