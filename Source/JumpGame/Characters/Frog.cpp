@@ -835,7 +835,7 @@ void AFrog::ServerRPC_StartTongueAttack_Implementation()
 void AFrog::InitJumpGaugeUIComponent()
 {
 	// 로컬 클라만 점프 게이지 보이게
-	if (IsLocallyControlled())
+	if (IsLocallyControlled() || bMapEditingPawn)
 	{
 		SetJumpGaugeVisibility(false);
 	}

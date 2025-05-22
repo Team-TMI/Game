@@ -10,7 +10,7 @@
 void UJumpGaugeUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	
+
 	Frog = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
 	DelegateBind(Frog);
@@ -19,7 +19,6 @@ void UJumpGaugeUI::NativeOnInitialized()
 void UJumpGaugeUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
-	
 }
 
 void UJumpGaugeUI::OnSuperJumpRatioChanged(float NewRatio)
@@ -44,6 +43,7 @@ void UJumpGaugeUI::DelegateBind(AFrog* NewFrog)
 {
 	if (NewFrog)
 	{
+		NewFrog->OnSuperJumpRatioChanged.RemoveDynamic(this, &UJumpGaugeUI::OnSuperJumpRatioChanged);
 		NewFrog->OnSuperJumpRatioChanged.AddDynamic(this, &UJumpGaugeUI::OnSuperJumpRatioChanged);
 	}
 }
