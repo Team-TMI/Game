@@ -34,10 +34,14 @@ private:
 	class UButton* SaveConfirm;
 
 private:
-	// TODO: 수정할거면 수정하기
+	// TODO: 수정할거면 수정하기 (뒤로가기 관련)
 	UFUNCTION()
 	void OnBackButtonClicked();
+	UFUNCTION()
+	void OnSaveCloseButtonClicked();
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "MapMenu", meta = (AllowPrivateAccess = "true"))
 	class UButton* BackButton;
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "MapMenu", meta = (AllowPrivateAccess = "true"))
+	class UButton* SaveCloseButton;
 };
