@@ -14,11 +14,12 @@ void UVictoryPageUI::NativeOnInitialized()
 	Super::NativeOnInitialized();
 	Btn_GoLobby->OnClicked.AddDynamic(this, &UVictoryPageUI::OnClickGoLobby);
 
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	FInputModeUIOnly InputMode;
+	APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+
+	FInputModeGameAndUI InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 	PC->SetInputMode(InputMode);
-	PC->bShowMouseCursor = false;
+	PC->bShowMouseCursor = true;
 }
 
 void UVictoryPageUI::OnClickGoLobby()
