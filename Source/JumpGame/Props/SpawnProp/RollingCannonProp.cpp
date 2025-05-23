@@ -21,10 +21,13 @@ ARollingCannonProp::ARollingCannonProp()
 	ObjectPool = CreateDefaultSubobject<UObjectPoolComponent>(TEXT("ObjectPool"));
 
 	// 콜리전 없음
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
+	CollisionComp->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel7, ECR_Block);
 	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
+	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 void ARollingCannonProp::OnProjectileReturn()

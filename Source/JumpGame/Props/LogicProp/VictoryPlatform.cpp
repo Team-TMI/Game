@@ -19,6 +19,9 @@ AVictoryPlatform::AVictoryPlatform()
 	MeshComp->SetRelativeLocation(FVector(0, 0, -90));
 	MeshComp->SetRelativeScale3D(FVector(4,4,0.5));
 
+	// 콜리전
+	GridInnerCollision->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+
 	// 카메라
 	VictoryCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("VictoryCamera"));
 	VictoryCamera->SetupAttachment(CollisionComp);

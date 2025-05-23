@@ -131,6 +131,10 @@ void ASoundMommyQuizProp::SendEndSoundQuizNotify()
 {
 	Super::SendEndSoundQuizNotify();
 	
+	if (StartSoundUI)
+	{
+		StartSoundUI->RemoveFromParent();
+	}
 	SoundQuizUI->RemoveFromParent();
 	TimeRemainUI->RemoveFromParent();
 }

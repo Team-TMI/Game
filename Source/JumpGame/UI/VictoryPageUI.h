@@ -15,7 +15,7 @@ class JUMPGAME_API UVictoryPageUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_PlayerName;

@@ -24,7 +24,9 @@ ABasicGroundProp::ABasicGroundProp()
 void ABasicGroundProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	// bReplicates = false;
+	// Super::SetReplicateMovement(false);
 }
 
 // Called every frame
