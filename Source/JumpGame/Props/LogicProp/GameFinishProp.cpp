@@ -40,6 +40,8 @@ AGameFinishProp::AGameFinishProp()
 	}
 	
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	CollisionComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
 	Super::SetSize(FVector(1,1,2));
 
@@ -66,7 +68,7 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		
 		// 10초 후에 게임을 끝내자
 		FTimerHandle EndTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(EndTimerHandle, this, &AGameFinishProp::GameEnd, 10.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(EndTimerHandle, this, &AGameFinishProp::GameEnd, 5.0f, false);
 	}
 }
 

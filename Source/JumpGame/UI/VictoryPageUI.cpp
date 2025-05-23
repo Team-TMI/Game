@@ -9,12 +9,16 @@
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 
-void UVictoryPageUI::NativeConstruct()
+void UVictoryPageUI::NativeOnInitialized()
 {
-	Super::NativeConstruct();
-
+	Super::NativeOnInitialized();
 	Btn_GoLobby->OnClicked.AddDynamic(this, &UVictoryPageUI::OnClickGoLobby);
 
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	FInputModeUIOnly InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+	PC->SetInputMode(InputMode);
+	PC->bShowMouseCursor = false;
 }
 
 void UVictoryPageUI::OnClickGoLobby()
