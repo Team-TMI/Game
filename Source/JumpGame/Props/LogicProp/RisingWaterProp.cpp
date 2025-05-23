@@ -58,7 +58,7 @@ ARisingWaterProp::ARisingWaterProp()
 	SetReplicatingMovement(true);
 
 	WaterState = EWaterStateEnum::None;
-	CurrentRisingSpeed = 30.f;
+	CurrentRisingSpeed = 15.f;
 }
 
 void ARisingWaterProp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
