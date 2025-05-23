@@ -78,13 +78,14 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	// }
 
 	// 치트키
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
+	{
+		// 8번 누르면 퀴즈 끝 메세지 전송
+		SendEndSoundQuizNotify();
+	}
+	
 	if (bCheatMode)
 	{
-		if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
-		{
-			// 8번 누르면 퀴즈 끝 메세지 전송
-			SendEndSoundQuizNotify();
-		}
 	}
 
 	if (bIsMessageReceived)
