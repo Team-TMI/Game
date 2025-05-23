@@ -172,7 +172,7 @@ void AObjectEyeHunterProp::StartMission()
 	}
 
 	// Object가 움직일 경로 (비율로 저장)
-
+	ChooseTargetPositionsRatio();
 
 	// 초기 목표 위치 계산
 	SetTargetPositionsByViewport();
