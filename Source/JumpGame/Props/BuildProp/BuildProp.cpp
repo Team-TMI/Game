@@ -19,7 +19,9 @@ ABuildProp::ABuildProp()
 void ABuildProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	bReplicates = false;
+	SetReplicateMovement(false);
 }
 
 // Called every frame

@@ -25,7 +25,9 @@ ADecorationProp::ADecorationProp()
 void ADecorationProp::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	bReplicates = false;
+	SetReplicateMovement(false);
 }
 
 // Called every frame
