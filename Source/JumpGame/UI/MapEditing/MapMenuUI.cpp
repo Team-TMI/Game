@@ -49,7 +49,7 @@ void UMapMenuUI::OnSaveConfirmClicked()
 void UMapMenuUI::OnBackButtonClicked()
 {
 	// 로비로 이동하자
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("/Game/Maps/ClientRoomLevel"));
+	//UGameplayStatics::OpenLevel(GetWorld(), TEXT("/Game/Maps/ClientRoomLevel"));
 }
 
 void UMapMenuUI::OnSaveCloseButtonClicked()

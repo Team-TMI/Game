@@ -103,7 +103,7 @@ void UClientRoomUI::OnClickGoFindRoom()
 
 void UClientRoomUI::OnClickGoCreateMap()
 {
-	UGameplayStatics::OpenLevel(GetWorld(),TEXT("MapEditorLevel"));
+	//UGameplayStatics::OpenLevel(GetWorld(),TEXT("MapEditorLevel"));
 }
 
 void UClientRoomUI::OnClickGoStoryMenu()
