@@ -78,6 +78,11 @@ void AGameFinishProp::BeginPlay()
 	GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
+	if (!GetWorld()->GetMapName().Contains(TEXT("InGameLevel")))
+	{
+		bIsActive = false;
+	}
+
 	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
 	
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGameFinishProp::OnMyBeginOverlap);
