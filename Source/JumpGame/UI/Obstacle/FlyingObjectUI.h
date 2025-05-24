@@ -39,6 +39,8 @@ public:
 	class UImage* OverlapImage;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UImage* GaugeImage;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UTimeRemainUI* WBP_TimeRemain;
 
 public:
 	float GaugeValue;

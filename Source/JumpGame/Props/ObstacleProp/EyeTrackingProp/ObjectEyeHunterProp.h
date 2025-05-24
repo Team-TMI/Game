@@ -76,10 +76,10 @@ public:
 	TSubclassOf<class UFlyingObjectUI> FlyingObjectUIClass;
 	UPROPERTY(EditAnywhere)
 	UFlyingObjectUI* FlyingObjectUI;
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UTimeRemainUI> TimeRemainUIClass;
-	UPROPERTY(EditAnywhere)
-	UTimeRemainUI* TimeRemainUI;
+	// UPROPERTY(EditAnywhere)
+	// TSubclassOf<class UTimeRemainUI> TimeRemainUIClass;
+	// UPROPERTY(EditAnywhere)
+	// UTimeRemainUI* TimeRemainUI;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ULookCenter> LookCenterUIClass;
 	UPROPERTY(EditAnywhere)

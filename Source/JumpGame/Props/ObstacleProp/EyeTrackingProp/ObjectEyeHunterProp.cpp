@@ -33,12 +33,12 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 		FlyingObjectUIClass = FlyingObjectWidget.Class;
 	}
 
-	ConstructorHelpers::FClassFinder<UTimeRemainUI> TimeRemainWidget
-		(TEXT("/Game/UI/Obstacle/WBP_TimeRemain.WBP_TimeRemain_C"));
-	if (TimeRemainWidget.Succeeded())
-	{
-		TimeRemainUIClass = TimeRemainWidget.Class;
-	}
+	// ConstructorHelpers::FClassFinder<UTimeRemainUI> TimeRemainWidget
+	// 	(TEXT("/Game/UI/Obstacle/WBP_TimeRemain.WBP_TimeRemain_C"));
+	// if (TimeRemainWidget.Succeeded())
+	// {
+	// 	TimeRemainUIClass = TimeRemainWidget.Class;
+	// }
 
 	ConstructorHelpers::FClassFinder<ULookCenter> LookCenterWidget
 		(TEXT("/Game/UI/Obstacle/WBP_LookCenter.WBP_LookCenter_C"));
@@ -89,13 +89,13 @@ void AObjectEyeHunterProp::InitializeMission()
 	// 위젯 미리 생성
 	FlyingObjectUI = CreateWidget<UFlyingObjectUI>(GetWorld(), FlyingObjectUIClass);
 	TrackingUI = CreateWidget<UEyeTrackingUI>(GetWorld(), EyeTrackingUIClass);
-	TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
+	//TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
 	LookCenterUI = CreateWidget<ULookCenter>(GetWorld(), LookCenterUIClass);
 
-	if (TimeRemainUI)
+	if (FlyingObjectUI)
 	{
 		// 미션 타이머 종료 바인드
-		TimeRemainUI->OnMissionTimerEnd.AddDynamic(this, &AObjectEyeHunterProp::MissionTimeEnd);
+		FlyingObjectUI->WBP_TimeRemain->OnMissionTimerEnd.AddDynamic(this, &AObjectEyeHunterProp::MissionTimeEnd);
 	}
 
 	if (GEngine && GEngine->GameViewport)
@@ -157,14 +157,14 @@ void AObjectEyeHunterProp::StartMission()
 	if (FlyingObjectUI)
 	{
 		FlyingObjectUI->InitializeParameters();
+		// 10초 후 미션 종료 ( 타이머 설정 )
+		FlyingObjectUI->WBP_TimeRemain->StartMissionTimer(20.f);
 	}
 
-	if (TimeRemainUI)
-	{
-		TimeRemainUI->AddToViewport();
-		// 10초 후 미션 종료 ( 타이머 설정 )
-		TimeRemainUI->StartMissionTimer(20.f);
-	}
+	// if (TimeRemainUI)
+	// {
+	// 	TimeRemainUI->AddToViewport();
+	// }
 
 	if (GEngine && GEngine->GameViewport)
 	{
@@ -545,17 +545,17 @@ void AObjectEyeHunterProp::ResetMission()
 	// 미션 끝
 	bIsStartHunt = false;
 
-	TimeRemainUI->StopMissionTimer();
+	FlyingObjectUI->WBP_TimeRemain->StopMissionTimer();
 
 	if (TrackingUI)
 	{
 		TrackingUI->RemoveFromParent();
 	}
 
-	if (TimeRemainUI)
-	{
-		TimeRemainUI->RemoveFromParent();
-	}
+	// if (TimeRemainUI)
+	// {
+	// 	FlyingObjectUI->WBP_TimeRemain->RemoveFromParent();
+	// }
 
 	FlowTime = 0.f;
 	SuccessRatio = 0.f;

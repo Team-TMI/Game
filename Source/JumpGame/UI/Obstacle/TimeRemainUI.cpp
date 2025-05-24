@@ -4,17 +4,40 @@
 #include "TimeRemainUI.h"
 
 #include "Components/RadialSlider.h"
+#include "Components/ScaleBox.h"
+#include "Components/TextBlock.h"
 
 void UTimeRemainUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	ChangeGaugeValue(0.f);
+	TimeText->SetText(FText());
 }
 
 void UTimeRemainUI::ChangeGaugeValue(float Value)
 {
 	MissionTimeRemainSlider->SetValue(Value);
+}
+
+void UTimeRemainUI::SetScaleBoxSize(FVector2D Size)
+{
+	Time_ScaleBox->SetRenderScale(Size);
+}
+
+void UTimeRemainUI::SetBarThickness(float Thickness)
+{
+	MissionTimeRemainSlider->WidgetStyle.BarThickness = Thickness;
+}
+
+void UTimeRemainUI::SetTimeTextColor(FLinearColor Color)
+{
+	TimeText->SetColorAndOpacity(Color);
+}
+
+void UTimeRemainUI::TimeTextOff()
+{
+	TimeText->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UTimeRemainUI::StartMissionTimer(float InMissionTime)
@@ -38,7 +61,9 @@ void UTimeRemainUI::StopMissionTimer()
 void UTimeRemainUI::MissionTimerTick()
 {
 	CurrentMissionTime += GetWorld()->GetDeltaSeconds();
-
+	
+	SetTimeTextTime(static_cast<int>(MissionTime - CurrentMissionTime));
+	
 	ChangeGaugeValue(CurrentMissionTime / MissionTime);
 	if (CurrentMissionTime >= MissionTime)
 	{
@@ -46,4 +71,14 @@ void UTimeRemainUI::MissionTimerTick()
 		// 미션 종료 알람을 보내자
 		OnMissionTimerEnd.Broadcast();
 	}
+}
+
+void UTimeRemainUI::SetTimeTextTime(int Time)
+{
+	TimeText->SetText(FText::AsNumber(Time));
+
+	// if (Time < MissionTime * 0.4)
+	// {
+	// 	SetTimeTextColor(FLinearColor::Yellow);
+	// }
 }

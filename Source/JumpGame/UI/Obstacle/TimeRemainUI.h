@@ -17,10 +17,19 @@ public:
 	virtual void NativeConstruct() override;
 	
 	void ChangeGaugeValue(float Value);
+	void SetScaleBoxSize(FVector2D Size);
+	void SetBarThickness(float Thickness);
+	void SetTimeTextColor(FLinearColor Color);
+	void SetTimeTextTime(int Time);
+	void TimeTextOff();
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class URadialSlider* MissionTimeRemainSlider;
-
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UScaleBox* Time_ScaleBox;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* TimeText;
+	
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnTimerEndDelegate OnMissionTimerEnd;

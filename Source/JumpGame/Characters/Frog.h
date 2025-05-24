@@ -118,6 +118,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetJumpAvailableBlock(int32 Block);
 	void CalculateWaterCameraOverlapRatio(float dt);
+	void SetFrogVignetteIntensity_PP(float Value);
+	void SetFrogBrightness_PP(float Value);
 	
 public:
 	// 물에 들어갔는지, 나왔는지 업데이트
@@ -264,6 +266,8 @@ public:
 	UMaterialInstanceDynamic* WaterPostProcessDynamicMaterial;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UPostProcessComponent* WaterPostProcessComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UPostProcessComponent* SettingPostProcessComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UStaticMeshComponent* FrogTongueMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

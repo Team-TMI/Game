@@ -155,6 +155,9 @@ AFrog::AFrog()
 		WaterPostProcessComponent->SetupAttachment(GetRootComponent());
 		WaterPostProcessComponent->bEnabled = false;
 	}
+	
+	SettingPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("SettingPostProcessComponent"));
+	SettingPostProcessComponent->SetupAttachment(GetRootComponent());
 
 	FrogTongueMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FrogTongueMesh"));
 	FrogTongueMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -1604,6 +1607,16 @@ void AFrog::ServerRPC_ProcessOverlap_Implementation(class AObstacleProp* Obstacl
 		return ;
 	}
 	ObstacleProp->MulticastRPC_PlayEffect(ObstacleProp->GetActorLocation());
+}
+
+void AFrog::SetFrogVignetteIntensity_PP(float Value)
+{
+	SettingPostProcessComponent->Settings.VignetteIntensity = Value;
+}
+
+void AFrog::SetFrogBrightness_PP(float Value)
+{
+	SettingPostProcessComponent->Settings.VignetteIntensity = Value;
 }
 
 void AFrog::FrogSkinFinder()

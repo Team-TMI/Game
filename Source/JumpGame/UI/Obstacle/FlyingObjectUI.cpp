@@ -3,6 +3,7 @@
 
 #include "FlyingObjectUI.h"
 
+#include "TimeRemainUI.h"
 #include "Components/Image.h"
 #include "JumpGame/Utils/FastLogger.h"
 
@@ -21,6 +22,11 @@ void UFlyingObjectUI::InitializeParameters()
 	FailImage->SetRenderOpacity(0.f);
 	OverlapImage->SetRenderOpacity(0.f);
 	GaugeImage->SetRenderOpacity(1.f);
+	WBP_TimeRemain->SetRenderOpacity(1.f);
+	WBP_TimeRemain->SetScaleBoxSize(FVector2D({0.25, 0.25}));
+	WBP_TimeRemain->SetBarThickness(25.f);
+	WBP_TimeRemain->TimeTextOff();
+	
 	GaugeValue = 0.f;
 }
 
@@ -45,6 +51,7 @@ void UFlyingObjectUI::SuccessMission()
 	FailImage->SetRenderOpacity(0.f);
 	GaugeImage->SetRenderOpacity(0.f);
 	OverlapImage->SetRenderOpacity(0.f);
+	WBP_TimeRemain->SetRenderOpacity(0.f);
 }
 
 void UFlyingObjectUI::FailMission()
@@ -63,6 +70,7 @@ void UFlyingObjectUI::Overlapping()
 	FailImage->SetRenderOpacity(0.f);
 	GaugeImage->SetRenderOpacity(1.f);
 	OverlapImage->SetRenderOpacity(1.f);
+	WBP_TimeRemain->SetRenderOpacity(1.f);
 }
 
 void UFlyingObjectUI::NotOverlapping()
@@ -72,4 +80,5 @@ void UFlyingObjectUI::NotOverlapping()
 	FailImage->SetRenderOpacity(0.f);
 	GaugeImage->SetRenderOpacity(1.f);
 	OverlapImage->SetRenderOpacity(0.f);
+	WBP_TimeRemain->SetRenderOpacity(1.f);
 }
