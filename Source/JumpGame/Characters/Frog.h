@@ -118,8 +118,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetJumpAvailableBlock(int32 Block);
 	void CalculateWaterCameraOverlapRatio(float dt);
+	UFUNCTION(BlueprintCallable)
 	void SetFrogVignetteIntensity_PP(float Value);
-	void SetFrogBrightness_PP(float Value);
 	
 public:
 	// 물에 들어갔는지, 나왔는지 업데이트
@@ -274,7 +274,8 @@ public:
 	class USphereComponent* TongueCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UArrowComponent* TongueTipComponent;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class USpotLightComponent* SpotLightComponent;
 	
 	// Enum
 public:
