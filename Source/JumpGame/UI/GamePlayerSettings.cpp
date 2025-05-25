@@ -37,9 +37,6 @@ void UGamePlayerSettings::ApplySettings(bool bCheckForCommandLineOverrides)
 	ApplyVolume(TEXT("/Game/Sounds/Class/SC_InGameEffect.SC_InGameEffect"), FMath::Clamp(CharacterVolume, 0.f, VolumeClamp));
 	ApplyVolume(TEXT("/Game/Sounds/Class/SC_Obstacle.SC_Obstacle"), FMath::Clamp(ObstacleVolume, 0.f, VolumeClamp));
 
-	UE_LOG(LogTemp, Warning, TEXT("[APPLY] 저장된 BgmVolume = %f"), BgmVolume);
-	UE_LOG(LogTemp, Warning, TEXT("[APPLY] 저장된 ColorMode = %d"), ColorMode);
-
 	// 3. 안티앨리어싱 적용
 	GEngine->Exec(GetWorld(), *FString::Printf(TEXT("r.AntiAliasingMethod %d"), AntiValue));
 
