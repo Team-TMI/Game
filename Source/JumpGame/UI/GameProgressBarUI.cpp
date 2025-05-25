@@ -79,11 +79,14 @@ void UGameProgressBarUI::UpdatePlayerPos()
 				// FFastLogger::LogConsole(TEXT("UpdatePlayerPos: %d"),PlayerIndex);
 				// 플레이어 위치값(Z좌표임) 저장
 				float Position = Frog->GetActorLocation().Z - 30.f;
-				
+
+				float Value = FMath::Clamp(Position, 1, 0);
 				// 높이에 따른 개구리 화면 설정: vignette, 해 밝기, 구름 밀도
-				Frog->SetFrogVignetteIntensity_PP(Position + 30.f);
+				Frog->SetFrogVignetteIntensity_PP(Value);
+				UpdateFogDensity(Value);
+				// UpdateSunBrightness(Value);
+				
 				PlayerPos[PlayerIndex] = Position; // PlayerID에 해당하는 인덱스에 저장
-            
 				// 1등 플레이어 위치 갱신
 				WinnerPos = FMath::Max(WinnerPos, Position);
 			}

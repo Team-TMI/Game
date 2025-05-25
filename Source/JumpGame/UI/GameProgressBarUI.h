@@ -93,7 +93,7 @@ public:
 
 	// 높이에 따른 업데이트
 	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateSunBrigntness();
+	void UpdateSunBrightness(float Value);
 	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateFogDensity();
+	void UpdateFogDensity(float Value);
 };
