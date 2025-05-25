@@ -6,8 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "SelectRoomUI.generated.h"
 
-/*
- */
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnMapSelected, class UMapSlotUI*, MapSlotUI);
+
 UCLASS()
 class JUMPGAME_API USelectRoomUI : public UUserWidget
 {
@@ -40,6 +40,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UScrollBox* ScrollBox_CustomMap;
 
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_MapName;
+
 	// 버튼 클릭시 실행 함수
 	UFUNCTION()
 	void OnClickGoBackWait();
@@ -63,6 +66,9 @@ public:
 	// 맵 리스트 관련
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* WidgetSwitcher_SR;
+
+	UPROPERTY()
+	FOnMapSelected OnMapSelectedDelegate;
 
 private:
 	void InitAllMap();

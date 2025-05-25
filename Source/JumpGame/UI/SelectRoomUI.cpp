@@ -30,10 +30,18 @@ void USelectRoomUI::NativeOnInitialized()
 	ScrollBox_AllMap->ClearChildren();
 	ScrollBox_OriginMap->ClearChildren();
 	ScrollBox_CustomMap->ClearChildren();
+
+	Text_MapName->SetText(FText::FromString(TEXT("No Map")));
 }
 
 void USelectRoomUI::InitSelectRoomUI()
 {
+	// Current Selected Map Slot UI를 이미지에 띄워주기
+	if (CurrentSelectedMapSlotUI)
+	{
+		Text_MapName->SetText(FText::FromString(CurrentSelectedMapSlotUI->GetMapName()));
+	}
+	
 	if (bIsInitialized)
 	{
 		return ;
@@ -92,6 +100,8 @@ void USelectRoomUI::OnClickSelectComplete()
 	}
 
 	GameInstance->SetMapFilePath(CurrentSelectedMapSlotUI->GetMapFullPath());
+
+	OnMapSelectedDelegate.ExecuteIfBound(CurrentSelectedMapSlotUI);
 }
 
 void USelectRoomUI::OnClickAllMap()
@@ -148,6 +158,9 @@ void USelectRoomUI::OnPickFileComplete(const FString& FilePath, bool bSuccess)
 	FString FileName = FPaths::GetCleanFilename(FilePath);
 	MapSlot->Init(FilePath, FileName);
 	PreviewSelectedMapSlotUI = MapSlot;
+
+	Text_MapName->SetText(FText::FromString(MapSlot->GetMapName()));
+	
 	bPreviewByPickedFile = true;
 }
 
@@ -230,6 +243,9 @@ void USelectRoomUI::OnMapClicked(UMapSlotUI* MapSlot)
 	}
 
 	PreviewSelectedMapSlotUI = MapSlot;
+
+	Text_MapName->SetText(FText::FromString(MapSlot->GetMapName()));
+	
 	bPreviewByPickedFile = false;
 }
 
