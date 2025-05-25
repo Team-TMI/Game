@@ -29,7 +29,7 @@ ASoundQuizProp::ASoundQuizProp()
 
 	// 여기서
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
-	(TEXT("/Game/Sounds/Ques/SQ_Radio.SQ_Radio"));
+	(TEXT("/Game/Sounds/Ques/SQ_QuizStart.SQ_QuizStart"));
 	if (SoundAsset.Succeeded())
 	{
 		HitSound = Cast<USoundCue>(SoundAsset.Object);
@@ -141,6 +141,14 @@ void ASoundQuizProp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASoundQuizProp ,bIsOverlap);
+}
+
+void ASoundQuizProp::MulticastRPC_PlayEffect(FVector Location, int32 Index)
+{
+	Character = Cast<AFrog>(PC->GetPawn());
+	FVector CharcaterPos = Character->GetActorLocation();
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, CharcaterPos, 0.8f, 1.0f);
+	this->PlayHitEffect(Index);
 }
 
 void ASoundQuizProp::SendStartSoundQuizNotify()
