@@ -42,8 +42,11 @@ void USelectRoomUI::InitSelectRoomUI()
 	
 	OriginMapList = GetMapList(TEXT(".json"), TEXT("OriginMap\\"));
 	CustomMapList = GetMapList(TEXT(".json"), TEXT("CustomMap\\"));
+	SavedMapList = GetMapList(TEXT(".json"), TEXT("../../Saved/SaveMap/"));
 	CombinedMapList.Append(OriginMapList);
 	CombinedMapList.Append(CustomMapList);
+	CombinedMapList.Append(SavedMapList);
+	CustomMapList.Append(SavedMapList);
 
 	InitAllMap();
 	InitOriginMap();
@@ -155,15 +158,16 @@ TArray<FString> USelectRoomUI::GetMapList(const FString& MapType, const FString&
 
 	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
 	FString MapPath = FPaths::Combine(ExecutableDir, MapDir);
+	FString AbsoluteMapPath = FPaths::ConvertRelativePathToFull(MapPath);
 
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	if (!PlatformFile.DirectoryExists(*MapPath))
+	if (!PlatformFile.DirectoryExists(*AbsoluteMapPath))
 	{
 		FFastLogger::LogScreen(FColor::Red, TEXT("Directory does not exist"));
 		return MapList;
 	}
 	
-	PlatformFile.IterateDirectory(*MapPath, [this, &MapList, &MapType](const TCHAR* Path, bool bIsDirectory) -> bool
+	PlatformFile.IterateDirectory(*AbsoluteMapPath, [this, &MapList, &MapType](const TCHAR* Path, bool bIsDirectory) -> bool
 	{
 		const FString ItemPath = FString(Path);
 		// const FString ItemName = FPaths::GetCleanFilename(ItemPath);

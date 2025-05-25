@@ -77,6 +77,8 @@ private:
 	UPROPERTY()
 	TArray<FString> CustomMapList;
 	UPROPERTY()
+	TArray<FString> SavedMapList;
+	UPROPERTY()
 	TArray<FString> CombinedMapList;
 
 	UPROPERTY(meta = (AllowPrivateAccess = "true"), BlueprintReadWrite, EditAnywhere)
