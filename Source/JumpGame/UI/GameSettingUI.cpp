@@ -16,7 +16,7 @@
 void UGameSettingUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
+	
 	// 전환
 	Btn_GameSet->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickGameSet);
 	Btn_OtherSet->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickOtherSet);
@@ -78,6 +78,46 @@ void UGameSettingUI::NativeOnInitialized()
 	{
 		GameQuitUI->AddToViewport(15);
 	}
+
+	// 세팅
+	Settings = Cast<UGamePlayerSettings>(UGameUserSettings::GetGameUserSettings());
+	UE_LOG(LogTemp, Warning, TEXT("UserSettings Class: %s | FullPath: %s"),
+	   *GEngine->GetGameUserSettings()->GetClass()->GetName(),
+	   *GEngine->GetGameUserSettings()->GetClass()->GetPathName()); // 출력 결과가 GamePlayerSettings가 아니면 등록 안 된 것
+	
+	if (Settings)
+	{
+		InitUISettings();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[InitUISettings] Settings is null"));
+	}
+}
+
+void UGameSettingUI::InitUISettings()
+{
+	// 사운드
+	int32 MasterSoundSet = Settings->GetMasterVolume();
+	if (MasterSoundSet == 1)
+	{
+		OnClickSoundOn();
+	}
+	else
+	{
+		OnClickSoundOff();
+	}
+	Sd_Bgm->SetValue(Settings->GetBgmVolume());
+	Sd_Weather->SetValue(Settings->GetWeatherVolume());
+	Sd_UI->SetValue(Settings->GetUIVolume());
+	Sd_Character->SetValue(Settings->GetCharacterVolume());
+	Sd_Obstacle->SetValue(Settings->GetObstacleVolume());
+
+	// 안티엘리어싱
+	ComboBox_Anti->SetSelectedIndex(Settings->GetAntiValue());
+
+	// 색각
+	ComboBox_Color->SetSelectedIndex(Settings->GetColorMode());
 }
 
 void UGameSettingUI::PlaySettingAnim(bool bIsForward)
@@ -126,6 +166,8 @@ void UGameSettingUI::OnClickSoundOn()
 	
 	Btn_SoundOn->SetIsEnabled(false);
 	Btn_SoundOff->SetIsEnabled(true);
+
+	Settings->SetMasterVolume(1);
 }
 
 void UGameSettingUI::OnClickSoundOff()
@@ -141,6 +183,8 @@ void UGameSettingUI::OnClickSoundOff()
 
 	Btn_SoundOn->SetIsEnabled(true);
 	Btn_SoundOff->SetIsEnabled(false);
+
+	Settings->SetMasterVolume(0);
 }
 
 void UGameSettingUI::OnBgmValueChanged(float Value)
@@ -157,6 +201,8 @@ void UGameSettingUI::OnBgmValueChanged(float Value)
 	);
 
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
+
+	Settings->SetBgmVolume(Volume);
 }
 
 void UGameSettingUI::OnWeatherValueChanged(float Value)
@@ -173,6 +219,8 @@ void UGameSettingUI::OnWeatherValueChanged(float Value)
 	);
 
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
+
+	Settings->SetWeatherVolume(Volume);
 }
 
 void UGameSettingUI::OnUIValueChanged(float Value)
@@ -189,6 +237,8 @@ void UGameSettingUI::OnUIValueChanged(float Value)
 	);
 
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
+
+	Settings->SetUIVolume(Volume);
 }
 
 void UGameSettingUI::OnCharacterValueChanged(float Value)
@@ -205,6 +255,8 @@ void UGameSettingUI::OnCharacterValueChanged(float Value)
 	);
 
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
+
+	Settings->SetCharacterVolume(Volume);
 }
 
 void UGameSettingUI::OnObstacleValueChanged(float Value)
@@ -221,6 +273,8 @@ void UGameSettingUI::OnObstacleValueChanged(float Value)
 	);
 
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MasterSoundMix);
+
+	Settings->SetObstacleVolume(Volume);
 }
 
 void UGameSettingUI::OnClickEffectOn()
@@ -241,20 +295,25 @@ void UGameSettingUI::OnClickWeatherOff()
 
 void UGameSettingUI::OnLightValueChanged(float Value)
 {
+	
 }
 
 void UGameSettingUI::SetAntiAliasingQuality(const FString& SelectedOption)
 {
+	int32 Mode = 0;
+
 	// Mode: 0 = None, 1 = FXAA, 2 = TAA
 	if (AntiAliasingMap.Contains(SelectedOption))
 	{
-		int32 Mode = AntiAliasingMap[SelectedOption];
+		Mode = AntiAliasingMap[SelectedOption];
 		FString Cmd = FString::Printf(TEXT("r.AntiAliasingMethod %d"), Mode);
 		if (GEngine)
 		{
 			GEngine->Exec(GetWorld(), *Cmd);
 		}
 	}
+
+	Settings->SetAntiValue(Mode);
 }
 
 void UGameSettingUI::OnAntiModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
@@ -285,6 +344,8 @@ void UGameSettingUI::OnColorModeChanged(FString SelectedItem, ESelectInfo::Type 
 		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Tritanope, 1.0f, true, false);
 		break;
 	}
+
+	Settings->SetColorMode(static_cast<int32>(SelectedMode));
 }
 
 void UGameSettingUI::OnClickQuitGame()
@@ -298,4 +359,12 @@ void UGameSettingUI::OnClickQuitGame()
 void UGameSettingUI::OnClickGoBack()
 {
 	PlaySettingAnim(false);
+
+	if (Settings)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[SAVE] Apply + Save 실행됨"));
+		
+		Settings->ApplySettings(false); // 실제 게임에 반영
+		Settings->SaveSettings(); // .ini에 저장
+	}
 }
