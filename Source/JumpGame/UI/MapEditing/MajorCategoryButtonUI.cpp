@@ -13,6 +13,7 @@ void UMajorCategoryButtonUI::NativeOnInitialized()
 	Super::NativeOnInitialized();
 
 	MajorCategoryButton->OnClicked.AddDynamic(this, &UMajorCategoryButtonUI::OnMajorCategoryButtonClicked);
+	NormalButtonStyle = MajorCategoryButton->GetStyle();
 }
 
 void UMajorCategoryButtonUI::SetMajorCategory(EMajorCategoryType MajorCategory)
@@ -29,4 +30,18 @@ void UMajorCategoryButtonUI::SetMajorCategory(EMajorCategoryType MajorCategory)
 void UMajorCategoryButtonUI::OnMajorCategoryButtonClicked()
 {
 	OnMajorButtonClicked.Broadcast(MajorCategoryType, false);
+}
+
+void UMajorCategoryButtonUI::ClearSelected()
+{
+	MajorCategoryButton->SetStyle(NormalButtonStyle);	
+}
+
+void UMajorCategoryButtonUI::SetSelected()
+{
+	FButtonStyle MajorButtonStyle = MajorCategoryButton->GetStyle();
+	MajorButtonStyle.Normal = NormalButtonStyle.Pressed;
+	MajorButtonStyle.Hovered = NormalButtonStyle.Hovered;
+	MajorButtonStyle.Pressed = NormalButtonStyle.Pressed;
+	MajorCategoryButton->SetStyle(MajorButtonStyle);
 }
