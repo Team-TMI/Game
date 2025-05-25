@@ -108,6 +108,13 @@ void ARotateSpikeProp::Tick(float DeltaTime)
 	float DeltaAngle = PropellerSpeed * DeltaTime;
 	FRotator NewRot = FRotator(0, DeltaAngle, 0);
 	Propeller->AddLocalRotation(NewRot);
+
+	// 헤머의 회전이 Pivot 기준으로 돌고 있기 때문에 물체랑 충돌이 나도 무시됨.
+	// 그래서 그냥 한번 더 SetLocation을 해서 강제로 Sweep을 해버리자!
+	if (HasAuthority())
+	{
+		MeshComp->SetWorldLocation(MeshComp->GetComponentLocation(), true, nullptr, ETeleportType::None);
+	}
 }
 
 void ARotateSpikeProp::CalculateForce(AFrog* Character)
