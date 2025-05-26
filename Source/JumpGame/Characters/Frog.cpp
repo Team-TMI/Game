@@ -216,6 +216,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = false;
 	GetCharacterMovement()->FallingLateralFriction = 5.f;
+	GetCharacterMovement()->GravityScale = 2.7;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -629,7 +630,7 @@ void AFrog::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index
 }
 
 void AFrog::StopJump()
-{
+{  
 	StopJumping();
 }
 
@@ -960,6 +961,8 @@ void AFrog::InitFrogState()
 
 	ResetSuperJumpRatio();
 
+	FrogGravity = 2.7f;
+	
 	// // 로컬 클라만 점프 게이지 보이게
 	// if (IsLocallyControlled())
 	// {
@@ -1135,6 +1138,7 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, SkinIndex);
 
 	DOREPLIFETIME(AFrog, bRecentlyLaunched);
+	DOREPLIFETIME(AFrog, FrogGravity);
 }
 
 void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, class ARisingWaterProp* WaterVolume)
@@ -1274,28 +1278,42 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 		switch (CharacterWaterState)
 		{
 		case ECharacterStateEnum::None:
-			MoveComp->GravityScale = 0.5f;
+			if (HasAuthority())
+			{
+				FrogGravity = 0.5f;
+			}
 
 			break;
 		case ECharacterStateEnum::Deep:
-			MoveComp->GravityScale = 0.f;
+			if (HasAuthority())
+			{
+				FrogGravity = 0.f;
+			}
+			
+			if (MoveComp->Velocity.Z < 800.f)
+			{
+				MoveComp->Velocity.Z = 800.f;
+			}
+
+			break;
+		case ECharacterStateEnum::Shallow:
+			if (HasAuthority())
+			{
+				FrogGravity = 0.f;
+			}
+			
 			if (MoveComp->Velocity.Z < 500.f)
 			{
 				MoveComp->Velocity.Z = 500.f;
 			}
 
 			break;
-		case ECharacterStateEnum::Shallow:
-			MoveComp->GravityScale = 0.f;
-			if (MoveComp->Velocity.Z < 300.f)
-			{
-				MoveComp->Velocity.Z = 300.f;
-			}
-
-			break;
 		case ECharacterStateEnum::Surface:
-			MoveComp->GravityScale = 0.05f;
-
+			if (HasAuthority())
+			{
+				FrogGravity = 0.05f;
+			}
+			
 			bool bIsJumpingOrLaunched{MoveComp->IsFalling() || bRecentlyLaunched};
 
 		// 물이 상승중이라면
@@ -1346,8 +1364,11 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 	}
 	else
 	{
-		MoveComp->GravityScale = 2.7f;
-
+		if (HasAuthority())
+		{
+			FrogGravity = 2.7f;
+		}
+		
 		if (MoveComp->IsFlying() || MoveComp->IsSwimming())
 		{
 			MoveComp->SetMovementMode(MOVE_Walking);
@@ -1449,6 +1470,11 @@ void AFrog::OnRep_IsTongueGrow()
 void AFrog::OnRep_CanTongAttack()
 {
 	// bCanTongAttack 상태 변화에 따른 클라이언트 액션
+}
+
+void AFrog::OnRep_GravityChange()
+{
+	GetCharacterMovement()->GravityScale = FrogGravity;
 }
 
 void AFrog::SetTongueLength(float Value)

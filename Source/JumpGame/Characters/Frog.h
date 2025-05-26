@@ -163,6 +163,8 @@ public:
 	void OnRep_IsTongueGrow();
 	UFUNCTION()
 	void OnRep_CanTongAttack();
+	UFUNCTION()
+	void OnRep_GravityChange();
 	
 	// 혓바닥
 	void SetTongueLength(float Value);
@@ -254,6 +256,9 @@ public:
 	int32 SkinIndex{};
 	bool bIsPressedSprint{false};
 	bool bIsPressedCrouch{false};
+	UPROPERTY(ReplicatedUsing=OnRep_GravityChange)
+	float FrogGravity{};
+	
 
 	// 델리게이트
 public:
