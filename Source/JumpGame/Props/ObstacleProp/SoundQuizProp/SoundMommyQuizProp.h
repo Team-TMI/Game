@@ -33,6 +33,9 @@ public:
 	virtual void StopRecord() override;
 	
 public:
+	UPROPERTY()
+	bool bIsOverlapChild = false;
+	
 	// 퀴즈 시작 UI
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UStartSoundUI> StartSoundUIClass;
@@ -66,4 +69,10 @@ public:
 	FTimerHandle UIRemoveTimerHandle;
 	// UPROPERTY()
 	// TMap<int32, FTimerHandle> PlayerUIRemoveTimers;
+
+	// 사운드 및 이펙트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundCue* ClearSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundCue* FailSound;
 };

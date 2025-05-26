@@ -7,8 +7,13 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "OnlineSubsystem.h"
 #include "Blueprint/UserWidget.h"
+#include "Interfaces/OnlineFriendsInterface.h"
+#include "Interfaces/OnlineIdentityInterface.h"
+#include "Interfaces/OnlinePresenceInterface.h"
 #include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
+#include "JumpGame/Core/GameState/TypeInfo/GameInfo.h"
 #include "JumpGame/UI/BottomNaviBarUI.h"
 #include "JumpGame/Utils/CursorManager.h"
 #include "JumpGame/Utils/FastLogger.h"
@@ -201,4 +206,49 @@ void ALobbyPlayerController::CalculateMinMax(const FVector& InLocallyPosition)
 	// X : NOT USE | Y : Yaw | Z : Pitch
 	PlusPitchMinMax.Y = InPlusMinMax.Z;
 	PlusYawMinMax.Y = InPlusMinMax.Y;
+}
+
+void ALobbyPlayerController::Server_RequestFriendList_Implementation()
+{
+	IOnlineSubsystem* Subsys = IOnlineSubsystem::Get();
+	if (!Subsys) return;
+
+	IOnlineFriendsPtr Friends = Subsys->GetFriendsInterface();
+	IOnlineIdentityPtr Identity = Subsys->GetIdentityInterface();
+	if (!Friends.IsValid() || !Identity.IsValid()) return;
+
+	if (Identity->GetLoginStatus(0) != ELoginStatus::LoggedIn) return;
+
+	TSharedPtr<const FUniqueNetId> UserId = Identity->GetUniquePlayerId(0);
+	if (!UserId.IsValid()) return;
+
+	// 비동기 친구 목록 읽기
+	Friends->ReadFriendsList(0, EFriendsLists::ToString(EFriendsLists::Default),
+		FOnReadFriendsListComplete::CreateLambda([this](int32 LocalUserNum, bool bSuccess, const FString& ListName, const FString& Error)
+		{
+			TArray<FSteamFriendData> OutList;
+
+			IOnlineSubsystem* SubsysInner = IOnlineSubsystem::Get();
+			if (!SubsysInner) return;
+
+			TArray<TSharedRef<FOnlineFriend>> FriendList;
+			if (SubsysInner->GetFriendsInterface()->GetFriendsList(LocalUserNum, ListName, FriendList))
+			{
+				for (const auto& Friend : FriendList)
+				{
+					FSteamFriendData Data;
+					Data.DisplayName = Friend->GetDisplayName();
+					Data.SteamId = Friend->GetUserId()->ToString();
+					Data.bIsOnline = Friend->GetPresence().bIsOnline;
+					OutList.Add(Data);
+				}
+			}
+
+			Client_ReceiveFriendList(OutList); // 서버 → 클라 전송
+		}));
+}
+
+void ALobbyPlayerController::Client_ReceiveFriendList_Implementation(const TArray<FSteamFriendData>& FriendList)
+{
+	OnFriendListUpdated.Broadcast(FriendList); // UI 위젯에 전달
 }

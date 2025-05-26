@@ -7,6 +7,7 @@
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -25,9 +26,10 @@ AVictoryPlatform::AVictoryPlatform()
 	// 카메라
 	VictoryCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("VictoryCamera"));
 	VictoryCamera->SetupAttachment(CollisionComp);
-	VictoryCamera->FieldOfView = 50.0f;
+	VictoryCamera->FieldOfView = 55.0f;
 	VictoryCamera->SetRelativeLocation(FVector(0, 600, 80));
 	VictoryCamera->SetRelativeRotation(FRotator(0, -90, 0));
+	OriginalCameraPos = VictoryCamera->GetRelativeLocation();
 
 	// 배경
 	VictoryPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryPlane"));
@@ -39,9 +41,21 @@ AVictoryPlatform::AVictoryPlatform()
 	// 무덤
 	VictoryTomb = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryTomb"));
 	VictoryTomb->SetupAttachment(CollisionComp);
-	VictoryTomb->SetRelativeLocation(FVector(310, -110, -86));
-	VictoryTomb->SetRelativeRotation(FRotator(-2,20, -4));
-	VictoryTomb->SetRelativeScale3D(FVector(1, 1, 1.1));
+	VictoryTomb->SetRelativeLocation(FVector(200, 22, 630)); //-3이 원위치
+	VictoryTomb->SetRelativeRotation(FRotator(0,-268, 0));
+	VictoryTomb->SetRelativeScale3D(FVector(1, 1, 1));
+
+	// 꽃, 당근
+	VictoryFlower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryFlower"));
+	VictoryFlower->SetupAttachment(CollisionComp);
+	VictoryFlower->SetRelativeLocation(FVector(90, 58, -53));
+	VictoryFlower->SetRelativeRotation(FRotator(-80, 24, 15));
+	
+	VictoryCarrot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryCarrot"));
+	VictoryCarrot->SetRelativeLocation(FVector(185, 75, -56));
+	VictoryCarrot->SetRelativeRotation(FRotator(43, -124, -3));
+	VictoryCarrot->SetRelativeScale3D(FVector(0.8));
+	VictoryCarrot->SetupAttachment(CollisionComp);
 
 	// 나무
 	VictoryTreeOne = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryTreeOne"));
@@ -76,10 +90,20 @@ AVictoryPlatform::AVictoryPlatform()
 	{
 		MeshComp->SetStaticMesh(TempMesh.Object);
 	}
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempTomb(TEXT("/Game/_Resource/Model/SM_SM_Mom.SM_SM_Mom"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempTomb(TEXT("/Game/_Resource/Model/SM_MomTomb.SM_MomTomb"));
 	if (TempTomb.Succeeded())
 	{
 		VictoryTomb->SetStaticMesh(TempTomb.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempFlower(TEXT("/Game/UI/Story/SM_StoryFlower.SM_StoryFlower"));
+	if (TempFlower.Succeeded())
+	{
+		VictoryFlower->SetStaticMesh(TempFlower.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempCarrot(TEXT("/Game/UI/Story/SM_StoryCarrot.SM_StoryCarrot"));
+	if (TempCarrot.Succeeded())
+	{
+		VictoryCarrot->SetStaticMesh(TempCarrot.Object);
 	}
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempTreeOne(TEXT("/Game/Kobo_ForestVillage/Meshes/SM-Tree-01.SM-Tree-01"));
 	if (TempTreeOne.Succeeded())
@@ -120,11 +144,54 @@ void AVictoryPlatform::BeginPlay()
 void AVictoryPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bShouldShake && VictoryCamera)
+	{
+		ElapsedShakeTime += DeltaTime;
+
+		if (ElapsedShakeTime > ShakeDuration)
+		{
+			bShouldShake = false;
+			VictoryCamera->SetRelativeLocation(OriginalCameraPos);
+			return;
+		}
+
+		ShakeTime += DeltaTime;
+
+		float ZOffset = FMath::Sin(ShakeTime * ShakeFrequency * 2 * PI) * ShakeAmplitude;
+
+		FVector NewLocation = OriginalCameraPos + FVector(0.f, 0.f, ZOffset);
+		VictoryCamera->SetRelativeLocation(NewLocation);
+	}
 }
 
 FVector AVictoryPlatform::SpawnVictoryCharacter()
 {
-	FVector SpawnLocation = MeshComp->GetComponentLocation() + FVector(0.f, 5.f, 100.f);
+	FVector SpawnLocation = MeshComp->GetComponentLocation() + FVector(0.f, 0.f, 100.f);
 	return SpawnLocation;
+}
+
+void AVictoryPlatform::DropProps()
+{
+	// 무덤 위치 떨어뜨리기
+	FTimerHandle TombDropHandle;
+	GetWorldTimerManager().SetTimer(TombDropHandle, [this]()
+	{
+		bShouldShake = true;
+		VictoryTomb->SetRelativeLocation(FVector(200, 22, -3));
+		// 카메라 쉐이크 인척
+		StartCameraShake();
+	}, 1.0f, false);
+}
+
+void AVictoryPlatform::StartCameraShake()
+{
+	if (!VictoryCamera) return;
+
+	UE_LOG(LogTemp, Log, TEXT("Starting camera shake @@@@@@@@@@@@"));
+	
+	ShakeTime = 0.f;
+	ElapsedShakeTime = 0.f;
+	bShouldShake = true;
 }
 

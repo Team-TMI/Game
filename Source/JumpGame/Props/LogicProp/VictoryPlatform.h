@@ -42,10 +42,41 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UArrowComponent* VictoryArrow;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* VictoryFlower;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* VictoryCarrot;
+
 	// 조명
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpotLightComponent* VictoryLight;
 	
 	// 1등 유저를 소환할 위치값을 반환하는 함수
+	UFUNCTION()
 	FVector SpawnVictoryCharacter();
+
+public:
+	// 연출용
+	UFUNCTION()
+	void DropProps();
+
+	// 카메라 흔들림
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraShake")
+	float ShakeAmplitude = 5.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraShake")
+	float ShakeFrequency = 10.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraShake")
+	float ShakeDuration = 0.5f; // 흔들림 지속 시간
+	UFUNCTION(BlueprintCallable)
+	void StartCameraShake();
+
+private:
+	UPROPERTY()
+	FVector OriginalCameraPos;
+	UPROPERTY()
+	bool bShouldShake = false;
+	UPROPERTY()
+	float ShakeTime = 0.f;
+	UPROPERTY()
+	float ElapsedShakeTime = 0.f; // 흔들림 누적 시간
 };

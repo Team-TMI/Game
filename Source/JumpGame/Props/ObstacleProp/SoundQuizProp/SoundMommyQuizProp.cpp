@@ -7,12 +7,15 @@
 #include "Components/BoxComponent.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
 #include "JumpGame/UI/Obstacle/SoundQuizClear.h"
 #include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/UI/Obstacle/SoundQuizUI.h"
 #include "JumpGame/UI/Obstacle/StartSoundUI.h"
 #include "JumpGame/UI/Obstacle/TimeRemainUI.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 
 // Sets default values
@@ -30,6 +33,20 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 	}
 
 	PropDataComponent->SetPropID(TEXT("2003"));
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> ClearSoundAsset
+	(TEXT("/Game/Sounds/Ques/SQ_QuizClear.SQ_QuizClear"));
+	if (ClearSoundAsset.Succeeded())
+	{
+		ClearSound = Cast<USoundCue>(ClearSoundAsset.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> FailSoundAsset
+	(TEXT("/Game/Sounds/Ques/SQ_QuizFail.SQ_QuizFail"));
+	if (FailSoundAsset.Succeeded())
+	{
+		FailSound = Cast<USoundCue>(FailSoundAsset.Object);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -65,21 +82,26 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	
 	// 각각의 화면에서 UI를 띄우자
 	// 그렇게 해야 remove했을때 본인의 화면에서 사라짐
-	if (PC->IsLocalPlayerController())
+	if (PC->IsLocalPlayerController() && !bIsOverlapChild)
 	{
 		if (StartSoundUI)
 		{
 			StartSoundUI->AddToViewport();
 			StartSoundUI->PlayStartSoundAnim();
 		}
+		bIsOverlapChild = true;
 	}
 }
 
 void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 {
+	Super::ReceiveSoundQuizMessage();
+	
 	// 20번 넘으면 자동 게임 종료, 디버프를 받는다 (못맞춤)
 	if (SendResponseIdx >= 20)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("1111111111111 ReceiveSoundQuiz : Fail!!"));
+		
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
 		// 실패...
@@ -88,6 +110,7 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 			SoundQuizFail->AddToViewport();
 		}
 
+		bIsClear = false;
 		// 퀴즈 끝났다고 알리자!
 		SendEndSoundQuizNotify();
 
@@ -101,6 +124,8 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	{
 		if (bSuccess == 1 || Similarity*100 >= 89)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("1111111111111 ReceiveSoundQuiz : Clear!!"));
+			
 			// UI 지우자
 			SoundQuizUI->RemoveFromParent();
 			// 성공!
@@ -109,15 +134,16 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 				SoundQuizClear->AddToViewport();
 			}
 
+			bIsClear = true;
 			// 퀴즈 끝났다고 알리자!
 			SendEndSoundQuizNotify();
-			
+
 			GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 			return;
 		}
 	}
-	
-	Super::ReceiveSoundQuizMessage();
+
+	UE_LOG(LogTemp, Warning, TEXT("3333333333 UpdateFromResponse : Update"));
 	SoundQuizUI->UpdateFromResponse(Similarity*100, MessageStr);
 }
 
@@ -137,6 +163,20 @@ void ASoundMommyQuizProp::SendEndSoundQuizNotify()
 	}
 	SoundQuizUI->RemoveFromParent();
 	TimeRemainUI->RemoveFromParent();
+
+	Character = Cast<AFrog>(PC->GetPawn());
+	FVector CharcaterPos = Character->GetActorLocation();
+	
+	if (bIsClear)
+	{
+		// 성공 음성
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ClearSound, CharcaterPos, 0.8f, 1.0f);
+	}
+	else
+	{
+		// 실패 음성
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), FailSound, CharcaterPos, 0.8f, 1.0f);
+	}
 }
 
 void ASoundMommyQuizProp::StartSoundQuiz()
@@ -182,6 +222,7 @@ void ASoundMommyQuizProp::StopRecord()
 	// 버튼 다시 활성화
 	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(true);
 }
+
 
 void ASoundMommyQuizProp::RemoveSoundQuizUI()
 {

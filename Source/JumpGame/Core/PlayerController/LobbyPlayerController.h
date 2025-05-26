@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "NetworkPlayerController.h"
+#include "JumpGame/Core/GameState/TypeInfo/GameInfo.h"
 #include "LobbyPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNextChatTriggered);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFriendListReceived, const TArray<FSteamFriendData>&, FriendList);
 
 /**
  * 
@@ -69,4 +71,18 @@ public:
 	TSubclassOf<class UBottomNaviBarUI> BottomNaviBarUIClass;
 	UPROPERTY(editanywhere, BlueprintReadWrite)
 	UBottomNaviBarUI* BottomNaviBarUI;
+
+public:
+	UFUNCTION(Server, Reliable)
+	void Server_RequestFriendList();
+
+	UFUNCTION(Client, Reliable)
+	void Client_ReceiveFriendList(const TArray<FSteamFriendData>& FriendList);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFriendListReceived OnFriendListUpdated;
+
+private:
+	TArray<FSteamFriendData> CollectedFriendList;
+	
 };

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GamePlayerSettings.h"
 #include "Blueprint/UserWidget.h"
 #include "GameSettingUI.generated.h"
 
@@ -24,6 +25,12 @@ class JUMPGAME_API UGameSettingUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+
+	// 세팅 저장
+	UPROPERTY()
+	UGamePlayerSettings* Settings;
+	UFUNCTION()
+	void InitUISettings();
 	
 	// 나왔다 들어갔다 애니메이션
 	UPROPERTY(meta = (BindWidgetAnim), Transient)

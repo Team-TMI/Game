@@ -90,4 +90,10 @@ public:
 	// 눈에 보이나요?
 	UPROPERTY()
 	bool bIsShow = true;
+
+	// 높이에 따른 업데이트
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateSunBrightness(float Value);
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateFogDensity(float Value);
 };

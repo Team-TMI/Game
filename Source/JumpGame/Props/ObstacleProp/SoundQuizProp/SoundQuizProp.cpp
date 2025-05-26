@@ -29,7 +29,7 @@ ASoundQuizProp::ASoundQuizProp()
 
 	// 여기서
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
-	(TEXT("/Game/Sounds/Ques/SQ_Radio.SQ_Radio"));
+	(TEXT("/Game/Sounds/Ques/SQ_QuizStart.SQ_QuizStart"));
 	if (SoundAsset.Succeeded())
 	{
 		HitSound = Cast<USoundCue>(SoundAsset.Object);
@@ -141,6 +141,14 @@ void ASoundQuizProp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASoundQuizProp ,bIsOverlap);
+}
+
+void ASoundQuizProp::MulticastRPC_PlayEffect(FVector Location, int32 Index)
+{
+	Character = Cast<AFrog>(PC->GetPawn());
+	FVector CharcaterPos = Character->GetActorLocation();
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, CharcaterPos, 0.8f, 1.0f);
+	this->PlayHitEffect(Index);
 }
 
 void ASoundQuizProp::SendStartSoundQuizNotify()
@@ -287,15 +295,6 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 내 메세지가 아니면 무시하자
 	if (RespMessage.Header.PlayerID != PlayerIdx) return;
 
-	/*
-	FFastLogger::LogConsole(TEXT("메세지 받았습니다@@@@@@@@"));
-	FDateTime Now = FDateTime::Now();
-	int32 Hour = Now.GetHour();
-	int32 Minute = Now.GetMinute();
-	int32 Second = Now.GetSecond();
-	UE_LOG(LogTemp, Warning, TEXT("ReceiveSoundQuizMessage 현재 시간: %02d:%02d:%02d"), Hour, Minute, Second);
-	*/
-
 	// 내가 만든 변수에 넣자
 	QuizID = RespMessage.WavResponseMessage.QuizID;
 	Similarity = RespMessage.WavResponseMessage.Similarity;
@@ -328,8 +327,25 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 틱 비활성화
 	bIsMessageReceived = false;
 	
-	// 메세지를 받았다! 2초 후에 녹음 시작
-	GetWorld()->GetTimerManager().SetTimer(RecordStartTimer, this, &ASoundQuizProp::StartRecord, 2.0f, false);
+	if (SendResponseIdx >= 20)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("퀴즈 실패"));
+		GetWorld()->GetTimerManager().ClearTimer(RecordStartTimer);
+	}
+	else if (SendResponseIdx < 20)
+	{
+		if (bSuccess == 1 || Similarity*100 >= 89)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("퀴즈 성공"));
+			GetWorld()->GetTimerManager().ClearTimer(RecordStartTimer);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("퀴즈 녹음시작"));
+			// 메세지를 받았다! 2초 후에 녹음 시작
+			GetWorld()->GetTimerManager().SetTimer(RecordStartTimer, this, &ASoundQuizProp::StartRecord, 2.0f, false);
+		}
+	}
 }
 
 void ASoundQuizProp::SendEndSoundQuizNotify()

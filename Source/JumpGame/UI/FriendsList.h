@@ -37,7 +37,10 @@ public:
     TArray<FSteamFriendData> AllFoundFriends;
     // 최대 친구 목록 수
     UPROPERTY(editanywhere)
-    int32 MaxFriendCount = 20; 
+    int32 MaxFriendCount = 20;
+
+	UFUNCTION()
+	void OnFriendListReceived(const TArray<FSteamFriendData>& FriendList);
 
 	UFUNCTION()
 	void Init();

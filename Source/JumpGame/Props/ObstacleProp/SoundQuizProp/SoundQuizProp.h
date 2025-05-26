@@ -35,10 +35,14 @@ public:
 	virtual void OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	virtual void OnMyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void MulticastRPC_PlayEffect(FVector Location, int32 Index = 0) override;
 	
 	// 퀴즈 한번만 실행
 	UPROPERTY(Replicated)
 	bool bIsOverlap = false;
+
+	UPROPERTY()
+	bool bIsClear = false;
 	
 	// 퀴즈 소켓 전송 관련
 	UFUNCTION()
