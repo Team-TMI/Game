@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GizmoComponent.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "RotateGizmoComponent.generated.h"
 
 /**
@@ -20,6 +21,8 @@ public:
 	virtual FVector GetDirection() const override;
 	virtual void SetSelected() override;
 	virtual void SetUnSelected() override;
+
+	void SetAxisDirection(const FVector& NewAxisDirection);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmo", meta = (AllowPrivateAccess = "true"))

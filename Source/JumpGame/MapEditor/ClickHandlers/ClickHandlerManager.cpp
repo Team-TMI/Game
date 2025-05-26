@@ -4,6 +4,7 @@
 #include "BackgroundClickHandler.h"
 #include "GizmoClickHandler.h"
 #include "PropSlotClickHandler.h"
+#include "RotateGizmoClickHandler.h"
 #include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
 #include "JumpGame/MapEditor/DragDropOperation/WidgetMapEditDragDropOperation.h"
@@ -33,7 +34,7 @@ bool UClickHandlerManager::HandleClick(AMapEditingPlayerController* PlayerContro
 	bool bHandled = false;
 	for (const auto& Handler : Handlers)
 	{
-		if (Handler->HandleClick(ControlledClickResponse, PlayerController))
+		if (Handler->HandleClick(ControlledClickResponse, PlayerController, bRotateGizmoMode))
 		{
 			bHandled = true;
 			break ;
@@ -68,6 +69,7 @@ void UClickHandlerManager::BeginPlay()
 	Super::BeginPlay();
 
 	RegisterHandler(MakeShared<FPropSlotClickHandler>());
+	RegisterHandler(MakeShared<FRotateGizmoClickHandler>());
 	RegisterHandler(MakeShared<FGizmoClickHandler>());
 	RegisterHandler(MakeShared<FActorClickHandler>());
 	RegisterHandler(MakeShared<FBackgroundClickHandler>());

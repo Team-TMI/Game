@@ -32,6 +32,7 @@ public:
 	GETTER(class UClickHandlerManager*, ClickHandlerManager)
 	GETTER(class UWidgetMapEditDragDropOperation*, DragDropOperation);
 	GETTER(class URotateHandlerManager*, RotateHandlerManager);
+	GETTER(bool, bRotateGizmoMode);
 
 private:
 	UFUNCTION()
@@ -58,6 +59,10 @@ private:
 	void HandleScroll(const FInputActionValue& InputActionValue);
 	UFUNCTION()
 	void HandleTeleport(const FInputActionValue& InputActionValue);
+	UFUNCTION()
+	void HandleChangeMoveGizmoMode(const FInputActionValue& InputActionValue);
+	UFUNCTION()
+	void HandleChangeRotateGizmoMode(const FInputActionValue& InputActionValue);
 
 	UFUNCTION()
 	void MoveForward(float Val);
@@ -102,6 +107,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Teleport = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_MoveGizmoMode = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_RotateGizmoMode = nullptr;
+
 	UPROPERTY()
 	bool bCanMove = false;
 
@@ -133,4 +144,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Movement|Speed")
 	float MaxSpeed  = 6000.f;
+
+	// false : 이동 Gizmo 모드
+	// true : 회전 Gizmo 모드
+	UPROPERTY(EditAnywhere, Category = "Handle|GizmoMode")
+	bool bRotateGizmoMode = false;
 };

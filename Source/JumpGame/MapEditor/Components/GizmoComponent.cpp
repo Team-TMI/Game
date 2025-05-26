@@ -47,7 +47,7 @@ void UGizmoComponent::SetSelected()
 void UGizmoComponent::SetUnSelected()
 {
 	bSelected = false;
-	
+
 	Super::SetMaterial(0, GizmoDynamicMaterial);
 }
 

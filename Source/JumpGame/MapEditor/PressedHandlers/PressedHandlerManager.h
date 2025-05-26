@@ -24,7 +24,6 @@ public:
 	UFUNCTION()
 	void OnWidgetDragging(FVector2D MousePosition);
 
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeComponent() override;

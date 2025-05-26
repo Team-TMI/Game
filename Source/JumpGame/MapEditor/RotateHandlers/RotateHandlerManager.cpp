@@ -2,6 +2,7 @@
 
 #include "JumpGame/MapEditor/ClickHandlers/ClickHandlerManager.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
+#include "JumpGame/MapEditor/Components/RotateGizmoComponent.h"
 #include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 
@@ -37,6 +38,7 @@ void URotateHandlerManager::HandleRotate(FClickResponse& ClickResponse)
 	UGridComponent* GridComponent = PrimitiveProp->GetGridComp();
 	if (!GridComponent) return;
 
+	// FVector PrimitiveProp->GetRotateGizmo()->GetDirection();
 	GridComponent->Rotate(Axis);
 
 	// PrimitiveProp->SetNewSizeByRotation(GridComponent->GetSize());
@@ -49,6 +51,9 @@ void URotateHandlerManager::HandleAxis(FVector InAxis, FClickResponse& ClickResp
 	if (!PrimitiveProp) return;
 
 	Axis = InAxis.GetSafeNormal().GetAbs();
+
+	Cast<URotateGizmoComponent>(PrimitiveProp->GetRotateGizmo())->SetAxisDirection(Axis);
+	
 	OnAxisChanged.Broadcast(Axis);
 }
 

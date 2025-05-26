@@ -16,10 +16,11 @@ FActorClickHandler::~FActorClickHandler()
 {
 }
 
-bool FActorClickHandler::HandleClick(FClickResponse& ClickResponse, class AMapEditingPlayerController* PlayerController)
+bool FActorClickHandler::HandleClick(FClickResponse& ClickResponse, class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
 {
 	ClickResponse.Result = EClickHandlingResult::ActorEditing;
-	
+
+	FFastLogger::LogScreen(FColor::Red, TEXT("Actor Clicked"));
 	// true가 될 경우 액터가 선택됨
 	if (PlayerController->OnClickOperation(ClickResponse.TargetProp, ClickResponse))
 	{
@@ -45,7 +46,7 @@ bool FActorClickHandler::HandleClick(FClickResponse& ClickResponse, class AMapEd
 		APrimitiveProp* Actor = Cast<APrimitiveProp>(HitResult.GetActor());
 		if (Actor && Actor->IsClickable())
 		{
-			Actor->SetSelected();
+			Actor->SetSelected(bRotateGizmoMode);
 			ClickResponse.TargetProp = Actor;
 		}
 		

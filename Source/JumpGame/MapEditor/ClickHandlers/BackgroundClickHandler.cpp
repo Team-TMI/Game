@@ -17,7 +17,7 @@ FBackgroundClickHandler::~FBackgroundClickHandler()
 }
 
 bool FBackgroundClickHandler::HandleClick(FClickResponse& ClickResponse,
-	class AMapEditingPlayerController* PlayerController)
+	class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
 {
 	ClickResponse.Result = EClickHandlingResult::BackgroundEditing;
 	
