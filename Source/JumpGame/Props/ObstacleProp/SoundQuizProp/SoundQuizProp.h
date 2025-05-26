@@ -40,6 +40,9 @@ public:
 	// 퀴즈 한번만 실행
 	UPROPERTY(Replicated)
 	bool bIsOverlap = false;
+
+	UPROPERTY()
+	bool bIsClear = false;
 	
 	// 퀴즈 소켓 전송 관련
 	UFUNCTION()

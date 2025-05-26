@@ -79,25 +79,29 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	                        SweepResult);
 	
 	if (!PC) return;
-	if (bIsOverlap) return;
 	
 	// 각각의 화면에서 UI를 띄우자
 	// 그렇게 해야 remove했을때 본인의 화면에서 사라짐
-	if (PC->IsLocalPlayerController())
+	if (PC->IsLocalPlayerController() && !bIsOverlapChild)
 	{
 		if (StartSoundUI)
 		{
 			StartSoundUI->AddToViewport();
 			StartSoundUI->PlayStartSoundAnim();
 		}
+		bIsOverlapChild = true;
 	}
 }
 
 void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 {
+	Super::ReceiveSoundQuizMessage();
+	
 	// 20번 넘으면 자동 게임 종료, 디버프를 받는다 (못맞춤)
 	if (SendResponseIdx >= 20)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("1111111111111 ReceiveSoundQuiz : Fail!!"));
+		
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
 		// 실패...
@@ -120,6 +124,8 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	{
 		if (bSuccess == 1 || Similarity*100 >= 89)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("1111111111111 ReceiveSoundQuiz : Clear!!"));
+			
 			// UI 지우자
 			SoundQuizUI->RemoveFromParent();
 			// 성공!
@@ -131,13 +137,13 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 			bIsClear = true;
 			// 퀴즈 끝났다고 알리자!
 			SendEndSoundQuizNotify();
-			
+
 			GetWorld()->GetTimerManager().SetTimer(UIRemoveTimerHandle, this, &ASoundMommyQuizProp::RemoveSoundQuizUI, 3.0f, false);
 			return;
 		}
 	}
-	
-	Super::ReceiveSoundQuizMessage();
+
+	UE_LOG(LogTemp, Warning, TEXT("3333333333 UpdateFromResponse : Update"));
 	SoundQuizUI->UpdateFromResponse(Similarity*100, MessageStr);
 }
 

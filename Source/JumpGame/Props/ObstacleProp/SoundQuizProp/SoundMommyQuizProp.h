@@ -34,7 +34,7 @@ public:
 	
 public:
 	UPROPERTY()
-	bool bIsClear = false;
+	bool bIsOverlapChild = false;
 	
 	// 퀴즈 시작 UI
 	UPROPERTY(EditAnywhere)
