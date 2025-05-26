@@ -23,6 +23,7 @@ public:
 	virtual void SetUnSelected() override;
 
 	void SetAxisDirection(const FVector& NewAxisDirection);
+	void Clicked();
 
 	virtual void BeginPlay() override;
 
@@ -32,4 +33,9 @@ private:
 
 	UPROPERTY()
 	class AMapEditingPawn* EditingPawn = nullptr;
+
+	UPROPERTY()
+	FVector BaseScale;
+	UPROPERTY()
+	FTimerHandle TempTimerHandle;
 };

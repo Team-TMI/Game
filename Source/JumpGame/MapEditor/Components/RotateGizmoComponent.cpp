@@ -32,7 +32,8 @@ URotateGizmoComponent::URotateGizmoComponent()
 
 	Super::SetStaticMesh(GizmoMesh);
 	Super::SetMaterial(0, GizmoMaterial);
-	SetRelativeScale3D(FVector(0.6f, 0.6f, 0.6f));
+	SetRelativeScale3D(FVector(0.8f, 0.8f, 0.8f));
+	BaseScale = GetRelativeScale3D();
 }
 
 FVector URotateGizmoComponent::GetDirection() const
@@ -84,6 +85,64 @@ void URotateGizmoComponent::SetAxisDirection(const FVector& NewAxisDirection)
 	{
 		SetRelativeRotation(FRotator(0, 0, 0));
 	}
+}
+
+void URotateGizmoComponent::Clicked()
+{
+	GetWorld()->GetTimerManager().ClearTimer(TempTimerHandle);
+	
+	TWeakObjectPtr<URotateGizmoComponent> WeakThis = this;
+	// 2) 상수 정의
+	constexpr float MinScale      = 0.8f;
+	constexpr float MaxScale      = 0.83f;
+	constexpr float TotalTime     = 0.25f;        // 전체 길이
+	constexpr float HalfTime      = TotalTime * 0.5f;
+
+	// 3) 시간 누적용 지역 변수(λ 캡처)
+	float Elapsed = 0.f;
+
+	FFastLogger::LogScreen(FColor::Green, TEXT("Clicked Rotate Gizmo"));
+
+	// 4) 매 프레임 람다 실행
+	GetWorld()->GetTimerManager().SetTimer(
+		TempTimerHandle,
+		FTimerDelegate::CreateLambda([WeakThis, Elapsed]() mutable
+		{
+			if (!WeakThis.IsValid())
+				return;
+
+			URotateGizmoComponent* Gizmo = WeakThis.Get();
+			const float Delta = Gizmo->GetWorld()->GetDeltaSeconds();
+			Elapsed += Delta;
+
+			/* ----- 구간별 보간 ----- */
+			float Scale;
+			if (Elapsed <= HalfTime)
+			{
+				// 0.6 → 1.0 (처음 0.25 초)
+				const float Alpha = Elapsed / HalfTime;          // 0~1
+				Scale = FMath::Lerp(MinScale, MaxScale, Alpha);
+			}
+			else
+			{
+				// 1.0 → 0.6 (마지막 0.25 초)
+				const float Alpha = (Elapsed - HalfTime) / HalfTime; // 0~1
+				Scale = FMath::Lerp(MaxScale, MinScale, Alpha);
+			}
+
+			FFastLogger::LogScreen(FColor::Green, TEXT("Elapsed: %.2f, Scale: %.2f"), Elapsed, Scale);
+			Gizmo->SetRelativeScale3D(FVector(Scale));
+
+			/* ----- 종료 처리 ----- */
+			if (Elapsed >= TotalTime)
+			{
+				Gizmo->SetUnSelected();
+				Gizmo->GetWorld()->GetTimerManager().ClearTimer(Gizmo->TempTimerHandle);
+			}
+		}),
+		0.01f,   /* Rate : 0 = 한 프레임마다 */
+		true    /* bLoop */
+	);
 }
 
 void URotateGizmoComponent::BeginPlay()
