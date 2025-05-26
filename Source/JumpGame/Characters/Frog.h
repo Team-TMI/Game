@@ -123,6 +123,11 @@ public:
 	void CalculateWaterCameraOverlapRatio(float dt);
 	UFUNCTION(BlueprintCallable)
 	void SetFrogVignetteIntensity_PP(float Value);
+	UFUNCTION(NetMulticast, reliable, BlueprintCallable)
+	void MulticastRPC_PlayEffect(FVector Location, int32 Index);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void PlayHitEffect(int32 Index = 0);
+	
 	
 public:
 	// 물에 들어갔는지, 나왔는지 업데이트
@@ -281,7 +286,7 @@ public:
 	class UArrowComponent* TongueTipComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USpotLightComponent* SpotLightComponent;
-	
+
 	// Enum
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CharacterWaterState)

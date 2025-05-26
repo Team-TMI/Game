@@ -2,11 +2,15 @@
 
 
 #include "RisingWaterProp.h"
+
+#include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "JumpGame/Characters/Frog.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 ARisingWaterProp::ARisingWaterProp()
 {
@@ -18,6 +22,13 @@ ARisingWaterProp::ARisingWaterProp()
 		MeshComp->SetRelativeScale3D(FVector(12.f, 12.f, 27.f));
 	}
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundAsset
+(TEXT("/Game/Sounds/Ques/JumpToWater_Cue.JumpToWater_Cue"));
+	if (SoundAsset.Succeeded())
+	{
+		HitSound = Cast<USoundCue>(SoundAsset.Object);
+	}
+	
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	CollisionComp->SetBoxExtent(FVector(600.f, 600.f, 1300.f));
@@ -159,7 +170,7 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 		// 서버에서만 처리
 		if (HasAuthority())
 		{
-			FLog::Log("Speed", OverlappingFrog->GetCharacterMovement()->Velocity.Length());
+			//FLog::Log("Speed", OverlappingFrog->GetCharacterMovement()->Velocity.Length());
 			// 안빠르면 가라앉지 않게
 			if (OverlappingFrog->GetCharacterMovement()->Velocity.Length() < 2'000.f)
 			{
@@ -180,6 +191,8 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 			GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);
 			
 			OverlappingFrog->ServerRPC_UpdateOverallWaterState(true, this);
+
+			MulticastRPC_PlayEffect(OverlappingFrog->GetActorLocation());
 		}
 	}
 }
@@ -316,6 +329,15 @@ void ARisingWaterProp::SetRisingSpeed(float Speed)
 float ARisingWaterProp::GetWaterSurfaceZ()
 {
 	return SurfaceCollision->GetComponentLocation().Z + SurfaceCollision->GetScaledBoxExtent().Z;
+}
+
+void ARisingWaterProp::MulticastRPC_PlayEffect_Implementation(FVector Location)
+{
+	auto SurfaceSound{UGameplayStatics::CreateSound2D(GetWorld(), HitSound)};
+	SurfaceSound->Play(0.f);
+	//SurfaceSound->FadeOut(1.f, 0.f);
+	// UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Location, 1.f, 1.f);
+
 }
 
 void ARisingWaterProp::OnRep_WaterState()

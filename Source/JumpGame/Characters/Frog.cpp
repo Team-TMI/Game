@@ -24,6 +24,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Net/UnrealNetwork.h"
+
 // Sets default values
 AFrog::AFrog()
 {
@@ -506,7 +507,7 @@ void AFrog::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	JumpCurrentCount = 0;
-	
+
 	ResetSuperJumpRatio();
 
 	if (bIsPressedSprint)
@@ -531,7 +532,7 @@ void AFrog::StartJump()
 	{
 		return;
 	}
-	
+
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1800.f};
@@ -569,7 +570,7 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			Jump();
-			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+			MulticastRPC_PlayEffect(GetActorLocation(), 0);
 		}
 	}
 	// 일반 점프
@@ -579,8 +580,25 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			Jump();
-			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+			MulticastRPC_PlayEffect(GetActorLocation(), 1);
 		}
+	}
+}
+
+void AFrog::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
+{
+	FLog::Log();
+	switch (Index)
+	{
+		case 0:
+			PlayHitEffect();
+			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1.5f, 1, 4.39f);
+			break;
+		case 1:
+			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+			break;
+		default:
+			break;
 	}
 }
 
@@ -626,7 +644,7 @@ void AFrog::SetCrouchEnabled(bool bEnabled)
 void AFrog::StartCrouch()
 {
 	bIsPressedCrouch = true;
-	
+
 	if (!GetCanMove())
 	{
 		return;
@@ -638,7 +656,7 @@ void AFrog::StartCrouch()
 void AFrog::StopCrouch()
 {
 	bIsPressedCrouch = false;
-	
+
 	MulticastRPC_StopCrouch();
 }
 
@@ -760,7 +778,7 @@ void AFrog::MulticastRPC_StartCrouch_Implementation()
 	{
 		return;
 	}
-	
+
 	bIsCrouching = true;
 	SetJumpGaugeVisibility(true);
 	Crouch();

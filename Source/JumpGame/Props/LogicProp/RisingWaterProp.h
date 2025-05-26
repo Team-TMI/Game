@@ -65,6 +65,9 @@ public:
 	void SetRisingSpeed(float Speed);
 	float GetWaterSurfaceZ();
 
+	UFUNCTION(NetMulticast, reliable, BlueprintCallable)
+	void MulticastRPC_PlayEffect(FVector Location);
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBoxComponent* DeepCollision;
@@ -91,4 +94,6 @@ public:
 	FTimerHandle ResumeRisingTimerHandle;
 	FTimerHandle TimerHandle;
 
+	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
+	class USoundCue* HitSound;
 };
