@@ -100,6 +100,18 @@ AMapEditingPawn::AMapEditingPawn()
 	{
 		IA_Teleport = IA_TELEPORT.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_MOVE_GIZMO_MODE
+	(TEXT("/Game/MapEditor/Input/Actions/IA_MoveGizmoMode.IA_MoveGizmoMode"));
+	if (IA_MOVE_GIZMO_MODE.Succeeded())
+	{
+		IA_MoveGizmoMode = IA_MOVE_GIZMO_MODE.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_ROTATE_GIZMO_MODE
+	(TEXT("/Game/MapEditor/Input/Actions/IA_RotateGizmoMode.IA_RotateGizmoMode"));
+	if (IA_ROTATE_GIZMO_MODE.Succeeded())
+	{
+		IA_RotateGizmoMode = IA_ROTATE_GIZMO_MODE.Object;
+	}
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponentMapEditing"));
 	CollisionComponent->InitSphereRadius(35.0f);
@@ -173,6 +185,9 @@ void AMapEditingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 		PlayerInput->BindAction(IA_Scroll, ETriggerEvent::Triggered, this, &AMapEditingPawn::HandleScroll);
 		PlayerInput->BindAction(IA_Teleport, ETriggerEvent::Started, this, &AMapEditingPawn::HandleTeleport);
+
+		PlayerInput->BindAction(IA_MoveGizmoMode, ETriggerEvent::Started, this, &AMapEditingPawn::HandleChangeMoveGizmoMode);
+		PlayerInput->BindAction(IA_RotateGizmoMode, ETriggerEvent::Started, this, &AMapEditingPawn::HandleChangeRotateGizmoMode);
 	}
 }
 
@@ -208,6 +223,11 @@ void AMapEditingPawn::HandleLeftPressed(const FInputActionValue& InputActionValu
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 	PC->SetShowMouseCursor(true);
 	PC->SetInputMode(InputMode);
+
+	if (bRotateGizmoMode)
+	{
+		return ;
+	}
 	
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
 	PressedHandlerManager->HandlePressed(ControlledInfo, PC);
@@ -336,6 +356,53 @@ void AMapEditingPawn::HandleTeleport(const FInputActionValue& InputActionValue)
 		false,                       // bForceShortestRotationPath
 		EMoveComponentAction::Move,  // 바로 이동
 		LatentInfo);
+}
+
+void AMapEditingPawn::HandleChangeMoveGizmoMode(const FInputActionValue& InputActionValue)
+{
+	if (!bRotateGizmoMode || bCanMove) return;
+	
+	bRotateGizmoMode = false;
+	ClickHandlerManager->SetbRotateGizmoMode(bRotateGizmoMode);
+
+	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
+	if (ControlledInfo.TargetProp && ControlledInfo.TargetProp->IsValidLowLevel())
+	{
+		ControlledInfo.TargetProp->ShowMoveGizmo();
+	}
+	
+	if (!(ControlledInfo.TargetGizmo && ControlledInfo.TargetGizmo->IsValidLowLevel()))
+	{
+		return ;
+	}
+
+	ControlledInfo.TargetGizmo->SetUnSelected();
+	ControlledInfo.TargetGizmo = nullptr;
+	ClickHandlerManager->SetControlledClickResponse(ControlledInfo);
+}
+
+void AMapEditingPawn::HandleChangeRotateGizmoMode(const FInputActionValue& InputActionValue)
+{
+	if (bRotateGizmoMode || bCanMove) return;
+	
+	bRotateGizmoMode = true;
+	ClickHandlerManager->SetbRotateGizmoMode(bRotateGizmoMode);
+
+	// 현재 클릭되고 있는 Gizmo가 있는지 확인
+	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
+	if (ControlledInfo.TargetProp && ControlledInfo.TargetProp->IsValidLowLevel())
+	{
+		ControlledInfo.TargetProp->ShowRotateGizmo();
+	}
+	
+	if (!(ControlledInfo.TargetGizmo && ControlledInfo.TargetGizmo->IsValidLowLevel()))
+	{
+		return ;
+	}
+
+	ControlledInfo.TargetGizmo->SetUnSelected();
+	ControlledInfo.TargetGizmo = nullptr;
+	ClickHandlerManager->SetControlledClickResponse(ControlledInfo);
 }
 
 void AMapEditingPawn::MoveForward(float Val)

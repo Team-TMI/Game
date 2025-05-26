@@ -66,6 +66,7 @@ ARotateSpikeProp::ARotateSpikeProp()
 	Propeller = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Propeller"));
 	Propeller->SetupAttachment(RootComponent);
 	Propeller->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// Propeller->SetAbsolute(true, true, true);
 
 	PropDataComponent->SetPropID(TEXT("2008"));
 

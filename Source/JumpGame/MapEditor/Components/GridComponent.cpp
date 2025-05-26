@@ -148,10 +148,10 @@ void UGridComponent::Rotate(const FVector& Direction)
 	const FVector WorldUp    = FVector::UpVector;        // Yaw
 	const FVector WorldForward = FVector::ForwardVector; // Roll
 	
-	// 각 축 기준으로 회전 쿼터니언 생성 (회전량 * 회전축)
+	// 각 축 기준으로 회전 쿼터니언 생성 (회전량 * 회전축) : 시계 방향
 	FQuat YawQuat   = FQuat(WorldUp,    FMath::DegreesToRadians(Direction.Z * RotateAngle));
-	FQuat PitchQuat = FQuat(WorldRight, FMath::DegreesToRadians(Direction.Y * RotateAngle));
-	FQuat RollQuat  = FQuat(WorldForward, FMath::DegreesToRadians(Direction.X * RotateAngle));
+	FQuat PitchQuat = FQuat(WorldRight, FMath::DegreesToRadians(Direction.Y * -RotateAngle));
+	FQuat RollQuat  = FQuat(WorldForward, FMath::DegreesToRadians(Direction.X * -RotateAngle));
 	
 	// 순서대로 회전 적용 (예: Roll → Pitch → Yaw)
 	FQuat CombinedQuat = YawQuat * PitchQuat * RollQuat;

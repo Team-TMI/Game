@@ -18,7 +18,7 @@ public:
 
 	void RegisterHandler(TSharedPtr<IClickHandler> Handler);
 	bool HandleClick(class AMapEditingPlayerController* PlayerController);
-	void ResetControl();;
+	void ResetControl();
 
 	// 처음 클릭될 때
 	UFUNCTION()
@@ -34,6 +34,8 @@ public:
 	void OnPropDragCancelled();
 
 	GETTER(FClickResponse, ControlledClickResponse)
+	SETTER(FClickResponse, ControlledClickResponse)
+	SETTER(bool, bRotateGizmoMode)
 
 	UPROPERTY()
 	FOnControlledPropChanged OnControlledPropChanged;
@@ -57,4 +59,5 @@ private:
 	TSubclassOf<class APrimitiveProp> ControlledPropClass = nullptr;
 
 	bool bMouseEnterUI = false;
+	bool bRotateGizmoMode = false;
 };

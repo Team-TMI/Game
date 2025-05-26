@@ -27,7 +27,10 @@ void URotateButtonUI::NativeOnInitialized()
 void URotateButtonUI::OnRotateButtonClicked()
 {
 	FClickResponse ControlledInfo = MapEditingPawn->GetClickHandlerManager()->GetControlledClickResponse();
-	MapEditingPawn->GetRotateHandlerManager()->HandleRotate(ControlledInfo);
+	if (MapEditingPawn->GetbRotateGizmoMode())
+	{
+		MapEditingPawn->GetRotateHandlerManager()->HandleRotate(ControlledInfo);
+	}
 }
 
 void URotateButtonUI::OnChangeAxisButtonClicked()
@@ -36,8 +39,11 @@ void URotateButtonUI::OnChangeAxisButtonClicked()
 	FVector Axis = AxisVectors[CurrentAxisIndex];
 	
 	FClickResponse ControlledInfo = MapEditingPawn->GetClickHandlerManager()->GetControlledClickResponse();
-	MapEditingPawn->GetRotateHandlerManager()->HandleAxis(Axis, ControlledInfo);
-	AxisImage->SetBrushFromTexture(AxisImages[CurrentAxisIndex]);
+	if (MapEditingPawn->GetbRotateGizmoMode())
+	{
+		MapEditingPawn->GetRotateHandlerManager()->HandleAxis(Axis, ControlledInfo);
+		AxisImage->SetBrushFromTexture(AxisImages[CurrentAxisIndex]);
+	}
 }
 
 void URotateButtonUI::OnAxisChanged(FVector Axis)

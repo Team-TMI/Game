@@ -13,7 +13,7 @@ FPropSlotClickHandler::~FPropSlotClickHandler()
 }
 
 bool FPropSlotClickHandler::HandleClick(FClickResponse& ClickResponse,
-	class AMapEditingPlayerController* PlayerController)
+	class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
 {
 	if (ClickResponse.Result != EClickHandlingResult::UIEditing)
 	{
@@ -39,7 +39,7 @@ bool FPropSlotClickHandler::HandleClick(FClickResponse& ClickResponse,
 	}
 
 	ClickResponse.TargetProp = ClickResponse.ClickedPropByWidget;
-	ClickResponse.TargetProp->SetSelected();
+	ClickResponse.TargetProp->SetSelected(bRotateGizmoMode);
 	
 	return true;
 }

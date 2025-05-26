@@ -34,7 +34,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSize(const FVector& InSize);
 	UFUNCTION(BlueprintCallable)
-	void SetSelected();
+	void SetSelected(bool bRotateGizmoMode);
 	UFUNCTION(BlueprintCallable)
 	void SetUnSelected();
 	UFUNCTION(BlueprintCallable)
@@ -47,14 +47,21 @@ public:
 	void SetNewSizeByRotation(const FVector& InSize);
 
 	GETTER(class UBoxComponent*, GridOuterCollision)
-	GETTER(class UBoxComponent*, GridInnerCollision);
+	GETTER(class UBoxComponent*, GridInnerCollision)
 	GETTER(class UGridComponent*, GridComp);
 	GETTER(class UPropDataComponent*, PropDataComponent);
+	GETTER(class UGizmoComponent*, RotateGizmo);
 
 	bool IsClickable() const { return bCanClick; }
 	bool IsCollisionEnabled() const { return bEnableCollision; }
 
+	void ShowRotateGizmo();;
+	void ShowMoveGizmo();
+	
 protected:
+	UFUNCTION()
+	void HideGizmos();
+	
 	UFUNCTION()
 	void SetGizmoLocation(class UGizmoComponent* Gizmo, const FVector& Direction, const FVector& InBoxSize);
 	UFUNCTION()
@@ -84,6 +91,8 @@ protected:
 	class UGizmoComponent* GizmoFive;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")
 	class UGizmoComponent* GizmoSix;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")
+	class UGizmoComponent* RotateGizmo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmos")
 	TArray<class UGizmoComponent*> GizmoArray;

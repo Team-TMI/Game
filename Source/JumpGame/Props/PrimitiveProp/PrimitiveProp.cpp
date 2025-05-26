@@ -9,6 +9,7 @@
 #include "JumpGame/MapEditor/Components/GizmoPrimaryComponent.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/MapEditor/CategorySystem/PropStruct.h"
+#include "JumpGame/MapEditor/Components/RotateGizmoComponent.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -62,10 +63,16 @@ APrimitiveProp::APrimitiveProp()
 		Gizmo->SetVisibility(false);
 	}
 
+	RotateGizmo = CreateDefaultSubobject<URotateGizmoComponent>(TEXT("RotateGizmo"));
+	RotateGizmo->SetupAttachment(GridComp);
+	RotateGizmo->SetAbsolute(false, true, false);
+	// RotateGizmo->SetRelativeScale3D({1, 1, 1});
+	RotateGizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	RotateGizmo->SetVisibility(false);
+
 	PropDataComponent = CreateDefaultSubobject<UPropDataComponent>(TEXT("PropDataComponent"));
 	
 	SetSize(DefaultSize);
-
 
 	// RotateWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("RotateWidgetComponent"));
 	// RotateWidgetComponent->SetupAttachment(RootComponent);
@@ -139,6 +146,9 @@ void APrimitiveProp::SetSize(const FVector& InSize)
 
 	// 항상 정면 앞에 RotateWidgetComponent이 위치해야 함
 	// RotateWidgetComponent->SetWorldLocation()
+	RotateGizmo->SetRelativeLocation(FVector(0, 0, 0));
+	FVector RotateGizmoLocation = FVector::UpVector * (GridComp->GetSize() * GridComp->GetSnapSize()) + FVector(0, 0, 35.0f);
+	RotateGizmo->SetWorldLocation(RotateGizmoLocation + GetActorLocation());
 }
 
 void APrimitiveProp::SetNewSizeByRotation(const FVector& InSize)
@@ -189,21 +199,20 @@ void APrimitiveProp::SetGizmoRotation(class UGizmoComponent* Gizmo, const FVecto
 	Gizmo->SetWorldRotation(Rotation);
 }
 
-void APrimitiveProp::SetSelected()
+void APrimitiveProp::SetSelected(bool bRotateGizmoMode)
 {
 	bSelected = true;
 
 	// Outer Collision을 꺼줌
 	GridOuterCollision->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 
-	GizmoPrimary->SetVisibility(true);
-	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	GizmoPrimary->SetRenderCustomDepth(true);
-	for (auto& Gizmo : GizmoArray)
+	if (bRotateGizmoMode)
 	{
-		Gizmo->SetVisibility(true);
-		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-		Gizmo->SetRenderCustomDepth(true);
+		ShowRotateGizmo();
+	}
+	else
+	{
+		ShowMoveGizmo();
 	}
 
 	this->SetCollision(false);
@@ -217,17 +226,7 @@ void APrimitiveProp::SetUnSelected()
 	// Outer Collision을 켜줌
 	GridOuterCollision->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 
-	GizmoPrimary->SetVisibility(false);
-	GizmoPrimary->SetUnSelected();
-	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	GizmoPrimary->SetRenderCustomDepth(false);
-	for (auto& Gizmo : GizmoArray)
-	{
-		Gizmo->SetVisibility(false);
-		Gizmo->SetUnSelected();
-		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-		Gizmo->SetRenderCustomDepth(false);
-	}
+	HideGizmos();
 
 	this->SetCollision(true);
 	MaterialChangeOnCollision();
@@ -244,7 +243,6 @@ void APrimitiveProp::SetPrimitivePropCollision(bool bCond)
 		GridOuterCollision->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	}
 }
-
 
 void APrimitiveProp::SetGizmosCollision(bool bCond)
 {
@@ -273,10 +271,60 @@ void APrimitiveProp::RotateAllGizmos()
 		FVector Direction = Gizmo->GetDirection();
 		SetGizmoRotation(Gizmo, Direction);
 	}
+
+	// 항상 액터의 위에 RotateGizmo가 위치해야 함
+	RotateGizmo->SetRelativeLocation(FVector(0, 0, 0));
+	FVector RotateGizmoLocation = FVector::UpVector * (GridComp->GetSize() * GridComp->GetSnapSize()) + FVector(0, 0, 35.0f);
+	RotateGizmo->SetWorldLocation(RotateGizmoLocation + GetActorLocation());
+	
 	// TODO: 기즈모 색상 어떻게 하지 어떤 축으로 도는지 모르겠음
 	// for (auto& Gizmo : GizmoArray)
 	// {
 	// 	FVector Direction = Gizmo->GetDirection();
 	// 	Gizmo->ChangeColorByNewAxis(Direction);
 	// }
+}
+
+void APrimitiveProp::ShowRotateGizmo()
+{
+	HideGizmos();
+
+	RotateGizmo->SetVisibility(true);
+	RotateGizmo->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	RotateGizmo->SetRenderCustomDepth(true);
+}
+
+void APrimitiveProp::ShowMoveGizmo()
+{
+	HideGizmos();
+
+	GizmoPrimary->SetVisibility(true);
+	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	GizmoPrimary->SetRenderCustomDepth(true);
+	for (auto& Gizmo : GizmoArray)
+	{
+		Gizmo->SetVisibility(true);
+		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+		Gizmo->SetRenderCustomDepth(true);
+	}
+}
+
+void APrimitiveProp::HideGizmos()
+{
+	RotateGizmo->SetVisibility(false);
+	RotateGizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	RotateGizmo->SetUnSelected();
+	RotateGizmo->SetRenderCustomDepth(false);
+	
+	GizmoPrimary->SetVisibility(false);
+	GizmoPrimary->SetUnSelected();
+	GizmoPrimary->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	GizmoPrimary->SetRenderCustomDepth(false);
+	for (auto& Gizmo : GizmoArray)
+	{
+		Gizmo->SetVisibility(false);
+		Gizmo->SetUnSelected();
+		Gizmo->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+		Gizmo->SetRenderCustomDepth(false);
+	}
 }
