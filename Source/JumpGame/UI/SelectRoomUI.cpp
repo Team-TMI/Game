@@ -30,10 +30,18 @@ void USelectRoomUI::NativeOnInitialized()
 	ScrollBox_AllMap->ClearChildren();
 	ScrollBox_OriginMap->ClearChildren();
 	ScrollBox_CustomMap->ClearChildren();
+
+	Text_MapName->SetText(FText::FromString(TEXT("No Map")));
 }
 
 void USelectRoomUI::InitSelectRoomUI()
 {
+	// Current Selected Map Slot UI를 이미지에 띄워주기
+	if (CurrentSelectedMapSlotUI)
+	{
+		Text_MapName->SetText(FText::FromString(CurrentSelectedMapSlotUI->GetMapName()));
+	}
+	
 	if (bIsInitialized)
 	{
 		return ;
@@ -42,8 +50,11 @@ void USelectRoomUI::InitSelectRoomUI()
 	
 	OriginMapList = GetMapList(TEXT(".json"), TEXT("OriginMap\\"));
 	CustomMapList = GetMapList(TEXT(".json"), TEXT("CustomMap\\"));
+	SavedMapList = GetMapList(TEXT(".json"), TEXT("../../Saved/SaveMap/"));
 	CombinedMapList.Append(OriginMapList);
 	CombinedMapList.Append(CustomMapList);
+	CombinedMapList.Append(SavedMapList);
+	CustomMapList.Append(SavedMapList);
 
 	InitAllMap();
 	InitOriginMap();
@@ -89,6 +100,8 @@ void USelectRoomUI::OnClickSelectComplete()
 	}
 
 	GameInstance->SetMapFilePath(CurrentSelectedMapSlotUI->GetMapFullPath());
+
+	OnMapSelectedDelegate.ExecuteIfBound(CurrentSelectedMapSlotUI);
 }
 
 void USelectRoomUI::OnClickAllMap()
@@ -145,6 +158,9 @@ void USelectRoomUI::OnPickFileComplete(const FString& FilePath, bool bSuccess)
 	FString FileName = FPaths::GetCleanFilename(FilePath);
 	MapSlot->Init(FilePath, FileName);
 	PreviewSelectedMapSlotUI = MapSlot;
+
+	Text_MapName->SetText(FText::FromString(MapSlot->GetMapName()));
+	
 	bPreviewByPickedFile = true;
 }
 
@@ -155,15 +171,16 @@ TArray<FString> USelectRoomUI::GetMapList(const FString& MapType, const FString&
 
 	FString ExecutableDir = FPaths::ProjectDir() + TEXT("AppData/Content/Maps/");
 	FString MapPath = FPaths::Combine(ExecutableDir, MapDir);
+	FString AbsoluteMapPath = FPaths::ConvertRelativePathToFull(MapPath);
 
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	if (!PlatformFile.DirectoryExists(*MapPath))
+	if (!PlatformFile.DirectoryExists(*AbsoluteMapPath))
 	{
 		FFastLogger::LogScreen(FColor::Red, TEXT("Directory does not exist"));
 		return MapList;
 	}
 	
-	PlatformFile.IterateDirectory(*MapPath, [this, &MapList, &MapType](const TCHAR* Path, bool bIsDirectory) -> bool
+	PlatformFile.IterateDirectory(*AbsoluteMapPath, [this, &MapList, &MapType](const TCHAR* Path, bool bIsDirectory) -> bool
 	{
 		const FString ItemPath = FString(Path);
 		// const FString ItemName = FPaths::GetCleanFilename(ItemPath);
@@ -226,6 +243,9 @@ void USelectRoomUI::OnMapClicked(UMapSlotUI* MapSlot)
 	}
 
 	PreviewSelectedMapSlotUI = MapSlot;
+
+	Text_MapName->SetText(FText::FromString(MapSlot->GetMapName()));
+	
 	bPreviewByPickedFile = false;
 }
 

@@ -21,13 +21,11 @@ ARollingCannonProp::ARollingCannonProp()
 	ObjectPool = CreateDefaultSubobject<UObjectPoolComponent>(TEXT("ObjectPool"));
 
 	// 콜리전 없음
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
-	CollisionComp->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel7, ECR_Block);
-	MeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
-	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
+	// CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	// CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel9, ECollisionResponse::ECR_Ignore);
+	// CollisionComp->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComp->SetCollisionProfileName(TEXT("Prop"));
 }
 
 void ARollingCannonProp::OnProjectileReturn()
@@ -46,8 +44,6 @@ void ARollingCannonProp::OnProjectileReturn()
 void ARollingCannonProp::BeginPlay()
 {
 	Super::BeginPlay();
-
-	MeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 	// 서버에서만
 	if (HasAuthority() && ObjectPool)

@@ -126,8 +126,16 @@ void UCategoryUI::OnMajorCategoryButtonClicked(const EMajorCategoryType& MajorCa
             SubCategoryButtonUI->SetVisibility(ESlateVisibility::Visible);
         }
     }
-
+	
+	if (SelectedMajorCategory)
+	{
+		SelectedMajorCategory->ClearSelected();
+	}
 	SelectedMajorCategory = MajorCategoryButtons[MajorCategory];
+	if (SelectedMajorCategory)
+	{
+		SelectedMajorCategory->SetSelected();
+	}
 
 	// 모든 PropData를 업데이트한다.
 	GridUI->UpdatePropGrid(MajorCategory, CategorySystem);
@@ -146,6 +154,15 @@ void UCategoryUI::ClearSubCategoryButtons()
 			SubCategories->RemoveChild(Child);
 		}
 	}
+	if (SelectedSubCategory)
+	{
+		SelectedSubCategory->ClearSelected();
+	}
+	if (SelectedMajorCategory)
+	{
+		SelectedMajorCategory->ClearSelected();
+	}
+	SelectedMajorCategory = nullptr;
 }
 
 void UCategoryUI::ClearMajorCategoryButtons()
@@ -162,12 +179,28 @@ void UCategoryUI::ClearMajorCategoryButtons()
 			MajorCategories->RemoveChild(Child);
 		}
 	}
+	if (SelectedMajorCategory)
+	{
+		SelectedMajorCategory->ClearSelected();
+	}
+	SelectedMajorCategory = nullptr;
 }
 
 void UCategoryUI::OnSubCategoryButtonClicked(const EMajorCategoryType& MajorCategory, const ESubCategoryType& SubCategory)
 {
     // SubCategory 버튼을 클릭했을 때, PropGridUI를 업데이트한다.
     GridUI->UpdatePropGridBySub(MajorCategory, SubCategory, CategorySystem);
+
+	if (SelectedSubCategory)
+	{
+		SelectedSubCategory->ClearSelected();
+	}
+	SelectedSubCategory = SubCategoryButtons[SubCategory];
+	if (SelectedSubCategory)
+	{
+		SelectedSubCategory->SetSelected();
+	}
+	
 }
 
 void UCategoryUI::OnSearchTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)

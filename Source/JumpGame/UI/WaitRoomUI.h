@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SelectRoomUI.h"
 #include "Blueprint/UserWidget.h"
 #include "WaitRoomUI.generated.h"
 
@@ -19,6 +18,9 @@ class JUMPGAME_API UWaitRoomUI : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 
+	UFUNCTION()
+	void OnMapSelected(class UMapSlotUI* MapSlotUI);
+	
 	UPROPERTY()
 	class UJumpGameInstance* GI;
 	
@@ -29,6 +31,8 @@ public:
 	class UButton* Btn_SelectMap;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_BackFromLobby;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Text_MapName;
 
 	// 클릭시 실행될 함수
 	UFUNCTION()

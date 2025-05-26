@@ -11,6 +11,7 @@ void USubCategoryButtonUI::NativeOnInitialized()
 
 	// TODO : 여기서 부터 진행
 	SubCategoryButton->OnClicked.AddDynamic(this, &USubCategoryButtonUI::SubCategoryButtonClicked);
+	NormalButtonStyle = SubCategoryButton->GetStyle();
 }
 
 void USubCategoryButtonUI::SetSubCategoryInfo(EMajorCategoryType InMajorCategory, ESubCategoryType InSubCategory)
@@ -26,4 +27,18 @@ void USubCategoryButtonUI::SetSubCategoryInfo(EMajorCategoryType InMajorCategory
 void USubCategoryButtonUI::SubCategoryButtonClicked()
 {
 	OnSubCategoryButtonClicked.Broadcast(MajorCategory, SubCategory);
+}
+
+void USubCategoryButtonUI::ClearSelected()
+{
+	SubCategoryButton->SetStyle(NormalButtonStyle);	
+}
+
+void USubCategoryButtonUI::SetSelected()
+{
+	FButtonStyle MajorButtonStyle = SubCategoryButton->GetStyle();
+	MajorButtonStyle.Normal = NormalButtonStyle.Pressed;
+	MajorButtonStyle.Hovered = NormalButtonStyle.Hovered;
+	MajorButtonStyle.Pressed = NormalButtonStyle.Pressed;
+	SubCategoryButton->SetStyle(MajorButtonStyle);
 }
