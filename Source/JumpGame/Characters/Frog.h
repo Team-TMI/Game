@@ -48,8 +48,10 @@ public:
 	virtual void NotifyControllerChanged() override;
 	virtual bool CanJumpInternal_Implementation() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Landed(const FHitResult& Hit) override;
+	
 	void FrogSkinFinder();
-
+	
 	// 카메라 물 오버랩 감지 후 포스트프로세스
 	UFUNCTION()
 	void OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -96,7 +98,8 @@ public:
 	void ServerRPC_StopSprint();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartTongueAttack();
-	
+	void SetSprintSpeed();
+	void SetWalkSpeed();
 
 public:
 	void InitJumpGaugeUIComponent();
@@ -244,6 +247,8 @@ public:
 	TArray<UTexture2D*> SkinTextures;
 	UPROPERTY(ReplicatedUsing=OnRep_SkinIndex)
 	int32 SkinIndex{};
+	bool bIsPressedSprint{false};
+	bool bIsPressedCrouch{false};
 
 	// 델리게이트
 public:
