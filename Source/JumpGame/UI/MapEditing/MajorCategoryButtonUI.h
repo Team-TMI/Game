@@ -25,14 +25,16 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnMajorButtonClicked OnMajorButtonClicked;
 
+	void ClearSelected();
+	void SetSelected();
 private:
 	UFUNCTION()
 	void OnMajorCategoryButtonClicked();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UButton* MajorCategoryButton;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
-	class UImage* MajorCategoryImage;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	// class UImage* MajorCategoryImage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UTextBlock* MajorCategoryText;
 
@@ -41,4 +43,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
 	class UDataTable* CategoryNameTable = nullptr;
+
+	UPROPERTY()
+	FButtonStyle NormalButtonStyle;
 };

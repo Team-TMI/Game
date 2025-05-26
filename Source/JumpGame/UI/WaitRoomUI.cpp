@@ -3,12 +3,14 @@
 
 #include "WaitRoomUI.h"
 
+#include "MapSlotUI.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
+#include "SelectRoomUI.h"
 #include "UICam/LobbySubCamera.h"
 
 class UTextBlock;
@@ -30,6 +32,19 @@ void UWaitRoomUI::NativeOnInitialized()
 	Btn_BackFromLobby->OnClicked.AddDynamic(this, &UWaitRoomUI::OnClickBackFromLobby);
 
 	SelectRoomUI = CreateWidget<USelectRoomUI>(GetWorld(), SelectRoomFactory);
+	if (SelectRoomUI)
+	{
+		SelectRoomUI->OnMapSelectedDelegate.BindDynamic(this, &UWaitRoomUI::OnMapSelected);
+	}
+
+	Text_MapName->SetText(FText::FromString(TEXT("No Map")));
+}
+
+void UWaitRoomUI::OnMapSelected(UMapSlotUI* MapSlotUI)
+{
+	if (!MapSlotUI) return;
+
+	Text_MapName->SetText(FText::FromString(MapSlotUI->GetMapName()));
 }
 
 void UWaitRoomUI::OnClickGameStart()
