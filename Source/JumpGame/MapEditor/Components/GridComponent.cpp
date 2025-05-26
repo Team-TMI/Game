@@ -142,26 +142,26 @@ void UGridComponent::Rotate(const FVector& Direction)
 	
 	// 기존 회전
 	FQuat CurrentQuat = GetComponentQuat();
-
+	
 	// 회전 축 정의 (월드 기준)
 	const FVector WorldRight = FVector::RightVector;     // Pitch
 	const FVector WorldUp    = FVector::UpVector;        // Yaw
 	const FVector WorldForward = FVector::ForwardVector; // Roll
-
+	
 	// 각 축 기준으로 회전 쿼터니언 생성 (회전량 * 회전축)
 	FQuat YawQuat   = FQuat(WorldUp,    FMath::DegreesToRadians(Direction.Z * RotateAngle));
 	FQuat PitchQuat = FQuat(WorldRight, FMath::DegreesToRadians(Direction.Y * RotateAngle));
 	FQuat RollQuat  = FQuat(WorldForward, FMath::DegreesToRadians(Direction.X * RotateAngle));
-
+	
 	// 순서대로 회전 적용 (예: Roll → Pitch → Yaw)
 	FQuat CombinedQuat = YawQuat * PitchQuat * RollQuat;
-
+	
 	// 월드 축 기준으로 누적 회전 적용
 	FQuat NewQuat = CombinedQuat * CurrentQuat;
-
+	
 	// Size 스왑은 여전히 필요
 	SwapSize(Direction);
-
+	
 	// 결과 적용
 	UpdatedActor->SetActorRotation(NewQuat);
 }
