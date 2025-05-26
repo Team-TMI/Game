@@ -7,6 +7,9 @@
 #include "Components/Button.h"
 #include "Components/ScrollBox.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/Core/PlayerController/LobbyPlayerController.h"
+
+class ALobbyPlayerController;
 
 void UFriendsList::NativeOnInitialized()
 {
@@ -19,10 +22,20 @@ void UFriendsList::NativeOnInitialized()
 	}
 
 	Btn_Refresh->OnClicked.AddDynamic(this, &UFriendsList::OnClickRefresh);
-
 	// 초기화
 	Init();
+
+	// PlayerController에 델리게이트 바인딩
+	if (auto PC = GetOwningPlayer<ALobbyPlayerController>())
+	{
+		PC->OnFriendListUpdated.AddDynamic(this, &UFriendsList::OnFriendListReceived);
+
+		// 자동 요청
+		PC->Server_RequestFriendList();
+		Btn_Refresh->SetIsEnabled(false);
+	}
 }
+
 
 void UFriendsList::Init()
 {
@@ -41,6 +54,13 @@ void UFriendsList::Init()
 		// 스크롤 박스에 추가
 		ScrollBox_Friend->AddChild(FriendsItemWidget);
 	}
+}
+
+void UFriendsList::OnFriendListReceived(const TArray<FSteamFriendData>& FriendList)
+{
+	AllFoundFriends = FriendList;
+	UpdateFriendList(FriendList);
+	Btn_Refresh->SetIsEnabled(true);
 }
 
 void UFriendsList::UpdateFriendList(const TArray<FSteamFriendData>& FriendDataArray)
@@ -64,12 +84,18 @@ void UFriendsList::OnClickRefresh()
 {
 	UE_LOG(LogTemp, Display, TEXT("FriendsList::OnClickRefresh"));
 	
-	AllFoundFriends.Empty(); // 중복 방지
+	/*AllFoundFriends.Empty(); // 중복 방지
 	UpdateFriendList(AllFoundFriends);
 	GI->GetSteamFriends();
 
 	// 찾는 중 버튼 비활성화
-	Btn_Refresh->SetIsEnabled(false);
+	Btn_Refresh->SetIsEnabled(false);*/
+
+	if (auto PC = GetOwningPlayer<ALobbyPlayerController>())
+	{
+		PC->Server_RequestFriendList();
+		Btn_Refresh->SetIsEnabled(false);
+	}
 }
 
 void UFriendsList::OnFindComplete(const FSteamFriendData& Data)

@@ -21,6 +21,12 @@ public:
 	
 	UPROPERTY(meta = (BindWidget))
 	class UImage* Img_FriendPicture;
+	// 이미지
+	UPROPERTY()
+	class UTexture2D* Img_Online;
+	UPROPERTY()
+	class UTexture2D* Img_Offline;
+	
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_FriendName;
 	UPROPERTY(meta = (BindWidget))
