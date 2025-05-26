@@ -271,11 +271,37 @@ AFrog::AFrog()
 
 	FrogSkinFinder();
 
+	// 감정표현
 	ConstructorHelpers::FClassFinder<UUserWidget> EmotionUIWidgetClass
 		(TEXT("/Game/UI/Character/WBP_Emotion.WBP_Emotion_C"));
 	if (EmotionUIWidgetClass.Succeeded())
 	{
 		EmotionUIClass = EmotionUIWidgetClass.Class;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempGreet(TEXT("/Game/Characters/Animation/EmotionMontage/WavingHands_Montage.WavingHands_Montage"));
+	if (TempGreet.Succeeded())
+	{
+		GreetingMontage = TempGreet.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempAngry(TEXT("/Game/Characters/Animation/EmotionMontage/Angry_Montage.Angry_Montage"));
+	if (TempAngry.Succeeded())
+	{
+		AngryMontage = TempAngry.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempSad(TEXT("/Game/Characters/Animation/EmotionMontage/Sad_Montage.Sad_Montage"));
+	if (TempSad.Succeeded())
+	{
+		SadMontage = TempSad.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempMerong(TEXT("/Game/Characters/Animation/EmotionMontage/Merong_Montage.Merong_Montage"));
+	if (TempMerong.Succeeded())
+	{
+		MerongMontage = TempMerong.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempWinner(TEXT("/Game/Characters/Animation/EmotionMontage/EndingDance_Montage.EndingDance_Montage"));
+	if (TempWinner.Succeeded())
+	{
+		WinnerMontage = TempWinner.Object;
 	}
 }
 
@@ -1415,6 +1441,8 @@ void AFrog::OnRep_SkinIndex()
 // 플레이어 감정표현
 void AFrog::OnPressCKey()
 {
+	if (EmotionState == EEmotionState::PlayingWinnerEmotion) return;
+	
 	if (EmotionState == EEmotionState::None || EmotionState == EEmotionState::PlayingEmotion)
 	{
 		ShowEmotionUI(true);
@@ -1424,6 +1452,8 @@ void AFrog::OnPressCKey()
 
 void AFrog::OnReleasedCKey()
 {
+	if (EmotionState == EEmotionState::PlayingWinnerEmotion) return;
+	
 	if (EmotionState == EEmotionState::WaitingForInput)
 	{
 		EmotionUI->ConfirmEmotionSelection();
@@ -1434,6 +1464,8 @@ void AFrog::OnReleasedCKey()
 
 void AFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
 {
+	if (EmotionState == EEmotionState::PlayingWinnerEmotion) return;
+	
 	// 선택된 감정 처리
 	ShowEmotionUI(false);
 	if (bCanPlayEmotion)
@@ -1446,8 +1478,8 @@ void AFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
 
 void AFrog::ShowEmotionUI(bool bIsShow)
 {
-	if (!EmotionUI)
-		return;
+	if (!EmotionUI)	return;
+	if (EmotionState == EEmotionState::PlayingWinnerEmotion) return;
 
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (bIsShow)
