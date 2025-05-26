@@ -24,7 +24,12 @@ public:
 
 	void SetAxisDirection(const FVector& NewAxisDirection);
 
+	virtual void BeginPlay() override;
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gizmo", meta = (AllowPrivateAccess = "true"))
 	FVector AxisDirection = FVector(0, 0, 1); // Default to Z-axis
+
+	UPROPERTY()
+	class AMapEditingPawn* EditingPawn = nullptr;
 };

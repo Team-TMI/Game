@@ -3,6 +3,10 @@
 
 #include "RotateGizmoComponent.h"
 
+#include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
+#include "JumpGame/MapEditor/RotateHandlers/RotateHandlerManager.h"
+#include "Kismet/GameplayStatics.h"
+
 URotateGizmoComponent::URotateGizmoComponent()
 {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_ROTATE_GIZMO
@@ -39,6 +43,12 @@ FVector URotateGizmoComponent::GetDirection() const
 void URotateGizmoComponent::SetSelected()
 {
 	Super::SetSelected();
+
+	if (!EditingPawn)
+	{
+		FVector Axis = EditingPawn->GetRotateHandlerManager()->GetAxis();
+		SetAxisDirection(Axis);
+	}
 }
 
 void URotateGizmoComponent::SetUnSelected()
@@ -46,9 +56,13 @@ void URotateGizmoComponent::SetUnSelected()
 	Super::SetUnSelected();
 
 	// 축을 0으로 초기화 : Yaw 축 회전으로 초기화
-	AxisDirection = FVector(0, 0, 1);
-	SetRelativeRotation(FRotator(0, 0, 0));
 
+	if (!EditingPawn)
+	{
+		FVector Axis = EditingPawn->GetRotateHandlerManager()->GetAxis();
+		SetAxisDirection(Axis);
+	}
+	
 	// Pitch : 90 Yaw : 0 Roll : 0 => Roll 축 회전으로 초기화
 	// Pitch : 0 Yaw : 0 Roll : 90 => Pitch 축 회전으로 초기화
 	// Pitch : 0 Yaw : 0 Roll : 0 => Yaw 축 회전으로 초기화
@@ -70,4 +84,11 @@ void URotateGizmoComponent::SetAxisDirection(const FVector& NewAxisDirection)
 	{
 		SetRelativeRotation(FRotator(0, 0, 0));
 	}
+}
+
+void URotateGizmoComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	EditingPawn = Cast<AMapEditingPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), AMapEditingPawn::StaticClass()));
 }
