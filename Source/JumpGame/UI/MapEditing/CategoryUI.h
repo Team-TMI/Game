@@ -38,6 +38,8 @@ private:
 	UPROPERTY()
 	class UMajorCategoryButtonUI* SelectedMajorCategory = nullptr;
 	UPROPERTY()
+	class USubCategoryButtonUI* SelectedSubCategory = nullptr;
+	UPROPERTY()
 	class UCategorySystem* CategorySystem = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
