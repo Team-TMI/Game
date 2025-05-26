@@ -68,7 +68,7 @@ AObjectEyeHunterProp::AObjectEyeHunterProp()
 		PlantMoveSound = Cast<USoundCue>(PlantMoveSoundAsset.Object);
 	}
 
-	CollisionComp->SetRelativeLocation(FVector(0, 0, 100.f));
+	CollisionComp->SetRelativeLocation(FVector(0, 0, 50.f));
 	MeshComp->SetRelativeLocation(FVector(0, 0, -100.f));
 
 	bReplicates = true;
