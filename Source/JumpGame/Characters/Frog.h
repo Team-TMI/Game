@@ -49,8 +49,10 @@ public:
 	virtual void NotifyControllerChanged() override;
 	virtual bool CanJumpInternal_Implementation() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Landed(const FHitResult& Hit) override;
+	
 	void FrogSkinFinder();
-
+	
 	// 카메라 물 오버랩 감지 후 포스트프로세스
 	UFUNCTION()
 	void OnCameraBeginOverlapWater(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -97,7 +99,8 @@ public:
 	void ServerRPC_StopSprint();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartTongueAttack();
-	
+	void SetSprintSpeed();
+	void SetWalkSpeed();
 
 public:
 	void InitJumpGaugeUIComponent();
@@ -121,7 +124,11 @@ public:
 	void CalculateWaterCameraOverlapRatio(float dt);
 	UFUNCTION(BlueprintCallable)
 	void SetFrogVignetteIntensity_PP(float Value);
-	
+	UFUNCTION(NetMulticast, reliable, BlueprintCallable)
+	void MulticastRPC_PlayEffect(FVector Location, int32 Index);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void PlayHitEffect(int32 Index = 0);
+ 
 public:
 	// 물에 들어갔는지, 나왔는지 업데이트
 	UFUNCTION(Server, Reliable, WithValidation)
@@ -245,6 +252,8 @@ public:
 	TArray<UTexture2D*> SkinTextures;
 	UPROPERTY(ReplicatedUsing=OnRep_SkinIndex)
 	int32 SkinIndex{};
+	bool bIsPressedSprint{false};
+	bool bIsPressedCrouch{false};
 
 	// 델리게이트
 public:
@@ -277,7 +286,7 @@ public:
 	class UArrowComponent* TongueTipComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USpotLightComponent* SpotLightComponent;
-	
+
 	// Enum
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CharacterWaterState)
