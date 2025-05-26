@@ -24,6 +24,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Net/UnrealNetwork.h"
+
 // Sets default values
 AFrog::AFrog()
 {
@@ -144,7 +145,7 @@ AFrog::AFrog()
 		JumpGaugeUIComponent->SetPivot(FVector2D(3.0, 0.3));
 		JumpGaugeUIComponent->SetDrawAtDesiredSize(true);
 	}
-	
+
 	ConstructorHelpers::FObjectFinder<UMaterial> WaterPostProcessFinder
 		(TEXT("/Game/PostProcess/MPP_InWater.MPP_InWater"));
 	if (WaterPostProcessFinder.Succeeded())
@@ -156,7 +157,7 @@ AFrog::AFrog()
 		WaterPostProcessComponent->SetupAttachment(GetRootComponent());
 		WaterPostProcessComponent->bEnabled = false;
 	}
-	
+
 	SettingPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("SettingPostProcessComponent"));
 	SettingPostProcessComponent->SetupAttachment(GetRootComponent());
 
@@ -182,7 +183,7 @@ AFrog::AFrog()
 	TongueTipComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("TongueTipComponent"));
 	TongueTipComponent->SetupAttachment(FrogTongueMesh, FName("TongueTipSocket"));
 	TongueTipComponent->SetRelativeRotation(FRotator(0, 90.f, 0));
-	
+
 	// CapsuleComponent Settings
 	GetCapsuleComponent()->InitCapsuleSize(43.f, 70.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -202,6 +203,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
 	GetCharacterMovement()->GroundFriction = 5.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	GetCharacterMovement()->JumpZVelocity = 650.f;
 	GetCharacterMovement()->MaxStepHeight = 65.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 150.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 1500.0f;
@@ -246,7 +248,7 @@ AFrog::AFrog()
 	SpotLightComponent->SetOuterConeAngle(29.f);
 	SpotLightComponent->SetCastShadows(false);
 	SpotLightComponent->SetRelativeRotation(FRotator(-10.f, 0.f, 0));
-	
+
 	GetCharacterMovement()->SetIsReplicated(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("FrogCollision"));
 	GetCapsuleComponent()->CanCharacterStepUpOn = ECB_Yes;
@@ -327,7 +329,7 @@ void AFrog::BeginPlay()
 	{
 		EmotionUI->AddToViewport();
 	}
-	
+
 	InitJumpGaugeUIComponent();
 	InitFrogState();
 }
@@ -350,7 +352,7 @@ void AFrog::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	//FLog::Log("Speed", GetCharacterMovement()->MaxWalkSpeed);
+	//FLog::Log("", GetCharacterMovement()->JumpZVelocity);
 
 	// 공중에 있을 때는 회전 잘 안되게
 	if (GetCharacterMovement()->IsFalling())
@@ -495,7 +497,33 @@ bool AFrog::CanJumpInternal_Implementation() const
 			&& !GetCharacterMovement()->IsFalling();
 	}
 
+	//FLog::Log("", JumpCurrentCount, JumpMaxCount);
+
 	return bCanJump;
+}
+
+void AFrog::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	JumpCurrentCount = 0;
+
+	ResetSuperJumpRatio();
+
+	if (bIsPressedSprint)
+	{
+		SetSprintSpeed();
+	}
+	else
+	{
+		SetWalkSpeed();
+	}
+
+	if (bIsPressedCrouch)
+	{
+		GetCharacterMovement()->MovementMode = MOVE_Walking;
+		MulticastRPC_StartCrouch_Implementation();
+	}
 }
 
 void AFrog::StartJump()
@@ -507,7 +535,7 @@ void AFrog::StartJump()
 
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
-		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 900.f};
+		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1800.f};
 
 		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
@@ -529,6 +557,7 @@ void AFrog::StartJump()
 		if (bIsSuperJump)
 		{
 			SetJumpAvailableBlock(3);
+			bIsSuperJump = false;
 		}
 		else if (SuperJumpRatio >= 0.5f)
 		{
@@ -541,7 +570,7 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			Jump();
-			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+			MulticastRPC_PlayEffect(GetActorLocation(), 0);
 		}
 	}
 	// 일반 점프
@@ -551,8 +580,25 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			Jump();
-			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+			MulticastRPC_PlayEffect(GetActorLocation(), 1);
 		}
+	}
+}
+
+void AFrog::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
+{
+	FLog::Log();
+	switch (Index)
+	{
+		case 0:
+			PlayHitEffect();
+			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1.5f, 1, 4.39f);
+			break;
+		case 1:
+			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+			break;
+		default:
+			break;
 	}
 }
 
@@ -563,6 +609,8 @@ void AFrog::StopJump()
 
 void AFrog::StartSprint()
 {
+	bIsPressedSprint = true;
+
 	if (!GetCanMove())
 	{
 		return;
@@ -573,29 +621,14 @@ void AFrog::StartSprint()
 		return;
 	}
 
-	if (HasAuthority())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 600.f;
-	}
-	else
-	{
-		// 클라 예측 실행
-		GetCharacterMovement()->MaxWalkSpeed = 600.f;
-		ServerRPC_StartSprint();
-	}
+	SetSprintSpeed();
 }
 
 void AFrog::StopSprint()
 {
-	if (HasAuthority())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	}
-	else
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-		ServerRPC_StopSprint();
-	}
+	bIsPressedSprint = false;
+
+	SetWalkSpeed();
 }
 
 void AFrog::SetCrouchEnabled(bool bEnabled)
@@ -610,6 +643,8 @@ void AFrog::SetCrouchEnabled(bool bEnabled)
 
 void AFrog::StartCrouch()
 {
+	bIsPressedCrouch = true;
+
 	if (!GetCanMove())
 	{
 		return;
@@ -620,6 +655,8 @@ void AFrog::StartCrouch()
 
 void AFrog::StopCrouch()
 {
+	bIsPressedCrouch = false;
+
 	MulticastRPC_StopCrouch();
 }
 
@@ -799,7 +836,7 @@ void AFrog::ServerRPC_StartTongueAttack_Implementation()
 	{
 		return;
 	}
-	
+
 	bCanTongAttack = false;
 	bIsTongueGrow = true;
 	TongueLengthRatio = 0.f;
@@ -846,6 +883,32 @@ void AFrog::ServerRPC_StartTongueAttack_Implementation()
 	GetWorldTimerManager().SetTimer(TongueTimer, TongueAttackDelegate, GetWorld()->GetDeltaSeconds(), true);
 }
 
+void AFrog::SetSprintSpeed()
+{
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+		ServerRPC_StartSprint();
+	}
+}
+
+void AFrog::SetWalkSpeed()
+{
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		ServerRPC_StopSprint();
+	}
+}
+
 void AFrog::InitJumpGaugeUIComponent()
 {
 	// 로컬 클라만 점프 게이지 보이게
@@ -866,7 +929,9 @@ void AFrog::InitJumpGaugeUIComponent()
 
 void AFrog::InitFrogState()
 {
-	SetJumpAvailableBlock(1);
+	//	SetJumpAvailableBlock(1);
+	SetJumpAvailableBlock(2);
+
 	ResetSuperJumpRatio();
 
 	// // 로컬 클라만 점프 게이지 보이게
@@ -887,6 +952,8 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 	float Height{Block * 100.f + 10.f};
 	float Value{FMath::Sqrt(Height * FMath::Abs(GetCharacterMovement()->GetGravityZ()) * 2)};
 	GetCharacterMovement()->JumpZVelocity = Value;
+
+	//FLog::Log("Block", Block);
 
 	// 점프력 높게 설정하면 다시 원래대로 점프력 돌아오게
 	if (Block != 1)
@@ -947,7 +1014,7 @@ void AFrog::CameraMovementMode()
 	CameraBoom->TargetArmLength = 400.f;
 }
 
-void AFrog::ServerRPC_PrepareMission_Implementation(const FVector& Loc,const FRotator& Rot)
+void AFrog::ServerRPC_PrepareMission_Implementation(const FVector& Loc, const FRotator& Rot)
 {
 	if (HasAuthority())
 	{
@@ -1002,6 +1069,7 @@ void AFrog::ServerRPC_SetJumpAvailableBlock_Implementation(int32 Block)
 	float Height{Block * 100.f + 10.f};
 	float Value{FMath::Sqrt(Height * FMath::Abs(GetCharacterMovement()->GetGravityZ()) * 2)};
 	GetCharacterMovement()->JumpZVelocity = Value;
+
 	// 점프력 높게 설정하면 다시 원래대로 점프력 돌아오게
 	if (Block != 1)
 	{
@@ -1039,7 +1107,7 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, bCanTongAttack);
 
 	DOREPLIFETIME(AFrog, SkinIndex);
-	
+
 	DOREPLIFETIME(AFrog, bRecentlyLaunched);
 }
 
@@ -1252,7 +1320,7 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 	}
 	else
 	{
-		MoveComp->GravityScale = 1.f;
+		MoveComp->GravityScale = 2.7f;
 
 		if (MoveComp->IsFlying() || MoveComp->IsSwimming())
 		{
@@ -1603,7 +1671,7 @@ void AFrog::ChangeEyeMaterial(int32 MatIndex)
 void AFrog::ActivateRecentlyLaunchedFlag()
 {
 	bRecentlyLaunched = true;
-	
+
 	GetWorldTimerManager().ClearTimer(LaunchCooldownTimer);
 	GetWorldTimerManager().SetTimer(LaunchCooldownTimer, [this]() {
 		bRecentlyLaunched = false;
@@ -1614,7 +1682,7 @@ void AFrog::ServerRPC_ProcessOverlap_Implementation(class AObstacleProp* Obstacl
 {
 	if (!ObstacleProp || this->IsLocallyControlled())
 	{
-		return ;
+		return;
 	}
 	ObstacleProp->MulticastRPC_PlayEffect(ObstacleProp->GetActorLocation());
 }
