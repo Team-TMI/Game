@@ -295,15 +295,6 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 내 메세지가 아니면 무시하자
 	if (RespMessage.Header.PlayerID != PlayerIdx) return;
 
-	/*
-	FFastLogger::LogConsole(TEXT("메세지 받았습니다@@@@@@@@"));
-	FDateTime Now = FDateTime::Now();
-	int32 Hour = Now.GetHour();
-	int32 Minute = Now.GetMinute();
-	int32 Second = Now.GetSecond();
-	UE_LOG(LogTemp, Warning, TEXT("ReceiveSoundQuizMessage 현재 시간: %02d:%02d:%02d"), Hour, Minute, Second);
-	*/
-
 	// 내가 만든 변수에 넣자
 	QuizID = RespMessage.WavResponseMessage.QuizID;
 	Similarity = RespMessage.WavResponseMessage.Similarity;
@@ -336,8 +327,25 @@ void ASoundQuizProp::ReceiveSoundQuizMessage()
 	// 틱 비활성화
 	bIsMessageReceived = false;
 	
-	// 메세지를 받았다! 2초 후에 녹음 시작
-	GetWorld()->GetTimerManager().SetTimer(RecordStartTimer, this, &ASoundQuizProp::StartRecord, 2.0f, false);
+	if (SendResponseIdx >= 20)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("퀴즈 실패"));
+		GetWorld()->GetTimerManager().ClearTimer(RecordStartTimer);
+	}
+	else if (SendResponseIdx < 20)
+	{
+		if (bSuccess == 1 || Similarity*100 >= 89)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("퀴즈 성공"));
+			GetWorld()->GetTimerManager().ClearTimer(RecordStartTimer);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("퀴즈 녹음시작"));
+			// 메세지를 받았다! 2초 후에 녹음 시작
+			GetWorld()->GetTimerManager().SetTimer(RecordStartTimer, this, &ASoundQuizProp::StartRecord, 2.0f, false);
+		}
+	}
 }
 
 void ASoundQuizProp::SendEndSoundQuizNotify()

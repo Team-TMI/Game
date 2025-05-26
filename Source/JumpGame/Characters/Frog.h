@@ -23,6 +23,7 @@ enum class EEmotionState
 	None,
 	WaitingForInput,
 	PlayingEmotion,
+	PlayingWinnerEmotion
 };
 
 UCLASS()
@@ -344,6 +345,8 @@ public:
 	UAnimMontage* SadMontage;
 	UPROPERTY(EditAnywhere, Category = "Emotion")
 	UAnimMontage* MerongMontage;
+	UPROPERTY(EditAnywhere, Category = "Emotion")
+	UAnimMontage* WinnerMontage;
 
 	// 감정표현 UI
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

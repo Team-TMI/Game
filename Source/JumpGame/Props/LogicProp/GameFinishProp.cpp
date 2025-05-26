@@ -117,6 +117,7 @@ void AGameFinishProp::GameEnd()
 	WinnerForward = VictoryP->VictoryArrow->GetForwardVector();
 	WinnerRotation = WinnerForward.Rotation();
 	WinnerCharacter->SetActorRotation(WinnerRotation);
+	WinnerCharacter->EmotionState = EEmotionState::PlayingWinnerEmotion;
 	
 	// 플레이어 텔레포트
 	WinnerCharacter->SetActorLocation(VictoryP->SpawnVictoryCharacter());
@@ -168,6 +169,7 @@ void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 	// 플레이어들 조작막기
 	AFrog* LocalCharacter = Cast<AFrog>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	LocalCharacter->StopMovementAndResetRotation(FRotator::ZeroRotator);
+	LocalCharacter->SetFrogVignetteIntensity_PP(0);
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	FInputModeGameAndUI InputMode;
@@ -180,6 +182,10 @@ void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 	
 	// 카메라 정렬
 	PC->SetViewTargetWithBlend(VictoryP, 0.5f);
+
+	// 연출
+	VictoryP->DropProps();
+	WinnerCharacter->PlayAnimMontage(WinnerCharacter->WinnerMontage);
 	
 	// UI를 띄우자
 	FString Key = WinnerCharacter->GetName();
