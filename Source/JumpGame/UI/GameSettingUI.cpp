@@ -12,6 +12,7 @@
 #include "Components/Slider.h"
 #include "Components/WidgetSwitcher.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UGameSettingUI::NativeOnInitialized()
 {
@@ -112,6 +113,9 @@ void UGameSettingUI::InitUISettings()
 	Sd_UI->SetValue(Settings->GetUIVolume());
 	Sd_Character->SetValue(Settings->GetCharacterVolume());
 	Sd_Obstacle->SetValue(Settings->GetObstacleVolume());
+
+	// 밝기
+	Sd_Light->SetValue(Settings->GetBrightness());
 
 	// 안티엘리어싱
 	ComboBox_Anti->SetSelectedIndex(Settings->GetAntiValue());
@@ -295,7 +299,8 @@ void UGameSettingUI::OnClickWeatherOff()
 
 void UGameSettingUI::OnLightValueChanged(float Value)
 {
-	
+	float BrightValue = UKismetMathLibrary::Lerp(3, 1, Value);
+	Settings->SetBrightness(BrightValue);
 }
 
 void UGameSettingUI::SetAntiAliasingQuality(const FString& SelectedOption)
