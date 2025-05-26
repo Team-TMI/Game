@@ -496,6 +496,8 @@ bool AFrog::CanJumpInternal_Implementation() const
 			&& !GetCharacterMovement()->IsFalling();
 	}
 
+	//FLog::Log("", JumpCurrentCount, JumpMaxCount);
+
 	return bCanJump;
 }
 
@@ -503,6 +505,8 @@ void AFrog::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
+	JumpCurrentCount = 0;
+	
 	ResetSuperJumpRatio();
 
 	if (bIsPressedSprint)
@@ -516,8 +520,7 @@ void AFrog::Landed(const FHitResult& Hit)
 
 	if (bIsPressedCrouch)
 	{
-		FLog::Log();
-
+		GetCharacterMovement()->MovementMode = MOVE_Walking;
 		MulticastRPC_StartCrouch_Implementation();
 	}
 }
@@ -528,10 +531,10 @@ void AFrog::StartJump()
 	{
 		return;
 	}
-
+	
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
-		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 900.f};
+		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1800.f};
 
 		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
@@ -757,7 +760,7 @@ void AFrog::MulticastRPC_StartCrouch_Implementation()
 	{
 		return;
 	}
-
+	
 	bIsCrouching = true;
 	SetJumpGaugeVisibility(true);
 	Crouch();

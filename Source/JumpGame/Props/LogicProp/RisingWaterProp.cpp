@@ -159,8 +159,9 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 		// 서버에서만 처리
 		if (HasAuthority())
 		{
+			FLog::Log("Speed", OverlappingFrog->GetCharacterMovement()->Velocity.Length());
 			// 안빠르면 가라앉지 않게
-			if (OverlappingFrog->GetCharacterMovement()->Velocity.Length() < 950.f)
+			if (OverlappingFrog->GetCharacterMovement()->Velocity.Length() < 2'000.f)
 			{
 				OverlappingFrog->CharacterWaterState = ECharacterStateEnum::Surface;
 			}
