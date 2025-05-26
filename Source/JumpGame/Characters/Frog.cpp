@@ -13,6 +13,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -181,7 +182,7 @@ AFrog::AFrog()
 	TongueTipComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("TongueTipComponent"));
 	TongueTipComponent->SetupAttachment(FrogTongueMesh, FName("TongueTipSocket"));
 	TongueTipComponent->SetRelativeRotation(FRotator(0, 90.f, 0));
-
+	
 	// CapsuleComponent Settings
 	GetCapsuleComponent()->InitCapsuleSize(43.f, 70.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -237,6 +238,15 @@ AFrog::AFrog()
 		TEXT("TrajectoryComponent"));
 	TrajectoryComponent->SetIsReplicated(true);
 
+	SpotLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLightComponent"));
+	SpotLightComponent->SetupAttachment(CameraBoom);
+	SpotLightComponent->SetIntensityUnits(ELightUnits::Candelas);
+	SpotLightComponent->SetIntensity(10.f);
+	SpotLightComponent->SetAttenuationRadius(630.f);
+	SpotLightComponent->SetOuterConeAngle(29.f);
+	SpotLightComponent->SetCastShadows(false);
+	SpotLightComponent->SetRelativeRotation(FRotator(-10.f, 0.f, 0));
+	
 	GetCharacterMovement()->SetIsReplicated(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("FrogCollision"));
 	GetCapsuleComponent()->CanCharacterStepUpOn = ECB_Yes;
@@ -1610,11 +1620,6 @@ void AFrog::ServerRPC_ProcessOverlap_Implementation(class AObstacleProp* Obstacl
 }
 
 void AFrog::SetFrogVignetteIntensity_PP(float Value)
-{
-	SettingPostProcessComponent->Settings.VignetteIntensity = Value;
-}
-
-void AFrog::SetFrogBrightness_PP(float Value)
 {
 	SettingPostProcessComponent->Settings.VignetteIntensity = Value;
 }
