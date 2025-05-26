@@ -127,8 +127,7 @@ public:
 	void MulticastRPC_PlayEffect(FVector Location, int32 Index);
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void PlayHitEffect(int32 Index = 0);
-	
-	
+ 
 public:
 	// 물에 들어갔는지, 나왔는지 업데이트
 	UFUNCTION(Server, Reliable, WithValidation)
