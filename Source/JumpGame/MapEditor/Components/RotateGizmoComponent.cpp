@@ -44,7 +44,7 @@ void URotateGizmoComponent::SetSelected()
 {
 	Super::SetSelected();
 
-	if (!EditingPawn)
+	if (EditingPawn)
 	{
 		FVector Axis = EditingPawn->GetRotateHandlerManager()->GetAxis();
 		SetAxisDirection(Axis);
@@ -57,7 +57,7 @@ void URotateGizmoComponent::SetUnSelected()
 
 	// 축을 0으로 초기화 : Yaw 축 회전으로 초기화
 
-	if (!EditingPawn)
+	if (EditingPawn)
 	{
 		FVector Axis = EditingPawn->GetRotateHandlerManager()->GetAxis();
 		SetAxisDirection(Axis);
