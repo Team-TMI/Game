@@ -382,6 +382,7 @@ public:
 public :
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ProcessOverlap(class AObstacleProp* ObstacleProp);
+	
 };
 
 

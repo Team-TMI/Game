@@ -2,3 +2,8 @@
 
 
 #include "SoundQuizFail.h"
+
+void USoundQuizFail::PlayQuizFailAnim()
+{
+	PlayAnimation(QuizFailAnim);
+}

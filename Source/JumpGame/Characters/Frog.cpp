@@ -1618,7 +1618,6 @@ void AFrog::PlayEmotion(int32 EmotionIndex)
 	}
 }
 
-
 void AFrog::ServerRPC_PlayEmotion_Implementation(AFrog* Character, int32 EmotionIndex)
 {
 	// 유효한 캐릭터인지 확인
