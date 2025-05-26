@@ -582,7 +582,7 @@ void AFrog::StartJump()
 
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
-		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1800.f};
+		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1'700.f};
 
 		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
