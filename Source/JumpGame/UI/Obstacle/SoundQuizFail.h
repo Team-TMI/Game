@@ -13,4 +13,11 @@ UCLASS()
 class JUMPGAME_API USoundQuizFail : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* QuizFailAnim;
+
+	UFUNCTION()
+	void PlayQuizFailAnim();
 };

@@ -15,6 +15,7 @@
 #include "JumpGame/UI/Obstacle/StartSoundUI.h"
 #include "JumpGame/UI/Obstacle/TimeRemainUI.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
 
@@ -46,6 +47,20 @@ ASoundMommyQuizProp::ASoundMommyQuizProp()
 	if (FailSoundAsset.Succeeded())
 	{
 		FailSound = Cast<USoundCue>(FailSoundAsset.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> TempClearEffect
+	(TEXT("/Game/_Resource/FX/VFX_Toolkit_V1/ParticleSystems/356Days/Par_RainBlow_01.Par_RainBlow_01"));
+	if (TempClearEffect.Succeeded())
+	{
+		ClearEffect = Cast<UParticleSystem>(TempClearEffect.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> TempFailEffect
+	(TEXT("/Game/_Resource/FX/VFX_Toolkit_V1/ParticleSystems/356Days/Par_Galaxoid_01.Par_Galaxoid_01"));
+	if (TempFailEffect.Succeeded())
+	{
+		FailEffect = Cast<UParticleSystem>(TempFailEffect.Object);
 	}
 }
 
@@ -79,7 +94,6 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	                        SweepResult);
 	
 	if (!PC) return;
-	
 	// 각각의 화면에서 UI를 띄우자
 	// 그렇게 해야 remove했을때 본인의 화면에서 사라짐
 	if (PC->IsLocalPlayerController() && !bIsOverlapChild)
@@ -100,16 +114,29 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	// 20번 넘으면 자동 게임 종료, 디버프를 받는다 (못맞춤)
 	if (SendResponseIdx >= 20)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("1111111111111 ReceiveSoundQuiz : Fail!!"));
-		
 		// UI 지우자
 		SoundQuizUI->RemoveFromParent();
 		// 실패...
 		if (SoundQuizFail)
 		{
 			SoundQuizFail->AddToViewport();
+			SoundQuizFail->PlayQuizFailAnim();
 		}
 
+		FVector SpawnLocation = Character->GetActorLocation() + FVector(100, 0, 120);
+		UParticleSystemComponent* SpawnedEffect = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),	FailEffect,	SpawnLocation, FRotator::ZeroRotator, FVector(5), true);
+
+		// 타이머로 5초 후 수동 Destroy
+		if (SpawnedEffect)
+		{
+			FTimerHandle SpawnTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, FTimerDelegate::CreateLambda([SpawnedEffect]()
+			{
+				SpawnedEffect->DestroyComponent(); // 파티클 제거
+			}), 5.0f, false);
+		}
+		
 		bIsClear = false;
 		// 퀴즈 끝났다고 알리자!
 		SendEndSoundQuizNotify();
@@ -124,15 +151,17 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 	{
 		if (bSuccess == 1 || Similarity*100 >= 89)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("1111111111111 ReceiveSoundQuiz : Clear!!"));
-			
 			// UI 지우자
 			SoundQuizUI->RemoveFromParent();
 			// 성공!
 			if (SoundQuizClear)
 			{
 				SoundQuizClear->AddToViewport();
+				SoundQuizClear->PlayQuizAnim();
 			}
+
+			FVector SpawnLocation = Character->GetActorLocation() + FVector(100, 0, 100);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ClearEffect, SpawnLocation, FRotator(0, 90, 0), FVector(0.5f), true);
 
 			bIsClear = true;
 			// 퀴즈 끝났다고 알리자!
@@ -143,7 +172,6 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("3333333333 UpdateFromResponse : Update"));
 	SoundQuizUI->UpdateFromResponse(Similarity*100, MessageStr);
 }
 
@@ -236,5 +264,3 @@ void ASoundMommyQuizProp::RemoveSoundQuizUI()
 		SoundQuizFail->RemoveFromParent();
 	}
 }
-
-

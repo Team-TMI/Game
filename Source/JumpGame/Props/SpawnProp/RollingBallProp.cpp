@@ -106,7 +106,7 @@ void ARollingBallProp::OnMyRollingBallOverlap(UPrimitiveComponent* OverlappedCom
 		return ;
 	}
 	
-	FVector LaunchVelocity = LaunchDir.GetSafeNormal() * 2000;
+	FVector LaunchVelocity = LaunchDir.GetSafeNormal() * 1'800;
 	Frog->LaunchCharacter(LaunchVelocity, true, true);
 	FLog::Log("OnMyRollingBallOverlap Frog");
 
