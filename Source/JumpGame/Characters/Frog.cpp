@@ -374,7 +374,6 @@ void AFrog::PossessedBy(AController* NewController)
 	InitJumpGaugeUIComponent();
 }
 
-
 // Called every frame
 void AFrog::Tick(float DeltaTime)
 {
@@ -387,6 +386,31 @@ void AFrog::Tick(float DeltaTime)
 
 	//FLog::Log("", GetCharacterMovement()->JumpZVelocity);
 
+	// 점프 버퍼
+	if (bJumpBuffered)
+	{
+		JumpBufferTimeFlow -= DeltaTime;
+		if (CanJump())
+		{
+			Jump();
+			bJumpBuffered = false;
+		}
+		else if (JumpBufferTimeFlow <= 0.f)
+		{
+			bJumpBuffered = false;
+		}
+	}
+
+	// 코요테 타임
+	if (bCoyoteActive)
+	{
+		CoyoteTimeFlow -= DeltaTime;
+		if (CoyoteTimeFlow <= 0.f)
+		{
+			bCoyoteActive = false;
+		}
+	}
+	
 	// 공중에 있을 때는 회전 잘 안되게
 	if (GetCharacterMovement()->IsFalling())
 	{
@@ -534,15 +558,38 @@ bool AFrog::CanJumpInternal_Implementation() const
 			&& !GetCharacterMovement()->IsFalling();
 	}
 
+	bCanJump |= bCoyoteActive;
 	//FLog::Log("", JumpCurrentCount, JumpMaxCount);
 
 	return bCanJump;
+}
+
+void AFrog::Falling()
+{
+	Super::Falling();
+// JumpCurrentCount
+	//FLog::Log("fall");
+	if (!bIsJumping)
+	{
+		bCoyoteActive = true;
+		CoyoteTimeFlow = CoyoteTime;
+	}
+}
+
+void AFrog::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+	
+	bCoyoteActive = false;
 }
 
 void AFrog::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
+	bIsJumping = false;
+	bCoyoteActive = false;
+	
 	if (HasAuthority())
 	{
 		FrogJumpCount = 0;
@@ -581,6 +628,18 @@ void AFrog::StartJump()
 		return;
 	}
 
+	if (!AFrog::CanJumpInternal_Implementation())
+	{
+		//FLog::Log();
+		// 점프 불가 -> 버퍼 시작
+		bJumpBuffered = true;
+		JumpBufferTimeFlow = JumpBufferTime;
+		
+		return;
+	}
+	
+	bIsJumping = true;
+	
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1'700.f};
@@ -618,6 +677,7 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			Jump();
+			bJumpBuffered = false;
 			MulticastRPC_PlayEffect(GetActorLocation(), 0);
 		}
 	}
@@ -628,6 +688,7 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			Jump();
+			bJumpBuffered = false;
 			MulticastRPC_PlayEffect(GetActorLocation(), 1);
 		}
 	}
