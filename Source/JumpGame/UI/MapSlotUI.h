@@ -23,6 +23,9 @@ public:
 	GETTER(FString, MapFullPath);
 	GETTER(FString, MapName);
 	GETTER(class UTexture2D*, SavedThumbnail);
+	
+	UPROPERTY()
+	TArray<uint8> ImageData; // 이미지 데이터를 저장할 배열
 private:
 	UFUNCTION()
 	void OnBtnMapSlotClicked();
