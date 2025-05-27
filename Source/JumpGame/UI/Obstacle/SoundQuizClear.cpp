@@ -2,3 +2,8 @@
 
 
 #include "SoundQuizClear.h"
+
+void USoundQuizClear::PlayQuizAnim()
+{
+	PlayAnimation(QuizClearAnim);
+}

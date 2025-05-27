@@ -77,6 +77,11 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	// 	SendSoundQuizMessage();
 	// }
 
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Seven))
+	{
+		// 7번 누르면 퀴즈 메세지 받아오기
+		ReceiveSoundQuizMessage();
+	}
 	// 치트키
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
 	{

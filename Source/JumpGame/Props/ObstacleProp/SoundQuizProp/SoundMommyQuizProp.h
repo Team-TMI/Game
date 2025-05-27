@@ -75,4 +75,10 @@ public:
 	class USoundCue* ClearSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	class USoundCue* FailSound;
+	
+	UPROPERTY(EditAnywhere, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	class UParticleSystem* ClearEffect;
+	UPROPERTY(EditAnywhere, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	class UParticleSystem* FailEffect;
+	
 };
