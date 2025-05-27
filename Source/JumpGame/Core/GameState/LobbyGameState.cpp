@@ -8,6 +8,7 @@
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
+#include "JumpGame/UI/SelectRoomUI.h"
 #include "JumpGame/UI/WaitRoomUI.h"
 #include "Net/UnrealNetwork.h"
 
@@ -60,6 +61,7 @@ void ALobbyGameState::OnClientAdded(const FString& NetID)
 	{
 		MulticastRPC_UpdateWaitImage(it.Key, it.Value);
 	}
+	WaitRoomUI->OnMapSelected(WaitRoomUI->SelectRoomUI->GetCurrentSelectedMapSlotUI());
 }
 
 void ALobbyGameState::MulticastRPC_UpdateWaitImage_Implementation(const FString& PlayerKey,
@@ -80,6 +82,7 @@ void ALobbyGameState::MulticastRPC_ClientBeginRecvImage_Implementation(const FSt
 {
 	CurrentMapName = InMapName;
 	CurrentMapImageData.SetNumUninitialized(InImageByteSize); // 목적지 버퍼 확보
+	WaitRoomUI->UpdateCurrentMapName(CurrentMapName);
 	RecvBytes = 0;
 }
 
@@ -106,7 +109,6 @@ void ALobbyGameState::MulticastRPC_ClientEndRecvImage_Implementation()
 	UTexture2D* Thumbnail = MakeTextureFromBytes(CurrentMapImageData);
 
 	// ② UI 위젯 반영
-	WaitRoomUI->UpdateCurrentMapName(CurrentMapName);
 	WaitRoomUI->UpdateCurrentMapThumbnail(Thumbnail);
 
 	// ③ 버퍼 해제
