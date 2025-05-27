@@ -30,7 +30,10 @@ AFrog::AFrog()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
+	bReplicates = true;
+	Super::SetReplicateMovement(true);
+	
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> FrogMesh
 		(TEXT("/Game/Characters/Fat_Frog/SM_Frog17.SM_Frog17"));
 	if (FrogMesh.Succeeded())
@@ -249,6 +252,7 @@ AFrog::AFrog()
 	SpotLightComponent->SetOuterConeAngle(29.f);
 	SpotLightComponent->SetCastShadows(false);
 	SpotLightComponent->SetRelativeRotation(FRotator(-10.f, 0.f, 0));
+	SpotLightComponent->SetIsReplicated(true);
 
 	GetCharacterMovement()->SetIsReplicated(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("FrogCollision"));
@@ -258,12 +262,12 @@ AFrog::AFrog()
 	Tags.Add(TEXT("Frog"));
 
 	// 동기화 좀 더 빨라지게
-	GetCharacterMovement()->bNetworkSkipProxyPredictionOnNetUpdate = true;
-	GetCharacterMovement()->bNetworkSmoothingComplete = true;
+	GetCharacterMovement()->bNetworkSkipProxyPredictionOnNetUpdate = false;
+	GetCharacterMovement()->bNetworkSmoothingComplete = false;
 	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
-	GetCharacterMovement()->NetworkSimulatedSmoothLocationTime = 0.05f;
-	GetCharacterMovement()->NetworkSimulatedSmoothRotationTime = 0.05f;
-	SetNetUpdateFrequency(100);
+	GetCharacterMovement()->NetworkSimulatedSmoothLocationTime = 0.01f;
+	GetCharacterMovement()->NetworkSimulatedSmoothRotationTime = 0.01f;
+	SetNetUpdateFrequency(10'000);
 
 	// 물 관련 상태
 	bIsSwimming = false;
@@ -373,7 +377,6 @@ void AFrog::PossessedBy(AController* NewController)
 	InitJumpGaugeUIComponent();
 }
 
-
 // Called every frame
 void AFrog::Tick(float DeltaTime)
 {
@@ -385,6 +388,31 @@ void AFrog::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//FLog::Log("", GetCharacterMovement()->JumpZVelocity);
+
+	// 점프 버퍼
+	if (bJumpBuffered)
+	{
+		JumpBufferTimeFlow -= DeltaTime;
+		if (CanJump())
+		{
+			Jump();
+			bJumpBuffered = false;
+		}
+		else if (JumpBufferTimeFlow <= 0.f)
+		{
+			bJumpBuffered = false;
+		}
+	}
+
+	// 코요테 타임
+	if (bCoyoteActive)
+	{
+		CoyoteTimeFlow -= DeltaTime;
+		if (CoyoteTimeFlow <= 0.f)
+		{
+			bCoyoteActive = false;
+		}
+	}
 
 	// 공중에 있을 때는 회전 잘 안되게
 	if (GetCharacterMovement()->IsFalling())
@@ -466,9 +494,9 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		                                   &AFrog::StopCrouch);
 
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this,
-		                                   &AFrog::StartSprint);
+		                                   &AFrog::WPressed);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this,
-		                                   &AFrog::StopSprint);
+		                                   &AFrog::WReleased);
 
 		EnhancedInputComponent->BindAction(TongueAttackAction, ETriggerEvent::Started, this,
 		                                   &AFrog::TongueAttack);
@@ -533,14 +561,37 @@ bool AFrog::CanJumpInternal_Implementation() const
 			&& !GetCharacterMovement()->IsFalling();
 	}
 
+	bCanJump |= bCoyoteActive;
 	//FLog::Log("", JumpCurrentCount, JumpMaxCount);
 
 	return bCanJump;
 }
 
+void AFrog::Falling()
+{
+	Super::Falling();
+	// JumpCurrentCount
+	//FLog::Log("fall");
+	if (!bIsJumping)
+	{
+		bCoyoteActive = true;
+		CoyoteTimeFlow = CoyoteTime;
+	}
+}
+
+void AFrog::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+
+	bCoyoteActive = false;
+}
+
 void AFrog::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
+
+	bIsJumping = false;
+	bCoyoteActive = false;
 
 	if (HasAuthority())
 	{
@@ -580,6 +631,17 @@ void AFrog::StartJump()
 		return;
 	}
 
+	// if (!AFrog::CanJumpInternal_Implementation())
+	// {
+	// 	// 점프 불가 -> 버퍼 시작
+	// 	bJumpBuffered = true;
+	// 	JumpBufferTimeFlow = JumpBufferTime;
+	//
+	// 	return;
+	// }
+
+	bIsJumping = true;
+
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1'700.f};
@@ -597,6 +659,12 @@ void AFrog::StartJump()
 			ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
 			ForceNetUpdate();
 		}
+	}
+	else if (!AFrog::CanJumpInternal_Implementation())
+	{
+		// 점프 불가 -> 버퍼 시작
+		bJumpBuffered = true;
+		JumpBufferTimeFlow = JumpBufferTime;
 	}
 	// 슈퍼 점프
 	else if (GetCharacterMovement()->IsCrouching())
@@ -617,6 +685,7 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			Jump();
+			bJumpBuffered = false;
 			MulticastRPC_PlayEffect(GetActorLocation(), 0);
 		}
 	}
@@ -627,6 +696,7 @@ void AFrog::StartJump()
 		{
 			CancelEmotion();
 			Jump();
+			bJumpBuffered = false;
 			MulticastRPC_PlayEffect(GetActorLocation(), 1);
 		}
 	}
@@ -652,6 +722,28 @@ void AFrog::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index
 void AFrog::StopJump()
 {
 	StopJumping();
+}
+
+void AFrog::WPressed(const struct FInputActionValue& Value)
+{
+	float CurrentTime{static_cast<float>(GetWorld()->GetTimeSeconds())};
+
+	if (CurrentTime - WPressedTime < 0.25f)
+	{
+		bIsSprint = true;
+		StartSprint();
+	}
+
+	WPressedTime = CurrentTime;
+}
+
+void AFrog::WReleased(const struct FInputActionValue& Value)
+{
+	if (bIsSprint)
+	{
+		bIsSprint = false;
+		StopSprint();
+	}
 }
 
 void AFrog::StartSprint()
@@ -706,6 +798,7 @@ void AFrog::StartCrouch()
 		ServerRPC_StartCrouch();
 	}
 }
+
 // Todo: 클라 점프 중 웅크리기, 서버에 안보임
 void AFrog::StopCrouch()
 {
@@ -1014,6 +1107,26 @@ void AFrog::MulticastRPC_Landed_Implementation()
 
 		MulticastRPC_StartCrouch();
 	}
+}
+
+void AFrog::SetLightIntensity(float Alpha)
+{
+	SpotLightComponent->SetIntensity(10.f * (1 - Alpha));
+
+	if (IsLocallyControlled())
+	{
+		ServerRPC_SetLight(Alpha);
+	}
+}
+
+void AFrog::ServerRPC_SetLight_Implementation(float Alpha)
+{
+	MulticastRPC_SetLight(Alpha);
+}
+
+void AFrog::MulticastRPC_SetLight_Implementation(float Alpha)
+{
+	SpotLightComponent->SetIntensity(10.f * (1 - Alpha));
 }
 
 void AFrog::InitJumpGaugeUIComponent()
@@ -1442,7 +1555,17 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 	{
 		if (HasAuthority())
 		{
-			FrogGravity = 2.7f;
+			// 점프 최대 높이일 때 중력 영향 감소
+			// --> 땅에 닿기까지 시간 더 줘서 움직임 더 쉽게 조정
+			if (bIsJumping && GetCharacterMovement()->Velocity.Z < 10.f)
+			{
+				// FLog::Log();
+				FrogGravity = 2.1f;
+			}
+			else
+			{
+				FrogGravity = 2.7f;
+			}
 		}
 
 		if (MoveComp->IsFlying() || MoveComp->IsSwimming())
