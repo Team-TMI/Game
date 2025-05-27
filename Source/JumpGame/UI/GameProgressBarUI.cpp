@@ -195,9 +195,9 @@ void UGameProgressBarUI::UpdatePlayerMarkers()
 		AFrog* Frog = Cast<AFrog>(GS->PlayerArray[i]->GetPawn());
 		if (Frog && Frog->IsLocallyControlled())
 		{
-			float FogValue = FMath::Lerp(0.0f, 1.0f, PlayerProgress); // 필요시 커브 적용
+			float FogValue = FMath::Lerp(0.f, 1.f, PlayerProgress * 1.5f); // 필요시 커브 적용
 
-			Frog->SetFrogVignetteIntensity_PP(1 - FogValue);
+			Frog->SetFrogVignetteIntensity_PP(1.f - FogValue);
 			Frog->SetLightIntensity(FogValue);
 			UpdateFogDensity(FogValue);
 			UpdateSunBrightness(FogValue);
