@@ -50,6 +50,8 @@ public:
 	virtual bool CanJumpInternal_Implementation() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Landed(const FHitResult& Hit) override;
+	virtual void Falling() override;
+	virtual void OnJumped_Implementation() override;
 	
 	void FrogSkinFinder();
 	
@@ -73,6 +75,8 @@ public:
 	void Look(const struct FInputActionValue& Value);
 	void StartJump();
 	void StopJump();
+	void WPressed(const struct FInputActionValue& Value);
+	void WReleased(const struct FInputActionValue& Value);
 	void StartSprint();
 	void StopSprint();
 	void StartCrouch();
@@ -109,7 +113,11 @@ public:
 	void ServerRPC_Landed();
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_Landed();
-	
+	void SetLightIntensity(float Alpha);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetLight(float Alpha);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetLight(float Alpha);
 
 public:
 	void InitJumpGaugeUIComponent();
@@ -406,7 +414,24 @@ public:
 public :
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ProcessOverlap(class AObstacleProp* ObstacleProp);
-	
-};
 
+	// 대쉬
+	FTimerHandle DoubleTapTimer;
+	float WPressedTime{0.f};
+	bool bIsSprint{false};
+
+	// 점프 버퍼 : 착지 직전에 일찍 점프 해도 점프 되도록
+	float JumpBufferTime{0.25f};
+	//float JumpBufferTime{5.f};
+	float JumpBufferTimeFlow{0.f};
+	bool bJumpBuffered{false};
+
+	// 코요테 타임 : 절벽에서 달려서 땅이 아니여도 점프 되도록
+	float CoyoteTime{0.3f};
+	//float CoyoteTime{5.f};
+	float CoyoteTimeFlow{0.f};
+	bool bCoyoteActive{false};
+
+	bool bIsJumping{false};
+};
 
