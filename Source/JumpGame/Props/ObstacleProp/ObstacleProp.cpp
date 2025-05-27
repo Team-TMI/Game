@@ -182,7 +182,15 @@ void AObstacleProp::ObstacleRotate()
 		float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
 		DeltaRot = RotAxis * RotSpeed;
 		// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
-		PivotScene->AddLocalRotation(DeltaRot, true);
+		PivotScene->AddLocalRotation(DeltaRot, false, nullptr, ETeleportType::TeleportPhysics);
+		Rotation = PivotScene->GetRelativeRotation();
+	}
+	else
+	{
+		float RotSpeed = RotAngle * GetWorld()->DeltaTimeSeconds;
+		DeltaRot = RotAxis * RotSpeed;
+		// MeshComp->SetRelativeRotation(DeltaRot); // 혹시모름
+		PivotScene->AddLocalRotation(DeltaRot, false, nullptr, ETeleportType::TeleportPhysics);
 		Rotation = PivotScene->GetRelativeRotation();
 	}
 }
@@ -194,7 +202,7 @@ void AObstacleProp::OnRep_ObstacleRotate()
 
 	// 클라이언트라면 이 함수가 실행
 	// PivotScene->AddLocalRotation(DeltaRot);
-	PivotScene->SetRelativeRotation(Rotation);
+	PivotScene->SetRelativeRotation(Rotation, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
 void AObstacleProp::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
