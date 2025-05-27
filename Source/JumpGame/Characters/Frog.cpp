@@ -1328,6 +1328,7 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, bIsPressedSprint);
 	DOREPLIFETIME(AFrog, bIsPressedCrouch);
 	DOREPLIFETIME(AFrog, FrogMovementMode);
+	DOREPLIFETIME(AFrog, FrogJumpCount);
 }
 
 void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, class ARisingWaterProp* WaterVolume)
