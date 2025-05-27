@@ -30,7 +30,10 @@ AFrog::AFrog()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
+	bReplicates = true;
+	Super::SetReplicateMovement(true);
+	
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> FrogMesh
 		(TEXT("/Game/Characters/Fat_Frog/SM_Frog17.SM_Frog17"));
 	if (FrogMesh.Succeeded())
@@ -259,12 +262,12 @@ AFrog::AFrog()
 	Tags.Add(TEXT("Frog"));
 
 	// 동기화 좀 더 빨라지게
-	GetCharacterMovement()->bNetworkSkipProxyPredictionOnNetUpdate = true;
-	GetCharacterMovement()->bNetworkSmoothingComplete = true;
+	GetCharacterMovement()->bNetworkSkipProxyPredictionOnNetUpdate = false;
+	GetCharacterMovement()->bNetworkSmoothingComplete = false;
 	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
-	GetCharacterMovement()->NetworkSimulatedSmoothLocationTime = 0.05f;
-	GetCharacterMovement()->NetworkSimulatedSmoothRotationTime = 0.05f;
-	SetNetUpdateFrequency(100);
+	GetCharacterMovement()->NetworkSimulatedSmoothLocationTime = 0.01f;
+	GetCharacterMovement()->NetworkSimulatedSmoothRotationTime = 0.01f;
+	SetNetUpdateFrequency(10'000);
 
 	// 물 관련 상태
 	bIsSwimming = false;
@@ -628,15 +631,14 @@ void AFrog::StartJump()
 		return;
 	}
 
-	if (!AFrog::CanJumpInternal_Implementation())
-	{
-		//FLog::Log();
-		// 점프 불가 -> 버퍼 시작
-		bJumpBuffered = true;
-		JumpBufferTimeFlow = JumpBufferTime;
-
-		return;
-	}
+	// if (!AFrog::CanJumpInternal_Implementation())
+	// {
+	// 	// 점프 불가 -> 버퍼 시작
+	// 	bJumpBuffered = true;
+	// 	JumpBufferTimeFlow = JumpBufferTime;
+	//
+	// 	return;
+	// }
 
 	bIsJumping = true;
 
@@ -657,6 +659,12 @@ void AFrog::StartJump()
 			ServerRPC_ExecuteWaterSurfaceJump(LaunchVelocity);
 			ForceNetUpdate();
 		}
+	}
+	else if (!AFrog::CanJumpInternal_Implementation())
+	{
+		// 점프 불가 -> 버퍼 시작
+		bJumpBuffered = true;
+		JumpBufferTimeFlow = JumpBufferTime;
 	}
 	// 슈퍼 점프
 	else if (GetCharacterMovement()->IsCrouching())
