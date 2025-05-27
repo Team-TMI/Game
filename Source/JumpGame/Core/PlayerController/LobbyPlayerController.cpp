@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "OnlineSubsystem.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/PlayerState.h"
 #include "Interfaces/OnlineFriendsInterface.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 #include "Interfaces/OnlinePresenceInterface.h"
@@ -208,47 +209,95 @@ void ALobbyPlayerController::CalculateMinMax(const FVector& InLocallyPosition)
 	PlusYawMinMax.Y = InPlusMinMax.Y;
 }
 
-void ALobbyPlayerController::Server_RequestFriendList_Implementation()
+void ALobbyPlayerController::RequestFriendList()
 {
-	IOnlineSubsystem* Subsys = IOnlineSubsystem::Get();
-	if (!Subsys) return;
-
-	IOnlineFriendsPtr Friends = Subsys->GetFriendsInterface();
-	IOnlineIdentityPtr Identity = Subsys->GetIdentityInterface();
-	if (!Friends.IsValid() || !Identity.IsValid()) return;
-
-	if (Identity->GetLoginStatus(0) != ELoginStatus::LoggedIn) return;
-
-	TSharedPtr<const FUniqueNetId> UserId = Identity->GetUniquePlayerId(0);
-	if (!UserId.IsValid()) return;
-
-	// 비동기 친구 목록 읽기
-	Friends->ReadFriendsList(0, EFriendsLists::ToString(EFriendsLists::Default),
-		FOnReadFriendsListComplete::CreateLambda([this](int32 LocalUserNum, bool bSuccess, const FString& ListName, const FString& Error)
-		{
-			TArray<FSteamFriendData> OutList;
-
-			IOnlineSubsystem* SubsysInner = IOnlineSubsystem::Get();
-			if (!SubsysInner) return;
-
-			TArray<TSharedRef<FOnlineFriend>> FriendList;
-			if (SubsysInner->GetFriendsInterface()->GetFriendsList(LocalUserNum, ListName, FriendList))
-			{
-				for (const auto& Friend : FriendList)
-				{
-					FSteamFriendData Data;
-					Data.DisplayName = Friend->GetDisplayName();
-					Data.SteamId = Friend->GetUserId()->ToString();
-					Data.bIsOnline = Friend->GetPresence().bIsOnline;
-					OutList.Add(Data);
-				}
-			}
-
-			Client_ReceiveFriendList(OutList); // 서버 → 클라 전송
-		}));
+	/* 로컬 클라이언트에서 호출됐으면 바로 실행,
+	   서버에서 강제로 부른 경우엔 오너 클라에 시키도록 분기 */
+	if (IsLocalController())
+	{
+		FetchAndSendFriendList();  // 로컬일 때 바로 실행
+	}
+	else
+	{
+		ClientRPC_RequestFriendList();   // 서버라면 오너 클라에 시킴
+	}
 }
 
-void ALobbyPlayerController::Client_ReceiveFriendList_Implementation(const TArray<FSteamFriendData>& FriendList)
+void ALobbyPlayerController::FetchAndSendFriendList()
 {
-	OnFriendListUpdated.Broadcast(FriendList); // UI 위젯에 전달
+	IOnlineFriendsPtr Friends = IOnlineSubsystem::Get()->GetFriendsInterface();
+	IOnlineIdentityPtr Identity = IOnlineSubsystem::Get()->GetIdentityInterface();
+	if (!Friends.IsValid() || !Identity.IsValid()) return;
+
+	const int32 LocalUserNum = 0;              // 로컬 PC에 로그인된 첫 번째 계정
+	const FString ListName = EFriendsLists::ToString(EFriendsLists::Default);
+
+	Friends->ReadFriendsList(LocalUserNum, ListName,
+		FOnReadFriendsListComplete::CreateLambda(
+		[WeakThis = TWeakObjectPtr<ALobbyPlayerController>(this),
+		 LocalUserNum, ListName]
+		(int32 /*UserNum*/, bool bSuccess, const FString& /*List*/, const FString& /*Err*/)
+	{
+		if (!WeakThis.IsValid()) return;
+
+		TArray<FSteamFriendData> Tmp;
+		TArray<TSharedRef<FOnlineFriend>> Raw;
+
+		if (bSuccess &&
+			IOnlineSubsystem::Get()->GetFriendsInterface()->GetFriendsList(
+				LocalUserNum, ListName, Raw))
+		{
+			for (const auto& F : Raw)
+			{
+				FSteamFriendData D;
+				D.DisplayName = F->GetDisplayName();
+				D.SteamId     = F->GetUserId()->ToString();
+				D.bIsOnline   = F->GetPresence().bIsOnline;
+				Tmp.Add(D);
+			}
+		}
+
+		/* ─── 게임 스레드로 이동 후 RPC 호출 ─── */
+		AsyncTask(ENamedThreads::GameThread,
+			[WeakThis, List = MoveTemp(Tmp)]()
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->ServerRPC_SendFriendList(List);
+			}
+		});
+	}));
+}
+
+void ALobbyPlayerController::ClientRPC_RequestFriendList_Implementation()
+{
+	FetchAndSendFriendList();
+}
+
+/** 클라 → 서버 */
+void ALobbyPlayerController::ServerRPC_SendFriendList_Implementation(
+		const TArray<FSteamFriendData>& FriendList)
+{
+	MyFriendList = FriendList;
+
+	/* 보낸 사람 ID 한 번만 확보 */
+	const FUniqueNetIdRepl SenderId =
+		PlayerState ? PlayerState->GetUniqueId() : FUniqueNetIdRepl();
+
+	/* 보낸 사람(=this)에게만 목록 회신 */
+	ClientRPC_ReceiveFriendList(PlayerState->GetUniqueId(), FriendList);
+}
+
+/** 서버 → 클라 */
+void ALobbyPlayerController::ClientRPC_ReceiveFriendList_Implementation(
+		const FUniqueNetIdRepl& FromPlayer,
+		const TArray<FSteamFriendData>& FriendList)
+{
+	/* 내 UI는 내 것만 보고 싶다 */
+	if (FromPlayer != PlayerState->GetUniqueId())
+	{
+		return;                     // 남의 리스트면 무시
+	}
+
+	OnFriendListUpdated.Broadcast(FriendList);
 }

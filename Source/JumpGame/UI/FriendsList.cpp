@@ -31,7 +31,7 @@ void UFriendsList::NativeOnInitialized()
 		PC->OnFriendListUpdated.AddDynamic(this, &UFriendsList::OnFriendListReceived);
 
 		// 자동 요청
-		PC->Server_RequestFriendList();
+		PC->RequestFriendList();
 		Btn_Refresh->SetIsEnabled(false);
 	}
 }
@@ -93,7 +93,7 @@ void UFriendsList::OnClickRefresh()
 
 	if (auto PC = GetOwningPlayer<ALobbyPlayerController>())
 	{
-		PC->Server_RequestFriendList();
+		PC->RequestFriendList();
 		Btn_Refresh->SetIsEnabled(false);
 	}
 }

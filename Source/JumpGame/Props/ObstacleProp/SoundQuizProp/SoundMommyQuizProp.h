@@ -33,9 +33,6 @@ public:
 	virtual void StopRecord() override;
 	
 public:
-	UPROPERTY()
-	bool bIsOverlapChild = false;
-	
 	// 퀴즈 시작 UI
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UStartSoundUI> StartSoundUIClass;

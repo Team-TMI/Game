@@ -73,16 +73,35 @@ public:
 	UBottomNaviBarUI* BottomNaviBarUI;
 
 public:
-	UFUNCTION(Server, Reliable)
-	void Server_RequestFriendList();
-
+	/** 서버 → 클라 : 친구 목록 보내 달라 */
 	UFUNCTION(Client, Reliable)
-	void Client_ReceiveFriendList(const TArray<FSteamFriendData>& FriendList);
+	void ClientRPC_RequestFriendList();
 
+	/** 클라 → 서버 : 친구 목록 전달 */
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SendFriendList(const TArray<FSteamFriendData>& FriendList);
+
+	/** 서버 → 모든(또는 선택) 클라 : 전달받은 목록 브로드캐스트 */
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_ReceiveFriendList(const FUniqueNetIdRepl& FromPlayer,
+									 const TArray<FSteamFriendData>& FriendList);
+
+	/** UI 바인딩용 델리게이트 */
 	UPROPERTY(BlueprintAssignable)
 	FOnFriendListReceived OnFriendListUpdated;
 
 private:
-	TArray<FSteamFriendData> CollectedFriendList;
+	/** 내가 최종적으로 받은(또는 보낸) 친구 목록 */
+	UPROPERTY()
+	TArray<FSteamFriendData> MyFriendList;
+
+public:
+	/** UI 에서 호출할 로컬 전용 함수 */
+	UFUNCTION(BlueprintCallable, Category="Friends")
+	void RequestFriendList();
+
+private:
+	/** 실제 Steam 친구 읽기 + 서버 전송 로직 */
+	void FetchAndSendFriendList();
 	
 };

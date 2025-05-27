@@ -69,8 +69,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UVictoryPageUI* VictoryPageUI;
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class USoundQuizClear> SoundQuizClearUIClass;
+	TSubclassOf<class UWinnerPlayerUI> WinnerPlayerUIClass;
 	UPROPERTY(EditAnywhere)
-	USoundQuizClear* SoundQuizClear;
+	UWinnerPlayerUI* WinnerPlayerUI;
 
+	// 파티클
+	UPROPERTY(EditAnywhere, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	class UParticleSystem* WinnerEffect;
+	UPROPERTY(EditAnywhere, Category = "Particle", meta = (AllowPrivateAccess = "true"))
+	class UParticleSystem* VictoryPlatformEffect;
+
+	// 랜덤 위치에
+	FTimerHandle EffectTimerHandle;
+	UPROPERTY(EditAnywhere, Category="Particle")
+	float EffectSpawnRadius = 250.0f;
+	UPROPERTY(EditAnywhere, Category="Particle")
+	float EffectInterval = 2.5f; // 몇초 마다
+	
+	UFUNCTION()
+	void StartWinnerEffect();
+	UFUNCTION()
+	void PlayWinnerEffect();
 };

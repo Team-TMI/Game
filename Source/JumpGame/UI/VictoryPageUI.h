@@ -22,7 +22,14 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_GoLobby;
 
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* WinnerAnim;
+
 	UFUNCTION()
 	void OnClickGoLobby();
+	UFUNCTION()
 	void SetVictoryPlayerName(FString PlayerName);
+	UFUNCTION()
+	void PlayWinnerPageAnim();
+
 };

@@ -76,21 +76,17 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	// 	// 9번 누르면 퀴즈 음성 파일 메세지 전송
 	// 	SendSoundQuizMessage();
 	// }
+	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Seven))
+	// {
+	// 	// 7번 누르면 퀴즈 메세지 받아오기
+	// 	ReceiveSoundQuizMessage();
+	// }
 
-	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Seven))
-	{
-		// 7번 누르면 퀴즈 메세지 받아오기
-		ReceiveSoundQuizMessage();
-	}
 	// 치트키
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
 	{
 		// 8번 누르면 퀴즈 끝 메세지 전송
 		SendEndSoundQuizNotify();
-	}
-	
-	if (bCheatMode)
-	{
 	}
 
 	if (bIsMessageReceived)
@@ -121,16 +117,13 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 			// 모든 플레이어의 움직임 제한
 			MulticastRPC_PlayerStopMovement();
 		}
-
-		GetWorldTimerManager().SetTimer(SoundTimerHandle, this, &ASoundQuizProp::StartSoundQuiz, 2.f, false);
+		GetWorldTimerManager().SetTimer(SoundTimerHandle, this, &ASoundQuizProp::StartSoundQuiz, 4.f, false);
 		
 		// 물 멈추자
 		if (RisingWaterProp)
 		{
 			RisingWaterProp->StopRising();
 		}
-
-		bIsOverlap = true;
 	}
 }
 

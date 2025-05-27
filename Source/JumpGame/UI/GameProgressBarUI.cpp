@@ -14,6 +14,7 @@
 #include "JumpGame/Props/LogicProp/GameStartProp.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 void UGameProgressBarUI::NativeOnInitialized()
@@ -82,7 +83,7 @@ void UGameProgressBarUI::UpdatePlayerPos()
 
 				// TODO: 개별 적용되는지 확인필요
 				// 높이에 따른 개구리 화면 설정: vignette, 해 밝기, 구름 밀도
-				float Value = FMath::Clamp(Position, 1, 0);
+				float Value = UKismetMathLibrary::Clamp(Position*2, 1, 0);
 				Frog->SetFrogVignetteIntensity_PP(Value);
 				UpdateFogDensity(Value);
 				UpdateSunBrightness(Value);

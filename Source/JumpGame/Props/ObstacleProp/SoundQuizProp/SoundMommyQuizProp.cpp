@@ -96,14 +96,14 @@ void ASoundMommyQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	if (!PC) return;
 	// 각각의 화면에서 UI를 띄우자
 	// 그렇게 해야 remove했을때 본인의 화면에서 사라짐
-	if (PC->IsLocalPlayerController() && !bIsOverlapChild)
+	if (PC->IsLocalPlayerController() && !bIsOverlap)
 	{
 		if (StartSoundUI)
 		{
 			StartSoundUI->AddToViewport();
 			StartSoundUI->PlayStartSoundAnim();
 		}
-		bIsOverlapChild = true;
+		bIsOverlap = true;
 	}
 }
 

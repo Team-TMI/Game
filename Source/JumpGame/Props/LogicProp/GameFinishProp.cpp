@@ -15,14 +15,15 @@
 #include "JumpGame/Core/GameState/MapGameState.h"
 #include "JumpGame/Props/Components/PropDataComponent.h"
 #include "JumpGame/UI/GameProgressBarUI.h"
-#include "JumpGame/UI/Obstacle/SoundQuizClear.h"
-#include "JumpGame/UI/Obstacle/SoundQuizFail.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "OnlineSubsystem.h"
 #include "Components/ArrowComponent.h"
 #include "Interfaces/OnlineIdentityInterface.h"
+#include "JumpGame/UI/WinnerPlayerUI.h"
+#include "JumpGame/UI/Character/EmotionUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Particles/ParticleSystem.h"
 
 
 // Sets default values
@@ -46,6 +47,20 @@ AGameFinishProp::AGameFinishProp()
 	Super::SetSize(FVector(1,1,2));
 
 	PropDataComponent->SetPropID(TEXT("3002"));
+
+	// 파티클
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> TempWinnerEffect
+	(TEXT("/Game/_Resource/FX/VFX_Toolkit_V1/ParticleSystems/356Days/Par_CloverField_01.Par_CloverField_01"));
+	if (TempWinnerEffect.Succeeded())
+	{
+		WinnerEffect = Cast<UParticleSystem>(TempWinnerEffect.Object);
+	}
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> TempVictoryPlatformEffect
+	(TEXT("/Game/_Resource/FX/VFX_Toolkit_V1/ParticleSystems/356Days/Par_ClearEffect.Par_ClearEffect"));
+	if (TempVictoryPlatformEffect.Succeeded())
+	{
+		VictoryPlatformEffect = Cast<UParticleSystem>(TempVictoryPlatformEffect.Object);
+	}
 }
 
 void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -66,7 +81,7 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		// 1등 캐릭터에게 Clear UI 띄우자
 		MulticastRPC_ShowClearUI();
 		
-		// 10초 후에 게임을 끝내자
+		// 5초 후에 게임을 끝내자
 		FTimerHandle EndTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(EndTimerHandle, this, &AGameFinishProp::GameEnd, 5.0f, false);
 	}
@@ -85,7 +100,7 @@ void AGameFinishProp::BeginPlay()
 		bIsActive = false;
 	}
 
-	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
+	WinnerPlayerUI = CreateWidget<UWinnerPlayerUI>(GetWorld(), WinnerPlayerUIClass);
 	
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGameFinishProp::OnMyBeginOverlap);
 }
@@ -150,20 +165,23 @@ void AGameFinishProp::MulticastRPC_ShowClearUI_Implementation()
 	
 	if (LocalCharacter == WinnerCharacter)
 	{
-		if (SoundQuizClear)
+		if (WinnerPlayerUI)
 		{
-			SoundQuizClear->AddToViewport();
+			WinnerPlayerUI->AddToViewport();
+			WinnerPlayerUI->PlayWinnerAnim();
 		}
 		LocalCharacter->SetJumpGaugeVisibility(false);
+		FVector SpawnLocation = WinnerCharacter->GetActorLocation() + FVector(0,0,-75);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WinnerEffect, SpawnLocation, FRotator::ZeroRotator, FVector(1.f), true);
 	}
 }
 
 void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 {
 	// UI 있으면 지우기
-	if (SoundQuizClear)
+	if (WinnerPlayerUI)
 	{
-		SoundQuizClear->RemoveFromParent();
+		WinnerPlayerUI->RemoveFromParent();
 	}
 	
 	// 플레이어들 조작막기
@@ -172,20 +190,25 @@ void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 	LocalCharacter->SetFrogVignetteIntensity_PP(0);
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
-	FInputModeGameAndUI InputMode;
+	if (LocalCharacter->EmotionUI)
+	{
+		LocalCharacter->EmotionUI->RemoveFromParent();
+	}
+	
+	// UI모드로 바꾸자
+	FInputModeUIOnly InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 	PC->SetInputMode(InputMode);
 	PC->bShowMouseCursor = true;
 	
 	// 우승자 앞에 보게 정렬하기
 	WinnerCharacter->SetActorRotation(WinnerRotation);
-	
 	// 카메라 정렬
 	PC->SetViewTargetWithBlend(VictoryP, 0.5f);
-
 	// 연출
 	VictoryP->DropProps();
 	WinnerCharacter->PlayAnimMontage(WinnerCharacter->WinnerMontage);
+	StartWinnerEffect();
 	
 	// UI를 띄우자
 	FString Key = WinnerCharacter->GetName();
@@ -213,6 +236,30 @@ void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 	{
 		VictoryPageUI->SetVictoryPlayerName(WinnerName);
 		VictoryPageUI->AddToViewport();
+		VictoryPageUI->PlayWinnerPageAnim();
 	}
+}
+
+void AGameFinishProp::StartWinnerEffect()
+{
+	// 이미 실행중이면 무시하자
+	if (GetWorld()->GetTimerManager().IsTimerActive(EffectTimerHandle)) return;
+	
+	GetWorld()->GetTimerManager().SetTimer(EffectTimerHandle, this, &AGameFinishProp::PlayWinnerEffect, EffectInterval, true);
+}
+
+void AGameFinishProp::PlayWinnerEffect()
+{
+	if (!WinnerCharacter || !VictoryPlatformEffect) return;
+	
+	// 랜덤 박스 범위: X: -BoxExtent.X ~ +BoxExtent.X
+	FVector BoxExtent(EffectSpawnRadius, EffectSpawnRadius, 0.f); // Z는 고정
+	FVector Offset;
+	Offset.X = FMath::RandRange(-BoxExtent.X, BoxExtent.X);
+	Offset.Y = FMath::RandRange(-BoxExtent.Y, BoxExtent.Y);
+	Offset.Z = FMath::RandRange(50, 100);
+
+	FVector SpawnLocation = WinnerCharacter->GetActorLocation() + Offset;
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), VictoryPlatformEffect, SpawnLocation, FRotator::ZeroRotator, FVector(0.7f), true);
 }
 

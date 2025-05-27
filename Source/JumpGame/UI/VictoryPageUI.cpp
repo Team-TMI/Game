@@ -65,3 +65,8 @@ void UVictoryPageUI::SetVictoryPlayerName(FString PlayerName)
 	// WinnerPlayer 이름 업데이트
 	Text_PlayerName->SetText(FText::FromString(PlayerName));
 }
+
+void UVictoryPageUI::PlayWinnerPageAnim()
+{
+	PlayAnimation(WinnerAnim);
+}

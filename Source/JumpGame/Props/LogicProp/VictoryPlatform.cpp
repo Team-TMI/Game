@@ -32,11 +32,11 @@ AVictoryPlatform::AVictoryPlatform()
 	OriginalCameraPos = VictoryCamera->GetRelativeLocation();
 
 	// 배경
-	VictoryPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryPlane"));
-	VictoryPlane->SetupAttachment(MeshComp);
-	VictoryPlane->SetRelativeLocation(FVector(0, -50, 500));
-	VictoryPlane->SetRelativeRotation(FRotator(0, 0, 90));
-	VictoryPlane->SetRelativeScale3D(FVector(4, 2, 1));
+	// VictoryPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryPlane"));
+	// VictoryPlane->SetupAttachment(MeshComp);
+	// VictoryPlane->SetRelativeLocation(FVector(0, -50, 500));
+	// VictoryPlane->SetRelativeRotation(FRotator(0, 0, 90));
+	// VictoryPlane->SetRelativeScale3D(FVector(4, 2, 1));
 
 	// 무덤
 	VictoryTomb = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VictoryTomb"));
@@ -78,7 +78,7 @@ AVictoryPlatform::AVictoryPlatform()
 	VictoryLight->SetupAttachment(PivotScene);
 	VictoryLight->SetRelativeLocation(FVector(0,-30,650));
 	VictoryLight->SetRelativeRotation(FRotator(-90,0, 0));
-	VictoryLight->SetIntensity(150);
+	VictoryLight->SetIntensity(10);
 	VictoryLight->SetIntensityUnits(ELightUnits::Lumens);
 	VictoryLight->AttenuationRadius = 900;
 	VictoryLight->InnerConeAngle = 20;
@@ -115,18 +115,18 @@ AVictoryPlatform::AVictoryPlatform()
 	{
 		VictoryTreeTwo->SetStaticMesh(TempTreeTwo.Object);
 	}
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempPlane(TEXT("/Game/Props/SM_ObstaclePlane.SM_ObstaclePlane"));
-	if (TempPlane.Succeeded())
-	{
-		VictoryPlane->SetStaticMesh(TempPlane.Object);
-	}
+	// ConstructorHelpers::FObjectFinder<UStaticMesh> TempPlane(TEXT("/Game/Props/SM_ObstaclePlane.SM_ObstaclePlane"));
+	// if (TempPlane.Succeeded())
+	// {
+	// 	VictoryPlane->SetStaticMesh(TempPlane.Object);
+	// }
 
-	// 재질적용
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> PlaneMaterial(TEXT("/Game/UI/Image/LogoAnim/MI_RingMask.MI_RingMask"));
-	if (PlaneMaterial.Succeeded())
-	{
-		VictoryPlane->SetMaterial(0, PlaneMaterial.Object);
-	}
+	// // 재질적용
+	// static ConstructorHelpers::FObjectFinder<UMaterialInterface> PlaneMaterial(TEXT("/Game/UI/Image/LogoAnim/MI_RingMask.MI_RingMask"));
+	// if (PlaneMaterial.Succeeded())
+	// {
+	// 	VictoryPlane->SetMaterial(0, PlaneMaterial.Object);
+	// }
 	
 	Tags.Add("VictoryPlatform");
 }
@@ -167,7 +167,7 @@ void AVictoryPlatform::Tick(float DeltaTime)
 
 FVector AVictoryPlatform::SpawnVictoryCharacter()
 {
-	FVector SpawnLocation = MeshComp->GetComponentLocation() + FVector(0.f, 0.f, 100.f);
+	FVector SpawnLocation = MeshComp->GetComponentLocation() + FVector(5.f, 5.f, 100.f);
 	return SpawnLocation;
 }
 
