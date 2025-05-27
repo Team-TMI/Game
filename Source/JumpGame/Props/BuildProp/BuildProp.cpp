@@ -13,6 +13,7 @@ ABuildProp::ABuildProp()
 	PrimaryActorTick.bCanEverTick = false;
 
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
+	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Block);
 }
 
 // Called when the game starts or when spawned
