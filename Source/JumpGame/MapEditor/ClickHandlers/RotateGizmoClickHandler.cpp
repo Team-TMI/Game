@@ -16,7 +16,6 @@ bool FRotateGizmoClickHandler::HandleClick(FClickResponse& ClickResponse,
 {
 	ClickResponse.Result = EClickHandlingResult::RotateGizmoEditing;
 	
-	FFastLogger::LogScreen(FColor::Red, TEXT("Rotate Gizmo Clicked"));
 	if (!bRotateGizmoMode)
 	{
 		return false;
@@ -26,22 +25,16 @@ bool FRotateGizmoClickHandler::HandleClick(FClickResponse& ClickResponse,
 	{
 		FHitResult HitResult = ClickResponse.HitResult;
 
-		FFastLogger::LogScreen(FColor::Red, TEXT("Rotate Gizmo Clicked1"));
 		ClickResponse.TargetProp = Cast<APrimitiveProp>(HitResult.GetActor());
 
-		// UGizmoComponent* RotateGizmo = ClickResponse.TargetGizmo;
-		// if (!RotateGizmo)
-		// {
-		// 	return false;
-		// }
 		URotateGizmoComponent* RotateGizmoComponent = Cast<URotateGizmoComponent>(HitResult.GetComponent());
 		if (!RotateGizmoComponent)
 		{
 			return false;
 		}
-		FFastLogger::LogScreen(FColor::Red, TEXT("Rotate Gizmo Clicked2"));
 
 		RotateGizmoComponent->SetSelected();
+		RotateGizmoComponent->Clicked();
 
 		// Rotate 할 축을 들고옴
 		// FVector Direction = RotateGizmo->GetDirection();
@@ -52,13 +45,11 @@ bool FRotateGizmoClickHandler::HandleClick(FClickResponse& ClickResponse,
 			return false;
 		}
 		
-		FFastLogger::LogScreen(FColor::Red, TEXT("Rotate Gizmo Clicked3"));
 		Editor->GetRotateHandlerManager()->HandleRotate(ClickResponse);
 		
 		return true;
 	}
 	
-	FFastLogger::LogScreen(FColor::Red, TEXT("Rotate Gizmo Clicked4"));
 	return false;
 }
 
