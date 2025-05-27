@@ -35,7 +35,7 @@ void USelectRoomUI::NativeOnInitialized()
 
 	Text_MapName->SetText(FText::FromString(TEXT("No Map")));
 
-	InitSelectRoomUI();
+	// InitSelectRoomUI();
 
 	DefaultTintColor = Image_Selected->GetBrush().TintColor;
 }
