@@ -216,6 +216,7 @@ AFrog::AFrog()
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = false;
 	GetCharacterMovement()->FallingLateralFriction = 5.f;
+	GetCharacterMovement()->GravityScale = 2.7;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -280,27 +281,32 @@ AFrog::AFrog()
 	{
 		EmotionUIClass = EmotionUIWidgetClass.Class;
 	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> TempGreet(TEXT("/Game/Characters/Animation/EmotionMontage/WavingHands_Montage.WavingHands_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempGreet(
+		TEXT("/Game/Characters/Animation/EmotionMontage/WavingHands_Montage.WavingHands_Montage"));
 	if (TempGreet.Succeeded())
 	{
 		GreetingMontage = TempGreet.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> TempAngry(TEXT("/Game/Characters/Animation/EmotionMontage/Angry_Montage.Angry_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempAngry(
+		TEXT("/Game/Characters/Animation/EmotionMontage/Angry_Montage.Angry_Montage"));
 	if (TempAngry.Succeeded())
 	{
 		AngryMontage = TempAngry.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> TempSad(TEXT("/Game/Characters/Animation/EmotionMontage/Sad_Montage.Sad_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempSad(
+		TEXT("/Game/Characters/Animation/EmotionMontage/Sad_Montage.Sad_Montage"));
 	if (TempSad.Succeeded())
 	{
 		SadMontage = TempSad.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> TempMerong(TEXT("/Game/Characters/Animation/EmotionMontage/Merong_Montage.Merong_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempMerong(
+		TEXT("/Game/Characters/Animation/EmotionMontage/Merong_Montage.Merong_Montage"));
 	if (TempMerong.Succeeded())
 	{
 		MerongMontage = TempMerong.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> TempWinner(TEXT("/Game/Characters/Animation/EmotionMontage/EndingDance_Montage.EndingDance_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> TempWinner(
+		TEXT("/Game/Characters/Animation/EmotionMontage/EndingDance_Montage.EndingDance_Montage"));
 	if (TempWinner.Succeeded())
 	{
 		WinnerMontage = TempWinner.Object;
@@ -433,6 +439,10 @@ void AFrog::Tick(float DeltaTime)
 		CameraCollision->SetWorldRotation(FRotator::ZeroRotator);
 		CalculateWaterCameraOverlapRatio(DeltaTime);
 	}
+
+	GetCharacterMovement()->GravityScale = FrogGravity;
+	JumpCurrentCount = FrogJumpCount;
+	//GetCharacterMovement()->MovementMode = FrogMovementMode;
 }
 
 // Called to bind functionality to input
@@ -532,23 +542,34 @@ void AFrog::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	JumpCurrentCount = 0;
-
-	ResetSuperJumpRatio();
-
-	if (bIsPressedSprint)
+	if (HasAuthority())
 	{
-		SetSprintSpeed();
+		FrogJumpCount = 0;
+
+		ResetSuperJumpRatio();
+
+		if (bIsPressedSprint)
+		{
+			SetSprintSpeed();
+		}
+		else
+		{
+			SetWalkSpeed();
+		}
+
+		if (bIsPressedCrouch)
+		{
+			FrogMovementMode = MOVE_Walking;
+			GetCharacterMovement()->MovementMode = MOVE_Walking;
+
+			MulticastRPC_StartCrouch();
+		}
+
+		MulticastRPC_Landed();
 	}
 	else
 	{
-		SetWalkSpeed();
-	}
-
-	if (bIsPressedCrouch)
-	{
-		GetCharacterMovement()->MovementMode = MOVE_Walking;
-		MulticastRPC_StartCrouch_Implementation();
+		ServerRPC_Landed();
 	}
 }
 
@@ -561,7 +582,7 @@ void AFrog::StartJump()
 
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
-		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1800.f};
+		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1'700.f};
 
 		// 클라이언트 예측 실행
 		if (IsLocallyControlled())
@@ -613,18 +634,18 @@ void AFrog::StartJump()
 
 void AFrog::MulticastRPC_PlayEffect_Implementation(FVector Location, int32 Index)
 {
-	FLog::Log();
+	//FLog::Log();
 	switch (Index)
 	{
-		case 0:
-			PlayHitEffect();
-			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1.5f, 1, 4.39f);
-			break;
-		case 1:
-			UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
-			break;
-		default:
-			break;
+	case 0:
+		PlayHitEffect();
+		UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1.5f, 1, 4.39f);
+		break;
+	case 1:
+		UGameplayStatics::PlaySoundAtLocation(this, JumpSound, GetActorLocation(), 1, 1, 4.39f);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -676,14 +697,29 @@ void AFrog::StartCrouch()
 		return;
 	}
 
-	MulticastRPC_StartCrouch();
+	if (HasAuthority())
+	{
+		MulticastRPC_StartCrouch();
+	}
+	else
+	{
+		ServerRPC_StartCrouch();
+	}
 }
-
+// Todo: 클라 점프 중 웅크리기, 서버에 안보임
 void AFrog::StopCrouch()
 {
 	bIsPressedCrouch = false;
 
 	MulticastRPC_StopCrouch();
+	if (HasAuthority())
+	{
+		MulticastRPC_StopCrouch();
+	}
+	else
+	{
+		ServerRPC_StopCrouch();
+	}
 }
 
 void AFrog::TongueAttack()
@@ -790,6 +826,16 @@ void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& Laun
 
 		GetWorldTimerManager().SetTimer(TempTimerHandle, RestoreCollisionDelegate, 1.f, false);
 	}
+}
+
+void AFrog::ServerRPC_StartCrouch_Implementation()
+{
+	MulticastRPC_StartCrouch();
+}
+
+void AFrog::ServerRPC_StopCrouch_Implementation()
+{
+	MulticastRPC_StopCrouch();
 }
 
 void AFrog::MulticastRPC_StartCrouch_Implementation()
@@ -918,7 +964,10 @@ void AFrog::SetSprintSpeed()
 	else
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 600.f;
-		ServerRPC_StartSprint();
+		if (IsLocallyControlled())
+		{
+			ServerRPC_StartSprint();
+		}
 	}
 }
 
@@ -931,7 +980,39 @@ void AFrog::SetWalkSpeed()
 	else
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-		ServerRPC_StopSprint();
+		if (IsLocallyControlled())
+		{
+			ServerRPC_StopSprint();
+		}
+	}
+}
+
+void AFrog::ServerRPC_Landed_Implementation()
+{
+	MulticastRPC_Landed();
+}
+
+void AFrog::MulticastRPC_Landed_Implementation()
+{
+	FrogJumpCount = 0;
+
+	ResetSuperJumpRatio();
+
+	if (bIsPressedSprint)
+	{
+		SetSprintSpeed();
+	}
+	else
+	{
+		SetWalkSpeed();
+	}
+
+	if (bIsPressedCrouch)
+	{
+		FrogMovementMode = MOVE_Walking;
+		GetCharacterMovement()->MovementMode = MOVE_Walking;
+
+		MulticastRPC_StartCrouch();
 	}
 }
 
@@ -960,17 +1041,11 @@ void AFrog::InitFrogState()
 
 	ResetSuperJumpRatio();
 
-	// // 로컬 클라만 점프 게이지 보이게
-	// if (IsLocallyControlled())
-	// {
-	// 	SetJumpGaugeVisibility(false);
-	// }
-	// else
-	// {
-	// 	// 다른 클라에서 삭제
-	// 	JumpGaugeUIComponent->DestroyComponent();
-	// 	JumpGaugeUIComponent = nullptr;
-	// }
+	if (HasAuthority())
+	{
+		FrogGravity = 2.7f;
+		FrogMovementMode = EMovementMode::MOVE_Walking;
+	}
 }
 
 void AFrog::SetJumpAvailableBlock(int32 Block)
@@ -1135,6 +1210,11 @@ void AFrog::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AFrog, SkinIndex);
 
 	DOREPLIFETIME(AFrog, bRecentlyLaunched);
+
+	DOREPLIFETIME(AFrog, FrogGravity);
+	DOREPLIFETIME(AFrog, bIsPressedSprint);
+	DOREPLIFETIME(AFrog, bIsPressedCrouch);
+	DOREPLIFETIME(AFrog, FrogMovementMode);
 }
 
 void AFrog::ServerRPC_UpdateOverallWaterState_Implementation(bool bNowInWater, class ARisingWaterProp* WaterVolume)
@@ -1274,27 +1354,41 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 		switch (CharacterWaterState)
 		{
 		case ECharacterStateEnum::None:
-			MoveComp->GravityScale = 0.5f;
+			if (HasAuthority())
+			{
+				FrogGravity = 0.5f;
+			}
 
 			break;
 		case ECharacterStateEnum::Deep:
-			MoveComp->GravityScale = 0.f;
+			if (HasAuthority())
+			{
+				FrogGravity = 0.f;
+			}
+
+			if (MoveComp->Velocity.Z < 800.f)
+			{
+				MoveComp->Velocity.Z = 800.f;
+			}
+
+			break;
+		case ECharacterStateEnum::Shallow:
+			if (HasAuthority())
+			{
+				FrogGravity = 0.f;
+			}
+
 			if (MoveComp->Velocity.Z < 500.f)
 			{
 				MoveComp->Velocity.Z = 500.f;
 			}
 
 			break;
-		case ECharacterStateEnum::Shallow:
-			MoveComp->GravityScale = 0.f;
-			if (MoveComp->Velocity.Z < 300.f)
-			{
-				MoveComp->Velocity.Z = 300.f;
-			}
-
-			break;
 		case ECharacterStateEnum::Surface:
-			MoveComp->GravityScale = 0.05f;
+			if (HasAuthority())
+			{
+				FrogGravity = 0.05f;
+			}
 
 			bool bIsJumpingOrLaunched{MoveComp->IsFalling() || bRecentlyLaunched};
 
@@ -1346,7 +1440,10 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 	}
 	else
 	{
-		MoveComp->GravityScale = 2.7f;
+		if (HasAuthority())
+		{
+			FrogGravity = 2.7f;
+		}
 
 		if (MoveComp->IsFlying() || MoveComp->IsSwimming())
 		{
@@ -1451,6 +1548,21 @@ void AFrog::OnRep_CanTongAttack()
 	// bCanTongAttack 상태 변화에 따른 클라이언트 액션
 }
 
+void AFrog::OnRep_GravityChange()
+{
+	GetCharacterMovement()->GravityScale = FrogGravity;
+}
+
+void AFrog::OnRep_JumpCount()
+{
+	JumpCurrentCount = FrogJumpCount;
+}
+
+void AFrog::OnRep_FrogMovement()
+{
+	GetCharacterMovement()->MovementMode = FrogMovementMode;
+}
+
 void AFrog::SetTongueLength(float Value)
 {
 	Value = FMath::Clamp(Value, 0.f, 1.f);
@@ -1509,8 +1621,9 @@ void AFrog::OnRep_SkinIndex()
 // 플레이어 감정표현
 void AFrog::OnPressCKey()
 {
-	if (EmotionState == EEmotionState::PlayingWinnerEmotion) return;
-	
+	if (EmotionState == EEmotionState::PlayingWinnerEmotion)
+		return;
+
 	if (EmotionState == EEmotionState::None || EmotionState == EEmotionState::PlayingEmotion)
 	{
 		ShowEmotionUI(true);
@@ -1520,8 +1633,9 @@ void AFrog::OnPressCKey()
 
 void AFrog::OnReleasedCKey()
 {
-	if (EmotionState == EEmotionState::PlayingWinnerEmotion) return;
-	
+	if (EmotionState == EEmotionState::PlayingWinnerEmotion)
+		return;
+
 	if (EmotionState == EEmotionState::WaitingForInput)
 	{
 		EmotionUI->ConfirmEmotionSelection();
@@ -1532,8 +1646,9 @@ void AFrog::OnReleasedCKey()
 
 void AFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
 {
-	if (EmotionState == EEmotionState::PlayingWinnerEmotion) return;
-	
+	if (EmotionState == EEmotionState::PlayingWinnerEmotion)
+		return;
+
 	// 선택된 감정 처리
 	ShowEmotionUI(false);
 	if (bCanPlayEmotion)
@@ -1546,8 +1661,10 @@ void AFrog::OnSelectionEmotionIndex(int32 EmotionIndex)
 
 void AFrog::ShowEmotionUI(bool bIsShow)
 {
-	if (!EmotionUI)	return;
-	if (EmotionState == EEmotionState::PlayingWinnerEmotion) return;
+	if (!EmotionUI)
+		return;
+	if (EmotionState == EEmotionState::PlayingWinnerEmotion)
+		return;
 
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (bIsShow)

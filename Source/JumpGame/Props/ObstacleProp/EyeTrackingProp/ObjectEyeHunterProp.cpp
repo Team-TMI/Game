@@ -499,7 +499,7 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		if (Frog)
 		{
 			FVector Direction{FVector::UpVector};
-			float Force{3'000.f};
+			float Force{2'000.f};
 
 			Frog->ServerRPC_CallLaunchCharacter(Direction, Force, false, false);
 			//Super::LaunchCharacter(Frog, Direction, Force);
@@ -515,7 +515,7 @@ void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
 		if (Frog)
 		{
 			FVector Direction{FVector::UpVector};
-			float Force{1'200};
+			float Force{800};
 
 			Frog->ServerRPC_CallLaunchCharacter(Direction, Force, false, false);
 			//Super::LaunchCharacter(Frog, Direction, Force);
