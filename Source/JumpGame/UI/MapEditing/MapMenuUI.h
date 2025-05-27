@@ -11,7 +11,8 @@ class JUMPGAME_API UMapMenuUI : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
-	
+
+	void OnImageSelected(const FString& FileName, bool bSuccess);
 private:
 	UFUNCTION()
 	void OnSaveButtonClicked();
@@ -39,9 +40,14 @@ private:
 	void OnBackButtonClicked();
 	UFUNCTION()
 	void OnSaveCloseButtonClicked();
+	UFUNCTION()
+	bool FileToBase64(const FString& FileName, FString& OutBase64);
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "MapMenu", meta = (AllowPrivateAccess = "true"))
 	class UButton* BackButton;
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "MapMenu", meta = (AllowPrivateAccess = "true"))
 	class UButton* SaveCloseButton;
+
+	UPROPERTY()
+	FString SaveFileName;
 };

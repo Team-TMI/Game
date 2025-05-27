@@ -12,6 +12,8 @@
 #include "Components/TextBlock.h"
 #include "MapSlotUI.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Image.h"
+#include "Components/SizeBox.h"
 #include "FileBrowser/FileBrowserUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 
@@ -32,6 +34,10 @@ void USelectRoomUI::NativeOnInitialized()
 	ScrollBox_CustomMap->ClearChildren();
 
 	Text_MapName->SetText(FText::FromString(TEXT("No Map")));
+
+	InitSelectRoomUI();
+
+	DefaultTintColor = Image_Selected->GetBrush().TintColor;
 }
 
 void USelectRoomUI::InitSelectRoomUI()
@@ -40,6 +46,16 @@ void USelectRoomUI::InitSelectRoomUI()
 	if (CurrentSelectedMapSlotUI)
 	{
 		Text_MapName->SetText(FText::FromString(CurrentSelectedMapSlotUI->GetMapName()));
+		if (CurrentSelectedMapSlotUI->GetSavedThumbnail())
+		{
+			Image_Selected->SetBrushFromTexture(CurrentSelectedMapSlotUI->GetSavedThumbnail());
+			Image_Selected->SetBrushTintColor(FLinearColor::White);
+		}
+		else
+		{
+			Image_Selected->SetBrushFromTexture(nullptr);
+			Image_Selected->SetBrushTintColor(DefaultTintColor);
+		}
 	}
 	
 	if (bIsInitialized)
@@ -73,10 +89,10 @@ void USelectRoomUI::OnClickGoBackWait()
 {
 	// 맵 선택 취소
 	// RemoveFromParent();
-	if (PreviewSelectedMapSlotUI)
-	{
-		PreviewSelectedMapSlotUI->RemoveFromParent();
-	}
+	// if (PreviewSelectedMapSlotUI)
+	// {
+	// 	PreviewSelectedMapSlotUI->RemoveFromParent();
+	// }
 	PreviewSelectedMapSlotUI = nullptr;
 }
 
@@ -160,6 +176,16 @@ void USelectRoomUI::OnPickFileComplete(const FString& FilePath, bool bSuccess)
 	PreviewSelectedMapSlotUI = MapSlot;
 
 	Text_MapName->SetText(FText::FromString(MapSlot->GetMapName()));
+	if (MapSlot->GetSavedThumbnail())
+	{
+		Image_Selected->SetBrushFromTexture(MapSlot->GetSavedThumbnail());
+		Image_Selected->SetBrushTintColor(FLinearColor::White);
+	}
+	else
+	{
+		Image_Selected->SetBrushFromTexture(nullptr);
+		Image_Selected->SetBrushTintColor(DefaultTintColor);
+	}
 	
 	bPreviewByPickedFile = true;
 }
@@ -203,7 +229,7 @@ void USelectRoomUI::InitAllMap()
 		UMapSlotUI* MapSlot = CreateWidget<UMapSlotUI>(GetWorld(), MapSlotClass);
 		MapSlot->Init(MapFullPath, MapName);
 		MapSlot->OnClicked.BindUObject(this, &USelectRoomUI::OnMapClicked);
-		MapSlot->SetPadding(FMargin(0, 0, 10.0, 0));
+		MapSlot->SetPadding(FMargin(0, 0, 10.0f, 10.0f));
 		CombinedMapListUI.Add(MapSlot);
 	}
 }
@@ -216,7 +242,7 @@ void USelectRoomUI::InitOriginMap()
 		UMapSlotUI* MapSlot = CreateWidget<UMapSlotUI>(GetWorld(), MapSlotClass);
 		MapSlot->Init(MapFullPath, MapName);
 		MapSlot->OnClicked.BindUObject(this, &USelectRoomUI::OnMapClicked);
-		MapSlot->SetPadding(FMargin(0, 0, 10.0, 0));
+		MapSlot->SetPadding(FMargin(0, 0, 10.0f, 10.0f));
 		OriginMapListUI.Add(MapSlot);
 	}
 }
@@ -229,7 +255,7 @@ void USelectRoomUI::InitCustomMap()
 		UMapSlotUI* MapSlot = CreateWidget<UMapSlotUI>(GetWorld(), MapSlotClass);
 		MapSlot->Init(MapFullPath, MapName);
 		MapSlot->OnClicked.BindUObject(this, &USelectRoomUI::OnMapClicked);
-		MapSlot->SetPadding(FMargin(0, 0, 10.0, 0));
+		MapSlot->SetPadding(FMargin(0, 0, 10.0f, 10.0f));
 		CustomMapListUI.Add(MapSlot);
 	}
 }
@@ -245,6 +271,16 @@ void USelectRoomUI::OnMapClicked(UMapSlotUI* MapSlot)
 	PreviewSelectedMapSlotUI = MapSlot;
 
 	Text_MapName->SetText(FText::FromString(MapSlot->GetMapName()));
+	if (MapSlot->GetSavedThumbnail())
+	{
+		Image_Selected->SetBrushFromTexture(MapSlot->GetSavedThumbnail());
+		Image_Selected->SetBrushTintColor(FLinearColor::White);
+	}
+	else
+	{
+		Image_Selected->SetBrushFromTexture(nullptr);
+		Image_Selected->SetBrushTintColor(DefaultTintColor);
+	}
 	
 	bPreviewByPickedFile = false;
 }

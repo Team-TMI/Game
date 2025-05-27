@@ -19,7 +19,7 @@ public:
 	// Sets default values for this component's properties
 	USaveMapComponent();
 
-	bool SaveMap(const FString& FileName);
+	bool SaveMap(const FString& FileName, const FString& ImageBase64);
 
 protected:
 	virtual void BeginPlay() override;
