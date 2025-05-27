@@ -36,6 +36,8 @@ public:
 	void CreateBackButton();
 	UFUNCTION()
 	void OnCloseButtonClicked();
+	UFUNCTION()
+	void SetHintText(const FString& HintText);
 
 	FOnFileSelected OnFileSelectedDelegate;
 

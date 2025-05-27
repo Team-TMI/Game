@@ -22,9 +22,15 @@ public:
 
 	GETTER(FString, MapFullPath);
 	GETTER(FString, MapName);
+	GETTER(class UTexture2D*, SavedThumbnail);
 private:
 	UFUNCTION()
 	void OnBtnMapSlotClicked();
+	UFUNCTION()
+	class UTexture2D* GetMapThumbnail(const FString& InMapFullPath);
+	UFUNCTION()
+	class UTexture2D* MakeTextureFromBytes(const TArray<uint8>& FileData);
+	
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "MapSlot", meta = (AllowPrivateAccess = "true"))
 	class UButton* Btn_MapSlot;
@@ -35,4 +41,6 @@ private:
 	FString MapFullPath;
 	UPROPERTY()
 	FString MapName;
+	UPROPERTY()
+	class UTexture2D* SavedThumbnail;
 };
