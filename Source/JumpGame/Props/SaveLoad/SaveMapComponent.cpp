@@ -20,7 +20,7 @@ void USaveMapComponent::BeginPlay()
 	FFastLogger::LogConsole(TEXT("DefaultDirectory : %s"), *DefaultDirectory);
 }
 
-bool USaveMapComponent::SaveMap(const FString& FileName)
+bool USaveMapComponent::SaveMap(const FString& FileName, const FString& ImageBase64)
 {
 	CollisionPropTags.Empty();
 	SaveDataArray.SaveDataArray.Empty();
@@ -30,6 +30,7 @@ bool USaveMapComponent::SaveMap(const FString& FileName)
 		FFastLogger::LogScreen(FColor::Red, TEXT("충돌중인 프롭이 있습니다! 저장 실패!!"));
 		return false;
 	}
+	SaveDataArray.ImageBase64 = ImageBase64; // TODO: 이미지 저장 기능 추가
 	return SaveDataToFile(SaveDataArray, FileName);
 }
 

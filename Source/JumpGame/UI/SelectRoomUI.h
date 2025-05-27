@@ -42,6 +42,8 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_MapName;
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Image_Selected;
 
 	// 버튼 클릭시 실행 함수
 	UFUNCTION()
@@ -108,4 +110,7 @@ private:
 
 	bool bPreviewByPickedFile = false;
 	bool bCurrentByPickedFile = false;
+
+	UPROPERTY()
+	FSlateColor DefaultTintColor;
 };

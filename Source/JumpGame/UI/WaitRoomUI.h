@@ -33,6 +33,9 @@ public:
 	class UButton* Btn_BackFromLobby;
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text_MapName;
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Image_Selected;
+	
 
 	// 클릭시 실행될 함수
 	UFUNCTION()
@@ -88,4 +91,7 @@ public:
 	class APlayerController* PC;
 	UPROPERTY(editanywhere, BlueprintReadWrite)
 	class ALobbySubCamera* SubCamera;
+
+	UPROPERTY()
+	FSlateColor DefaultTintColor;
 };

@@ -35,6 +35,9 @@ struct FSaveDataArray
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ImageBase64;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FSaveData> SaveDataArray;
 
 	FSaveDataArray(TArray<FSaveData> InSaveDataArray = {})

@@ -19,9 +19,9 @@ public:
 
 	UFUNCTION()
 	virtual FVector GetDirection() const;
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual void SetSelected();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual void SetUnSelected();
 
 	virtual ~UGizmoComponent() override {}

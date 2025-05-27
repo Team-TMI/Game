@@ -87,6 +87,7 @@ void UGameProgressBarUI::UpdatePlayerPos()
 				Frog->SetFrogVignetteIntensity_PP(Value);
 				UpdateFogDensity(Value);
 				UpdateSunBrightness(Value);
+				Frog->SetLightIntensity(Value);
 				
 				PlayerPos[PlayerIndex] = Position; // PlayerID에 해당하는 인덱스에 저장
 				// 1등 플레이어 위치 갱신

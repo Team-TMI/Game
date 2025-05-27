@@ -13,8 +13,6 @@
 #include "SelectRoomUI.h"
 #include "UICam/LobbySubCamera.h"
 
-class UTextBlock;
-
 void UWaitRoomUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -38,6 +36,8 @@ void UWaitRoomUI::NativeOnInitialized()
 	}
 
 	Text_MapName->SetText(FText::FromString(TEXT("No Map")));
+
+	DefaultTintColor = Image_Selected->GetBrush().TintColor;
 }
 
 void UWaitRoomUI::OnMapSelected(UMapSlotUI* MapSlotUI)
@@ -45,6 +45,16 @@ void UWaitRoomUI::OnMapSelected(UMapSlotUI* MapSlotUI)
 	if (!MapSlotUI) return;
 
 	Text_MapName->SetText(FText::FromString(MapSlotUI->GetMapName()));
+	if (MapSlotUI->GetSavedThumbnail())
+	{
+		Image_Selected->SetBrushFromTexture(MapSlotUI->GetSavedThumbnail());
+		Image_Selected->SetBrushTintColor(FLinearColor::White);
+	}
+	else
+	{
+		Image_Selected->SetBrushFromTexture(nullptr);
+		Image_Selected->SetBrushTintColor(DefaultTintColor);
+	}
 }
 
 void UWaitRoomUI::OnClickGameStart()
@@ -83,7 +93,7 @@ void UWaitRoomUI::OnClickSelectMap()
 	{
 		// 맵선택 UI가 뜨게 하자
 		SelectRoomUI->AddToViewport();
-		SelectRoomUI->InitSelectRoomUI();
+		// SelectRoomUI->InitSelectRoomUI();
 		ShowMapSelect();
 		FFastLogger::LogConsole(TEXT("OnClickSelectMapOnClickSelectMapOnClickSelectMap"));
 	}
