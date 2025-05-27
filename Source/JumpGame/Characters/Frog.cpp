@@ -410,7 +410,7 @@ void AFrog::Tick(float DeltaTime)
 			bCoyoteActive = false;
 		}
 	}
-	
+
 	// 공중에 있을 때는 회전 잘 안되게
 	if (GetCharacterMovement()->IsFalling())
 	{
@@ -524,7 +524,7 @@ void AFrog::Move(const struct FInputActionValue& Value)
 
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		
+
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
@@ -567,7 +567,7 @@ bool AFrog::CanJumpInternal_Implementation() const
 void AFrog::Falling()
 {
 	Super::Falling();
-// JumpCurrentCount
+	// JumpCurrentCount
 	//FLog::Log("fall");
 	if (!bIsJumping)
 	{
@@ -579,7 +579,7 @@ void AFrog::Falling()
 void AFrog::OnJumped_Implementation()
 {
 	Super::OnJumped_Implementation();
-	
+
 	bCoyoteActive = false;
 }
 
@@ -589,7 +589,7 @@ void AFrog::Landed(const FHitResult& Hit)
 
 	bIsJumping = false;
 	bCoyoteActive = false;
-	
+
 	if (HasAuthority())
 	{
 		FrogJumpCount = 0;
@@ -634,12 +634,12 @@ void AFrog::StartJump()
 		// 점프 불가 -> 버퍼 시작
 		bJumpBuffered = true;
 		JumpBufferTimeFlow = JumpBufferTime;
-		
+
 		return;
 	}
-	
+
 	bIsJumping = true;
-	
+
 	if (CharacterWaterState == ECharacterStateEnum::Surface)
 	{
 		FVector LaunchVelocity{GetActorForwardVector() * 100.f + FVector::UpVector * 1'700.f};
@@ -719,13 +719,13 @@ void AFrog::StopJump()
 void AFrog::WPressed(const struct FInputActionValue& Value)
 {
 	float CurrentTime{static_cast<float>(GetWorld()->GetTimeSeconds())};
-	
+
 	if (CurrentTime - WPressedTime < 0.25f)
 	{
 		bIsSprint = true;
 		StartSprint();
 	}
-	
+
 	WPressedTime = CurrentTime;
 }
 
@@ -1547,7 +1547,17 @@ void AFrog::HandleInWaterLogic(float DeltaTime)
 	{
 		if (HasAuthority())
 		{
-			FrogGravity = 2.7f;
+			// 점프 최대 높이일 때 중력 영향 감소
+			// --> 땅에 닿기까지 시간 더 줘서 움직임 더 쉽게 조정
+			if (bIsJumping && GetCharacterMovement()->Velocity.Z < 10.f)
+			{
+				// FLog::Log();
+				FrogGravity = 2.1f;
+			}
+			else
+			{
+				FrogGravity = 2.7f;
+			}
 		}
 
 		if (MoveComp->IsFlying() || MoveComp->IsSwimming())
