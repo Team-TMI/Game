@@ -89,6 +89,10 @@ public:
 	void MulticastRPC_Launch(const FVector& LaunchVelocity);
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_Launch(const FVector& LaunchVelocity);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StartCrouch();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StopCrouch();
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_StartCrouch();
 	UFUNCTION(NetMulticast, Reliable)
@@ -101,6 +105,11 @@ public:
 	void ServerRPC_StartTongueAttack();
 	void SetSprintSpeed();
 	void SetWalkSpeed();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_Landed();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_Landed();
+	
 
 public:
 	void InitJumpGaugeUIComponent();
@@ -163,6 +172,13 @@ public:
 	void OnRep_IsTongueGrow();
 	UFUNCTION()
 	void OnRep_CanTongAttack();
+	UFUNCTION()
+	void OnRep_GravityChange();
+	UFUNCTION()
+	void OnRep_JumpCount();
+	UFUNCTION()
+	void OnRep_FrogMovement();
+	
 	
 	// 혓바닥
 	void SetTongueLength(float Value);
@@ -252,9 +268,17 @@ public:
 	TArray<UTexture2D*> SkinTextures;
 	UPROPERTY(ReplicatedUsing=OnRep_SkinIndex)
 	int32 SkinIndex{};
+	UPROPERTY(Replicated)
 	bool bIsPressedSprint{false};
+	UPROPERTY(Replicated)
 	bool bIsPressedCrouch{false};
-
+	UPROPERTY(ReplicatedUsing=OnRep_GravityChange)
+	float FrogGravity{};
+	UPROPERTY(ReplicatedUsing=OnRep_JumpCount)
+	int32 FrogJumpCount{};
+	UPROPERTY(ReplicatedUsing=OnRep_FrogMovement)
+	TEnumAsByte<EMovementMode> FrogMovementMode{EMovementMode::MOVE_Walking};
+	
 	// 델리게이트
 public:
 	UPROPERTY(BlueprintAssignable)
