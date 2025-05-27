@@ -73,6 +73,8 @@ public:
 	void Look(const struct FInputActionValue& Value);
 	void StartJump();
 	void StopJump();
+	void WPressed(const struct FInputActionValue& Value);
+	void WReleased(const struct FInputActionValue& Value);
 	void StartSprint();
 	void StopSprint();
 	void StartCrouch();
@@ -109,7 +111,11 @@ public:
 	void ServerRPC_Landed();
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_Landed();
-	
+	void SetLightIntensity(float Alpha);
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetLight(float Alpha);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetLight(float Alpha);
 
 public:
 	void InitJumpGaugeUIComponent();
@@ -406,7 +412,12 @@ public:
 public :
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ProcessOverlap(class AObstacleProp* ObstacleProp);
-	
+
+	// 대쉬
+	FTimerHandle DoubleTapTimer;
+	float WPressedTime{0.f};
+	//bool bIsDoubleTap{false};
+	bool bIsSprint{false};
 };
 
 

@@ -249,6 +249,7 @@ AFrog::AFrog()
 	SpotLightComponent->SetOuterConeAngle(29.f);
 	SpotLightComponent->SetCastShadows(false);
 	SpotLightComponent->SetRelativeRotation(FRotator(-10.f, 0.f, 0));
+	SpotLightComponent->SetIsReplicated(true);
 
 	GetCharacterMovement()->SetIsReplicated(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("FrogCollision"));
@@ -466,9 +467,9 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		                                   &AFrog::StopCrouch);
 
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this,
-		                                   &AFrog::StartSprint);
+		                                   &AFrog::WPressed);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this,
-		                                   &AFrog::StopSprint);
+		                                   &AFrog::WReleased);
 
 		EnhancedInputComponent->BindAction(TongueAttackAction, ETriggerEvent::Started, this,
 		                                   &AFrog::TongueAttack);
@@ -499,7 +500,7 @@ void AFrog::Move(const struct FInputActionValue& Value)
 
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
+		
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
@@ -654,6 +655,28 @@ void AFrog::StopJump()
 	StopJumping();
 }
 
+void AFrog::WPressed(const struct FInputActionValue& Value)
+{
+	float CurrentTime{static_cast<float>(GetWorld()->GetTimeSeconds())};
+	
+	if (CurrentTime - WPressedTime < 0.25f)
+	{
+		bIsSprint = true;
+		StartSprint();
+	}
+	
+	WPressedTime = CurrentTime;
+}
+
+void AFrog::WReleased(const struct FInputActionValue& Value)
+{
+	if (bIsSprint)
+	{
+		bIsSprint = false;
+		StopSprint();
+	}
+}
+
 void AFrog::StartSprint()
 {
 	bIsPressedSprint = true;
@@ -706,6 +729,7 @@ void AFrog::StartCrouch()
 		ServerRPC_StartCrouch();
 	}
 }
+
 // Todo: 클라 점프 중 웅크리기, 서버에 안보임
 void AFrog::StopCrouch()
 {
@@ -1014,6 +1038,26 @@ void AFrog::MulticastRPC_Landed_Implementation()
 
 		MulticastRPC_StartCrouch();
 	}
+}
+
+void AFrog::SetLightIntensity(float Alpha)
+{
+	SpotLightComponent->SetIntensity(10.f * (1 - Alpha));
+
+	if (IsLocallyControlled())
+	{
+		ServerRPC_SetLight(Alpha);
+	}
+}
+
+void AFrog::ServerRPC_SetLight_Implementation(float Alpha)
+{
+	MulticastRPC_SetLight(Alpha);
+}
+
+void AFrog::MulticastRPC_SetLight_Implementation(float Alpha)
+{
+	SpotLightComponent->SetIntensity(10.f * (1 - Alpha));
 }
 
 void AFrog::InitJumpGaugeUIComponent()
