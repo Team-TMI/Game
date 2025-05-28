@@ -62,6 +62,7 @@ public:
 	// 뷰포트에 따른 TargetPositions 위치 결정 함수
 	void SetTargetPositionsByViewport();
 	void ChooseTargetPositionsRatio();
+	void AddDynamicOverlap();
 	
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -115,6 +116,7 @@ public:
 	
 	FTimerHandle EndTimerHandle;
 	FTimerHandle StartTimerHandle;
+	FTimerHandle DynamicTimerHandle;
 
 	// 뷰포트 크기 변화 고려
 	TArray<FVector2D> TargetPositionsRatio;
