@@ -20,7 +20,11 @@ public:
 
 	UFUNCTION()
 	void OnMapSelected(class UMapSlotUI* MapSlotUI);
-	
+	UFUNCTION()
+	void UpdateCurrentMapThumbnail(UTexture2D* Texture);
+	UFUNCTION()
+	void UpdateCurrentMapName(const FString& MapName);
+
 	UPROPERTY()
 	class UJumpGameInstance* GI;
 	
@@ -94,4 +98,7 @@ public:
 
 	UPROPERTY()
 	FSlateColor DefaultTintColor;
+
+	UPROPERTY()
+	TObjectPtr<class UTexture2D> CurrentMapThumbnail;
 };
