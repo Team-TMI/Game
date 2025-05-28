@@ -188,7 +188,7 @@ void UGameProgressBarUI::UpdatePlayerMarkers()
 		// 마커 위치 설정
 		Marker->SetRenderTranslation(MarkerPos);
 
-		// 🟢 후처리 연출 추가
+		// 후처리 연출 추가
 		AMapGameState* GS = Cast<AMapGameState>(GetWorld()->GetGameState());
 		if (!GS || !GS->PlayerArray.IsValidIndex(i)) continue;
 
