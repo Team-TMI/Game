@@ -23,6 +23,7 @@
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "JumpGame/Utils/FastLogger.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -1962,6 +1963,17 @@ void AFrog::ServerRPC_ProcessOverlap_Implementation(class AObstacleProp* Obstacl
 void AFrog::SetFrogVignetteIntensity_PP(float Value)
 {
 	SettingPostProcessComponent->Settings.VignetteIntensity = Value;
+}
+
+void AFrog::SetFrogGlobalGain_PP(float Value)
+{
+	Value *= 2;
+	Value = FMath::Clamp(Value, 0.1f, 1.8f);
+
+	SettingPostProcessComponent->Settings.ColorGain.Set(1, 1, 1, Value);
+	//SettingPostProcessComponent->Settings.ColorGainMidtones.Set(1, 1, 1, Value);
+	//SettingPostProcessComponent->Settings.ColorGainHighlights.Set(1, 1, 1, Value);
+	//SettingPostProcessComponent->Settings.ColorGainShadows.Set(1, 1, 1, Value);
 }
 
 void AFrog::FrogSkinFinder()

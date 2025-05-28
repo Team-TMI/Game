@@ -42,8 +42,8 @@ void UStoryUI::NativeConstruct()
 	bIsStoryStarted = true;
 	bIsEnd = false;
 	
-	APlayerController* PC{UGameplayStatics::GetPlayerController(this, 0)};
-	PC->bShowMouseCursor = false;
+	// APlayerController* PC{UGameplayStatics::GetPlayerController(this, 0)};
+	// PC->bShowMouseCursor = false;
 }
 
 // void UStoryUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)

@@ -141,6 +141,8 @@ public:
 	void CalculateWaterCameraOverlapRatio(float dt);
 	UFUNCTION(BlueprintCallable)
 	void SetFrogVignetteIntensity_PP(float Value);
+	UFUNCTION(BlueprintCallable)
+	void SetFrogGlobalGain_PP(float Value);
 	UFUNCTION(NetMulticast, reliable, BlueprintCallable)
 	void MulticastRPC_PlayEffect(FVector Location, int32 Index);
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)

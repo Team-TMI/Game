@@ -17,7 +17,7 @@ public:
 	// Sets default values for this actor's properties
 	AObstacleProp();
 
-protected:
+// protected:
 	UFUNCTION()
 	void OnMyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
