@@ -11,6 +11,7 @@
 #include "Components/ComboBoxString.h"
 #include "Components/Slider.h"
 #include "Components/WidgetSwitcher.h"
+#include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -301,7 +302,7 @@ void UGameSettingUI::OnClickWeatherOff()
 
 void UGameSettingUI::OnLightValueChanged(float Value)
 {
-	//Character->SetFrogGlobalGain_PP(Value);
+	Character->SetFrogGlobalGain_PP(Value);
 	Settings->SetBrightness(Value);
 }
 
