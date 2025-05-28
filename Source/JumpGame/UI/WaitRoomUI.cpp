@@ -11,6 +11,7 @@
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 #include "SelectRoomUI.h"
+#include "JumpGame/Core/GameState/LobbyGameState.h"
 #include "UICam/LobbySubCamera.h"
 
 void UWaitRoomUI::NativeOnInitialized()
@@ -44,10 +45,33 @@ void UWaitRoomUI::OnMapSelected(UMapSlotUI* MapSlotUI)
 {
 	if (!MapSlotUI) return;
 
-	Text_MapName->SetText(FText::FromString(MapSlotUI->GetMapName()));
-	if (MapSlotUI->GetSavedThumbnail())
+	ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GetWorld()->GetGameState());
+	if (!LobbyGameState) return;
+
+	TArray<uint8> ImageData = MapSlotUI->ImageData;
+	const int32 ImageSize = ImageData.Num();
+	const int32 ChunkSize = 8192; // 8KB
+	
+	LobbyGameState->MulticastRPC_ClientBeginRecvImage(MapSlotUI->GetMapName(), ImageSize);
+	for (int32 Offset = 0; Offset < ImageSize; Offset += ChunkSize)
 	{
-		Image_Selected->SetBrushFromTexture(MapSlotUI->GetSavedThumbnail());
+		const int32 Size = FMath::Min(ChunkSize, ImageSize - Offset);
+
+		// 임시 배열에 잘라 담는다
+		TArray<uint8> Chunk;
+		Chunk.Append(&ImageData[Offset], Size);
+
+		// Reliable 전송
+		LobbyGameState->MulticastRPC_ClientRecvImageChunk(Chunk, Offset);
+	}
+	LobbyGameState->MulticastRPC_ClientEndRecvImage();
+}
+
+void UWaitRoomUI::UpdateCurrentMapThumbnail(UTexture2D* Texture)
+{
+	if (Texture)
+	{
+		Image_Selected->SetBrushFromTexture(Texture);
 		Image_Selected->SetBrushTintColor(FLinearColor::White);
 	}
 	else
@@ -55,6 +79,17 @@ void UWaitRoomUI::OnMapSelected(UMapSlotUI* MapSlotUI)
 		Image_Selected->SetBrushFromTexture(nullptr);
 		Image_Selected->SetBrushTintColor(DefaultTintColor);
 	}
+
+	if (IsValid(CurrentMapThumbnail))
+	{
+		CurrentMapThumbnail->MarkAsGarbage();
+	}
+	CurrentMapThumbnail = Texture;
+}
+
+void UWaitRoomUI::UpdateCurrentMapName(const FString& MapName)
+{
+	Text_MapName->SetText(FText::FromString(MapName));
 }
 
 void UWaitRoomUI::OnClickGameStart()

@@ -80,7 +80,6 @@ UTexture2D* UMapSlotUI::GetMapThumbnail(const FString& InMapFullPath)
 	}
 	
 	// Base64로 인코딩된 이미지 데이터를 디코딩하여 UTexture2D로 변환
-	TArray<uint8> ImageData;
 	if (!FBase64::Decode(SaveDataArray.ImageBase64, ImageData))
 	{
 		return Thumbnail;

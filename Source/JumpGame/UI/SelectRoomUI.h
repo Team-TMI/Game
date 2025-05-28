@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "JumpGame/Utils/CommonUtils.h"
 #include "SelectRoomUI.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnMapSelected, class UMapSlotUI*, MapSlotUI);
@@ -71,6 +72,8 @@ public:
 
 	UPROPERTY()
 	FOnMapSelected OnMapSelectedDelegate;
+
+	GETTER(class UMapSlotUI*, CurrentSelectedMapSlotUI)
 
 private:
 	void InitAllMap();

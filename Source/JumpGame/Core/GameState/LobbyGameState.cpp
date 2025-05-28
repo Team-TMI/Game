@@ -2,13 +2,20 @@
 
 
 #include "LobbyGameState.h"
+
+#include "IImageWrapper.h"
+#include "IImageWrapperModule.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
+#include "JumpGame/UI/SelectRoomUI.h"
 #include "JumpGame/UI/WaitRoomUI.h"
+#include "Net/UnrealNetwork.h"
 
 ALobbyGameState::ALobbyGameState()
 {
+	bReplicates = true;
+	
 	ConstructorHelpers::FClassFinder<UWaitRoomUI> TempWaitUI(TEXT("/Game/UI/LobbyUI/WBP_WaitRoomUI.WBP_WaitRoomUI_C"));
 	if (TempWaitUI.Succeeded())
 	{
@@ -39,6 +46,11 @@ void ALobbyGameState::BeginPlay()
 	}
 }
 
+void ALobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
 void ALobbyGameState::OnClientAdded(const FString& NetID)
 {
 	Super::OnClientAdded(NetID);
@@ -49,6 +61,7 @@ void ALobbyGameState::OnClientAdded(const FString& NetID)
 	{
 		MulticastRPC_UpdateWaitImage(it.Key, it.Value);
 	}
+	WaitRoomUI->OnMapSelected(WaitRoomUI->SelectRoomUI->GetCurrentSelectedMapSlotUI());
 }
 
 void ALobbyGameState::MulticastRPC_UpdateWaitImage_Implementation(const FString& PlayerKey,
@@ -65,3 +78,71 @@ void ALobbyGameState::MulticastRPC_UpdateWaitImage_Implementation(const FString&
 	}
 }
 
+void ALobbyGameState::MulticastRPC_ClientBeginRecvImage_Implementation(const FString& InMapName, int32 InImageByteSize)
+{
+	CurrentMapName = InMapName;
+	CurrentMapImageData.SetNumUninitialized(InImageByteSize); // 목적지 버퍼 확보
+	WaitRoomUI->UpdateCurrentMapName(CurrentMapName);
+	RecvBytes = 0;
+}
+
+void ALobbyGameState::MulticastRPC_ClientRecvImageChunk_Implementation(const TArray<uint8>& InChunk, int32 InOffset)
+{
+	if (InOffset + InChunk.Num() > CurrentMapImageData.Num()) { return; }
+
+	FMemory::Memcpy(CurrentMapImageData.GetData() + InOffset,
+					InChunk.GetData(),
+					InChunk.Num());
+
+	RecvBytes += InChunk.Num();
+}
+
+void ALobbyGameState::MulticastRPC_ClientEndRecvImage_Implementation()
+{
+	if (RecvBytes != CurrentMapImageData.Num())
+	{
+		FFastLogger::LogConsole(TEXT("Thumbnail lost! (%d/%d)"), RecvBytes, CurrentMapImageData.Num());
+		return;
+	}
+
+	// ① 바이너리 → UTexture2D
+	UTexture2D* Thumbnail = MakeTextureFromBytes(CurrentMapImageData);
+
+	// ② UI 위젯 반영
+	WaitRoomUI->UpdateCurrentMapThumbnail(Thumbnail);
+
+	// ③ 버퍼 해제
+	CurrentMapImageData.Empty();
+	RecvBytes = 0;
+}
+
+UTexture2D* ALobbyGameState::MakeTextureFromBytes(const TArray<uint8>& FileData)
+{
+	IImageWrapperModule& ImgMod = FModuleManager::LoadModuleChecked<IImageWrapperModule>("ImageWrapper");
+	// PNG / JPEG 자동 감지
+	EImageFormat Fmt = ImgMod.DetectImageFormat(FileData.GetData(), FileData.Num());
+	TSharedPtr<IImageWrapper> Wrapper = ImgMod.CreateImageWrapper(Fmt);
+
+	if (!Wrapper.IsValid() || !Wrapper->SetCompressed(FileData.GetData(), FileData.Num()))
+		return nullptr;
+
+	TArray<uint8> RawBGRA;
+	if (!Wrapper->GetRaw(ERGBFormat::BGRA, 8, RawBGRA))
+		return nullptr;
+
+	const int32 W = Wrapper->GetWidth();
+	const int32 H = Wrapper->GetHeight();
+
+	UTexture2D* Texture = UTexture2D::CreateTransient(W, H, PF_B8G8R8A8);
+	if (!Texture) return nullptr;
+
+	// 텍스처에 데이터 복사
+	void* MipData = Texture->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+	FMemory::Memcpy(MipData, RawBGRA.GetData(), RawBGRA.Num());
+	Texture->GetPlatformData()->Mips[0].BulkData.Unlock();
+
+	Texture->SRGB = true;
+	Texture->UpdateResource();
+
+	return Texture;
+}
