@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GamePlayerSettings.h"
 #include "Blueprint/UserWidget.h"
+#include "JumpGame/Characters/Frog.h"
 #include "GameSettingUI.generated.h"
 
 /**/
@@ -124,6 +125,9 @@ public:
 	UFUNCTION()
 	void OnClickWeatherOff();
 
+	// 밝기 (캐릭터가 가지고 있다)
+	UPROPERTY()
+	AFrog* Character;
 	UPROPERTY(meta = (BindWidget))
 	class USlider* Sd_Light;
 	
