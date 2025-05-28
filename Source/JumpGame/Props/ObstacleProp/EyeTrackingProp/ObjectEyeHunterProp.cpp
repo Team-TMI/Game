@@ -573,6 +573,12 @@ void AObjectEyeHunterProp::ResetMission()
 
 	GetWorldTimerManager().SetTimer(EndTimerHandle, FlyingObjectUI, &UFlyingObjectUI::VanishMission,
 	                                0.5f, false);
+	
+	CollisionComp->OnComponentBeginOverlap.RemoveDynamic(this, &AObstacleProp::OnMyBeginOverlap);
+	CollisionComp->OnComponentEndOverlap.RemoveDynamic(this, &AObstacleProp::OnMyEndOverlap);
+
+	GetWorldTimerManager().SetTimer(DynamicTimerHandle, this, &AObjectEyeHunterProp::AddDynamicOverlap,
+								1.f, false);
 }
 
 void AObjectEyeHunterProp::SetNextTargetPosition()
@@ -735,6 +741,12 @@ void AObjectEyeHunterProp::ChooseTargetPositionsRatio()
 		TargetPositionsRatio.Add(FVector2D(0.5f, 0.5f));
 		break;
 	}
+}
+
+void AObjectEyeHunterProp::AddDynamicOverlap()
+{
+	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AObstacleProp::OnMyBeginOverlap);
+	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AObstacleProp::OnMyEndOverlap);
 }
 
 void AObjectEyeHunterProp::ServerRPC_PlayEffect_Implementation(const FVector& Vector, int32 Index)
