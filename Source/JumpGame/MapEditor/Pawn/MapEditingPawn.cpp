@@ -292,6 +292,7 @@ void AMapEditingPawn::HandleDelete(const FInputActionValue& InputActionValue)
 void AMapEditingPawn::HandleRotate(const FInputActionValue& InputActionValue)
 {
 	// 정해져 있는 회전값으로 회전
+	if (bCanMove || !bRotateGizmoMode) return;
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
 	RotateHandlerManager->HandleRotate(ControlledInfo);
 }
@@ -299,6 +300,7 @@ void AMapEditingPawn::HandleRotate(const FInputActionValue& InputActionValue)
 void AMapEditingPawn::HandleAxis(const FInputActionValue& InputActionValue)
 {
 	// 회전 축 설정
+	if (bCanMove || !bRotateGizmoMode) return;
 	FVector Axis = InputActionValue.Get<FVector>();
 	FClickResponse ControlledInfo = ClickHandlerManager->GetControlledClickResponse();
 	RotateHandlerManager->HandleAxis(Axis, ControlledInfo);

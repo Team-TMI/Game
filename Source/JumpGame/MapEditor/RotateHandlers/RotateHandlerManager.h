@@ -18,6 +18,8 @@ public:
 
 	void HandleRotate(FClickResponse& ClickResponse);
 	void HandleAxis(FVector InAxis, FClickResponse& ClickResponse);
+	UFUNCTION()
+	void ResetAxis();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnAxisChanged OnAxisChanged;
@@ -29,8 +31,6 @@ protected:
 	virtual void InitializeComponent() override;
 	
 private:
-	UFUNCTION()
-	void ResetAxis();
 	
 	UPROPERTY()
 	FVector Axis = FVector(0, 0, 1);
