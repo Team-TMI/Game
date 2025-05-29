@@ -101,14 +101,12 @@ void ARollingBallProp::OnMyRollingBallOverlap(UPrimitiveComponent* OverlappedCom
 	FLog::Log("OnMyRollingBallOverlap");
 	
 	AFrog* Frog = Cast<AFrog>(OtherActor);
-	if (!Frog)
+	if (Frog)
 	{
-		return ;
+		FVector LaunchVelocity = LaunchDir.GetSafeNormal() * 1'800;
+		Frog->LaunchCharacter(LaunchVelocity, true, true);
+		FLog::Log("OnMyRollingBallOverlap Frog");
 	}
-	
-	FVector LaunchVelocity = LaunchDir.GetSafeNormal() * 1'800;
-	Frog->LaunchCharacter(LaunchVelocity, true, true);
-	FLog::Log("OnMyRollingBallOverlap Frog");
 
 	if (HasAuthority())
 	{

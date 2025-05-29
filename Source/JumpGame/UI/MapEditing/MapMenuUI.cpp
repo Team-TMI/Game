@@ -94,7 +94,6 @@ void UMapMenuUI::OnImageSelected(const FString& FileName, bool bSuccess)
 			UE_LOG(LogTemp, Log, TEXT("맵 저장 성공dfsdfsdfsdfsdfsdfs"));
 			SaveResultUI->PlayResultAnim();
 		}
-		
 	}
 	else
 	{
