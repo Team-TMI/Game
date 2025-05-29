@@ -389,6 +389,7 @@ void AFrog::BeginPlay()
 	if (GameSettingUI && IsLocallyControlled())
 	{
 		GameSettingUI->AddToViewport();
+		GameSettingUI->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	InitJumpGaugeUIComponent();
