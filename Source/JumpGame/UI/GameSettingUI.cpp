@@ -375,4 +375,12 @@ void UGameSettingUI::OnClickGoBack()
 		Settings->ApplySettings(false); // 실제 게임에 반영
 		Settings->SaveSettings(); // .ini에 저장
 	}
+	
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC->GetPawn())
+	{
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+	}
 }

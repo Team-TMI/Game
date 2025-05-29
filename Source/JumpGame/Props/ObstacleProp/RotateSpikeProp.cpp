@@ -28,12 +28,6 @@ ARotateSpikeProp::ARotateSpikeProp()
 	CollisionComp->SetBoxExtent(FVector(116,40,42));
 	CollisionComp->SetRelativeLocation(FVector(-3,-6,40));
 	CollisionComp->SetupAttachment(Hammer);
-	
-	ConstructorHelpers::FObjectFinder<UStaticMesh>TempCylinder(TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleCylinder.SM_ObstacleCylinder'"));
-	if (TempCylinder.Succeeded())
-	{
-		MeshComp->SetStaticMesh(TempCylinder.Object);
-	}
 
 	// 메쉬랑 부딪힘 (CollisionComp랑은 충돌하지 않는다)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);

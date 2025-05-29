@@ -17,13 +17,7 @@ ABounceBollardProp::ABounceBollardProp()
 
 	// NOTE: scale로 0해버리면 밑의 자식들 안보임 Extent로 하자
 	CollisionComp->SetBoxExtent(FVector(FVector::ZeroVector));
-	
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
-		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleCylinder.SM_ObstacleCylinder'"));
-	if (TempMesh.Succeeded())
-	{
-		MeshComp->SetStaticMesh(TempMesh.Object);
-	}
+
 
 	// 메쉬랑 부딪힘 (CollisionComp랑은 충돌하지 않는다)
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
