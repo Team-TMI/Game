@@ -157,6 +157,7 @@ void UFileBrowserUI::OnSelectButtonClicked()
 	if (CurrentFilePath.IsEmpty())
 	{
 		OnFileSelectedDelegate.Execute(CurrentFilePath, false);
+		SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
 	if (CurrentFilePath.EndsWith(Suffix))
