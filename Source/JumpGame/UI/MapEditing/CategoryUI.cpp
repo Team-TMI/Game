@@ -274,7 +274,8 @@ void UCategoryUI::OnImageSearchButtonClicked()
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.Unbind();
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &UCategoryUI::OnImageSearchButtonResponse);
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffix(TEXT(".jpg"));
-
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetInfoText(TEXT("검색할 이미지를 선택해 주세요.\nAI가 자동으로 해당 계절에 맞는 에셋을 추천해줍니다."));
+	
 	FString RelativeDir = FPaths::ProjectDir();
 
 	FString AbsoluteDir = FPaths::ConvertRelativePathToFull(RelativeDir);

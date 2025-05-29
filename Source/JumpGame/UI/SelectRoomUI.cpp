@@ -115,7 +115,10 @@ void USelectRoomUI::OnClickSelectComplete()
 		return ;
 	}
 
-	GameInstance->SetMapFilePath(CurrentSelectedMapSlotUI->GetMapFullPath());
+	if (CurrentSelectedMapSlotUI)
+	{
+		GameInstance->SetMapFilePath(CurrentSelectedMapSlotUI->GetMapFullPath());
+	}
 
 	OnMapSelectedDelegate.ExecuteIfBound(CurrentSelectedMapSlotUI);
 }
@@ -152,6 +155,7 @@ void USelectRoomUI::OnPickCustomMap()
 	}
 	FString Suffix = TEXT(".json");
 	GameState->LoadMapComponent->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &USelectRoomUI::OnPickFileComplete);
+	GameState->LoadMapComponent->GetFileBrowserUI()->SetInfoText(TEXT("플레이할 맵을 선택해 주세요.\n선택을 원하지 않을 시 창을 닫아주세요."));
 	GameState->LoadMapComponent->PickFile(Suffix, false);
 }
 

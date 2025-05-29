@@ -50,4 +50,10 @@ private:
 
 	UPROPERTY()
 	FString SaveFileName;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class USaveResultUI> SaveResultUIClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USaveResultUI* SaveResultUI;
 };

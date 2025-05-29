@@ -157,6 +157,7 @@ void UFileBrowserUI::OnSelectButtonClicked()
 	if (CurrentFilePath.IsEmpty())
 	{
 		OnFileSelectedDelegate.Execute(CurrentFilePath, false);
+		SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
 	if (CurrentFilePath.EndsWith(Suffix))
@@ -211,6 +212,11 @@ void UFileBrowserUI::OnCloseButtonClicked()
 void UFileBrowserUI::SetHintText(const FString& HintText)
 {
 	CurrentFileText->SetHintText(FText::FromString(HintText));
+}
+
+void UFileBrowserUI::SetInfoText(const FString& InfoText)
+{
+	InfomationText->SetText(FText::FromString(InfoText));
 }
 
 FString UFileBrowserUI::EllipsisLastFolders(const FString& InPath, int32 NumFoldersToKeep)

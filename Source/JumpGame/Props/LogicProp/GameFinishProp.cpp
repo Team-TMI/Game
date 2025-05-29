@@ -19,6 +19,7 @@
 #include "OnlineSubsystem.h"
 #include "Components/ArrowComponent.h"
 #include "Interfaces/OnlineIdentityInterface.h"
+#include "JumpGame/UI/InGameSettingUI.h"
 #include "JumpGame/UI/WinnerPlayerUI.h"
 #include "JumpGame/UI/Character/EmotionUI.h"
 #include "Kismet/GameplayStatics.h"
@@ -179,6 +180,11 @@ void AGameFinishProp::MulticastRPC_ShowClearUI_Implementation()
 void AGameFinishProp::MulticastRPC_GameEnd_Implementation()
 {
 	// UI 있으면 지우기
+	AMapGameState* GS = Cast<AMapGameState>(GetWorld()->GetGameState());
+	if (GS && GS->InGameSettingUI)
+	{
+		GS->InGameSettingUI->RemoveFromParent();
+	}
 	if (WinnerPlayerUI)
 	{
 		WinnerPlayerUI->RemoveFromParent();

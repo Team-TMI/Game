@@ -25,6 +25,7 @@ void UClickHandlerManager::RegisterHandler(TSharedPtr<IClickHandler> Handler)
 	{
 		return A->GetPriority() > B->GetPriority();
 	});
+	Handler->Init(Cast<AMapEditingPawn>(GetOwner()));
 }
 
 bool UClickHandlerManager::HandleClick(AMapEditingPlayerController* PlayerController)

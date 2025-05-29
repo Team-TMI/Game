@@ -1,7 +1,11 @@
 #include "PropSlotClickHandler.h"
 
+#include "JumpGame/Core/PlayerController/MapEditingPlayerController.h"
 #include "JumpGame/MapEditor/Components/GizmoComponent.h"
+#include "JumpGame/MapEditor/Pawn/MapEditingPawn.h"
+#include "JumpGame/MapEditor/RotateHandlers/RotateHandlerManager.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
+#include "Kismet/GameplayStatics.h"
 
 
 FPropSlotClickHandler::FPropSlotClickHandler()
@@ -38,6 +42,10 @@ bool FPropSlotClickHandler::HandleClick(FClickResponse& ClickResponse,
 		ClickResponse.TargetProp = nullptr;
 	}
 
+	if (EditingPawn)
+	{
+		EditingPawn->GetRotateHandlerManager()->ResetAxis();
+	}
 	ClickResponse.TargetProp = ClickResponse.ClickedPropByWidget;
 	ClickResponse.TargetProp->SetSelected(bRotateGizmoMode);
 	

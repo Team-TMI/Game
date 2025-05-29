@@ -40,6 +40,8 @@ public:
 	void PlaySettingAnim(bool bIsForward);
 
 	// 전환
+	UPROPERTY()
+	UUMGSequencePlayer* SCPlayer;
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* SettingSwitcher;
 	UPROPERTY(meta = (BindWidget))

@@ -48,4 +48,7 @@ private:
 	bool bIsPlayMode = false;
 	
 	FTimerHandle WidgetTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AFrog> FrogClass;
 };
