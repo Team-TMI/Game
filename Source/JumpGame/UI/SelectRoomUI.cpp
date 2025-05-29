@@ -115,7 +115,10 @@ void USelectRoomUI::OnClickSelectComplete()
 		return ;
 	}
 
-	GameInstance->SetMapFilePath(CurrentSelectedMapSlotUI->GetMapFullPath());
+	if (CurrentSelectedMapSlotUI)
+	{
+		GameInstance->SetMapFilePath(CurrentSelectedMapSlotUI->GetMapFullPath());
+	}
 
 	OnMapSelectedDelegate.ExecuteIfBound(CurrentSelectedMapSlotUI);
 }

@@ -1,5 +1,6 @@
 #include "MapMenuUI.h"
 
+#include "SaveResultUI.h"
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 #include "Components/SizeBox.h"
@@ -20,6 +21,8 @@ void UMapMenuUI::NativeOnInitialized()
 
 	BackButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnBackButtonClicked);
 	SaveCloseButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnSaveCloseButtonClicked);
+
+	SaveResultUI = CreateWidget<USaveResultUI>(GetWorld(), SaveResultUIClass);
 }
 
 void UMapMenuUI::OnSaveButtonClicked()
@@ -83,10 +86,22 @@ void UMapMenuUI::OnImageSelected(const FString& FileName, bool bSuccess)
 	if (MapEditorState->GetSaveMapComponent()->SaveMap(SaveFileName, ImageBase64))
 	{
 		UE_LOG(LogTemp, Log, TEXT("맵 저장 성공: %s"), *SaveFileName);
+		if (SaveResultUI)
+		{
+			SaveResultUI->AddToViewport();
+			SaveResultUI->SetResultImage(true);
+			SaveResultUI->SetResultText(TEXT("맵 저장이 완료 되었습니다 :)"));
+			SaveResultUI->PlayResultAnim();
+		}
+		
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("맵 저장 실패: %s"), *SaveFileName);
+		SaveResultUI->AddToViewport();
+		SaveResultUI->SetResultImage(false);
+		SaveResultUI->SetResultText(TEXT("맵 저장을 실패했습니다 :("));
+		SaveResultUI->PlayResultAnim();
 	}
 	SaveFileName = TEXT("");
 }
