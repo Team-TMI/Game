@@ -210,7 +210,7 @@ AFrog::AFrog()
 
 	// CharacterMovement Settings
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->MaxAcceleration = 15'000.f;
+	GetCharacterMovement()->MaxAcceleration = 1'200.f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.f;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
 	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
