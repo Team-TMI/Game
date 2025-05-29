@@ -91,9 +91,9 @@ void UMapMenuUI::OnImageSelected(const FString& FileName, bool bSuccess)
 			SaveResultUI->AddToViewport();
 			SaveResultUI->SetResultImage(true);
 			SaveResultUI->SetResultText(TEXT("맵 저장이 완료 되었습니다 :)"));
+			UE_LOG(LogTemp, Log, TEXT("맵 저장 성공dfsdfsdfsdfsdfsdfs"));
 			SaveResultUI->PlayResultAnim();
 		}
-		
 	}
 	else
 	{
