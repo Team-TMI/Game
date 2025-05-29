@@ -210,21 +210,22 @@ AFrog::AFrog()
 
 	// CharacterMovement Settings
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->MaxAcceleration = 1200.0f;
-	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
+	GetCharacterMovement()->MaxAcceleration = 15'000.f;
+	GetCharacterMovement()->BrakingFrictionFactor = 1.f;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
 	GetCharacterMovement()->bUseSeparateBrakingFriction = true;
-	GetCharacterMovement()->GroundFriction = 5.0f;
-	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	GetCharacterMovement()->GroundFriction = 5.f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	GetCharacterMovement()->JumpZVelocity = 650.f;
 	GetCharacterMovement()->MaxStepHeight = 65.f;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 150.0f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 1500.0f;
+	GetCharacterMovement()->MinAnalogWalkSpeed = 150.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 1500.f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 	GetCharacterMovement()->AirControl = 1.f;
-	GetCharacterMovement()->PerchRadiusThreshold = 20.0f;
+	GetCharacterMovement()->PerchRadiusThreshold = 20.f;
+	GetCharacterMovement()->PerchRadiusThreshold = 20.f;
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 800.0f, 0.0f);
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 800.f, 0.f);
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 150.f;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = false;
@@ -1758,7 +1759,7 @@ void AFrog::ServerRPC_SetSkin_Implementation(int32 NewIndex)
 	OnRep_SkinIndex();
 }
 
-void AFrog::OnRep_SkinIndex()
+void AFrog::OnRep_SkinIndex_Implementation()
 {
 	if (GetMesh())
 	{

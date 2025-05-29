@@ -107,7 +107,9 @@ public:
 	void ServerRPC_StopSprint();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartTongueAttack();
+	UFUNCTION(BlueprintCallable)
 	void SetSprintSpeed();
+	UFUNCTION(BlueprintCallable)
 	void SetWalkSpeed();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_Landed();
@@ -195,7 +197,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetSkin(int32 NewIndex);
-	UFUNCTION()
+	UFUNCTION(BlueprintNativeEvent)
 	void OnRep_SkinIndex();
 	void SetMapEditingPawn(bool bCond) {bMapEditingPawn = bCond;}
 	bool bMapEditingPawn = false;
@@ -276,9 +278,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CanTongAttack)
 	bool bCanTongAttack{true};
 	// 스킨
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TArray<UTexture2D*> SkinTextures;
-	UPROPERTY(ReplicatedUsing=OnRep_SkinIndex)
+	UPROPERTY(ReplicatedUsing=OnRep_SkinIndex, BlueprintReadWrite)
 	int32 SkinIndex{};
 	UPROPERTY(Replicated)
 	bool bIsPressedSprint{false};
