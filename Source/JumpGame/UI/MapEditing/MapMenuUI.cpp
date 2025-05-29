@@ -35,6 +35,7 @@ void UMapMenuUI::OnLoadButtonClicked()
 	AMapEditorState* MapEditorState = Cast<AMapEditorState>(GetWorld()->GetGameState());
 	if (MapEditorState)
 	{
+		MapEditorState->GetLoadMapComponent()->GetFileBrowserUI()->SetInfoText(TEXT("불러올 맵을 선택해주세요.\n선택한 맵은 현재 맵에 추가됩니다."));
 		MapEditorState->GetLoadMapComponent()->LoadMap();
 	}
 }
