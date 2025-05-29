@@ -6,6 +6,8 @@
 #include "NetworkGameState.h"
 #include "MapGameState.generated.h"
 
+class UInGameSettingUI;
+
 // 모든 클라이언트가 연결되었을때 호출되는 델리게이트
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllClientMapAdded);
 
@@ -35,9 +37,9 @@ public:
 
 	// 프로그레스바 UI
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UGameProgressBarUI> UGameProgressBarUIClass = nullptr;
+	TSubclassOf<class UGameProgressBarUI> UGameProgressBarUIClass{nullptr};
 	UPROPERTY(editanywhere, BlueprintReadWrite)
-	class UGameProgressBarUI* ProgressBarUI = nullptr;
+	class UGameProgressBarUI* ProgressBarUI{nullptr};
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_RemoveProgressBarUI();
@@ -61,4 +63,11 @@ public:
 
 	UPROPERTY()
 	class ARisingWaterProp* RisingWaterProp;
+
+public:
+	// 설정 UI
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UInGameSettingUI> InGameSettingUIClass{nullptr};
+	UPROPERTY(EditAnywhere)
+	class UInGameSettingUI* InGameSettingUI{nullptr};
 };
