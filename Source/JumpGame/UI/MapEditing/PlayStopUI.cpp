@@ -18,7 +18,7 @@ void UPlayStopUI::NativeOnInitialized()
 	FTransform SpawnTransform;
 	SpawnTransform.SetScale3D({1.f, 1.f, 1.f});
 	SpawnTransform.SetTranslation({-1000,-1000,-1000});
-	PlayPawn = GetWorld()->SpawnActorDeferred<AFrog>(AFrog::StaticClass(), SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	PlayPawn = GetWorld()->SpawnActorDeferred<AFrog>(FrogClass, SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (PlayPawn)
 	{
 		PlayPawn->SetMapEditingPawn(true);
