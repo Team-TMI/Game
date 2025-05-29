@@ -8,6 +8,7 @@
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "JumpGame/UI/GameProgressBarUI.h"
+#include "JumpGame/UI/InGameSettingUI.h"
 #include "JumpGame/UI/LoadingUI.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
@@ -28,6 +29,12 @@ void AMapGameState::BeginPlay()
 	if (ProgressBarUI)
 	{
 		ProgressBarUI->AddToViewport();
+	}
+
+	InGameSettingUI = CreateWidget<UInGameSettingUI>(GetWorld(), InGameSettingUIClass);
+	if (InGameSettingUI)
+	{
+		InGameSettingUI->AddToViewport();
 	}
 
 	APlayerController* PC{UGameplayStatics::GetPlayerController(this, 0)};

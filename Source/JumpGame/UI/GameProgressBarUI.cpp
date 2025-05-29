@@ -201,8 +201,6 @@ void UGameProgressBarUI::UpdatePlayerMarkers()
 			Frog->SetLightIntensity(FogValue);
 			UpdateFogDensity(FogValue);
 			UpdateSunBrightness(FogValue);
-
-			UE_LOG(LogTemp, Warning, TEXT("FogValue: %f"), FogValue);
 		}
 	}
 }

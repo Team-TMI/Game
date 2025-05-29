@@ -11,6 +11,7 @@
 #include "Components/ComboBoxString.h"
 #include "Components/Slider.h"
 #include "Components/WidgetSwitcher.h"
+#include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -79,6 +80,8 @@ void UGameSettingUI::NativeOnInitialized()
 	{
 		GameQuitUI->AddToViewport(15);
 	}
+
+	Character = Cast<AFrog>(UGameplayStatics::GetActorOfClass(GetWorld(),AFrog::StaticClass()));
 
 	// 세팅
 	Settings = Cast<UGamePlayerSettings>(UGameUserSettings::GetGameUserSettings());
@@ -299,8 +302,8 @@ void UGameSettingUI::OnClickWeatherOff()
 
 void UGameSettingUI::OnLightValueChanged(float Value)
 {
-	float BrightValue = UKismetMathLibrary::Lerp(3, 1, Value);
-	Settings->SetBrightness(BrightValue);
+	Character->SetFrogGlobalGain_PP(Value);
+	Settings->SetBrightness(Value);
 }
 
 void UGameSettingUI::SetAntiAliasingQuality(const FString& SelectedOption)
@@ -371,5 +374,13 @@ void UGameSettingUI::OnClickGoBack()
 		
 		Settings->ApplySettings(false); // 실제 게임에 반영
 		Settings->SaveSettings(); // .ini에 저장
+	}
+	
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC->GetPawn())
+	{
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
 	}
 }

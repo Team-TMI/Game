@@ -13,13 +13,7 @@ ARotatePlatform::ARotatePlatform()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add("RotatePlatform");
-
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(
-		TEXT("/Script/Engine.StaticMesh'/Game/Props/SM_ObstacleCylinder.SM_ObstacleCylinder'"));
-	if (TempMesh.Succeeded())
-	{
-		MeshComp->SetStaticMesh(TempMesh.Object);
-	}
+	
 	MeshComp->SetRelativeScale3D(FVector(5,5,1));
 	CollisionComp->SetBoxExtent(FVector(250,250,50));
 

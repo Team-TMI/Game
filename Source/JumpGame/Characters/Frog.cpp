@@ -19,6 +19,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "JumpGame/Props/LogicProp/RisingWaterProp.h"
 #include "JumpGame/Props/ObstacleProp/ObstacleProp.h"
+#include "JumpGame/UI/GameSettingUI.h"
 #include "JumpGame/UI/Character/EmotionUI.h"
 #include "JumpGame/UI/Character/JumpGaugeUI.h"
 #include "Kismet/GameplayStatics.h"
@@ -126,6 +127,14 @@ AFrog::AFrog()
 	{
 		EmotionAction = Frog_Emotion.Object;
 	}
+	
+	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Setting
+		(TEXT("/Game/Characters/Input/IA_FrogSetting.IA_FrogSetting"));
+	if (Frog_Setting.Succeeded())
+	{
+		SettingAction = Frog_Setting.Object;
+	}
+	
 
 	ConstructorHelpers::FObjectFinder<USoundBase> JumpSoundObject
 		(TEXT("/Game/Sounds/Ques/Jump_Cue.Jump_Cue"));
@@ -316,6 +325,14 @@ AFrog::AFrog()
 	{
 		WinnerMontage = TempWinner.Object;
 	}
+
+	// 설정
+	ConstructorHelpers::FClassFinder<UUserWidget> TempGameSettingUIClass
+		(TEXT("/Game/UI/Game/WBP_Setting.WBP_Setting_C"));
+	if (TempGameSettingUIClass.Succeeded())
+	{
+		GameSettingUIClass = TempGameSettingUIClass.Class;
+	}
 }
 
 void AFrog::NotifyControllerChanged()
@@ -365,6 +382,13 @@ void AFrog::BeginPlay()
 	if (EmotionUI && IsLocallyControlled())
 	{
 		EmotionUI->AddToViewport();
+	}
+
+	// 설정 UI
+	GameSettingUI = CreateWidget<class UGameSettingUI>(GetWorld(), GameSettingUIClass);
+	if (GameSettingUI && IsLocallyControlled())
+	{
+		GameSettingUI->AddToViewport();
 	}
 
 	InitJumpGaugeUIComponent();
@@ -511,6 +535,8 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 		EnhancedInputComponent->BindAction(EmotionAction, ETriggerEvent::Started, this, &AFrog::OnPressCKey);
 		EnhancedInputComponent->BindAction(EmotionAction, ETriggerEvent::Completed, this, &AFrog::OnReleasedCKey);
+		
+		EnhancedInputComponent->BindAction(SettingAction, ETriggerEvent::Started, this, &AFrog::OnPressESCKey);
 	}
 }
 
@@ -1971,6 +1997,8 @@ void AFrog::SetFrogGlobalGain_PP(float Value)
 	Value = FMath::Clamp(Value, 0.1f, 1.8f);
 
 	SettingPostProcessComponent->Settings.ColorGain.Set(1, 1, 1, Value);
+
+	FLog::Log(TEXT("SetFrogGlobalGain_PP: Value"), Value);
 	//SettingPostProcessComponent->Settings.ColorGainMidtones.Set(1, 1, 1, Value);
 	//SettingPostProcessComponent->Settings.ColorGainHighlights.Set(1, 1, 1, Value);
 	//SettingPostProcessComponent->Settings.ColorGainShadows.Set(1, 1, 1, Value);
@@ -2068,5 +2096,36 @@ void AFrog::FrogSkinFinder()
 	if (EyeTexture5.Succeeded())
 	{
 		EyeTextures.Add(EyeTexture5.Object);
+	}
+}
+
+void AFrog::OnPressESCKey()
+{
+	if (GameSettingUI)
+	{
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		if (!bIsPress)
+		{
+			GameSettingUI->PlaySettingAnim(true);
+
+			UE_LOG(LogTemp, Warning, TEXT("OnPressESCKeyOnPressESCKeyOnPressESCKey111111111111"))
+			FInputModeUIOnly InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+			
+			bIsPress = true;
+		}
+		else
+		{
+			GameSettingUI->PlaySettingAnim(false);
+			
+			UE_LOG(LogTemp, Warning, TEXT("OnPressESCKeyOnPressESCKeyOnPressESCKey2222222222222"))
+			FInputModeGameOnly InputMode;
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = false;
+			
+			bIsPress = false;
+		}
 	}
 }

@@ -227,6 +227,8 @@ public:
 	class UInputAction* EmotionAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* DebugModeAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* SettingAction;
 	
 	// 일반 변수
 public:
@@ -435,5 +437,17 @@ public :
 	bool bCoyoteActive{false};
 
 	bool bIsJumping{false};
+
+public:
+	// 인게임 내에서 esc키를 누르면 설정UI떠야함
+	UFUNCTION()
+	void OnPressESCKey();
+	UPROPERTY()
+	bool bIsPress = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UGameSettingUI> GameSettingUIClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UGameSettingUI* GameSettingUI;
 };
 
