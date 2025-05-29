@@ -2108,11 +2108,15 @@ void AFrog::OnPressESCKey()
 		if (!bIsPress)
 		{
 			GameSettingUI->PlaySettingAnim(true);
-
-			UE_LOG(LogTemp, Warning, TEXT("OnPressESCKeyOnPressESCKeyOnPressESCKey111111111111"))
-			FInputModeUIOnly InputMode;
+			
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(GameSettingUI->TakeWidget());
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+			InputMode.SetHideCursorDuringCapture(false);
 			PC->SetInputMode(InputMode);
+			
+			PC->SetIgnoreLookInput(true);
+			PC->SetIgnoreMoveInput(true);
 			PC->bShowMouseCursor = true;
 			
 			bIsPress = true;
@@ -2121,9 +2125,11 @@ void AFrog::OnPressESCKey()
 		{
 			GameSettingUI->PlaySettingAnim(false);
 			
-			UE_LOG(LogTemp, Warning, TEXT("OnPressESCKeyOnPressESCKeyOnPressESCKey2222222222222"))
 			FInputModeGameOnly InputMode;
 			PC->SetInputMode(InputMode);
+			
+			PC->SetIgnoreLookInput(false);
+			PC->SetIgnoreMoveInput(false);
 			PC->bShowMouseCursor = false;
 			
 			bIsPress = false;

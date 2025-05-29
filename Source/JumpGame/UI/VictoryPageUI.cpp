@@ -28,9 +28,10 @@ void UVictoryPageUI::OnClickGoLobby()
 	UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance());
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 
-	if (!GI || !PC) return;
-	
-	if (!PC->HasAuthority())
+	if (!GI || !PC) return; 
+	if (!PC->HasAuthority()) return;
+		
+	/*if (!PC->HasAuthority())
 	{
 		// 클라이언트는 이동 후 세션 나가기
 		PC->ClientTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"), TRAVEL_Absolute);
@@ -54,7 +55,7 @@ void UVictoryPageUI::OnClickGoLobby()
 
 		GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?listen"));
 		FLog::Log("Server Leaving Game, 로비로 이동");
-	}
+	}*/
 	
 	// 이동하면 나는 지우자
 	RemoveFromParent();

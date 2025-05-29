@@ -19,6 +19,8 @@ void UGameSettingUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	
+	SetIsFocusable(true);
+	
 	// 전환
 	Btn_GameSet->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickGameSet);
 	Btn_OtherSet->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickOtherSet);
@@ -129,15 +131,28 @@ void UGameSettingUI::InitUISettings()
 
 void UGameSettingUI::PlaySettingAnim(bool bIsForward)
 {
+	/*// 애니메이션이 이미 재생 중이면 무시
+	if (IsAnimationPlaying(SettingAnim))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Animation is already playing. Ignored."));
+		return;
+	}*/
+	
 	if (bIsForward)
 	{
+		// 기존 Reverse 재생 중이던 콜백 제거
+		if (SCPlayer)
+		{
+			SCPlayer->OnSequenceFinishedPlaying().Clear(); 
+			SCPlayer = nullptr;
+		}
+		
 		this->SetVisibility(ESlateVisibility::Visible);
 		PlayAnimationForward(SettingAnim);
-		UE_LOG(LogTemp, Warning, TEXT("PlayAnimationForward"));
 	}
 	else
 	{
-		UUMGSequencePlayer* SCPlayer = PlayAnimationReverse(SettingAnim);
+		SCPlayer = PlayAnimationReverse(SettingAnim);
 		if (SCPlayer)
 		{
 			auto& FinishedEvent = SCPlayer->OnSequenceFinishedPlaying();
@@ -146,7 +161,6 @@ void UGameSettingUI::PlaySettingAnim(bool bIsForward)
 				UE_LOG(LogTemp, Warning, TEXT("Animation finished - Widget Collapsed"));
 			});
 		}
-		UE_LOG(LogTemp, Warning, TEXT("PlayAnimationReverse"));
 	}
 }
 
@@ -377,10 +391,15 @@ void UGameSettingUI::OnClickGoBack()
 	}
 	
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (PC->GetPawn())
+	if (PC->GetPawn() && Character->bIsPress == true)
 	{
 		FInputModeGameOnly InputMode;
 		PC->SetInputMode(InputMode);
+
+		PC->SetIgnoreLookInput(false);
+		PC->SetIgnoreMoveInput(false);
 		PC->bShowMouseCursor = false;
+
+		Character->bIsPress = false;
 	}
 }

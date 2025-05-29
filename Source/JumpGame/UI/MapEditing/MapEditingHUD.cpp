@@ -67,7 +67,7 @@ void UMapEditingHUD::HideCategory()
 		return;
 	}
 	ToggleBox->SetRenderTransformAngle(-180.f);
-	PlayAnimation(CategoryHideAnim, 0.f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+	PlayAnimation(CategoryHideAnim, 0.f, 1, EUMGSequencePlayMode::Forward, 1.5f);
 	bIsCategoryHidden = true;
 }
 
@@ -78,6 +78,6 @@ void UMapEditingHUD::ShowCategory()
 		return;
 	}
 	ToggleBox->SetRenderTransformAngle(0.f);
-	PlayAnimation(CategoryHideAnim, 0.f, 1, EUMGSequencePlayMode::Reverse, 1.0f);
+	PlayAnimation(CategoryHideAnim, 0.f, 1, EUMGSequencePlayMode::Reverse, 1.5f);
 	bIsCategoryHidden = false;
 }
