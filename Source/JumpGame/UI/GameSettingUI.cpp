@@ -149,7 +149,6 @@ void UGameSettingUI::PlaySettingAnim(bool bIsForward)
 		
 		this->SetVisibility(ESlateVisibility::Visible);
 		PlayAnimationForward(SettingAnim);
-		UE_LOG(LogTemp, Warning, TEXT("PlayAnimationForward"));
 	}
 	else
 	{
@@ -162,7 +161,6 @@ void UGameSettingUI::PlaySettingAnim(bool bIsForward)
 				UE_LOG(LogTemp, Warning, TEXT("Animation finished - Widget Collapsed"));
 			});
 		}
-		UE_LOG(LogTemp, Warning, TEXT("PlayAnimationReverse"));
 	}
 }
 

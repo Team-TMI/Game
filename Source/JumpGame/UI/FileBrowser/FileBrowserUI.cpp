@@ -213,6 +213,11 @@ void UFileBrowserUI::SetHintText(const FString& HintText)
 	CurrentFileText->SetHintText(FText::FromString(HintText));
 }
 
+void UFileBrowserUI::SetInfoText(const FString& InfoText)
+{
+	InfomationText->SetText(FText::FromString(InfoText));
+}
+
 FString UFileBrowserUI::EllipsisLastFolders(const FString& InPath, int32 NumFoldersToKeep)
 {
 	// 1) OS 구분자를 통일해 두면 처리하기가 쉽다

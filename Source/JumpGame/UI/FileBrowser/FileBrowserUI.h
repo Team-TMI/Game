@@ -38,6 +38,8 @@ public:
 	void OnCloseButtonClicked();
 	UFUNCTION()
 	void SetHintText(const FString& HintText);
+	UFUNCTION()
+	void SetInfoText(const FString& InfoText);
 
 	FOnFileSelected OnFileSelectedDelegate;
 
@@ -62,6 +64,8 @@ private:
 	class UButton* CloseButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UTextBlock* CurrentDirectoryText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
+	class UTextBlock* InfomationText;
 
 	FString CurrentDirectory;
 	FString CurrentFilePath;

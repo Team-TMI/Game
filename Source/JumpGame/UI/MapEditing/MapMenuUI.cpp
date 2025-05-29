@@ -50,6 +50,7 @@ void UMapMenuUI::OnSaveConfirmClicked()
 		MapEditorState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &UMapMenuUI::OnImageSelected);
 		MapEditorState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffix(TEXT(".png"));
 		MapEditorState->GetLoadMapComponent()->GetFileBrowserUI()->SetHintText(TEXT("썸네일 이미지를 선택해주세요."));
+		MapEditorState->GetLoadMapComponent()->GetFileBrowserUI()->SetInfoText(TEXT("맵을 자랑할 대표 이미지를 골라주세요.\n선택하지 않을 경우 기본 이미지로 적용됩니다."));
 
 		FString RelativeDir = FPaths::ProjectDir();
 
