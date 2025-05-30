@@ -1,6 +1,7 @@
 #include "MapMenuUI.h"
 
 #include "SaveResultUI.h"
+#include "Components/BackgroundBlur.h"
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 #include "Components/SizeBox.h"
@@ -23,11 +24,13 @@ void UMapMenuUI::NativeOnInitialized()
 	SaveCloseButton->OnClicked.AddDynamic(this, &UMapMenuUI::OnSaveCloseButtonClicked);
 
 	SaveResultUI = CreateWidget<USaveResultUI>(GetWorld(), SaveResultUIClass);
+	SaveBackgroundBlur->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UMapMenuUI::OnSaveButtonClicked()
 {
 	SavePopup->SetVisibility(ESlateVisibility::Visible);
+	SaveBackgroundBlur->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UMapMenuUI::OnLoadButtonClicked()
@@ -68,6 +71,7 @@ void UMapMenuUI::OnSaveConfirmClicked()
 		// MapEditorState->GetSaveMapComponent()->SaveMap(FileName);
 	}
 	SavePopup->SetVisibility(ESlateVisibility::Collapsed);
+	SaveBackgroundBlur->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UMapMenuUI::OnImageSelected(const FString& FileName, bool bSuccess)
@@ -116,6 +120,7 @@ void UMapMenuUI::OnBackButtonClicked()
 void UMapMenuUI::OnSaveCloseButtonClicked()
 {
 	SavePopup->SetVisibility(ESlateVisibility::Collapsed);
+	SaveBackgroundBlur->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 bool UMapMenuUI::FileToBase64(const FString& FileName, FString& OutBase64)

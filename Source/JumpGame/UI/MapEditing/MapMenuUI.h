@@ -33,7 +33,9 @@ private:
 	class UEditableTextBox* FileNameTextBox;
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "MapMenu", meta = (AllowPrivateAccess = "true"))
 	class UButton* SaveConfirm;
-
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "MapMenu", meta = (AllowPrivateAccess = "true"))
+	class UBackgroundBlur* SaveBackgroundBlur;
+	
 private:
 	// TODO: 수정할거면 수정하기 (뒤로가기 관련)
 	UFUNCTION()
