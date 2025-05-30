@@ -10,15 +10,15 @@
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 
 
-FActorClickHandler::FActorClickHandler()
+UActorClickHandler::UActorClickHandler()
 {
 }
 
-FActorClickHandler::~FActorClickHandler()
+UActorClickHandler::~UActorClickHandler()
 {
 }
 
-bool FActorClickHandler::HandleClick(FClickResponse& ClickResponse, class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
+bool UActorClickHandler::HandleClick(FClickResponse& ClickResponse, class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
 {
 	ClickResponse.Result = EClickHandlingResult::ActorEditing;
 

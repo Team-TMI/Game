@@ -18,12 +18,13 @@ UClickHandlerManager::UClickHandlerManager()
 	bWantsInitializeComponent = true;
 }
 
-void UClickHandlerManager::RegisterHandler(TSharedPtr<IClickHandler> Handler)
+void UClickHandlerManager::RegisterHandler(UClickHandlerInterface* Handler)
 {
 	Handlers.Add(Handler);
-	Handlers.Sort([](const TSharedPtr<IClickHandler>& A, const TSharedPtr<IClickHandler>& B)
+	
+	Algo::Sort(Handlers, [](const UClickHandlerInterface* A, const UClickHandlerInterface* B)
 	{
-		return A->GetPriority() > B->GetPriority();
+		return A->GetPriority() > B->GetPriority();   // 우선순위가 높은 것이 앞으로
 	});
 	Handler->Init(Cast<AMapEditingPawn>(GetOwner()));
 }
@@ -69,11 +70,17 @@ void UClickHandlerManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RegisterHandler(MakeShared<FPropSlotClickHandler>());
-	RegisterHandler(MakeShared<FRotateGizmoClickHandler>());
-	RegisterHandler(MakeShared<FGizmoClickHandler>());
-	RegisterHandler(MakeShared<FActorClickHandler>());
-	RegisterHandler(MakeShared<FBackgroundClickHandler>());
+	UClickHandlerInterface* PropSlotClickHandler = NewObject<UPropSlotClickHandler>();
+	UClickHandlerInterface* RotateGizmoClickHandler = NewObject<URotateGizmoClickHandler>();
+	UClickHandlerInterface* GizmoClickHandler = NewObject<UGizmoClickHandler>();
+	UClickHandlerInterface* ActorClickHandler = NewObject<UActorClickHandler>();
+	UClickHandlerInterface* BackgroundClickHandler = NewObject<UBackgroundClickHandler>();
+
+	RegisterHandler(PropSlotClickHandler);
+	RegisterHandler(RotateGizmoClickHandler);
+	RegisterHandler(GizmoClickHandler);
+	RegisterHandler(ActorClickHandler);
+	RegisterHandler(BackgroundClickHandler);
 }
 
 void UClickHandlerManager::InitializeComponent()

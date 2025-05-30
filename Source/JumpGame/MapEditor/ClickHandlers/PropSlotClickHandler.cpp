@@ -8,15 +8,15 @@
 #include "Kismet/GameplayStatics.h"
 
 
-FPropSlotClickHandler::FPropSlotClickHandler()
+UPropSlotClickHandler::UPropSlotClickHandler()
 {
 }
 
-FPropSlotClickHandler::~FPropSlotClickHandler()
+UPropSlotClickHandler::~UPropSlotClickHandler()
 {
 }
 
-bool FPropSlotClickHandler::HandleClick(FClickResponse& ClickResponse,
+bool UPropSlotClickHandler::HandleClick(FClickResponse& ClickResponse,
 	class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
 {
 	if (ClickResponse.Result != EClickHandlingResult::UIEditing)

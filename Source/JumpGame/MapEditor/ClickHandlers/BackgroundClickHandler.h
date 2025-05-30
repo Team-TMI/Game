@@ -1,12 +1,16 @@
 #pragma once
 
 #include "ClickHandlerInterface.h"
+#include "BackgroundClickHandler.generated.h"
 
-class JUMPGAME_API FBackgroundClickHandler : public IClickHandler
+UCLASS()
+class JUMPGAME_API UBackgroundClickHandler : public UClickHandlerInterface
 {
+	GENERATED_BODY()
+	
 public:
-	FBackgroundClickHandler();
+	UBackgroundClickHandler();
 	virtual int32 GetPriority() const override { return 0; }
 	virtual bool HandleClick(FClickResponse& ClickResponse, class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode) override;
-	virtual ~FBackgroundClickHandler() override;
+	virtual ~UBackgroundClickHandler() override;
 };
