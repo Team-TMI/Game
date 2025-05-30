@@ -114,8 +114,9 @@ void ARollingBallProp::OnMyRollingBallOverlap(UPrimitiveComponent* OverlappedCom
 	}
 	// 타이머 초기화
 	GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
-	ReturnSelf(BackTime - LaunchTime);
-	
+	float Value = BackTime - LaunchTime;
+	Value = FMath::Clamp<float>(Value, 0.f, 4.f);
+	ReturnSelf(Value);
 }
 
 // Called when the game starts or when spawned

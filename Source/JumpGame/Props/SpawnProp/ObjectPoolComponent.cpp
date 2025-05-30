@@ -107,6 +107,7 @@ void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject, fl
 		// 알림을 보낸다: 다시 왔음!!
 		if (!FMath::IsNearlyZero(RemainTime))
 		{
+			UE_LOG(LogTemp, Log, TEXT("RemainTime: %f"),RemainTime);
 			GetWorld()->GetTimerManager().SetTimer(ObPoolTimerHandle, FTimerDelegate::CreateLambda([this]()
 			{
 				OnObjectReturn.Broadcast();

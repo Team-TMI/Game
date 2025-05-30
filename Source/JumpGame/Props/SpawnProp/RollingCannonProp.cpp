@@ -31,7 +31,6 @@ ARollingCannonProp::ARollingCannonProp()
 
 void ARollingCannonProp::OnProjectileReturn()
 {
-	FFastLogger::LogConsole(TEXT("알림을 받았다: 다시 발사!!222222222222"));
 	// 서버에서만 처리
 	// OnObjectReturned은 모든 클라이언트에서 호출되어, FireRollingBall() 중복될 수도 있음
 	if (HasAuthority())
