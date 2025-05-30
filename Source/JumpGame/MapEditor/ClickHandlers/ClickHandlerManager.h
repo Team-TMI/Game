@@ -16,7 +16,8 @@ class JUMPGAME_API UClickHandlerManager : public UActorComponent
 public:
 	UClickHandlerManager();
 
-	void RegisterHandler(TSharedPtr<IClickHandler> Handler);
+	UFUNCTION()
+	void RegisterHandler(class UClickHandlerInterface* Handler);
 	bool HandleClick(class AMapEditingPlayerController* PlayerController);
 	void ResetControl();
 
@@ -45,9 +46,8 @@ protected:
 	virtual void InitializeComponent() override;
 
 private:
-	// GC의 관리 대상이 아님
-	// 주의 : 내부적으로 UObject를 캐싱하지 않기 : 즉 일회성으로만 사용
-	TArray<TSharedPtr<IClickHandler>> Handlers;
+	UPROPERTY()
+	TArray<class UClickHandlerInterface*> Handlers;
 
 	UPROPERTY()
 	FClickResponse ControlledClickResponse;

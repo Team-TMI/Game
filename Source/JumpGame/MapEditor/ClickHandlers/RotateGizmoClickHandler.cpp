@@ -7,11 +7,11 @@
 #include "JumpGame/MapEditor/RotateHandlers/RotateHandlerManager.h"
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 
-FRotateGizmoClickHandler::FRotateGizmoClickHandler()
+URotateGizmoClickHandler::URotateGizmoClickHandler()
 {
 }
 
-bool FRotateGizmoClickHandler::HandleClick(FClickResponse& ClickResponse,
+bool URotateGizmoClickHandler::HandleClick(FClickResponse& ClickResponse,
 	class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
 {
 	ClickResponse.Result = EClickHandlingResult::RotateGizmoEditing;
@@ -53,6 +53,6 @@ bool FRotateGizmoClickHandler::HandleClick(FClickResponse& ClickResponse,
 	return false;
 }
 
-FRotateGizmoClickHandler::~FRotateGizmoClickHandler()
+URotateGizmoClickHandler::~URotateGizmoClickHandler()
 {
 }

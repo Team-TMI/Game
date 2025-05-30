@@ -8,16 +8,16 @@
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 
 
-FGizmoClickHandler::FGizmoClickHandler()
+UGizmoClickHandler::UGizmoClickHandler()
 {
 }
 
 
-FGizmoClickHandler::~FGizmoClickHandler()
+UGizmoClickHandler::~UGizmoClickHandler()
 {
 }
 
-bool FGizmoClickHandler::HandleClick(FClickResponse& ClickResponse, AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
+bool UGizmoClickHandler::HandleClick(FClickResponse& ClickResponse, AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
 {
 	ClickResponse.Result = EClickHandlingResult::GizmoEditing;
 
