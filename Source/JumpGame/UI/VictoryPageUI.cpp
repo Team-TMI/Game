@@ -30,6 +30,22 @@ void UVictoryPageUI::OnClickGoLobby()
 
 	if (!GI || !PC) return; 
 	if (!PC->HasAuthority()) return;
+
+	// 클라이언트들 먼저 이동시킴
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* OtherPC = Cast<APlayerController>(*It);
+		if (OtherPC && !OtherPC->IsLocalController())
+		{
+			OtherPC->ClientTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"), TRAVEL_Absolute);
+		}
+	}
+
+	// 서버도 세션 제거하고 이동
+	GI->LeaveSession(true);
+
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?listen"));
+	FLog::Log("Server Leaving Game, 로비로 이동");
 		
 	/*if (!PC->HasAuthority())
 	{
