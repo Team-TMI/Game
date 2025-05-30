@@ -83,7 +83,7 @@ void UGameSettingUI::NativeOnInitialized()
 		GameQuitUI->AddToViewport(15);
 	}
 
-	Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	Character = Cast<AFrog>(UGameplayStatics::GetActorOfClass(GetWorld(),AFrog::StaticClass()));
 
 	// 세팅
 	Settings = Cast<UGamePlayerSettings>(UGameUserSettings::GetGameUserSettings());
