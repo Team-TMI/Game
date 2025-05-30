@@ -319,6 +319,7 @@ void UGameSettingUI::OnLightValueChanged(float Value)
 {
 	if (Character)
 	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Passed Character: %p"), Character);
 		Character->SetFrogGlobalGain_PP(Value);
 		Settings->SetBrightness(Value);
 	}

@@ -357,6 +357,11 @@ void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (HasAuthority() && IsLocallyControlled() && GetWorld()->GetMapName().Contains("InGame"))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("This Character: %p"), this);
+	}
+	
 	if (WaterPostProcessComponent && WaterPostProcessMaterial)
 	{
 		WaterPostProcessDynamicMaterial = UMaterialInstanceDynamic::Create(
@@ -1172,6 +1177,11 @@ void AFrog::InitJumpGaugeUIComponent()
 		{
 			JumpGaugeUIComponent->DestroyComponent();
 			JumpGaugeUIComponent = nullptr;
+		}
+		if (SettingPostProcessComponent)
+		{
+			SettingPostProcessComponent->DestroyComponent();
+			SettingPostProcessComponent = nullptr;
 		}
 	}
 }
