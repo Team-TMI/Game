@@ -2,17 +2,35 @@
 
 
 #include "GamePlayerSettings.h"
+
+#include "EngineUtils.h"
 #include "Sound/SoundClass.h"
 #include "Sound/SoundMix.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/PostProcessComponent.h"
+#include "JumpGame/Characters/Frog.h"
 #include "Kismet/GameplayStatics.h"
 
 void UGamePlayerSettings::ApplySettings(bool bCheckForCommandLineOverrides)
 {
 	Super::ApplySettings(bCheckForCommandLineOverrides);
 
-	// 1. 밝기/대비 적용 (어떻게 처리하는지에 따라 다를 수 있음)
-	// 예: PostProcessMaterial에 파라미터로 넘긴다면 여기선 안 해도 됨
+	// 1. 밝기/대비 적용
+	float GainA = FMath::Clamp(Brightness, 0.1f, 1.8f);
+	if (const UWorld* World = GetWorld())
+	{
+		// 플레이어의 component 찾기
+		APlayerController* PC = World->GetFirstPlayerController();
+		if (PC)
+		{
+			AFrog* Frog = Cast<AFrog>(PC->GetPawn());
+			if (Frog)
+			{
+				Frog->SettingPostProcessComponent->Settings.ColorGain.Set(1,1,1,GainA);
+				Frog->SettingPostProcessComponent->Settings.bOverride_ColorGain = true; // 설정 즉시 반
+			}
+		}
+	}
 
 	// 2. 사운드 볼륨 적용
 	USoundMix* MasterSoundMix = LoadObject<USoundMix>(nullptr, TEXT("/Game/Sounds/Class/SCM_TotalSound.SCM_TotalSound"));
@@ -46,11 +64,11 @@ void UGamePlayerSettings::ApplySettings(bool bCheckForCommandLineOverrides)
 	case EColorVisionDeficiency::NormalVision:
 		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::NormalVision, 1.0f, true, false);
 		break;
-	case EColorVisionDeficiency::Protanope:
-		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Protanope, 1.0f, true, false);
-		break;
 	case EColorVisionDeficiency::Deuteranope:
 		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Deuteranope, 1.0f, true, false);
+		break;
+	case EColorVisionDeficiency::Protanope:
+		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Protanope, 1.0f, true, false);
 		break;
 	case EColorVisionDeficiency::Tritanope:
 		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Tritanope, 1.0f, true, false);

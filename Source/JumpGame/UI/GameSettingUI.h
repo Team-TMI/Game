@@ -14,8 +14,8 @@ UENUM(BlueprintType)
 enum class EColorBlindMode : uint8
 {
 	None       UMETA(DisplayName = "보정 없음"),
-	Protanope  UMETA(DisplayName = "적색약"),
 	Deuteranope UMETA(DisplayName = "녹색약"),
+	Protanope  UMETA(DisplayName = "적색약"),
 	Tritanope  UMETA(DisplayName = "청색약"),
 };
 
