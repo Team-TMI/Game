@@ -170,11 +170,9 @@ void ARollingBallProp::SetActive(bool bIsActive)
 	{
 		MeshComp->SetCollisionProfileName(TEXT("RollingBall"));
 		MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-		BoxComp->SetCollisionResponseToChannel(ECC_GameTraceChannel6, ECR_Ignore);
 
 		BoxComp->SetCollisionProfileName(TEXT("RollingBall"));
 		BoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-		BoxComp->SetCollisionResponseToChannel(ECC_GameTraceChannel6, ECR_Ignore);
 	}
 	else
 	{

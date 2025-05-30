@@ -1,12 +1,16 @@
 ﻿#pragma once
 
 #include "ClickHandlerInterface.h"
+#include "RotateGizmoClickHandler.generated.h"
 
-class JUMPGAME_API FRotateGizmoClickHandler : public IClickHandler
+UCLASS()
+class JUMPGAME_API URotateGizmoClickHandler : public UClickHandlerInterface
 {
+	GENERATED_BODY()
+	
 public:
-	FRotateGizmoClickHandler();
+	URotateGizmoClickHandler();
 	virtual int32 GetPriority() const override { return 200; }
 	virtual bool HandleClick(FClickResponse& ClickResponse, class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode) override;
-	virtual ~FRotateGizmoClickHandler() override;
+	virtual ~URotateGizmoClickHandler() override;
 };

@@ -8,15 +8,15 @@
 #include "JumpGame/Props/PrimitiveProp/PrimitiveProp.h"
 
 
-FBackgroundClickHandler::FBackgroundClickHandler()
+UBackgroundClickHandler::UBackgroundClickHandler()
 {
 }
 
-FBackgroundClickHandler::~FBackgroundClickHandler()
+UBackgroundClickHandler::~UBackgroundClickHandler()
 {
 }
 
-bool FBackgroundClickHandler::HandleClick(FClickResponse& ClickResponse,
+bool UBackgroundClickHandler::HandleClick(FClickResponse& ClickResponse,
 	class AMapEditingPlayerController* PlayerController, bool bRotateGizmoMode)
 {
 	ClickResponse.Result = EClickHandlingResult::BackgroundEditing;
