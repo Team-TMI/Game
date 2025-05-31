@@ -233,6 +233,8 @@ void ASoundMommyQuizProp::StartRecord()
 
 	// 남은 시간 UI
 	TimeRemainUI->AddToViewport();
+	TimeRemainUI->SetScaleBoxSize(FVector2D(80,80));
+	TimeRemainUI->SetPositionInViewport(FVector2D(336,280));
 	TimeRemainUI->StartMissionTimer(3.0f);
 
 	// 버튼 이름 바꾸고

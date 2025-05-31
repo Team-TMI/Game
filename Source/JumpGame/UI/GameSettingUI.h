@@ -105,23 +105,13 @@ public:
 	void OnCharacterValueChanged(float Value);
 	UFUNCTION()
 	void OnObstacleValueChanged(float Value);
-	
-	// 버튼별 기능_나머지
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_EffectOn;
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_EffectOff;
 
-	UFUNCTION()
-	void OnClickEffectOn();
-	UFUNCTION()
-	void OnClickEffectOff();
-	
+	// 환경 효과 (인게임 내의 액터가 가지고 있다)
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_WeatherOn;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_WeatherOff;
-
+	
 	UFUNCTION()
 	void OnClickWeatherOn();
 	UFUNCTION()

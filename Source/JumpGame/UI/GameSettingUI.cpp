@@ -36,10 +36,6 @@ void UGameSettingUI::NativeOnInitialized()
 	Sd_Character->OnValueChanged.AddDynamic(this, &UGameSettingUI::OnCharacterValueChanged);
 	Sd_Obstacle->OnValueChanged.AddDynamic(this, &UGameSettingUI::OnObstacleValueChanged);
 
-	// 이펙트
-	Btn_EffectOn->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickEffectOn);
-	Btn_EffectOff->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickEffectOff);
-
 	// 환경효과
 	Btn_WeatherOn->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickWeatherOn);
 	Btn_WeatherOff->OnClicked.AddDynamic(this, &UGameSettingUI::OnClickWeatherOff);
@@ -120,6 +116,9 @@ void UGameSettingUI::InitUISettings()
 	Sd_Character->SetValue(Settings->GetCharacterVolume());
 	Sd_Obstacle->SetValue(Settings->GetObstacleVolume());
 
+	// 환경 효과
+	Btn_WeatherOff->SetIsEnabled(true);
+	Btn_WeatherOn->SetIsEnabled(false);
 	// 밝기
 	Sd_Light->SetValue(Settings->GetBrightness());
 	// 안티엘리어싱
@@ -299,27 +298,22 @@ void UGameSettingUI::OnObstacleValueChanged(float Value)
 	Settings->SetObstacleVolume(Volume);
 }
 
-void UGameSettingUI::OnClickEffectOn()
-{
-}
-
-void UGameSettingUI::OnClickEffectOff()
-{
-}
-
 void UGameSettingUI::OnClickWeatherOn()
 {
+	Btn_WeatherOn->SetIsEnabled(false);
+	Btn_WeatherOff->SetIsEnabled(true);
 }
 
 void UGameSettingUI::OnClickWeatherOff()
 {
+	Btn_WeatherOn->SetIsEnabled(true);
+	Btn_WeatherOff->SetIsEnabled(false);
 }
 
 void UGameSettingUI::OnLightValueChanged(float Value)
 {
 	if (Character)
 	{
-		FFastLogger::LogScreen(FColor::Red, TEXT("Passed Character: %p"), Character);
 		Character->SetFrogGlobalGain_PP(Value);
 		Settings->SetBrightness(Value);
 	}
