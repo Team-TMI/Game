@@ -356,7 +356,7 @@ void AObjectEyeHunterProp::RecvEyeTrackingInfo()
 	//TrackLocation(FVector2f(Width, Height), FVector2f(X, Y))
 }
 
-void AObjectEyeHunterProp::DisplayMessage()
+void AObjectEyeHunterProp::DisplayMessage_Implementation()
 {
 	// 메시지 띄우기
 	if (LookCenterUI)
@@ -489,7 +489,7 @@ void AObjectEyeHunterProp::MissionTimeEnd()
 	EndMission(false);
 }
 
-void AObjectEyeHunterProp::EndMission(bool bIsSuccess)
+void AObjectEyeHunterProp::EndMission_Implementation(bool bIsSuccess)
 {
 	if (bIsSuccess)
 	{
