@@ -83,7 +83,8 @@ void UGameSettingUI::NativeOnInitialized()
 		GameQuitUI->AddToViewport(15);
 	}
 
-	Character = Cast<AFrog>(UGameplayStatics::GetActorOfClass(GetWorld(),AFrog::StaticClass()));
+	// Character = Cast<AFrog>(UGameplayStatics::GetActorOfClass(GetWorld(),AFrog::StaticClass()));
+	Character = Cast<AFrog>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
 	// 세팅
 	Settings = Cast<UGamePlayerSettings>(UGameUserSettings::GetGameUserSettings());
@@ -121,12 +122,12 @@ void UGameSettingUI::InitUISettings()
 
 	// 밝기
 	Sd_Light->SetValue(Settings->GetBrightness());
-
 	// 안티엘리어싱
 	ComboBox_Anti->SetSelectedIndex(Settings->GetAntiValue());
-
 	// 색각
 	ComboBox_Color->SetSelectedIndex(Settings->GetColorMode());
+
+	Settings->ApplySettings(false);
 }
 
 void UGameSettingUI::PlaySettingAnim(bool bIsForward)
@@ -316,8 +317,12 @@ void UGameSettingUI::OnClickWeatherOff()
 
 void UGameSettingUI::OnLightValueChanged(float Value)
 {
-	Character->SetFrogGlobalGain_PP(Value);
-	Settings->SetBrightness(Value);
+	if (Character)
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("Passed Character: %p"), Character);
+		Character->SetFrogGlobalGain_PP(Value);
+		Settings->SetBrightness(Value);
+	}
 }
 
 void UGameSettingUI::SetAntiAliasingQuality(const FString& SelectedOption)
@@ -356,11 +361,11 @@ void UGameSettingUI::OnColorModeChanged(FString SelectedItem, ESelectInfo::Type 
 	case EColorBlindMode::None:
 		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::NormalVision, 1.0f, true, false);
 		break;
-	case EColorBlindMode::Protanope:
-		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Protanope, 1.0f, true, false);
-		break;
 	case EColorBlindMode::Deuteranope:
 		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Deuteranope, 1.0f, true, false);
+		break;
+	case EColorBlindMode::Protanope:
+		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Protanope, 1.0f, true, false);
 		break;
 	case EColorBlindMode::Tritanope:
 		UWidgetBlueprintLibrary::SetColorVisionDeficiencyType(EColorVisionDeficiency::Tritanope, 1.0f, true, false);
@@ -385,9 +390,11 @@ void UGameSettingUI::OnClickGoBack()
 	if (Settings)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[SAVE] Apply + Save 실행됨"));
-		
-		Settings->ApplySettings(false); // 실제 게임에 반영
+
+		UE_LOG(LogTemp, Warning, TEXT("ColorMode Before SaveSetting:  %d"), Settings->GetColorMode());
 		Settings->SaveSettings(); // .ini에 저장
+		UE_LOG(LogTemp, Warning, TEXT("ColorMode After SaveSetting:  %d"), Settings->GetColorMode());
+		Settings->ApplySettings(false); // 실제 게임에 반영
 	}
 	
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();

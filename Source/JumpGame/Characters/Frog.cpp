@@ -357,6 +357,11 @@ void AFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (HasAuthority() && IsLocallyControlled() && GetWorld()->GetMapName().Contains("InGame"))
+	{
+		FFastLogger::LogScreen(FColor::Red, TEXT("This Character: %p"), this);
+	}
+	
 	if (WaterPostProcessComponent && WaterPostProcessMaterial)
 	{
 		WaterPostProcessDynamicMaterial = UMaterialInstanceDynamic::Create(
@@ -1172,6 +1177,11 @@ void AFrog::InitJumpGaugeUIComponent()
 		{
 			JumpGaugeUIComponent->DestroyComponent();
 			JumpGaugeUIComponent = nullptr;
+		}
+		if (SettingPostProcessComponent)
+		{
+			SettingPostProcessComponent->DestroyComponent();
+			SettingPostProcessComponent = nullptr;
 		}
 	}
 }
@@ -1999,8 +2009,8 @@ void AFrog::SetFrogGlobalGain_PP(float Value)
 	Value = FMath::Clamp(Value, 0.1f, 1.8f);
 
 	SettingPostProcessComponent->Settings.ColorGain.Set(1, 1, 1, Value);
-
 	FLog::Log(TEXT("SetFrogGlobalGain_PP: Value"), Value);
+	
 	//SettingPostProcessComponent->Settings.ColorGainMidtones.Set(1, 1, 1, Value);
 	//SettingPostProcessComponent->Settings.ColorGainHighlights.Set(1, 1, 1, Value);
 	//SettingPostProcessComponent->Settings.ColorGainShadows.Set(1, 1, 1, Value);
