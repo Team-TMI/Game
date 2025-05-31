@@ -28,7 +28,7 @@ public:
 	UFUNCTION()
 	void OnFileSelected(const FString& FullPath);
 	UFUNCTION()
-	void OnItemClicked(const FString& FileName);
+	void OnItemClicked(const FString& FileName, class UItemUI* ItemUI);
 	UFUNCTION()
 	void OnSelectButtonClicked();
 
@@ -49,11 +49,11 @@ private:
 	FString EllipsisLastFolders(const FString& InPath, int32 NumFoldersToKeep = 2);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
-	TSubclassOf<class UFileItemUI> FileItemClass;
+	TSubclassOf<class UItemUI> FileItemClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
-	TSubclassOf<class UDirectoryItemUI> DirectoryItemClass;
+	TSubclassOf<class UItemUI> DirectoryItemClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
-	TSubclassOf<class UBackItemUI> BackButtonClass;
+	TSubclassOf<class UItemUI> BackButtonClass;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UScrollBox* FileListScrollBox;
@@ -66,11 +66,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
 	class UTextBlock* CurrentDirectoryText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"), Category = "UI")
-	class UTextBlock* InfomationText;
+	class UTextBlock* InformationText;
 
 	FString CurrentDirectory;
 	FString CurrentFilePath;
 	FString DefaultString = TEXT(R"(파일을 선택하세요)");
 
+	UPROPERTY()
+	class UItemUI* CurrentSelectedItem;
+	
 	TArray<FString> Suffixes;
 };

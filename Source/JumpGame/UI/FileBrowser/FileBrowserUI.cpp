@@ -1,7 +1,5 @@
 ﻿#include "FileBrowserUI.h"
-#include "DirectoryItemUI.h"
-#include "FileItemUI.h"
-#include "BackItemUI.h"
+#include "ItemUI.h"
 #include "Components/Button.h"
 #include "Components/EditableText.h"
 #include "Components/ScrollBox.h"
@@ -30,6 +28,12 @@ void UFileBrowserUI::NativeDestruct()
 void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 {
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+	if (CurrentSelectedItem != nullptr)
+	{
+		CurrentSelectedItem->SetSelected(false);
+		CurrentSelectedItem = nullptr;
+	}
 
 	FString NewDirectoryPath;
 	if (DirectoryPath.Equals(TEXT("C:")))
@@ -97,34 +101,36 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 
 void UFileBrowserUI::CreateDirectoryButton(const FString& DirName, const FString& FullPath)
 {
-	UDirectoryItemUI* DirectoryItem = CreateWidget<UDirectoryItemUI>(GetWorld(), DirectoryItemClass);
+	UItemUI* DirectoryItem = CreateWidget<UItemUI>(GetWorld(), DirectoryItemClass);
 	if (!DirectoryItem)
 	{
 		return ;
 	}
-	DirectoryItem->SetDirectoryPath(FullPath);
-	DirectoryItem->SetDirectoryName(DirName);
+	DirectoryItem->SetItemPath(FullPath);
+	DirectoryItem->SetItemName(DirName);
+	DirectoryItem->SetItemType(EItemType::Directory);
 
-	FText DirectoryText = FText::FromString(DirectoryItem->GetDirectoryName());
-	DirectoryItem->GetDirectoryText()->SetText(DirectoryText);
+	FText DirectoryText = FText::FromString(DirectoryItem->GetItemName());
+	DirectoryItem->GetItemText()->SetText(DirectoryText);
 	
 	DirectoryItem->OnDoubleClicked.BindUObject(this, &UFileBrowserUI::OnDirectorySelected);
-	// DirectoryItem->OnClicked.BindUObject(this, &UFileBrowserUI::OnItemClicked);
+	DirectoryItem->OnClicked.BindUObject(this, &UFileBrowserUI::OnItemClicked);
 
 	FileListScrollBox->AddChild(DirectoryItem);
 }
 
 void UFileBrowserUI::CreateFileButton(const FString& FileName, const FString& FullPath)
 {
-	UFileItemUI* FileItem = CreateWidget<UFileItemUI>(GetWorld(), FileItemClass);
+	UItemUI* FileItem = CreateWidget<UItemUI>(GetWorld(), FileItemClass);
 	if (!FileItem)
 	{
 		return ;
 	}
-	FileItem->SetFilePath(FullPath);
-	FileItem->SetFileName(FileName);
-	FText FileText = FText::FromString(FileItem->GetFileName());
-	FileItem->GetFileText()->SetText(FileText);
+	FileItem->SetItemPath(FullPath);
+	FileItem->SetItemName(FileName);
+	FileItem->SetItemType(EItemType::File);
+	FText FileText = FText::FromString(FileItem->GetItemName());
+	FileItem->GetItemText()->SetText(FileText);
 	
 	FileItem->OnDoubleClicked.BindUObject(this, &UFileBrowserUI::OnFileSelected);
 	FileItem->OnClicked.BindUObject(this, &UFileBrowserUI::OnItemClicked);
@@ -143,6 +149,12 @@ void UFileBrowserUI::OnDirectorySelected(const FString& FullPath)
 // 외부에 최종적으로 선택된 파일 경로를 전달
 void UFileBrowserUI::OnFileSelected(const FString& FullPath)
 {
+	if (CurrentSelectedItem != nullptr)
+	{
+		CurrentSelectedItem->SetSelected(false);
+		CurrentSelectedItem = nullptr;
+	}
+	
 	OnFileSelectedDelegate.ExecuteIfBound(CurrentFilePath, true);
 
 	FileListScrollBox->ClearChildren(); // 기존 목록 초기화
@@ -153,15 +165,34 @@ void UFileBrowserUI::OnFileSelected(const FString& FullPath)
 	SetVisibility(ESlateVisibility::Collapsed);
 }
 
-void UFileBrowserUI::OnItemClicked(const FString& FilePath)
+void UFileBrowserUI::OnItemClicked(const FString& FilePath, UItemUI* ItemUI)
 {
-	CurrentFilePath = FilePath;
-	FString FileName = FPaths::GetCleanFilename(FilePath);
-	CurrentFileText->SetText(FText::FromString(FileName));
+	if (CurrentSelectedItem != nullptr)
+	{
+		CurrentSelectedItem->SetSelected(false);
+	}
+	CurrentSelectedItem = ItemUI;
+	if (CurrentSelectedItem)
+	{
+		CurrentSelectedItem->SetSelected(true);
+	}
+	
+	if (ItemUI->GetItemType() == EItemType::File)
+	{
+		CurrentFilePath = FilePath;
+		FString FileName = FPaths::GetCleanFilename(FilePath);
+		CurrentFileText->SetText(FText::FromString(FileName));
+	}
 }
 
 void UFileBrowserUI::OnSelectButtonClicked()
 {
+	if (CurrentSelectedItem != nullptr)
+	{
+		CurrentSelectedItem->SetSelected(false);
+		CurrentSelectedItem = nullptr;
+	}
+	
 	if (CurrentFilePath.IsEmpty())
 	{
 		OnFileSelectedDelegate.Execute(CurrentFilePath, false);
@@ -194,24 +225,31 @@ void UFileBrowserUI::CreateBackButton()
 		return; // 루트면 무시
 	}
 	
-	UBackItemUI* BackButton = CreateWidget<UBackItemUI>(GetWorld(), BackButtonClass);
+	UItemUI* BackButton = CreateWidget<UItemUI>(GetWorld(), BackButtonClass);
 	if (!BackButton)
 	{
 		return ;
 	}
 	
-	BackButton->SetBackDirectoryPath(ParentDir);
-	BackButton->SetBackDirectoryName(FPaths::GetCleanFilename(ParentDir));
-	FText BackButtonText = FText::FromString(BackButton->GetBackDirectoryPath());
-	BackButton->GetBackDirectoryText()->SetText(BackButtonText);
+	BackButton->SetItemPath(ParentDir);
+	BackButton->SetItemName(FPaths::GetCleanFilename(ParentDir));
+	BackButton->SetItemType(EItemType::BackButton);
+	FText BackButtonText = FText::FromString(BackButton->GetItemPath());
+	BackButton->GetItemText()->SetText(BackButtonText);
 
 	BackButton->OnDoubleClicked.BindUObject(this, &UFileBrowserUI::LoadDirectoryContents);
+	BackButton->OnClicked.BindUObject(this, &UFileBrowserUI::OnItemClicked);
 
 	FileListScrollBox->AddChild(BackButton);
 }
 
 void UFileBrowserUI::OnCloseButtonClicked()
 {
+	if (CurrentSelectedItem != nullptr)
+	{
+		CurrentSelectedItem->SetSelected(false);
+		CurrentSelectedItem = nullptr;
+	}
 	// Close the file browser UI
 	SetVisibility(ESlateVisibility::Collapsed);
 
@@ -230,7 +268,7 @@ void UFileBrowserUI::SetHintText(const FString& HintText)
 
 void UFileBrowserUI::SetInfoText(const FString& InfoText)
 {
-	InfomationText->SetText(FText::FromString(InfoText));
+	InformationText->SetText(FText::FromString(InfoText));
 }
 
 FString UFileBrowserUI::EllipsisLastFolders(const FString& InPath, int32 NumFoldersToKeep)
