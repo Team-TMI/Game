@@ -77,9 +77,17 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 		const FString ItemName = FPaths::GetCleanFilename(ItemPath);
 	
 		// json 파일만 검출
-		if (!bIsDirectory && ItemName.EndsWith(Suffix))
+		if (bIsDirectory)
 		{
-			CreateFileButton(ItemName, ItemPath);
+			return true; // 디렉토리는 이미 처리됨
+		}
+		for (auto& Suffix : Suffixes)
+		{
+			if (ItemName.EndsWith(Suffix))
+			{
+				CreateFileButton(ItemName, ItemPath);
+				return true; // 해당 파일을 찾았으므로 더 이상 검사하지 않음
+			}
 		}
 		return true;
 	});
@@ -160,11 +168,17 @@ void UFileBrowserUI::OnSelectButtonClicked()
 		SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
-	if (CurrentFilePath.EndsWith(Suffix))
+	bool Flag = false;
+	for (auto& Suffix : Suffixes)
 	{
-		OnFileSelectedDelegate.Execute(CurrentFilePath, true);
+		if (CurrentFilePath.EndsWith(Suffix))
+		{
+			OnFileSelectedDelegate.Execute(CurrentFilePath, true);
+			Flag = true;
+			break;
+		}
 	}
-	else
+	if (!Flag)
 	{
 		OnFileSelectedDelegate.Execute(CurrentFilePath, false);
 	}
