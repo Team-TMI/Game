@@ -43,7 +43,8 @@ public:
 
 	FOnFileSelected OnFileSelectedDelegate;
 
-	SETTER(FString, Suffix);
+	SETTER(TArray<FString>, Suffixes)
+
 private:
 	FString EllipsisLastFolders(const FString& InPath, int32 NumFoldersToKeep = 2);
 	
@@ -71,5 +72,5 @@ private:
 	FString CurrentFilePath;
 	FString DefaultString = TEXT(R"(파일을 선택하세요)");
 
-	FString Suffix = TEXT("");
+	TArray<FString> Suffixes;
 };

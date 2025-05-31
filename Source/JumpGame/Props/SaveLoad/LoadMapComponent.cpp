@@ -76,7 +76,7 @@ void ULoadMapComponent::LoadMap()
 	FString AbsoluteDir = FPaths::ConvertRelativePathToFull(RelativeDir);
 	FPaths::MakePlatformFilename(AbsoluteDir);
 	
-	FileBrowserUI->SetSuffix(TEXT(".json"));
+	FileBrowserUI->SetSuffixes({TEXT(".json")});
 	FileBrowserUI->LoadDirectoryContents(AbsoluteDir);
 }
 
@@ -110,7 +110,7 @@ void ULoadMapComponent::PickFile(const FString& Suffix, bool bBindFunction)
 	FString AbsoluteDir = FPaths::ConvertRelativePathToFull(RelativeDir);
 	FPaths::MakePlatformFilename(AbsoluteDir);
 	
-	FileBrowserUI->SetSuffix(Suffix);
+	FileBrowserUI->SetSuffixes({Suffix});
 	FileBrowserUI->LoadDirectoryContents(AbsoluteDir);
 }
 
