@@ -48,18 +48,21 @@ void ALobbyPlayerController::BeginPlay()
 		Subsystem->AddMappingContext(LobbyMappingContext, 0);
 	}
 
-	BottomNaviBarUI = CreateWidget<UBottomNaviBarUI>(GetWorld(), BottomNaviBarUIClass);
-	if (BottomNaviBarUI)
+	if (IsLocalPlayerController())
 	{
-		BottomNaviBarUI->AddToViewport(5);
+		BottomNaviBarUI = CreateWidget<UBottomNaviBarUI>(GetWorld(), BottomNaviBarUIClass);
+		if (BottomNaviBarUI)
+		{
+			BottomNaviBarUI->AddToViewport(5);
+		}
+	
+		UCursorManager::SetCursor(this, ECursorName::LeafCursor);
+		
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);  // ★ 핵심! : 이렇게 해야 마우스가 창 밖으로 안나감
+		SetInputMode(InputMode);
+		bShowMouseCursor = true;
 	}
-	
-	UCursorManager::SetCursor(this, ECursorName::LeafCursor);
-	
-	FInputModeGameAndUI InputMode;
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);  // ★ 핵심! : 이렇게 해야 마우스가 창 밖으로 안나감
-	SetInputMode(InputMode);
-	bShowMouseCursor = true;
 }
 
 void ALobbyPlayerController::SetupInputComponent()
