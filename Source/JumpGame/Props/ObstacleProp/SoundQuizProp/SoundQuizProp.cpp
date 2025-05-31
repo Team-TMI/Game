@@ -56,16 +56,6 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 테스트용 키바인딩
-	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Six))
-	// {
-	// 	// 6번 누르면 녹음시작
-	// 	StartRecord();
-	// }
-	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Five))
-	// {
-	// 	// 5번 누르면 녹음끝
-	// 	StopRecord();
-	// }
 	// if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Seven))
 	// {
 	// 	// 7번 누르면 퀴즈 메세지 받아오기
@@ -81,6 +71,18 @@ void ASoundQuizProp::Tick(float DeltaTime)
 	// 	// 7번 누르면 퀴즈 메세지 받아오기
 	// 	ReceiveSoundQuizMessage();
 	// }
+
+	// 테스트용 키바인딩
+	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Seven))
+	{
+		// 7번 누르면 녹음시작
+		StartRecord();
+	}
+		if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Nine))
+	{
+		// 9번 누르면 녹음끝
+		StopRecord();
+	}
 
 	// 치트키
 	if (GetWorld()->GetFirstPlayerController()->WasInputKeyJustPressed(EKeys::Eight))
