@@ -18,6 +18,11 @@ class JUMPGAME_API USoundQuizUI : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+
+	//타이머 UI
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UTimeRemainUI* WBP_TimeRemain;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_VoiceSend;

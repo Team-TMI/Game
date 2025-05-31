@@ -74,10 +74,14 @@ void ASoundMommyQuizProp::BeginPlay()
 	SoundQuizUI->SetVoiceRecorderComponent(VoiceRecorderComponent);
 	SoundQuizFail = CreateWidget<USoundQuizFail>(GetWorld(), SoundQuizFailUIClass);
 	SoundQuizClear = CreateWidget<USoundQuizClear>(GetWorld(), SoundQuizClearUIClass);
-	TimeRemainUI = CreateWidget<UTimeRemainUI>(GetWorld(), TimeRemainUIClass);
+	if (SoundQuizUI)
+	{
+		SoundQuizUI->WBP_TimeRemain->SetBarThickness(100.f);
+		SoundQuizUI->WBP_TimeRemain->SetVisibility(ESlateVisibility::Hidden);
+	}
 	
 	// 미션 종료 시 실행할 함수 바인딩
-	TimeRemainUI->OnMissionTimerEnd.AddDynamic(this, &ASoundMommyQuizProp::StopRecord);
+	SoundQuizUI->WBP_TimeRemain->OnMissionTimerEnd.AddDynamic(this, &ASoundMommyQuizProp::StopRecord);
 }
 
 // Called every frame
@@ -190,7 +194,6 @@ void ASoundMommyQuizProp::SendEndSoundQuizNotify()
 		StartSoundUI->RemoveFromParent();
 	}
 	SoundQuizUI->RemoveFromParent();
-	TimeRemainUI->RemoveFromParent();
 
 	Character = Cast<AFrog>(PC->GetPawn());
 	FVector CharcaterPos = Character->GetActorLocation();
@@ -232,10 +235,8 @@ void ASoundMommyQuizProp::StartRecord()
 	Super::StartRecord();
 
 	// 남은 시간 UI
-	TimeRemainUI->AddToViewport();
-	TimeRemainUI->SetScaleBoxSize(FVector2D(80,80));
-	TimeRemainUI->SetPositionInViewport(FVector2D(336,280));
-	TimeRemainUI->StartMissionTimer(3.0f);
+	SoundQuizUI->WBP_TimeRemain->StartMissionTimer(3.0f);
+	SoundQuizUI->WBP_TimeRemain->SetVisibility(ESlateVisibility::Visible);
 
 	// 버튼 이름 바꾸고
 	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString(TEXT("대답 녹음중!")));
@@ -247,7 +248,7 @@ void ASoundMommyQuizProp::StopRecord()
 {
 	Super::StopRecord();
 
-	TimeRemainUI->RemoveFromParent();
+	SoundQuizUI->WBP_TimeRemain->SetVisibility(ESlateVisibility::Hidden);
 	SoundQuizUI->Text_VoiceSend->SetText(FText::FromString(TEXT("엄마 말 듣는중...")));
 	// 버튼 다시 활성화
 	SoundQuizUI->Btn_VoiceSend->SetIsEnabled(true);

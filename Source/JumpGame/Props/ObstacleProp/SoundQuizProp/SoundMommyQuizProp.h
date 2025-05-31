@@ -45,12 +45,6 @@ public:
 	UPROPERTY(editAnywhere)
 	USoundQuizUI* SoundQuizUI;
 
-	// 타이머 UI
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UTimeRemainUI> TimeRemainUIClass;
-	UPROPERTY(EditAnywhere)
-	UTimeRemainUI* TimeRemainUI;
-
 	// 퀴즈 성공 실패 UI
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class USoundQuizClear> SoundQuizClearUIClass;
