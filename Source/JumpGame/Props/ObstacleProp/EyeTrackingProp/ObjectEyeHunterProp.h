@@ -40,6 +40,7 @@ public:
 	virtual void RecvEyeTrackingInfo() override;
 
 public:
+	UFUNCTION(BlueprintNativeEvent)
 	void DisplayMessage();
 	void FlyingObjectMovement(float DeltaTime);
 	void TrackLocation(FVector2f Resolution, FVector2f ScreenLoc);
@@ -47,6 +48,7 @@ public:
 	// 수치 변화시키는 함수
 	void ChangeValue(bool bIsOverlap);
 	void StartMission();
+	UFUNCTION(BlueprintNativeEvent)
 	void EndMission(bool bIsSuccess);
 	UFUNCTION()
 	void MissionTimeEnd();

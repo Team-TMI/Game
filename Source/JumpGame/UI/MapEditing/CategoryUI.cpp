@@ -273,7 +273,7 @@ void UCategoryUI::OnImageSearchButtonClicked()
 
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.Unbind();
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->OnFileSelectedDelegate.BindUObject(this, &UCategoryUI::OnImageSearchButtonResponse);
-	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffix(TEXT(".jpg"));
+	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetSuffixes({TEXT(".jpg"), TEXT(".png")});
 	GameState->GetLoadMapComponent()->GetFileBrowserUI()->SetInfoText(TEXT("검색할 이미지를 선택해 주세요.\nAI가 자동으로 해당 계절에 맞는 에셋을 추천해줍니다."));
 	
 	FString RelativeDir = FPaths::ProjectDir();
@@ -344,8 +344,18 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 	FString FileNameWithExtension = FPaths::GetCleanFilename(ImagePath);
 	ImageField.FieldName = TEXT("file");
 	ImageField.FileName = FileNameWithExtension;
-	ImageField.ContentType = TEXT("image/jpeg");
 	ImageField.Data = ImageData;
+	// ImageField.ContentType = TEXT("image/jpeg");
+
+	FString Extension = FPaths::GetExtension(ImagePath, false).ToLower();
+	if (Extension == TEXT("jpg") || Extension == TEXT("jpeg"))
+	{
+		ImageField.ContentType = TEXT("image/jpeg");
+	}
+	else if (Extension == TEXT("png"))
+	{
+		ImageField.ContentType = TEXT("image/png");
+	}
 
 	FHttpMultipartRequest Request;
 	FHTTPHandlerInitInfo HttpInfo = GameState->HttpManagerComponent->GetHttpHandlerInitInfo();
