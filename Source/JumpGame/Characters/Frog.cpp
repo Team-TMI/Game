@@ -1212,9 +1212,15 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 	if (Block != 1)
 	{
 		FTimerHandle TimerHandle;
+		TWeakObjectPtr<AFrog> WeakThis{this};
 		FTimerDelegate JumpDelegate{
-			FTimerDelegate::CreateLambda([this]() {
-				SetJumpAvailableBlock(1);
+			FTimerDelegate::CreateLambda([WeakThis]() {
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+				AFrog* StrongThis = WeakThis.Get();
+				StrongThis->SetJumpAvailableBlock(1);
 			})
 		};
 		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);

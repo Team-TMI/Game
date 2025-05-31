@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "OnlineSubsystem.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
 #include "GameFramework/PlayerState.h"
 #include "Interfaces/OnlineFriendsInterface.h"
 #include "Interfaces/OnlineIdentityInterface.h"
@@ -16,6 +17,7 @@
 #include "JumpGame/Characters/LobbyCharacter/LobbyFrog.h"
 #include "JumpGame/Core/GameState/TypeInfo/GameInfo.h"
 #include "JumpGame/UI/BottomNaviBarUI.h"
+#include "JumpGame/UI/FriendsList.h"
 #include "JumpGame/Utils/CursorManager.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
@@ -300,4 +302,22 @@ void ALobbyPlayerController::ClientRPC_ReceiveFriendList_Implementation(
 	}
 
 	OnFriendListUpdated.Broadcast(FriendList);
+	
+	// Recursive_ReceiveFriendList(FromPlayer, FriendList);
+}
+
+
+void ALobbyPlayerController::Recursive_ReceiveFriendList(const FUniqueNetIdRepl& FromPlayer,
+	const TArray<FSteamFriendData>& FriendList)
+{
+	if (!PlayerState)
+	{
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, FromPlayer, FriendList]()
+		{
+			Recursive_ReceiveFriendList(FromPlayer, FriendList);
+		}, 0.2f, false); // 0.1초 후에 다시 시도
+		return ;
+	}
+	
 }
