@@ -25,8 +25,6 @@ ALobbyFrog::ALobbyFrog()
 	}
 
 	CameraComp = CreateDefaultSubobject<ULobbyCameraComp>(TEXT("CameraComp"));
-	
-	JumpGaugeUIComponent->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -34,7 +32,7 @@ void ALobbyFrog::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetJumpGaugeVisibility(false);
+	// SetJumpGaugeVisibility(false);
 }
 
 // Called every frame
