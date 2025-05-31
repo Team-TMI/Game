@@ -85,6 +85,8 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_ReceiveFriendList(const FUniqueNetIdRepl& FromPlayer,
 									 const TArray<FSteamFriendData>& FriendList);
+	void Recursive_ReceiveFriendList(const FUniqueNetIdRepl& FromPlayer,
+									 const TArray<FSteamFriendData>& FriendList);
 
 	/** UI 바인딩용 델리게이트 */
 	UPROPERTY(BlueprintAssignable)
@@ -103,5 +105,4 @@ public:
 private:
 	/** 실제 Steam 친구 읽기 + 서버 전송 로직 */
 	void FetchAndSendFriendList();
-	
 };

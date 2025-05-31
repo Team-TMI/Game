@@ -26,14 +26,15 @@ void UFriendsList::NativeOnInitialized()
 	Init();
 
 	// PlayerController에 델리게이트 바인딩
-	if (auto PC = GetOwningPlayer<ALobbyPlayerController>())
-	{
-		PC->OnFriendListUpdated.AddDynamic(this, &UFriendsList::OnFriendListReceived);
-
-		// 자동 요청
-		PC->RequestFriendList();
-		Btn_Refresh->SetIsEnabled(false);
-	}
+	// auto PC = GetOwningPlayer<ALobbyPlayerController>();
+	// if (GetWorld()->GetMapName().Contains(TEXT("Client")) && PC)
+	// {
+	// 	PC->OnFriendListUpdated.AddDynamic(this, &UFriendsList::OnFriendListReceived);
+	//
+	// 	// 자동 요청
+	// 	PC->RequestFriendList();
+	// 	Btn_Refresh->SetIsEnabled(false);
+	// }
 }
 
 

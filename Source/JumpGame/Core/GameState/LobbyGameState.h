@@ -20,6 +20,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void OnClientAdded(const FString& NetID) override;
+	virtual void OnConnectionSucceeded() override;
 
 	UPROPERTY()
 	class UJumpGameInstance* GI;

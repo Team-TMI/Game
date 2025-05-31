@@ -5,9 +5,13 @@
 
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
+#include "Components/Button.h"
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
+#include "JumpGame/Core/PlayerController/LobbyPlayerController.h"
 #include "JumpGame/Networks/Connection/ConnectionVerifyComponent.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
+#include "JumpGame/UI/BottomNaviBarUI.h"
+#include "JumpGame/UI/FriendsList.h"
 #include "JumpGame/UI/SelectRoomUI.h"
 #include "JumpGame/UI/WaitRoomUI.h"
 #include "Net/UnrealNetwork.h"
@@ -62,6 +66,23 @@ void ALobbyGameState::OnClientAdded(const FString& NetID)
 		MulticastRPC_UpdateWaitImage(it.Key, it.Value);
 	}
 	WaitRoomUI->OnMapSelected(WaitRoomUI->SelectRoomUI->GetCurrentSelectedMapSlotUI());
+}
+
+void ALobbyGameState::OnConnectionSucceeded()
+{
+	Super::OnConnectionSucceeded();
+
+	// // PlayerController에 델리게이트 바인딩
+	ALobbyPlayerController* PC = Cast<ALobbyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (PC)
+	{
+		UFriendsList* FriendList = PC->BottomNaviBarUI->FriendsList;
+		PC->OnFriendListUpdated.AddDynamic(FriendList, &UFriendsList::OnFriendListReceived);
+	
+		// 자동 요청
+		PC->RequestFriendList();
+		FriendList->Btn_Refresh->SetIsEnabled(false);
+	}
 }
 
 void ALobbyGameState::MulticastRPC_UpdateWaitImage_Implementation(const FString& PlayerKey,
@@ -146,3 +167,4 @@ UTexture2D* ALobbyGameState::MakeTextureFromBytes(const TArray<uint8>& FileData)
 
 	return Texture;
 }
+

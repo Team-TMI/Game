@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class JUMPGAME_API AClientRoomGameState : public AGameState
+class JUMPGAME_API AClientRoomGameState : public ANetworkGameState
 {
 	GENERATED_BODY()
 
@@ -19,6 +19,7 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void OnConnectionSucceeded() override;
 	
 public:
 	UPROPERTY(EditAnywhere)

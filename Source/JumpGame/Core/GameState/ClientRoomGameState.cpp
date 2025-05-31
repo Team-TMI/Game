@@ -4,11 +4,17 @@
 #include "ClientRoomGameState.h"
 
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/Button.h"
+#include "JumpGame/Core/PlayerController/LobbyPlayerController.h"
+#include "JumpGame/UI/BottomNaviBarUI.h"
+#include "JumpGame/UI/FriendsList.h"
 #include "JumpGame/UI/Cinematic/IntroCinematic.h"
 #include "JumpGame/UI/Lobby/Follower.h"
 #include "JumpGame/Utils/FastLogger.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+
+class ALobbyPlayerController;
 
 AClientRoomGameState::AClientRoomGameState()
 {
@@ -69,5 +75,22 @@ void AClientRoomGameState::Tick(float DeltaSeconds)
 		FollowerUI->SetRenderTransformAngle(AngleVelocity);
 
 		PrevMousePos = MousePos;
+	}
+}
+
+void AClientRoomGameState::OnConnectionSucceeded()
+{
+	Super::OnConnectionSucceeded();
+
+	// // PlayerController에 델리게이트 바인딩
+	ALobbyPlayerController* PC = Cast<ALobbyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (PC)
+	{
+		UFriendsList* FriendList = PC->BottomNaviBarUI->FriendsList;
+		PC->OnFriendListUpdated.AddDynamic(FriendList, &UFriendsList::OnFriendListReceived);
+	
+		// 자동 요청
+		PC->RequestFriendList();
+		FriendList->Btn_Refresh->SetIsEnabled(false);
 	}
 }
