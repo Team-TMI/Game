@@ -130,6 +130,7 @@ void UJumpGameInstance::FindOtherSession()
 
 void UJumpGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 {
+	FFastLogger::LogFile(TEXT("FindSessionComplete.txt"), TEXT("Session Find Complete: %d"), (int32)bWasSuccessful);
 	if (bWasSuccessful && SessionSearch && SessionSearch->SearchResults.Num() != 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("세션 검색 성공!"));
@@ -137,12 +138,16 @@ void UJumpGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 		auto results = SessionSearch->SearchResults;
 		for (int32 i = 0; i < results.Num(); i++)
 		{
+			FString TempName;
+			results[i].Session.SessionSettings.Get(FName(TEXT("DP_NAME")), TempName);
+			FFastLogger::LogFile(TEXT("FindSessionComplete.txt"), TEXT("Session [%d] Name: %s"), i, TempName.IsEmpty() ? TEXT("Unknown") : *TempName);
 			// 파괴된 세션 필터
 			bool bIsEnded = true; // 기본 true로 두고, Get 실패해도 거르도록
 			results[i].Session.SessionSettings.Get(FName("bIsEnded"), bIsEnded);
 			if (bIsEnded)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("세션 [%d]는 이미 종료된 세션입니다. 자동으로 제외됩니다."), i);
+				FFastLogger::LogFile(TEXT("FindSessionComplete.txt"), TEXT("Session [%d] is Already Destroyed"), i);
 				continue;
 			}
 			
@@ -313,10 +318,20 @@ void UJumpGameInstance::OnDestroySessionComplete(FName Name, bool bArg)
 	// 	}
 	// }
 	// FFastLogger::LogFile(TEXT("OnDestroySessionComplete"), TEXT("OnDestroySessionComplete End Function"));
-
+	// UWorld* World = GetWorld();
+	// if (World && World->GetNetDriver())
+	// {
+	// 	FFastLogger::LogFile(TEXT("DestroySession.txt"), TEXT("Clear Net Driver"));
+	// 	World->ClearNetDriver(World->GetNetDriver());
+	// }
+	// else
+	// {
+	// 	FFastLogger::LogFile(TEXT("DestroySession.txt"), TEXT("Failed to Clear Net Driver"));
+	// }
+	
 	FFastLogger::LogConsole(TEXT("DestroySession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
 	FFastLogger::LogScreen(FColor::Red, TEXT("DestroySession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
-	FFastLogger::LogFile(TEXT("DestroySession"), TEXT("DestroySession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
+	FFastLogger::LogFile(TEXT("DestroySession.txt"), TEXT("DestroySession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
 }
 
 void UJumpGameInstance::OnFailureSessionDetected(const FUniqueNetId& UniqueNetId,
@@ -349,7 +364,7 @@ void UJumpGameInstance::OnEndSessionComplete(FName Name, bool bArg)
 	{
 		Sessions->DestroySession(CurrentSessionName);
 	}
-	FFastLogger::LogFile(TEXT("EndSession"), TEXT("EndSession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
+	FFastLogger::LogFile(TEXT("EndSession.txt"), TEXT("EndSession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
 }
 
 FString UJumpGameInstance::StringBase64Encode(FString Str)
