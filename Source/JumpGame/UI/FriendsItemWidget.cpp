@@ -28,9 +28,7 @@ void UFriendsItemWidget::OnClickInvite()
 		const auto& Friends = GI->GetFilteredFriendList();
 		if (Friends.IsValidIndex(FriendIndex))
 		{
-			UE_LOG(LogTemp, Log, TEXT("Friends list not found"));
 			GI->InviteFriendToSession(Friends[FriendIndex].SteamId);
-			UE_LOG(LogTemp, Log, TEXT("Friends list found"));
 		}
 	}
 }
