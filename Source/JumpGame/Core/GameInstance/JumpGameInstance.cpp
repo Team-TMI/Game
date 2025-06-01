@@ -242,62 +242,74 @@ void UJumpGameInstance::OnJoinSessionComplete(FName SessionName,
 
 void UJumpGameInstance::LeaveSession(bool bDestroySession)
 {
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	IOnlineSubsystem* Subsys = IOnlineSubsystem::Get();
-	if (Subsys)
+	// APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	// IOnlineSubsystem* Subsys = IOnlineSubsystem::Get();
+	// if (Subsys)
+	// {
+	// 	SessionInterface = Subsys->GetSessionInterface();
+	// 	if (SessionInterface.IsValid() && bDestroySession)
+	// 	{
+	// 		// 생성된 세션의 이름을 가져오자
+	// 		FName SessionName = CurrentSessionName;
+	//
+	// 		FNamedOnlineSession* Session = SessionInterface->GetNamedSession(SessionName);
+	// 		if (Session)
+	// 		{
+	// 			// bIsEnded = true로 설정
+	// 			Session->SessionSettings.Set(FName("bIsEnded"), true, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	//
+	// 			// 업데이트 반영
+	// 			SessionInterface->UpdateSession(SessionName, Session->SessionSettings, true);
+	// 		}
+	// 		
+	// 		// 서버가 방을 떠나면, 세션을 삭제하자
+	// 		if (PC->HasAuthority())
+	// 		{
+	// 			// 먼저 세션을 끝내고
+	// 			SessionInterface->EndSession(SessionName);
+	// 			// 그 다음 파괴
+	// 			SessionInterface->DestroySession(SessionName);
+	// 		}
+	// 		else
+	// 		{
+	// 			// 클라이언트가 방을 떠나면, 그 클라이언트만 세션에서 나오자
+	// 			SessionInterface->EndSession(SessionName);
+	// 		}
+	// 	}
+	// }
+	// FFastLogger::LogConsole(TEXT("UJumpGameInstance::LeaveSession, Server Leaving Session"));
+
+	IOnlineSessionPtr Sessions = IOnlineSubsystem::Get()->GetSessionInterface();
+	if (Sessions.IsValid())
 	{
-		SessionInterface = Subsys->GetSessionInterface();
-		if (SessionInterface.IsValid() && bDestroySession)
-		{
-			// 생성된 세션의 이름을 가져오자
-			FName SessionName = CurrentSessionName;
-
-			FNamedOnlineSession* Session = SessionInterface->GetNamedSession(SessionName);
-			if (Session)
-			{
-				// bIsEnded = true로 설정
-				Session->SessionSettings.Set(FName("bIsEnded"), true, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-
-				// 업데이트 반영
-				SessionInterface->UpdateSession(SessionName, Session->SessionSettings, true);
-			}
-			
-			// 서버가 방을 떠나면, 세션을 삭제하자
-			if (PC->HasAuthority())
-			{
-				// 먼저 세션을 끝내고
-				SessionInterface->EndSession(SessionName);
-				// 그 다음 파괴
-				SessionInterface->DestroySession(SessionName);
-			}
-			else
-			{
-				// 클라이언트가 방을 떠나면, 그 클라이언트만 세션에서 나오자
-				SessionInterface->EndSession(SessionName);
-			}
-		}
+		Sessions->EndSession(CurrentSessionName);   // 비동기
 	}
-	FFastLogger::LogConsole(TEXT("UJumpGameInstance::LeaveSession, Server Leaving Session"));
 }
 
 void UJumpGameInstance::OnDestroySessionComplete(FName Name, bool bArg)
 {
-	// 만약에 파괴 성공했다면
-	if (bArg == true)
-	{
-		FFastLogger::LogScreen(FColor::Red, TEXT("UJumpGameInstance::OnDestroySessionComplete"));
+	// FFastLogger::LogFile(TEXT("OnDestroySessionComplete"), TEXT("OnDestroySessionComplete Begin Function"));
+	// // 만약에 파괴 성공했다면
+	// if (bArg == true)
+	// {
+	// 	FFastLogger::LogScreen(FColor::Red, TEXT("UJumpGameInstance::OnDestroySessionComplete"));
+	//
+	// 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	// 	if (PC)
+	// 	{
+	// 		// 서버라면, 로비로 이동하자
+	// 		if (PC->HasAuthority())
+	// 		{
+	// 			FFastLogger::LogScreen(FColor::Red, TEXT("서버 이동@@@@@"));
+	// 			GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"));
+	// 		}
+	// 	}
+	// }
+	// FFastLogger::LogFile(TEXT("OnDestroySessionComplete"), TEXT("OnDestroySessionComplete End Function"));
 
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		if (PC)
-		{
-			// 서버라면, 로비로 이동하자
-			if (PC->HasAuthority())
-			{
-				FFastLogger::LogScreen(FColor::Red, TEXT("서버 이동@@@@@"));
-				GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?closed"));
-			}
-		}
-	}
+	FFastLogger::LogConsole(TEXT("DestroySession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
+	FFastLogger::LogScreen(FColor::Red, TEXT("DestroySession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
+	FFastLogger::LogFile(TEXT("DestroySession"), TEXT("DestroySession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
 }
 
 void UJumpGameInstance::OnFailureSessionDetected(const FUniqueNetId& UniqueNetId,
@@ -313,13 +325,24 @@ void UJumpGameInstance::OnFailureSessionDetected(const FUniqueNetId& UniqueNetId
 
 void UJumpGameInstance::OnEndSessionComplete(FName Name, bool bArg)
 {
-	FFastLogger::LogScreen(FColor::Red, TEXT("OnEndSessionComplete@@@@@@"));
-	UWorld* World = GetWorld();
-	if (World)
+	// FFastLogger::LogScreen(FColor::Red, TEXT("OnEndSessionComplete@@@@@@"));
+	// UWorld* World = GetWorld();
+	// if (World)
+	// {
+	// 	// 서버 클라 구분없이 호출한 측에서 독립적으로 레벨 변경
+	// 	// UGameplayStatics::OpenLevel(World, FName(TEXT("/Game/Maps/ClientRoomLevel")));
+	// }
+
+	// 성공 여부와 무관하게 클라·서버 모두 로비로 이동
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("/Game/Maps/ClientRoomLevel"));
+
+	// 세션 파괴는 백그라운드로
+	IOnlineSessionPtr Sessions = IOnlineSubsystem::Get()->GetSessionInterface();
+	if (Sessions.IsValid())
 	{
-		// 서버 클라 구분없이 호출한 측에서 독립적으로 레벨 변경
-		UGameplayStatics::OpenLevel(World, FName(TEXT("/Game/Maps/ClientRoomLevel")));
+		Sessions->DestroySession(CurrentSessionName);
 	}
+	FFastLogger::LogFile(TEXT("EndSession"), TEXT("EndSession %s"), bArg ? TEXT("Success") : TEXT("Fail"));
 }
 
 FString UJumpGameInstance::StringBase64Encode(FString Str)

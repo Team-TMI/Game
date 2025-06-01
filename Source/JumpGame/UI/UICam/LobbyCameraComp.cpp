@@ -32,7 +32,10 @@ void ULobbyCameraComp::BeginPlay()
 	SubCamera = Cast<ALobbySubCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), ALobbySubCamera::StaticClass()));
 
 	PC = GetWorld()->GetFirstPlayerController();
-	PC->SetViewTarget(MainCamera);
+	if (PC)
+	{
+		PC->SetViewTarget(MainCamera);
+	}
 }
 
 
