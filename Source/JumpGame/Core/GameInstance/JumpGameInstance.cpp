@@ -95,6 +95,11 @@ void UJumpGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucc
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[%s] 세션 생성 성공"), *SessionName.ToString());
 
+		IOnlineSessionPtr Sessions = IOnlineSubsystem::Get()->GetSessionInterface();
+		if (Sessions.IsValid())
+		{
+			Sessions->StartSession(SessionName);   // 상태 → InProgress
+		}
 		// 대기방으로 이동
 		GetWorld()->ServerTravel(TEXT("/Game/Maps/WaitRoomLevel?listen"));
 	}

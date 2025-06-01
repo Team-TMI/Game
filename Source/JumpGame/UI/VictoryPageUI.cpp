@@ -44,7 +44,7 @@ void UVictoryPageUI::OnClickGoLobby()
 	// 서버도 세션 제거하고 이동
 	GI->LeaveSession(true);
 
-	GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?listen"));
+	// GetWorld()->ServerTravel(TEXT("/Game/Maps/ClientRoomLevel?listen"));
 	FLog::Log("Server Leaving Game, 로비로 이동");
 		
 	/*if (!PC->HasAuthority())
