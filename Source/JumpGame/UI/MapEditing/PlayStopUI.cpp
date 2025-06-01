@@ -84,10 +84,10 @@ void UPlayStopUI::ChangeToFrog()
 
 	PlayPawn->SetActorLocation(CamLocation);
 	PlayPawn->SetActorRotation(CamRotation);
-
+	
 	PC->SetViewTargetWithBlend(PlayPawn, 0.2f);
 	PC->Possess(PlayPawn);
-
+	
 	// Hide and deactivate editor pawn
 	EditPawn->SetActorHiddenInGame(true);
 	EditPawn->SetActive(false);

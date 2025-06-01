@@ -56,7 +56,7 @@ void ABounceBollardProp::CalculateForce(AFrog* Character)
 	// Z축은 무시하자
 	CharacterDir.Z = 0;
 	FVector Direction = CharacterDir*(-1);
-	DrawDebugLine(GetWorld(),GetActorLocation(),GetActorLocation()+Direction*200,FColor::Red, false, 3.0f, 0, 2.f);
+	// DrawDebugLine(GetWorld(),GetActorLocation(),GetActorLocation()+Direction*200,FColor::Red, false, 3.0f, 0, 2.f);
 	float Force = 1'500;
 	
 	Super::LaunchCharacter(Character, Direction, Force, true, true);
