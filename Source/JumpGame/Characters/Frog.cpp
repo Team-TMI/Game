@@ -1165,6 +1165,15 @@ void AFrog::MulticastRPC_SetLight_Implementation(float Alpha)
 
 void AFrog::InitJumpGaugeUIComponent()
 {
+	if (bMapEditingPawn)
+	{
+		if (SettingPostProcessComponent)
+		{
+			SettingPostProcessComponent->DestroyComponent();
+			SettingPostProcessComponent = nullptr;
+		}
+	}
+	
 	// 로컬 클라만 점프 게이지 보이게
 	if (IsLocallyControlled() || bMapEditingPawn)
 	{
