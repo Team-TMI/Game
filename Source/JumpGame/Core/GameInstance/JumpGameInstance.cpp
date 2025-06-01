@@ -484,12 +484,8 @@ void UJumpGameInstance::InviteFriendToSession(const FString& FriendIdStr)
 	if (!LocalUserId.IsValid() || !FriendId.IsValid()) return;
 
 	const FName SessionName = CurrentSessionName;
-
-	SessionInterface->SendSessionInviteToFriend(*LocalUserId, SessionName, *FriendId);
-	
-	UE_LOG(LogTemp, Log, TEXT("친구 초대: %s → 세션 이름: %s"), *FriendIdStr, *SessionName.ToString());
-
 	bool bSuccess = SessionInterface->SendSessionInviteToFriend(*LocalUserId, SessionName, *FriendId);
+	UE_LOG(LogTemp, Log, TEXT("친구 초대: %s → 세션 이름: %s"), *FriendIdStr, *SessionName.ToString());
 	if (!bSuccess)
 	{
 		UE_LOG(LogTemp, Error, TEXT("SendSessionInviteToFriend 실패"));
