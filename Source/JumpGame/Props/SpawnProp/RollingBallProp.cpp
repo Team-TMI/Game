@@ -222,7 +222,7 @@ void ARollingBallProp::RollingBall()
 	
 	FVector RotationAxis = FVector::CrossProduct(FVector::RightVector, FVector::UpVector);
 	FQuat DeltaQuat = FQuat(RotationAxis, FMath::DegreesToRadians(RotationDegrees));
-	DrawDebugCoordinateSystem(GetWorld(), GetActorLocation(), GetActorRotation(), 100.f, false, -1.f, 0, 2.f);
+	// DrawDebugCoordinateSystem(GetWorld(), GetActorLocation(), GetActorRotation(), 100.f, false, -1.f, 0, 2.f);
 
 	// 회전 적용
 	MeshComp->AddLocalRotation(DeltaQuat, false, nullptr, ETeleportType::None);

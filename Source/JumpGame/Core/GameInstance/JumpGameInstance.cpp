@@ -34,7 +34,9 @@ void UJumpGameInstance::Init()
 		SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UJumpGameInstance::OnFindSessionComplete);
 		// 세션 참여 성공시 호출되는 함수 등록
 		SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UJumpGameInstance::OnJoinSessionComplete);
-		SessionInterface->OnSessionUserInviteAcceptedDelegates.AddUObject(this, &UJumpGameInstance::OnSessionInviteAccepted); // 초대수락
+		// 초대
+		SessionInterface->AddOnSessionUserInviteAcceptedDelegate_Handle(FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UJumpGameInstance::OnSessionInviteAccepted));
+		SessionInterface->AddOnJoinSessionCompleteDelegate_Handle(FOnJoinSessionCompleteDelegate::CreateUObject(this, &UJumpGameInstance::OnJoinSessionComplete));
 	
 		// 세션 파괴 성공시 호출되는 함수 등록
 		SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UJumpGameInstance::OnDestroySessionComplete);
@@ -453,9 +455,17 @@ void UJumpGameInstance::InviteFriendToSession(const FString& FriendIdStr)
 
 	if (!LocalUserId.IsValid() || !FriendId.IsValid()) return;
 
-	const FName SessionName = NAME_GameSession;
+	const FName SessionName = CurrentSessionName;
 
 	SessionInterface->SendSessionInviteToFriend(*LocalUserId, SessionName, *FriendId);
+	
+	UE_LOG(LogTemp, Log, TEXT("친구 초대: %s → 세션 이름: %s"), *FriendIdStr, *SessionName.ToString());
+
+	bool bSuccess = SessionInterface->SendSessionInviteToFriend(*LocalUserId, SessionName, *FriendId);
+	if (!bSuccess)
+	{
+		UE_LOG(LogTemp, Error, TEXT("SendSessionInviteToFriend 실패"));
+	}
 }
 
 void UJumpGameInstance::OnSessionInviteAccepted(bool bWasSuccessful, int32 LocalUserNum,
@@ -476,7 +486,7 @@ void UJumpGameInstance::OnSessionInviteAccepted(bool bWasSuccessful, int32 Local
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("초대 수락됨 - 세션 참가 시도"));
-	SessionInterface->JoinSession(LocalUserNum, NAME_GameSession, SessionToJoin);
+	SessionInterface->JoinSession(LocalUserNum, CurrentSessionName, SessionToJoin);
 }
 
 void UJumpGameInstance::SetFilteredFriendList(const TArray<FSteamFriendData>& FriendList)
