@@ -252,12 +252,14 @@ void ALobbyPlayerController::FetchAndSendFriendList()
 			IOnlineSubsystem::Get()->GetFriendsInterface()->GetFriendsList(
 				LocalUserNum, ListName, Raw))
 		{
-			for (const auto& F : Raw)
+			for (int32 Index = 0; Index < Raw.Num(); ++Index)
 			{
+				const auto& F = Raw[Index];
 				FSteamFriendData D;
 				D.DisplayName = F->GetDisplayName();
 				D.SteamId     = F->GetUserId()->ToString();
 				D.bIsOnline   = F->GetPresence().bIsOnline;
+				D.FriendIdx   = Index;
 				Tmp.Add(D);
 			}
 		}
@@ -302,6 +304,12 @@ void ALobbyPlayerController::ClientRPC_ReceiveFriendList_Implementation(
 	if (FromPlayer != PlayerState->GetUniqueId())
 	{
 		return;                     // 남의 리스트면 무시
+	}
+	
+	// GameInstance에 친구 목록 전달
+	if (UJumpGameInstance* GI = Cast<UJumpGameInstance>(GetWorld()->GetGameInstance()))
+	{
+		GI->SetFilteredFriendList(FriendList);
 	}
 
 	OnFriendListUpdated.Broadcast(FriendList);
