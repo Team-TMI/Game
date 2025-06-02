@@ -83,7 +83,6 @@ void AGameFinishProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		MulticastRPC_ShowClearUI();
 		
 		// 5초 후에 게임을 끝내자
-		FTimerHandle EndTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(EndTimerHandle, this, &AGameFinishProp::GameEnd, 5.0f, false);
 	}
 }
@@ -113,6 +112,16 @@ void AGameFinishProp::GetLifetimeReplicatedProps(
 
 	DOREPLIFETIME(AGameFinishProp, WinnerCharacter);
 	DOREPLIFETIME(AGameFinishProp, VictoryP);
+}
+
+void AGameFinishProp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(EndTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(EffectTimerHandle);
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame

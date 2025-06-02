@@ -116,9 +116,15 @@ void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject, fl
 		if (!FMath::IsNearlyZero(RemainTime))
 		{
 			UE_LOG(LogTemp, Log, TEXT("RemainTime: %f"),RemainTime);
-			GetWorld()->GetTimerManager().SetTimer(ObPoolTimerHandle, FTimerDelegate::CreateLambda([this]()
+			TWeakObjectPtr<UObjectPoolComponent> WeakThis = this;
+			GetWorld()->GetTimerManager().SetTimer(ObPoolTimerHandle, FTimerDelegate::CreateLambda([WeakThis]()
 			{
-				OnObjectReturn.Broadcast();
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+				UObjectPoolComponent* StrongThis = Cast<UObjectPoolComponent>(WeakThis.Get());
+				StrongThis->OnObjectReturn.Broadcast();
 			}), RemainTime, false);
 		}
 		else

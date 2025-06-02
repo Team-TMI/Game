@@ -140,6 +140,15 @@ void AVictoryPlatform::BeginPlay()
 	SetReplicateMovement(true);
 }
 
+void AVictoryPlatform::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TombDropHandle);
+	}
+	Super::EndPlay(EndPlayReason);
+}
+
 // Called every frame
 void AVictoryPlatform::Tick(float DeltaTime)
 {
@@ -174,7 +183,6 @@ FVector AVictoryPlatform::SpawnVictoryCharacter()
 void AVictoryPlatform::DropProps()
 {
 	// 무덤 위치 떨어뜨리기
-	FTimerHandle TombDropHandle;
 	GetWorldTimerManager().SetTimer(TombDropHandle, [this]()
 	{
 		bShouldShake = true;

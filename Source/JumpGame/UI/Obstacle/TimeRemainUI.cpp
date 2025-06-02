@@ -15,6 +15,15 @@ void UTimeRemainUI::NativeConstruct()
 	TimeText->SetText(FText());
 }
 
+void UTimeRemainUI::NativeDestruct()
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(MissionTimerHandle);
+	}
+	Super::NativeDestruct();
+}
+
 void UTimeRemainUI::ChangeGaugeValue(float Value)
 {
 	MissionTimeRemainSlider->SetValue(Value);

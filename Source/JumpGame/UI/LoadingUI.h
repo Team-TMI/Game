@@ -15,6 +15,8 @@ class JUMPGAME_API ULoadingUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeDestruct() override;
+	
 	UFUNCTION()
 	void InitializeLoadingScreen();
 	UFUNCTION()

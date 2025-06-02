@@ -41,8 +41,17 @@ void ACarrotBounceBollardProp::BeginPlay()
 	
 }
 
+void ACarrotBounceBollardProp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(CoolTimeHandle);
+	}
+	Super::EndPlay(EndPlayReason);
+}
+
 void ACarrotBounceBollardProp::OnBollardHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+                                            UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	AFrog* Frog = Cast<AFrog>(OtherActor);
 	if (Frog)

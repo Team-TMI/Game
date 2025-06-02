@@ -18,6 +18,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	// Called every frame
@@ -26,6 +27,9 @@ public:
 public:
 	// 골인지점에서 구현
 	// void SpawnVictoryPlatform();
+
+	UPROPERTY()
+	FTimerHandle TombDropHandle;
 
 	// 카메라 액터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

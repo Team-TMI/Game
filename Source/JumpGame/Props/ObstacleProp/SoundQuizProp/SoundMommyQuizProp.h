@@ -18,6 +18,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	// Called every frame
@@ -33,6 +34,9 @@ public:
 	virtual void StopRecord() override;
 	
 public:
+	UPROPERTY()
+	FTimerHandle SpawnTimerHandle;
+	
 	// 퀴즈 시작 UI
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UStartSoundUI> StartSoundUIClass;

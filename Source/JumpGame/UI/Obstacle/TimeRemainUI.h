@@ -15,6 +15,7 @@ class JUMPGAME_API UTimeRemainUI : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	
 	void ChangeGaugeValue(float Value);
 	

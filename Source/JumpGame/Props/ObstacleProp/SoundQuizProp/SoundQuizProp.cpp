@@ -104,8 +104,6 @@ void ASoundQuizProp::OnMyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 {
 	if (!OtherActor->ActorHasTag("Frog")) return;
 	if (bIsActive == false) return;
-
-	FTimerHandle SoundTimerHandle;
 	
 	if (!bIsOverlap)
 	{
@@ -149,6 +147,19 @@ void ASoundQuizProp::MulticastRPC_PlayEffect(FVector Location, int32 Index)
 	FVector CharcaterPos = Character->GetActorLocation();
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, CharcaterPos, 0.8f, 1.0f);
 	this->PlayHitEffect(Index);
+}
+
+void ASoundQuizProp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SoundTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(RecordStartTimer);
+		GetWorld()->GetTimerManager().ClearTimer(RecordStopTimer);
+		GetWorld()->GetTimerManager().ClearTimer(SendFileMessage);
+	}
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 void ASoundQuizProp::SendStartSoundQuizNotify()
