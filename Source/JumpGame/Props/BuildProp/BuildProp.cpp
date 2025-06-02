@@ -4,6 +4,7 @@
 #include "BuildProp.h"
 
 #include "Components/BoxComponent.h"
+#include "JumpGame/MapEditor/Components/GizmoComponent.h"
 
 
 // Sets default values
@@ -23,6 +24,19 @@ void ABuildProp::BeginPlay()
 
 	bReplicates = false;
 	SetReplicateMovement(false);
+
+	CollisionComp->bReplicatePhysicsToAutonomousProxy = false;
+	GridInnerCollision->bReplicatePhysicsToAutonomousProxy = false;
+	GridOuterCollision->bReplicatePhysicsToAutonomousProxy = false;
+	MeshComp->bReplicatePhysicsToAutonomousProxy = false;
+	RotateGizmo->bReplicatePhysicsToAutonomousProxy = false;
+	GizmoPrimary->bReplicatePhysicsToAutonomousProxy = false;
+	GizmoOne->bReplicatePhysicsToAutonomousProxy = false;
+	GizmoTwo->bReplicatePhysicsToAutonomousProxy = false;
+	GizmoThree->bReplicatePhysicsToAutonomousProxy = false;
+	GizmoFour->bReplicatePhysicsToAutonomousProxy = false;
+	GizmoFive->bReplicatePhysicsToAutonomousProxy = false;
+	GizmoSix->bReplicatePhysicsToAutonomousProxy = false;
 }
 
 // Called every frame
