@@ -48,6 +48,16 @@ void UObjectPoolComponent::BeginPlay()
 	Initialize();
 }
 
+void UObjectPoolComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ObPoolTimerHandle);
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 
 // Called every frame
 void UObjectPoolComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -99,8 +109,6 @@ void UObjectPoolComponent::ReturnObject(class ARollingBallProp* ReturnObject, fl
 	// 사용하고 나서 다시 풀에 넣자 
 	InactivePool.Remove(ReturnObject);
 	Pool.Push(ReturnObject);
-
-	FTimerHandle ObPoolTimerHandle;
 	
 	if (GetOwner()->HasAuthority())
 	{

@@ -131,6 +131,16 @@ void ARollingBallProp::BeginPlay()
 	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &ARollingBallProp::OnMyRollingBallOverlap);
 }
 
+void ARollingBallProp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(PoolTimerHandle);
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 // Called every frame
 void ARollingBallProp::Tick(float DeltaTime)
 {
