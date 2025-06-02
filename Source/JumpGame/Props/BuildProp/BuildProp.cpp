@@ -15,16 +15,6 @@ ABuildProp::ABuildProp()
 
 	CollisionComp->SetCollisionProfileName(TEXT("OverlapProp"));
 	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Block);
-}
-
-// Called when the game starts or when spawned
-void ABuildProp::BeginPlay()
-{
-	Super::BeginPlay();
-
-	bReplicates = false;
-	SetReplicateMovement(false);
-
 	CollisionComp->bReplicatePhysicsToAutonomousProxy = false;
 	GridInnerCollision->bReplicatePhysicsToAutonomousProxy = false;
 	GridOuterCollision->bReplicatePhysicsToAutonomousProxy = false;
@@ -39,9 +29,20 @@ void ABuildProp::BeginPlay()
 	GizmoSix->bReplicatePhysicsToAutonomousProxy = false;
 }
 
+// Called when the game starts or when spawned
+void ABuildProp::BeginPlay()
+{
+	Super::BeginPlay();
+
+	bReplicates = false;
+	SetReplicateMovement(false);
+
+}
+
 // Called every frame
 void ABuildProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//FLog::Log("", bReplicates);
 }
 

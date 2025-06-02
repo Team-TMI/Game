@@ -20,16 +20,6 @@ ADecorationProp::ADecorationProp()
 
 	// 그리드 충돌 허용
 	bEnableCollision = false;
-}
-
-// Called when the game starts or when spawned
-void ADecorationProp::BeginPlay()
-{
-	Super::BeginPlay();
-
-	bReplicates = false;
-	SetReplicateMovement(false);
-	
 	CollisionComp->bReplicatePhysicsToAutonomousProxy = false;
 	GridInnerCollision->bReplicatePhysicsToAutonomousProxy = false;
 	GridOuterCollision->bReplicatePhysicsToAutonomousProxy = false;
@@ -42,6 +32,16 @@ void ADecorationProp::BeginPlay()
 	GizmoFour->bReplicatePhysicsToAutonomousProxy = false;
 	GizmoFive->bReplicatePhysicsToAutonomousProxy = false;
 	GizmoSix->bReplicatePhysicsToAutonomousProxy = false;
+}
+
+// Called when the game starts or when spawned
+void ADecorationProp::BeginPlay()
+{
+	Super::BeginPlay();
+
+	bReplicates = false;
+	SetReplicateMovement(false);
+	
 }
 
 // Called every frame
