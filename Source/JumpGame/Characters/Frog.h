@@ -39,6 +39,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 public:
 	virtual void PossessedBy(AController* NewController) override;
 
@@ -451,5 +453,8 @@ public:
 	TSubclassOf<class UGameSettingUI> GameSettingUIClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UGameSettingUI* GameSettingUI;
+	FTimerHandle JumpBackHandle;
+	FTimerHandle ReturnCollisionTimer;
+
 };
 

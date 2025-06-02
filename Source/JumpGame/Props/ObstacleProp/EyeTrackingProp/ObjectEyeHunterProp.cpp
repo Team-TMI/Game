@@ -280,6 +280,18 @@ void AObjectEyeHunterProp::GetLifetimeReplicatedProps(TArray<class FLifetimeProp
 	DOREPLIFETIME(AObjectEyeHunterProp, Frog);
 }
 
+void AObjectEyeHunterProp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(EndTimerHandle);
+		GetWorldTimerManager().ClearTimer(StartTimerHandle);
+		GetWorldTimerManager().ClearTimer(DynamicTimerHandle);
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 void AObjectEyeHunterProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

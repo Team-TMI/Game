@@ -160,6 +160,17 @@ void ARisingWaterProp::Tick(float DeltaTime)
 	// }
 }
 
+void ARisingWaterProp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(ResumeRisingTimerHandle);
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
@@ -178,14 +189,21 @@ void ARisingWaterProp::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 			}
 
 			// 잠시 가라앉고 올라오게
+			TWeakObjectPtr<ARisingWaterProp> WeakThis{this};
 			FTimerDelegate MovementModeDelegate{
-				FTimerDelegate::CreateLambda([this]() {
+				FTimerDelegate::CreateLambda([WeakThis]() {
+					if (!WeakThis.IsValid())
+					{
+						return;
+					}
+
+					ARisingWaterProp* StrongThis = WeakThis.Get();
 					// 기존 바인딩을 제거해서 중복을 방지 후, 새로 바인딩
-					ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
-					ShallowCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginShallowOverlap);
+					StrongThis->ShallowCollision->OnComponentBeginOverlap.RemoveDynamic(StrongThis, &ARisingWaterProp::OnBeginShallowOverlap);
+					StrongThis->ShallowCollision->OnComponentBeginOverlap.AddDynamic(StrongThis, &ARisingWaterProp::OnBeginShallowOverlap);
 					
-					SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
-					SurfaceCollision->OnComponentBeginOverlap.AddDynamic(this, &ARisingWaterProp::OnBeginSurfaceOverlap);
+					StrongThis->SurfaceCollision->OnComponentBeginOverlap.RemoveDynamic(StrongThis, &ARisingWaterProp::OnBeginSurfaceOverlap);
+					StrongThis->SurfaceCollision->OnComponentBeginOverlap.AddDynamic(StrongThis, &ARisingWaterProp::OnBeginSurfaceOverlap);
 				})
 			};
 			GetWorldTimerManager().SetTimer(TimerHandle, MovementModeDelegate, 1.f, false);

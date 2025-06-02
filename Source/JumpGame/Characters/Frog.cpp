@@ -32,10 +32,10 @@ AFrog::AFrog()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
+
 	bReplicates = true;
 	Super::SetReplicateMovement(true);
-	
+
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> FrogMesh
 		(TEXT("/Game/Characters/Fat_Frog/SM_Frog17.SM_Frog17"));
 	if (FrogMesh.Succeeded())
@@ -127,14 +127,14 @@ AFrog::AFrog()
 	{
 		EmotionAction = Frog_Emotion.Object;
 	}
-	
+
 	ConstructorHelpers::FObjectFinder<UInputAction> Frog_Setting
 		(TEXT("/Game/Characters/Input/IA_FrogSetting.IA_FrogSetting"));
 	if (Frog_Setting.Succeeded())
 	{
 		SettingAction = Frog_Setting.Object;
 	}
-	
+
 
 	ConstructorHelpers::FObjectFinder<USoundBase> JumpSoundObject
 		(TEXT("/Game/Sounds/Ques/Jump_Cue.Jump_Cue"));
@@ -361,7 +361,7 @@ void AFrog::BeginPlay()
 	{
 		FFastLogger::LogScreen(FColor::Red, TEXT("This Character: %p"), this);
 	}
-	
+
 	if (WaterPostProcessComponent && WaterPostProcessMaterial)
 	{
 		WaterPostProcessDynamicMaterial = UMaterialInstanceDynamic::Create(
@@ -400,6 +400,21 @@ void AFrog::BeginPlay()
 
 	InitJumpGaugeUIComponent();
 	InitFrogState();
+}
+
+void AFrog::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(TongueTimer);
+		GetWorldTimerManager().ClearTimer(CrouchTimer);
+		GetWorldTimerManager().ClearTimer(LaunchCooldownTimer);
+		GetWorldTimerManager().ClearTimer(DoubleTapTimer);
+		GetWorldTimerManager().ClearTimer(JumpBackHandle);
+		GetWorldTimerManager().ClearTimer(ReturnCollisionTimer);
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void AFrog::PossessedBy(AController* NewController)
@@ -542,7 +557,7 @@ void AFrog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 		EnhancedInputComponent->BindAction(EmotionAction, ETriggerEvent::Started, this, &AFrog::OnPressCKey);
 		EnhancedInputComponent->BindAction(EmotionAction, ETriggerEvent::Completed, this, &AFrog::OnReleasedCKey);
-		
+
 		EnhancedInputComponent->BindAction(SettingAction, ETriggerEvent::Started, this, &AFrog::OnPressESCKey);
 	}
 }
@@ -875,10 +890,17 @@ void AFrog::TongueAttackEnd()
 	TongueCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// 혓바닥 공격 쿨타임
+	TWeakObjectPtr<AFrog> WeakThis{this};
 	FTimerDelegate TongueAttackCoolTimeDelegate{
-		FTimerDelegate::CreateLambda([this]() {
-			bCanTongAttack = true;
-			OnRep_CanTongAttack();
+		FTimerDelegate::CreateLambda([WeakThis]() {
+			if (!WeakThis.IsValid())
+			{
+				return;
+			}
+
+			AFrog* StrongThis = WeakThis.Get();
+			StrongThis->bCanTongAttack = true;
+			StrongThis->OnRep_CanTongAttack();
 		})
 	};
 
@@ -940,10 +962,16 @@ void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& Laun
 		MulticastRPC_Launch(LaunchVelocity);
 
 		// 1초 후 서버에서 충돌 프로필 되돌리기
-		FTimerHandle TempTimerHandle;
+		TWeakObjectPtr<AFrog> WeakThis{this};
 		FTimerDelegate RestoreCollisionDelegate{
-			FTimerDelegate::CreateLambda([this]() {
-				UCapsuleComponent* MyCapComp{GetCapsuleComponent()};
+			FTimerDelegate::CreateLambda([WeakThis]() {
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+
+				AFrog* StrongThis = WeakThis.Get();
+				UCapsuleComponent* MyCapComp{StrongThis->GetCapsuleComponent()};
 				if (MyCapComp)
 				{
 					MyCapComp->SetCollisionProfileName(TEXT("FrogCollision"));
@@ -951,7 +979,7 @@ void AFrog::ServerRPC_ExecuteWaterSurfaceJump_Implementation(const FVector& Laun
 			})
 		};
 
-		GetWorldTimerManager().SetTimer(TempTimerHandle, RestoreCollisionDelegate, 1.f, false);
+		GetWorldTimerManager().SetTimer(ReturnCollisionTimer, RestoreCollisionDelegate, 1.f, false);
 	}
 }
 
@@ -983,17 +1011,24 @@ void AFrog::MulticastRPC_StartCrouch_Implementation()
 	Crouch();
 
 	// 슈퍼 점프 게이지 충전
+	TWeakObjectPtr<AFrog> WeakThis{this};
 	FTimerDelegate CrouchDelegate{
-		FTimerDelegate::CreateLambda([this]() {
-			CrouchTime += GetWorld()->GetDeltaSeconds();
-
-			if (CrouchTime >= SuperJumpValue)
+		FTimerDelegate::CreateLambda([WeakThis]() {
+			if (!WeakThis.IsValid())
 			{
-				bIsSuperJump = true;
+				return;
 			}
 
-			SuperJumpRatio = FMath::Clamp(CrouchTime / SuperJumpValue, 0.f, 1.f);
-			OnSuperJumpRatioChanged.Broadcast(SuperJumpRatio);
+			AFrog* StrongThis = WeakThis.Get();
+			StrongThis->CrouchTime += StrongThis->GetWorld()->GetDeltaSeconds();
+
+			if (StrongThis->CrouchTime >= StrongThis->SuperJumpValue)
+			{
+				StrongThis->bIsSuperJump = true;
+			}
+
+			StrongThis->SuperJumpRatio = FMath::Clamp(StrongThis->CrouchTime / StrongThis->SuperJumpValue, 0.f, 1.f);
+			StrongThis->OnSuperJumpRatioChanged.Broadcast(StrongThis->SuperJumpRatio);
 
 			//FLog::Log("Ratio", SuperJumpRatio);
 		})
@@ -1048,34 +1083,41 @@ void AFrog::ServerRPC_StartTongueAttack_Implementation()
 	TongueCollision->SetCollisionProfileName(FName("FrogTongue"));
 	TongueCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
+	TWeakObjectPtr<AFrog> WeakThis{this};
 	FTimerDelegate TongueAttackDelegate{
-		FTimerDelegate::CreateLambda([this]() {
-			if (bIsTongueGrow)
+		FTimerDelegate::CreateLambda([WeakThis]() {
+			if (!WeakThis.IsValid())
 			{
-				TongueLengthRatio += GetWorld()->GetDeltaSeconds() * 8.f;
+				return;
+			}
 
-				if (TongueLengthRatio > 1.f)
+			AFrog* StrongThis = WeakThis.Get();
+			if (StrongThis->bIsTongueGrow)
+			{
+				StrongThis->TongueLengthRatio += StrongThis->GetWorld()->GetDeltaSeconds() * 8.f;
+
+				if (StrongThis->TongueLengthRatio > 1.f)
 				{
-					TongueLengthRatio = 1.f;
-					bIsTongueGrow = false;
-					TongueCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					StrongThis->TongueLengthRatio = 1.f;
+					StrongThis->bIsTongueGrow = false;
+					StrongThis->TongueCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-					OnRep_IsTongueGrow();
+					StrongThis->OnRep_IsTongueGrow();
 				}
 			}
 			else
 			{
-				TongueLengthRatio -= GetWorld()->GetDeltaSeconds() * 8.f;
+				StrongThis->TongueLengthRatio -= StrongThis->GetWorld()->GetDeltaSeconds() * 8.f;
 
-				if (TongueLengthRatio < 0.f)
+				if (StrongThis->TongueLengthRatio < 0.f)
 				{
-					TongueLengthRatio = 0.f;
-					TongueAttackEnd();
+					StrongThis->TongueLengthRatio = 0.f;
+					StrongThis->TongueAttackEnd();
 					return;
 				}
 			}
 
-			OnRep_TongueLengthRatio();
+			StrongThis->OnRep_TongueLengthRatio();
 		})
 	};
 
@@ -1173,7 +1215,7 @@ void AFrog::InitJumpGaugeUIComponent()
 			SettingPostProcessComponent = nullptr;
 		}
 	}
-	
+
 	// 로컬 클라만 점프 게이지 보이게
 	if (IsLocallyControlled() || bMapEditingPawn)
 	{
@@ -1220,7 +1262,6 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 	// 점프력 높게 설정하면 다시 원래대로 점프력 돌아오게
 	if (Block != 1)
 	{
-		FTimerHandle TimerHandle;
 		TWeakObjectPtr<AFrog> WeakThis{this};
 		FTimerDelegate JumpDelegate{
 			FTimerDelegate::CreateLambda([WeakThis]() {
@@ -1232,7 +1273,7 @@ void AFrog::SetJumpAvailableBlock(int32 Block)
 				StrongThis->SetJumpAvailableBlock(1);
 			})
 		};
-		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
+		GetWorldTimerManager().SetTimer(JumpBackHandle, JumpDelegate, 0.2f, false);
 	}
 
 	if (IsLocallyControlled())
@@ -1341,13 +1382,19 @@ void AFrog::ServerRPC_SetJumpAvailableBlock_Implementation(int32 Block)
 	// 점프력 높게 설정하면 다시 원래대로 점프력 돌아오게
 	if (Block != 1)
 	{
-		FTimerHandle TimerHandle;
+		TWeakObjectPtr<AFrog> WeakThis{this};
 		FTimerDelegate JumpDelegate{
-			FTimerDelegate::CreateLambda([this]() {
-				SetJumpAvailableBlock(1);
+			FTimerDelegate::CreateLambda([WeakThis]() {
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+
+				AFrog* StrongThis = WeakThis.Get();
+				StrongThis->SetJumpAvailableBlock(1);
 			})
 		};
-		GetWorldTimerManager().SetTimer(TimerHandle, JumpDelegate, 0.2f, false);
+		GetWorldTimerManager().SetTimer(JumpBackHandle, JumpDelegate, 0.2f, false);
 	}
 }
 
@@ -1999,8 +2046,15 @@ void AFrog::ActivateRecentlyLaunchedFlag()
 	bRecentlyLaunched = true;
 
 	GetWorldTimerManager().ClearTimer(LaunchCooldownTimer);
-	GetWorldTimerManager().SetTimer(LaunchCooldownTimer, [this]() {
-		bRecentlyLaunched = false;
+	
+	TWeakObjectPtr<AFrog> WeakThis{this};
+	GetWorldTimerManager().SetTimer(LaunchCooldownTimer, [WeakThis]() {
+		if (!WeakThis.IsValid())
+		{
+			return;
+		}
+		AFrog* StrongThis = WeakThis.Get();
+		StrongThis->bRecentlyLaunched = false;
 	}, 0.2f, false);
 }
 
@@ -2025,7 +2079,7 @@ void AFrog::SetFrogGlobalGain_PP(float Value)
 
 	SettingPostProcessComponent->Settings.ColorGain.Set(1, 1, 1, Value);
 	FLog::Log(TEXT("SetFrogGlobalGain_PP: Value"), Value);
-	
+
 	//SettingPostProcessComponent->Settings.ColorGainMidtones.Set(1, 1, 1, Value);
 	//SettingPostProcessComponent->Settings.ColorGainHighlights.Set(1, 1, 1, Value);
 	//SettingPostProcessComponent->Settings.ColorGainShadows.Set(1, 1, 1, Value);
@@ -2134,30 +2188,30 @@ void AFrog::OnPressESCKey()
 		if (!bIsPress)
 		{
 			GameSettingUI->PlaySettingAnim(true);
-			
+
 			FInputModeGameAndUI InputMode;
 			InputMode.SetWidgetToFocus(GameSettingUI->TakeWidget());
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 			InputMode.SetHideCursorDuringCapture(false);
 			PC->SetInputMode(InputMode);
-			
+
 			PC->SetIgnoreLookInput(true);
 			PC->SetIgnoreMoveInput(true);
 			PC->bShowMouseCursor = true;
-			
+
 			bIsPress = true;
 		}
 		else
 		{
 			GameSettingUI->PlaySettingAnim(false);
-			
+
 			FInputModeGameOnly InputMode;
 			PC->SetInputMode(InputMode);
-			
+
 			PC->SetIgnoreLookInput(false);
 			PC->SetIgnoreMoveInput(false);
 			PC->bShowMouseCursor = false;
-			
+
 			bIsPress = false;
 		}
 	}
