@@ -39,8 +39,20 @@ void ADecorationProp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetReplicates(false);
-	SetReplicateMovement(false);
+	if (HasAuthority())
+	{
+		TWeakObjectPtr<ADecorationProp> WeakThis = this;
+		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakThis]()
+		{
+			if (!WeakThis.IsValid())
+			{
+				return ;
+			}
+			ADecorationProp* StrongThis = WeakThis.Get();
+			StrongThis->SetReplicates(false);
+			StrongThis->SetReplicateMovement(false);
+		}));	
+	}
 }
 
 // Called every frame

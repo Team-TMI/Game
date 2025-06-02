@@ -34,8 +34,20 @@ void ABuildProp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetReplicates(false);
-	SetReplicateMovement(false);
+	if (HasAuthority())
+	{
+		TWeakObjectPtr<ABuildProp> WeakThis = this;
+		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakThis]()
+		{
+			if (!WeakThis.IsValid())
+			{
+				return ;
+			}
+			ABuildProp* StrongThis = WeakThis.Get();
+			StrongThis->SetReplicates(false);
+			StrongThis->SetReplicateMovement(false);
+		}));	
+	}
 }
 
 // Called every frame
