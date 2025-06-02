@@ -46,7 +46,7 @@ void ABuildProp::BeginPlay()
 			ABuildProp* StrongThis = WeakThis.Get();
 			StrongThis->SetReplicates(false);
 			StrongThis->SetReplicateMovement(false);
-		}), 10.0f, false);
+		}), 60.0f, false);
 	}
 }
 
