@@ -47,6 +47,8 @@ void ABaseProp::BeginPlay()
 	}
 
 	bInGame = GetWorld()->GetMapName().Contains(TEXT("InGameLevel"));
+
+	
 }
 
 void ABaseProp::SetCollision(bool bEnable)
