@@ -7,6 +7,7 @@
 #include "LoadMapComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMapLoaded);
+// Delegate를 두어서 맵이 전부 로드 되었다는 것을 알려주는 것이 좋을 듯 함.
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class JUMPGAME_API ULoadMapComponent : public UActorComponent
@@ -38,6 +39,7 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	UFUNCTION()
@@ -46,6 +48,8 @@ private:
 	bool ParseJsonStringToMap(const FString& JsonString);
 	UFUNCTION()
 	void BuildMapFromSaveData();
+	UFUNCTION()
+	void BuildMapFromSaveDataV2();
 	UFUNCTION()
 	void SpawnProp(TSubclassOf<class APrimitiveProp> PropClass, const FSaveData& SaveData);
 
@@ -59,4 +63,11 @@ private:
 	TSubclassOf<class UFileBrowserUI> FileBrowserUIClass = nullptr;
 	UPROPERTY()
 	class UFileBrowserUI* FileBrowserUI = nullptr;
+
+	UPROPERTY()
+	bool bIsLoading = false;
+	UPROPERTY()
+	uint32 ChunkSize = 100;
+	UPROPERTY()
+	uint32 CurrentChunkIndex = 0;
 };

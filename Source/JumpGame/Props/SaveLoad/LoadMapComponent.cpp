@@ -12,7 +12,7 @@
 
 ULoadMapComponent::ULoadMapComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void ULoadMapComponent::BeginPlay()
@@ -21,6 +21,20 @@ void ULoadMapComponent::BeginPlay()
 
 	FileBrowserUI = CreateWidget<UFileBrowserUI>(GetWorld(), FileBrowserUIClass);
 	FileBrowserUI->AddToViewport(999);
+}
+
+void ULoadMapComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FFastLogger::LogScreen(FColor::Red, TEXT("LoadMapComponent::TickComponent : %s"), *GetName());
+	if (!bIsLoading)
+	{
+		return ;
+	}
+
+	BuildMapFromSaveDataV2();
 }
 
 void ULoadMapComponent::OnPickFileComplete(const FString& FileName, bool bSuccess)
@@ -61,8 +75,9 @@ void ULoadMapComponent::OnLoadFileComplete(const FString& FileName, bool bSucces
 	{
 		return ;
 	}
-
-	BuildMapFromSaveData();
+	bIsLoading = true;
+	//
+	// BuildMapFromSaveData();
 }
 
 void ULoadMapComponent::LoadMap()
@@ -84,6 +99,7 @@ void ULoadMapComponent::LoadMapWithString(const FString& FileName)
 {
 	FString JsonString;
 
+	FFastLogger::LogFile(TEXT("LoadMapComponent"), TEXT("LoadFile : %s"), *FileName);
 	if (!LoadFileToJsonString(FileName, JsonString))
 	{
 		return ;
@@ -92,8 +108,9 @@ void ULoadMapComponent::LoadMapWithString(const FString& FileName)
 	{
 		return ;
 	}
-
-	BuildMapFromSaveData();
+	bIsLoading = true;
+	//
+	// BuildMapFromSaveData();
 }
 
 void ULoadMapComponent::PickFile(const FString& Suffix, bool bBindFunction)
@@ -131,6 +148,7 @@ bool ULoadMapComponent::LoadFileToJsonString(const FString& FilePath, FString& J
 
 bool ULoadMapComponent::ParseJsonStringToMap(const FString& JsonString)
 {
+	SaveDataArray.SaveDataArray.Empty();
 	if (FJsonObjectConverter::JsonObjectStringToUStruct(JsonString, &SaveDataArray, 0, 0))
 	{
 		// UE_LOG(LogTemp, Log, TEXT("JSON → 구조체 변환 성공"));
@@ -156,6 +174,34 @@ void ULoadMapComponent::BuildMapFromSaveData()
 	OnMapLoaded.Broadcast();
 }
 
+void ULoadMapComponent::BuildMapFromSaveDataV2()
+{
+	// SaveData에 SaveDataArray의 배열에서 500개씩 가져와서 처리하면 될 듯
+	for (uint32 i = CurrentChunkIndex * ChunkSize; i < (uint32)SaveDataArray.SaveDataArray.Num() && i < (CurrentChunkIndex + 1) * ChunkSize; ++i)
+	{
+		const FSaveData& SaveData = SaveDataArray.SaveDataArray[i];
+		FPropStruct* PropInfo = PropTable->FindRow<FPropStruct>(SaveData.Id, TEXT("LoadMap"), true);
+		if (!PropInfo)
+		{
+			continue ;
+		}
+		TSubclassOf<APrimitiveProp> PropClass = PropInfo->PropClass;
+
+		SpawnProp(PropClass, SaveData);
+	}
+	
+	if ((CurrentChunkIndex + 1) * ChunkSize >= (uint32)SaveDataArray.SaveDataArray.Num())
+	{
+		bIsLoading = false;
+		CurrentChunkIndex = 0;
+		OnMapLoaded.Broadcast();
+	}
+	else
+	{
+		CurrentChunkIndex++;
+	}
+}
+
 void ULoadMapComponent::SpawnProp(TSubclassOf<APrimitiveProp> PropClass, const FSaveData& SaveData)
 {
 	FVector Location = SaveData.Position;
@@ -168,11 +214,24 @@ void ULoadMapComponent::SpawnProp(TSubclassOf<APrimitiveProp> PropClass, const F
 	
 	FVector Size = SaveData.Size;
 
-	APrimitiveProp* NewProp = GetWorld()->SpawnActorDeferred<APrimitiveProp>(PropClass,	SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	// APrimitiveProp* NewProp = GetWorld()->SpawnActorDeferred<APrimitiveProp>(PropClass,	SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	// if (NewProp)
+	// {
+	// 	// NewProp->SetSize(Size);
+	// 	NewProp->FinishSpawning(SpawnTransform);
+	// 	NewProp->GetGridComp()->SetSize(Size);
+	// 	NewProp->SetActorRotation(Rotation);
+	// 	NewProp->RotateAllGizmos();
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("Prop Spawn 실패"));
+	// }
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	APrimitiveProp* NewProp = GetWorld()->SpawnActor<APrimitiveProp>(PropClass, SpawnTransform, SpawnParameters);
 	if (NewProp)
 	{
-		// NewProp->SetSize(Size);
-		NewProp->FinishSpawning(SpawnTransform);
 		NewProp->GetGridComp()->SetSize(Size);
 		NewProp->SetActorRotation(Rotation);
 		NewProp->RotateAllGizmos();
