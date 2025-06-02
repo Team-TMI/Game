@@ -31,6 +31,8 @@ protected:
 								int32 OtherBodyIndex) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 public:
 	// Called every frame
