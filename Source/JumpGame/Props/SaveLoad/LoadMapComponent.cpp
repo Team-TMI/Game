@@ -28,7 +28,6 @@ void ULoadMapComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FFastLogger::LogScreen(FColor::Red, TEXT("LoadMapComponent::TickComponent : %s"), *GetName());
 	if (!bIsLoading)
 	{
 		return ;

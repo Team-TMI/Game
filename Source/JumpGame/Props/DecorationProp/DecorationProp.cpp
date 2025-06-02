@@ -42,7 +42,7 @@ void ADecorationProp::BeginPlay()
 	if (HasAuthority())
 	{
 		TWeakObjectPtr<ADecorationProp> WeakThis = this;
-		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakThis]()
+		GetWorld()->GetTimerManager().SetTimer(ReplicateTimerHandle, FTimerDelegate::CreateLambda([WeakThis]()
 		{
 			if (!WeakThis.IsValid())
 			{
@@ -51,7 +51,7 @@ void ADecorationProp::BeginPlay()
 			ADecorationProp* StrongThis = WeakThis.Get();
 			StrongThis->SetReplicates(false);
 			StrongThis->SetReplicateMovement(false);
-		}));	
+		}), 10.0f, false);
 	}
 }
 

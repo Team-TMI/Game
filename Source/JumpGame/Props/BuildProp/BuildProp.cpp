@@ -37,7 +37,7 @@ void ABuildProp::BeginPlay()
 	if (HasAuthority())
 	{
 		TWeakObjectPtr<ABuildProp> WeakThis = this;
-		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakThis]()
+		GetWorld()->GetTimerManager().SetTimer(ReplicateTimerHandle, FTimerDelegate::CreateLambda([WeakThis]()
 		{
 			if (!WeakThis.IsValid())
 			{
@@ -46,7 +46,7 @@ void ABuildProp::BeginPlay()
 			ABuildProp* StrongThis = WeakThis.Get();
 			StrongThis->SetReplicates(false);
 			StrongThis->SetReplicateMovement(false);
-		}));	
+		}), 10.0f, false);
 	}
 }
 
