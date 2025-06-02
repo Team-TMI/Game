@@ -7,6 +7,15 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
+void ULoadingUI::NativeDestruct()
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	}
+	Super::NativeDestruct();
+}
+
 void ULoadingUI::InitializeLoadingScreen()
 {
 	UpdateLoadingImage();

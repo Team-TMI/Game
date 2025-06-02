@@ -19,6 +19,7 @@ class JUMPGAME_API UIntroCinematic : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual void NativeDestruct() override;
 
 	// 미디어 플레이어 (실제 재생기)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Media")

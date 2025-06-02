@@ -22,10 +22,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnAllClientAdded() override;
 	virtual void OnClientAdded(const FString& NetID) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_AllClientAdded();
-
+	
 	UPROPERTY()
 	FOnAllClientMapAdded OnAllClientAddedDelegate;
 	
@@ -59,6 +60,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_UpdateLoadingUI(float Value);
 
+	UPROPERTY()
+	FTimerHandle TimerHandle;
+	UPROPERTY()
 	FTimerHandle LoadingTimerHandle;
 
 	UPROPERTY()

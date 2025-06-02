@@ -84,6 +84,15 @@ void ASoundMommyQuizProp::BeginPlay()
 	SoundQuizUI->WBP_TimeRemain->OnMissionTimerEnd.AddDynamic(this, &ASoundMommyQuizProp::StopRecord);
 }
 
+void ASoundMommyQuizProp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+	}
+	Super::EndPlay(EndPlayReason);
+}
+
 // Called every frame
 void ASoundMommyQuizProp::Tick(float DeltaTime)
 {
@@ -134,7 +143,6 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		// 타이머로 5초 후 수동 Destroy
 		if (SpawnedEffect)
 		{
-			FTimerHandle SpawnTimerHandle;
 			GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, FTimerDelegate::CreateLambda([SpawnedEffect]()
 			{
 				SpawnedEffect->DestroyComponent(); // 파티클 제거

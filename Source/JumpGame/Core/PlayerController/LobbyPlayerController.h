@@ -24,6 +24,10 @@ public:
 public:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UPROPERTY()
+	FTimerHandle TimerHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UInputAction* NextChatAction;

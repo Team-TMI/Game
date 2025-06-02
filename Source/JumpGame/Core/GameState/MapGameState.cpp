@@ -97,7 +97,6 @@ void AMapGameState::OnAllClientAdded()
 	{
 		MulticastRPC_UpdateLoadingUI(1.0f);
 		// 클라이언트에게 알리자 (2초후)
-		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMapGameState::MulticastRPC_AllClientAdded, 5,
 		                                       false);
 	}
@@ -138,6 +137,16 @@ void AMapGameState::OnClientAdded(const FString& NetID)
 		
 		GetWorld()->GetTimerManager().SetTimer(LoadingTimerHandle, LoadingDelegate, 0.5f, false);
 	}
+}
+
+void AMapGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(LoadingTimerHandle);
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 void AMapGameState::MulticastRPC_RemoveProgressBarUI_Implementation()

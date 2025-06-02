@@ -26,6 +26,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	// Called every frame
@@ -34,6 +35,9 @@ public:
 public:
 	UPROPERTY()
 	class UJumpGameInstance* GI;
+
+	UPROPERTY()
+	FTimerHandle EndTimerHandle;
 	
 	// 첫번째 플레이어가 들어오면 10초후 게임 끝내자
 	UFUNCTION()

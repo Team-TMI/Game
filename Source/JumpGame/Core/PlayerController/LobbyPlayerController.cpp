@@ -78,6 +78,15 @@ void ALobbyPlayerController::SetupInputComponent()
 	}
 }
 
+void ALobbyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	}
+	Super::EndPlay(EndPlayReason);
+}
+
 void ALobbyPlayerController::NextChat()
 {
 	OnNextChatTriggered.Broadcast();
@@ -323,7 +332,6 @@ void ALobbyPlayerController::Recursive_ReceiveFriendList(const FUniqueNetIdRepl&
 {
 	if (!PlayerState)
 	{
-		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, FromPlayer, FriendList]()
 		{
 			Recursive_ReceiveFriendList(FromPlayer, FriendList);

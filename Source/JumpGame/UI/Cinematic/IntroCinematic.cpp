@@ -42,6 +42,16 @@ void UIntroCinematic::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	}
 }
 
+void UIntroCinematic::NativeDestruct()
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AnimTimerhandle);
+	}
+	
+	Super::NativeDestruct();
+}
+
 void UIntroCinematic::PlaySkipAnim()
 {
 	PlayAnimation(SkipAnim);
