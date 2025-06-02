@@ -374,7 +374,6 @@ void ASoundQuizProp::SendEndSoundQuizNotify()
 		Frog->ResumeMovement();
 		Frog->CameraMovementMode();
 		Frog->SetCrouchEnabled(true);
-		Frog->SetJumpGaugeVisibility(true);
 	}
 
 	if (HasAuthority())

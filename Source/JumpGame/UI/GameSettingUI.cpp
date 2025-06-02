@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
+
 void UGameSettingUI::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
