@@ -28,6 +28,8 @@ public:
 	virtual void NativeOnInitialized() override;
 
 	// 세팅 저장
+	FTimerHandle SoundTimerHandle;
+	
 	UPROPERTY()
 	UGamePlayerSettings* Settings;
 	UFUNCTION()
