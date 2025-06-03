@@ -332,9 +332,16 @@ void ALobbyPlayerController::Recursive_ReceiveFriendList(const FUniqueNetIdRepl&
 {
 	if (!PlayerState)
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, FromPlayer, FriendList]()
+		TWeakObjectPtr<ALobbyPlayerController> WeakThis{this};
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [WeakThis, FromPlayer, FriendList]()
 		{
-			Recursive_ReceiveFriendList(FromPlayer, FriendList);
+			if (!WeakThis.IsValid())
+			{
+				return;
+			}
+			ALobbyPlayerController* StrongThis{WeakThis.Get()};
+			
+			StrongThis->Recursive_ReceiveFriendList(FromPlayer, FriendList);
 		}, 0.2f, false); // 0.1초 후에 다시 시도
 		return ;
 	}

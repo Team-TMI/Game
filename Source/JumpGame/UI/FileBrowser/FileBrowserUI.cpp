@@ -62,21 +62,34 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 	CreateBackButton();
 
 	// 디렉토리 우선 검출
-	PlatformFile.IterateDirectory(*NewDirectoryPath, [this](const TCHAR* Path, bool bIsDirectory) -> bool
+	TWeakObjectPtr<UFileBrowserUI> WeakThis{this};
+	PlatformFile.IterateDirectory(*NewDirectoryPath, [WeakThis](const TCHAR* Path, bool bIsDirectory) -> bool
 	{
+		if (!WeakThis.IsValid())
+		{
+			return false;
+		}
+		UFileBrowserUI* StrongThis{WeakThis.Get()};
+		
 		const FString ItemPath = FString(Path);
 		const FString ItemName = FPaths::GetCleanFilename(ItemPath);
 
 		if (bIsDirectory && !ItemName.StartsWith(TEXT(".")))
 		{
-			CreateDirectoryButton(ItemName, ItemPath);
+			StrongThis->CreateDirectoryButton(ItemName, ItemPath);
 		}
 		return true;
 	});
 
 	// 파일은 후순위로 검출
-	PlatformFile.IterateDirectory(*NewDirectoryPath, [this](const TCHAR* Path, bool bIsDirectory) -> bool
+	PlatformFile.IterateDirectory(*NewDirectoryPath, [WeakThis](const TCHAR* Path, bool bIsDirectory) -> bool
 	{
+		if (!WeakThis.IsValid())
+		{
+			return false;
+		}
+		UFileBrowserUI* StrongThis{WeakThis.Get()};
+		
 		const FString ItemPath = FString(Path);
 		const FString ItemName = FPaths::GetCleanFilename(ItemPath);
 	
@@ -85,11 +98,11 @@ void UFileBrowserUI::LoadDirectoryContents(const FString& DirectoryPath)
 		{
 			return true; // 디렉토리는 이미 처리됨
 		}
-		for (auto& Suffix : Suffixes)
+		for (auto& Suffix : StrongThis->Suffixes)
 		{
 			if (ItemName.EndsWith(Suffix))
 			{
-				CreateFileButton(ItemName, ItemPath);
+				StrongThis->CreateFileButton(ItemName, ItemPath);
 				return true; // 해당 파일을 찾았으므로 더 이상 검사하지 않음
 			}
 		}

@@ -183,12 +183,19 @@ FVector AVictoryPlatform::SpawnVictoryCharacter()
 void AVictoryPlatform::DropProps()
 {
 	// 무덤 위치 떨어뜨리기
-	GetWorldTimerManager().SetTimer(TombDropHandle, [this]()
+	TWeakObjectPtr<AVictoryPlatform> WeakThis{this};
+	GetWorldTimerManager().SetTimer(TombDropHandle, [WeakThis]()
 	{
-		bShouldShake = true;
-		VictoryTomb->SetRelativeLocation(FVector(200, 22, -3));
+		if (!WeakThis.IsValid())
+		{
+			return;
+		}
+		AVictoryPlatform* StrongThis = WeakThis.Get();
+
+		StrongThis->bShouldShake = true;
+		StrongThis->VictoryTomb->SetRelativeLocation(FVector(200, 22, -3));
 		// 카메라 쉐이크 인척
-		StartCameraShake();
+		StrongThis->StartCameraShake();
 	}, 1.0f, false);
 }
 

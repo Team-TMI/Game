@@ -143,9 +143,16 @@ void ASoundMommyQuizProp::ReceiveSoundQuizMessage()
 		// 타이머로 5초 후 수동 Destroy
 		if (SpawnedEffect)
 		{
-			GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, FTimerDelegate::CreateLambda([SpawnedEffect]()
+			TWeakObjectPtr<UParticleSystemComponent> WeakThis(SpawnedEffect);
+			GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, FTimerDelegate::CreateLambda([WeakThis]()
 			{
-				SpawnedEffect->DestroyComponent(); // 파티클 제거
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+				
+				UParticleSystemComponent* StrongThis = WeakThis.Get();
+				StrongThis->DestroyComponent(); // 파티클 제거
 			}), 5.0f, false);
 		}
 		

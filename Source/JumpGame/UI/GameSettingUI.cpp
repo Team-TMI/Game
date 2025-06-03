@@ -157,8 +157,14 @@ void UGameSettingUI::PlaySettingAnim(bool bIsForward)
 		if (SCPlayer)
 		{
 			auto& FinishedEvent = SCPlayer->OnSequenceFinishedPlaying();
-			FinishedEvent.AddLambda([this](UUMGSequencePlayer& Player) {
-				this->SetVisibility(ESlateVisibility::Collapsed);
+			TWeakObjectPtr<UGameSettingUI> WeakThis{this};
+			FinishedEvent.AddLambda([WeakThis](UUMGSequencePlayer& Player) {
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+				UGameSettingUI* StrongThis{WeakThis.Get()};
+				StrongThis->SetVisibility(ESlateVisibility::Collapsed);
 				UE_LOG(LogTemp, Warning, TEXT("Animation finished - Widget Collapsed"));
 			});
 		}

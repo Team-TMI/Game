@@ -37,12 +37,21 @@ void UGamePlayerSettings::ApplySettings(bool bCheckForCommandLineOverrides)
 	const float VolumeClamp = 1.0f;
 	
 	// 람다
-	auto ApplyVolume = [this, MasterSoundMix](const FString& ClassName, float Volume)
+	TWeakObjectPtr<UGamePlayerSettings> WeakThis{this};
+	TWeakObjectPtr<USoundMix> WeakMasterSoundMix{MasterSoundMix};
+	auto ApplyVolume = [WeakThis, WeakMasterSoundMix](const FString& ClassName, float Volume)
 	{
-		USoundClass* SoundClass = LoadObject<USoundClass>(nullptr, *ClassName);
-		if (SoundClass && MasterSoundMix)
+		if (!WeakMasterSoundMix.IsValid() || !WeakThis.IsValid())
 		{
-			UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MasterSoundMix, SoundClass, Volume, 1.0f, 0.1f);
+			return;
+		}
+		UGamePlayerSettings* StrongThis{WeakThis.Get()};
+		USoundMix* StrongMasterSoundMix{WeakMasterSoundMix.Get()};
+		
+		USoundClass* SoundClass = LoadObject<USoundClass>(nullptr, *ClassName);
+		if (SoundClass && StrongMasterSoundMix)
+		{
+			UGameplayStatics::SetSoundMixClassOverride(StrongThis->GetWorld(), StrongMasterSoundMix, SoundClass, Volume, 1.0f, 0.1f);
 		}
 	};
 

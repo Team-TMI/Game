@@ -161,14 +161,15 @@ void UStoryUI::TextAppearAnimation()
 		bIsTextAppearing = true;
 		
 		SequencePlayerTextAppearing = PlayAnimation(TextAppear, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
-		SequencePlayerTextAppearing->OnSequenceFinishedPlaying().AddLambda([this](UUMGSequencePlayer&) {
-			if (!IsValid(this))
+		TWeakObjectPtr<UStoryUI> WeakThis{this};
+		SequencePlayerTextAppearing->OnSequenceFinishedPlaying().AddLambda([WeakThis](UUMGSequencePlayer&) {
+			if (!WeakThis.IsValid())
 			{
 				return;
 			}
-
-			bIsTextAppearing = false;
-			bIsNextTriggered = false;
+			UStoryUI* StrongThis{WeakThis.Get()};
+			StrongThis->bIsTextAppearing = false;
+			StrongThis->bIsNextTriggered = false;
 		});
 	}
 }
