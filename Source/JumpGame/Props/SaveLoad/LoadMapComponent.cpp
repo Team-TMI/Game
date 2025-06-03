@@ -9,10 +9,18 @@
 #include "JumpGame/Core/GameInstance/JumpGameInstance.h"
 #include "JumpGame/MapEditor/Components/GridComponent.h"
 #include "JumpGame/UI/FileBrowser/FileBrowserUI.h"
+#include "JumpGame/UI/MapEditing/MapLoadingUI.h"
 
 ULoadMapComponent::ULoadMapComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FClassFinder<UMapLoadingUI> MAP_LOADING_UI_CLASS
+	(TEXT("/Game/UI/MapEditing/WBP_MapLoading.WBP_MapLoading_C"));
+	if (MAP_LOADING_UI_CLASS.Succeeded())
+	{
+		MapLoadingUIClass = MAP_LOADING_UI_CLASS.Class;
+	}
 }
 
 void ULoadMapComponent::BeginPlay()
@@ -21,6 +29,7 @@ void ULoadMapComponent::BeginPlay()
 
 	FileBrowserUI = CreateWidget<UFileBrowserUI>(GetWorld(), FileBrowserUIClass);
 	FileBrowserUI->AddToViewport(999);
+	MapLoadingUI = CreateWidget<UMapLoadingUI>(GetWorld(), MapLoadingUIClass);
 }
 
 void ULoadMapComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
@@ -75,6 +84,12 @@ void ULoadMapComponent::OnLoadFileComplete(const FString& FileName, bool bSucces
 		return ;
 	}
 	bIsLoading = true;
+	if (bShowLoading)
+	{
+		MapLoadingUI->AddToViewport(99);
+		MapLoadingUI->SetLoadingText(TEXT("맵 로딩 중..."));
+		MapLoadingUI->PlayLoadingAnim();
+	}
 	//
 	// BuildMapFromSaveData();
 }
@@ -194,6 +209,10 @@ void ULoadMapComponent::BuildMapFromSaveDataV2()
 		bIsLoading = false;
 		CurrentChunkIndex = 0;
 		OnMapLoaded.Broadcast();
+		if (bShowLoading)
+		{
+			MapLoadingUI->RemoveFromParent();
+		}
 	}
 	else
 	{

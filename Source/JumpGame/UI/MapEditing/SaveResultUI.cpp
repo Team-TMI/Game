@@ -13,8 +13,14 @@ void USaveResultUI::PlayResultAnim()
 	if (SCPlayer)
 	{
 		auto& FinishedEvent = SCPlayer->OnSequenceFinishedPlaying();
-		FinishedEvent.AddLambda([this](UUMGSequencePlayer& Player) {
-			this->RemoveFromParent();
+		TWeakObjectPtr<USaveResultUI> WeakThis = this;
+		FinishedEvent.AddLambda([WeakThis](UUMGSequencePlayer& Player) {
+			if (!WeakThis.IsValid())
+			{
+				return;
+			}
+			USaveResultUI* StrongThis = WeakThis.Get();
+			StrongThis->RemoveFromParent();
 		});
 	}
 }

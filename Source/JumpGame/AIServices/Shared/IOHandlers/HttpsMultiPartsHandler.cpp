@@ -143,14 +143,14 @@ void FHttpsMultiPartsHandler::OnHttpRequestComplete(FHttpRequestPtr Req, FHttpRe
 			FFastLogger::LogConsole(TEXT("Response type not found in queue"));
 		}
 
-		OnMessageReceived.Broadcast();
+		OnMessageReceived.Broadcast(true);
 	}
 	else
 	{
 		FFastLogger::LogConsole(TEXT("HTTP Request Failed : %s"), *Req->GetURL());
 		FFastLogger::LogConsole(TEXT("Error: %d"), Resp.IsValid() ? Resp->GetResponseCode() : -1);
 		FFastLogger::LogConsole(TEXT("Error (Success): %d"), bSuccess);
-		OnMessageReceived.Broadcast();
+		OnMessageReceived.Broadcast(false);
 	}
 }
 

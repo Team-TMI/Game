@@ -8,7 +8,7 @@
 #include "IOHandlerInitInfo.h"
 #include "JumpGame/AIServices/Shared/HttpMessage.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnMessageReceived);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMessageReceived, bool /*bSuccess*/);
 
 // Socket, IPC에 따라서 분기를 나누는 역할
 class JUMPGAME_API IIOHandlerInterface

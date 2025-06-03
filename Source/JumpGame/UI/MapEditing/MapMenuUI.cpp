@@ -39,6 +39,7 @@ void UMapMenuUI::OnLoadButtonClicked()
 	if (MapEditorState)
 	{
 		MapEditorState->GetLoadMapComponent()->GetFileBrowserUI()->SetInfoText(TEXT("불러올 맵을 선택해주세요.\n선택한 맵은 현재 맵에 추가됩니다."));
+		MapEditorState->GetLoadMapComponent()->ShowLoading(true);
 		MapEditorState->GetLoadMapComponent()->LoadMap();
 	}
 }
@@ -96,7 +97,7 @@ void UMapMenuUI::OnImageSelected(const FString& FileName, bool bSuccess)
 			SaveResultUI->AddToViewport();
 			SaveResultUI->SetResultImage(true);
 			SaveResultUI->SetResultText(TEXT("맵 저장이 완료 되었습니다 :)"));
-			UE_LOG(LogTemp, Log, TEXT("맵 저장 성공dfsdfsdfsdfsdfsdfs"));
+			UE_LOG(LogTemp, Log, TEXT("맵 저장 성공"));
 			SaveResultUI->PlayResultAnim();
 		}
 	}

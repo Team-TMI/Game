@@ -25,6 +25,8 @@
 #include "JumpGame/MapEditor/CategorySystem/PropWrap.h"
 #include "JumpGame/Props/SaveLoad/LoadMapComponent.h"
 #include "JumpGame/UI/FileBrowser/FileBrowserUI.h"
+#include "JumpGame/UI/MapEditing/MapLoadingUI.h"
+#include "JumpGame/UI/MapEditing/SaveResultUI.h"
 
 class ANetworkGameState;
 
@@ -97,6 +99,8 @@ void UCategoryUI::NativeOnInitialized()
 
 	ImageSearchButton->OnClicked.AddDynamic(this, &UCategoryUI::OnImageSearchButtonClicked);
 
+	ImageSearchLoadingUI = CreateWidget<UMapLoadingUI>(GetWorld(), MapLoadingUIClass);
+	SaveResultUI = CreateWidget<USaveResultUI>(GetWorld(), SaveResultUIClass);
 }
 
 void UCategoryUI::NativeDestruct()
@@ -376,16 +380,35 @@ bool UCategoryUI::SendImageRequest(const FString& ImagePath)
 		SetGridToDefault();
 		return false;
 	}
+
+	// 로딩 UI 띄우기
+	ImageSearchLoadingUI->AddToViewport(99);
+	ImageSearchLoadingUI->SetLoadingText(TEXT("이미지 검색 중..."));
+	ImageSearchLoadingUI->PlayLoadingAnim();
+	
 	return true;
 }
 
-void UCategoryUI::OnImageSearchResponse()
+void UCategoryUI::OnImageSearchResponse(bool bSuccess)
 {
+	// UI 지우기
+	ImageSearchLoadingUI->RemoveFromParent();
+	
+	if (!bSuccess)
+	{
+		FFastLogger::LogConsole(TEXT("Image Search Response failed"));
+		ShowResultUI(false, TEXT("이미지 검색에 실패했습니다."));
+		SetTextToDefault();
+		SetGridToDefault();
+		return;
+	}
+	
 	FHttpMessageWrapper Response;
 	AMapEditorState* GameState = GetWorld()->GetGameState<AMapEditorState>();
 	if (!GameState)
 	{
 		FFastLogger::LogConsole(TEXT("GameState is null"));
+		ShowResultUI(false, TEXT("이미지 검색에 실패했습니다."));
 		SetTextToDefault();
 		SetGridToDefault();
 		return;
@@ -403,6 +426,7 @@ void UCategoryUI::OnImageSearchResponse()
 	if (!HttpResponse)
 	{
 		FFastLogger::LogConsole(TEXT("Invalid HttpMessage type"));
+		ShowResultUI(false, TEXT("이미지 검색에 실패했습니다."));
 		SetTextToDefault();
 		SetGridToDefault();
 		return;
@@ -411,6 +435,7 @@ void UCategoryUI::OnImageSearchResponse()
 	if (HttpResponse->ResponseCode / 100 != 2)
 	{
 		FFastLogger::LogConsole(TEXT("Image search failed: %d"), HttpResponse->ResponseCode);
+		ShowResultUI(false, TEXT("이미지 검색에 실패했습니다."));
 		SetTextToDefault();
 		SetGridToDefault();
 		return;
@@ -422,11 +447,13 @@ void UCategoryUI::OnImageSearchResponse()
 	if (!ImageResponse.SubCategoryList.Num())
 	{
 		FFastLogger::LogConsole(TEXT("No subcategories found"));
+		ShowResultUI(false, TEXT("이미지 검색에 실패했습니다."));
 		SetTextToDefault();
 		SetGridToDefault();
 		return;
 	}
 
+	ShowResultUI(true, TEXT("이미지 검색에 성공했습니다."));
 	SetTextToDefault();
 	GridUI->UpdatePropGridByImageSearch(ImageResponse.SubCategoryList, CategorySystem);
 }
@@ -457,4 +484,17 @@ void UCategoryUI::OnImageSearchButtonResponse(const FString& ImgPath, bool bSucc
 	FString FilePath = FPaths::GetPath(ImgPath);
 	FString FileNameWithExtension = FPaths::GetCleanFilename(ImgPath);
 	SearchText->SetText(FText::FromString(FileNameWithExtension));
+}
+
+void UCategoryUI::ShowResultUI(bool bSuccess, const FString& ResultText)
+{
+	if (!SaveResultUI)
+	{
+		FFastLogger::LogConsole(TEXT("SaveResultUI is null"));
+		return;
+	}
+	SaveResultUI->AddToViewport();
+	SaveResultUI->SetResultImage(bSuccess);
+	SaveResultUI->SetResultText(ResultText);
+	SaveResultUI->PlayResultAnim();
 }

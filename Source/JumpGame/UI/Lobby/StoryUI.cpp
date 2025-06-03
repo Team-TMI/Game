@@ -67,14 +67,17 @@ void UStoryUI::DisplayInitialStory()
 	if (StoryArray.IsValidIndex(CurrentStoryIndex) && TextBlock_Talk)
 	{
 		UUMGSequencePlayer* SequencePlayer{PlayAnimation(ChatAppear, 0.5f, 1, EUMGSequencePlayMode::Forward, 0.3f)};
-		SequencePlayer->OnSequenceFinishedPlaying().AddLambda([this](UUMGSequencePlayer&) {
-			if (!IsValid(this))
+		TWeakObjectPtr<UStoryUI> WeakThis = this;
+		SequencePlayer->OnSequenceFinishedPlaying().AddLambda([WeakThis](UUMGSequencePlayer&) {
+			if (!WeakThis.IsValid())
 			{
 				return;
 			}
 
-			CheckNextSpeaker(StoryArray[CurrentStoryIndex + 1]);
-			UpdateSpeakerAndText(StoryArray[CurrentStoryIndex]);
+			UStoryUI* StrongThis = WeakThis.Get();
+			
+			StrongThis->CheckNextSpeaker(StrongThis->StoryArray[StrongThis->CurrentStoryIndex + 1]);
+			StrongThis->UpdateSpeakerAndText(StrongThis->StoryArray[StrongThis->CurrentStoryIndex]);
 		});
 	}
 }
@@ -248,17 +251,19 @@ void UStoryUI::ChatAppearAnimation()
 	if (ChatAppear)
 	{
 		UUMGSequencePlayer* SequencePlayer{PlayAnimation(ChatAppear, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f)};
-		SequencePlayer->OnSequenceFinishedPlaying().AddLambda([this](UUMGSequencePlayer&) {
-			if (!IsValid(this))
+		TWeakObjectPtr<UStoryUI> WeakThis = this;
+		SequencePlayer->OnSequenceFinishedPlaying().AddLambda([WeakThis](UUMGSequencePlayer&) {
+			if (!WeakThis.IsValid())
 			{
 				return;
 			}
+			UStoryUI* StrongThis = WeakThis.Get();
 			
-			bIsNextTriggered = false;
+			StrongThis->bIsNextTriggered = false;
 
-			if (StoryArray.IsValidIndex(CurrentStoryIndex))
+			if (StrongThis->StoryArray.IsValidIndex(StrongThis->CurrentStoryIndex))
 			{
-				UpdateSpeakerAndText(StoryArray[CurrentStoryIndex]);
+				StrongThis->UpdateSpeakerAndText(StrongThis->StoryArray[StrongThis->CurrentStoryIndex]);
 			}
 		});
 	}

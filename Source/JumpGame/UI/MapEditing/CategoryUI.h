@@ -46,6 +46,16 @@ private:
 	TSubclassOf<class UMajorCategoryButtonUI> MajorCategoryButtonUIClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
 	TSubclassOf<class USubCategoryButtonUI> SubCategoryButtonUIClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
+	TSubclassOf<class UMapLoadingUI> MapLoadingUIClass;
+	UPROPERTY()
+	class UMapLoadingUI* ImageSearchLoadingUI;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "UI")
+	TSubclassOf<class USaveResultUI> SaveResultUIClass;
+	UPROPERTY()
+	class USaveResultUI* SaveResultUI;
+	
+	
 
 	UPROPERTY()
 	TMap<EMajorCategoryType, class UMajorCategoryButtonUI*> MajorCategoryButtons;
@@ -64,10 +74,12 @@ private:
 	void OnImageSearchButtonClicked();
 	bool OpenFileDialog(FString& OutFilePath);
 	bool SendImageRequest(const FString& ImagePath);
-	void OnImageSearchResponse();
+	void OnImageSearchResponse(bool bSuccess);
 	void SetTextToDefault();
 	void SetGridToDefault();
 	void OnImageSearchButtonResponse(const FString& ImgPath, bool bSuccess);
+
+	void ShowResultUI(bool bSuccess, const FString& ResultText);
 
 	FString DefaultSearchText = TEXT("검색 할 내용을 입력하세요");
 

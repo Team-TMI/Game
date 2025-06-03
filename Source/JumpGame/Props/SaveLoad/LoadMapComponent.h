@@ -28,6 +28,7 @@ public:
 	void OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames);
 	UFUNCTION()
 	void PrintData(const FString& File);
+	void ShowLoading(bool bInShowLoading) { bShowLoading = bInShowLoading; };
 
 	UPROPERTY(BlueprintAssignable)
 	FOnMapLoaded OnMapLoaded;
@@ -63,6 +64,11 @@ private:
 	TSubclassOf<class UFileBrowserUI> FileBrowserUIClass = nullptr;
 	UPROPERTY()
 	class UFileBrowserUI* FileBrowserUI = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapLoadUI", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UMapLoadingUI> MapLoadingUIClass = nullptr;
+	UPROPERTY()
+	class UMapLoadingUI* MapLoadingUI = nullptr;
+	
 
 	UPROPERTY()
 	bool bIsLoading = false;
@@ -70,4 +76,6 @@ private:
 	uint32 ChunkSize = 100;
 	UPROPERTY()
 	uint32 CurrentChunkIndex = 0;
+	UPROPERTY()
+	bool bShowLoading = false;
 };
