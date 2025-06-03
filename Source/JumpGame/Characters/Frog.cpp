@@ -370,7 +370,7 @@ void AFrog::BeginPlay()
 		WaterPostProcessComponent->Settings.AddBlendable(WaterPostProcessDynamicMaterial, 1.f);
 		//WaterPostProcessComponent->Settings.Blendables.Add(WaterPostProcessDynamicMaterial);
 	}
-
+	
 	// 로컬 플레이어만 카메라 오버랩 이벤트 바인딩
 	if (IsLocallyControlled() && CameraCollision != nullptr)
 	{
