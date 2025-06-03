@@ -52,7 +52,7 @@ void AMapGameState::BeginPlay()
 	}
 
 	RisingWaterProp = Cast<ARisingWaterProp>(UGameplayStatics::GetActorOfClass(GetWorld(), ARisingWaterProp::StaticClass()));
-	RisingWaterProp->StopRising(100);
+	//RisingWaterProp->StopRising(100);
 
 	FInputModeUIOnly InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
@@ -173,7 +173,7 @@ void AMapGameState::MulticastRPC_AllClientAdded_Implementation()
 	// 로딩 UI 제거
 	MulticastRPC_RemoveLoadingUI();
 
-	RisingWaterProp->StartRising();
+	//RisingWaterProp->StartRising();
 }
 
 

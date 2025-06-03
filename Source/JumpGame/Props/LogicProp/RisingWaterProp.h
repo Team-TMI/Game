@@ -94,6 +94,7 @@ public:
 public:
 	FTimerHandle ResumeRisingTimerHandle;
 	FTimerHandle TimerHandle;
+	FTimerHandle WaterStartTimer;
 
 	UPROPERTY(EditAnywhere, Category = "SoundCue", meta = (AllowPrivateAccess = "true"))
 	class USoundCue* HitSound;

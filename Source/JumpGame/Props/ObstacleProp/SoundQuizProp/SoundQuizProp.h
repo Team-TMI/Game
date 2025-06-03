@@ -147,4 +147,8 @@ protected:
 private:
 	UFUNCTION()
 	void ClearAllTimer();
+
+public:
+	UPROPERTY()
+	FTimerHandle WaterStartTimer;
 };

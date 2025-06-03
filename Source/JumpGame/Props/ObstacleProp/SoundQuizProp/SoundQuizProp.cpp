@@ -511,7 +511,8 @@ void ASoundQuizProp::StartRisingWater()
 	{
 		if (RisingWaterProp)
 		{
-			RisingWaterProp->StartRising();
+			GetWorldTimerManager().SetTimer(WaterStartTimer, RisingWaterProp, &ARisingWaterProp::StartRising, 60.f, false);
+			//RisingWaterProp->StartRising();
 		}
 	}
 }
@@ -521,4 +522,5 @@ void ASoundQuizProp::ClearAllTimer()
 	GetWorld()->GetTimerManager().ClearTimer(RecordStartTimer);
 	GetWorld()->GetTimerManager().ClearTimer(RecordStopTimer);
 	GetWorld()->GetTimerManager().ClearTimer(SendFileMessage);
+	GetWorld()->GetTimerManager().ClearTimer(WaterStartTimer);
 }

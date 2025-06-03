@@ -95,7 +95,8 @@ void ARisingWaterProp::BeginPlay()
 
 	if (HasAuthority())
 	{
-		StartRising();
+		StopRising();
+		//GetWorldTimerManager().SetTimer(WaterStartTimer, this, &ARisingWaterProp::StartRising, 120.f, false);
 	}
 }
 
@@ -166,6 +167,7 @@ void ARisingWaterProp::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		GetWorldTimerManager().ClearTimer(ResumeRisingTimerHandle);
 		GetWorldTimerManager().ClearTimer(TimerHandle);
+		GetWorldTimerManager().ClearTimer(WaterStartTimer);
 	}
 	
 	Super::EndPlay(EndPlayReason);
