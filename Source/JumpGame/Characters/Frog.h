@@ -79,7 +79,9 @@ public:
 	void StopJump();
 	void WPressed(const struct FInputActionValue& Value);
 	void WReleased(const struct FInputActionValue& Value);
+	UFUNCTION(BlueprintCallable)
 	void StartSprint();
+	UFUNCTION(BlueprintCallable)
 	void StopSprint();
 	void StartCrouch();
 	void StopCrouch();
