@@ -511,7 +511,7 @@ void ASoundQuizProp::StartRisingWater()
 	{
 		if (RisingWaterProp)
 		{
-			GetWorldTimerManager().SetTimer(WaterStartTimer, RisingWaterProp, &ARisingWaterProp::StartRising, 60.f, false);
+			GetWorldTimerManager().SetTimer(WaterStartTimer, RisingWaterProp, &ARisingWaterProp::StartRising, 55.f, false);
 			//RisingWaterProp->StartRising();
 		}
 	}
